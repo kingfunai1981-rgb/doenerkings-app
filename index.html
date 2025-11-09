@@ -346,24 +346,25 @@ async function addPointsFromScan() {
     
     if (error) throw error
     
-    showResult('addPointsResult', 
-      `✅ Erfolgreich gutgeschrieben!<br>
-      Betrag: ${amount.toFixed(2)} €<br>
-      Gutgeschriebene Punkte: ${data.added}<br>
-      Neuer Punktestand: ${data.points}`, 
-      true)
+    // Zeige Erfolgs-Dialog der NICHT automatisch verschwindet
+    const confirmed = confirm(
+      `✅ ERFOLGREICH GUTGESCHRIEBEN!\n\n` +
+      `Kunde: ${data.customer}\n` +
+      `Betrag: ${amount.toFixed(2)} €\n` +
+      `Gutgeschriebene Punkte: ${data.added}\n` +
+      `Neuer Punktestand: ${data.points}\n\n` +
+      `Klicke OK zum Bestätigen`
+    )
     
-    document.getElementById('custPoints').textContent = data.points
-    document.getElementById('scannedAmount').value = ''
-    
-    setTimeout(() => {
+    if (confirmed) {
       document.getElementById('customerCard').style.display = 'none'
       document.getElementById('scanResult').innerHTML = ''
       document.getElementById('addPointsResult').innerHTML = ''
-    }, 3000)
+      document.getElementById('scannedAmount').value = ''
+    }
     
   } catch (e) {
-    showResult('addPointsResult', '❌ Fehler: ' + e.message, false)
+    alert('❌ FEHLER!\n\n' + e.message)
   }
 }
 
