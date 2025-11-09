@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dönerkings Scanner</title>
+<title>Dönerkings Scanner PRO</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { 
@@ -12,7 +12,7 @@ body {
   min-height: 100vh;
   padding: 20px;
 }
-.container { max-width: 800px; margin: 0 auto; }
+.container { max-width: 900px; margin: 0 auto; }
 .card {
   background: white;
   border-radius: 20px;
@@ -22,6 +22,7 @@ body {
 }
 h1 { color: #667eea; margin-bottom: 10px; font-size: 28px; }
 h2 { font-size: 18px; margin-bottom: 12px; }
+h3 { font-size: 16px; margin: 16px 0 8px 0; color: #374151; }
 input {
   width: 100%;
   padding: 12px;
@@ -46,6 +47,12 @@ button:hover { opacity: 0.9; }
 button.secondary { background: #6b7280; }
 button.success { background: #10b981; }
 button.danger { background: #ef4444; }
+button.small { 
+  width: auto; 
+  padding: 8px 16px; 
+  font-size: 14px; 
+  margin: 0 4px;
+}
 .result {
   padding: 12px;
   border-radius: 8px;
@@ -66,13 +73,8 @@ button.danger { background: #ef4444; }
   overflow: hidden;
   display: none;
 }
-.video-container.active {
-  display: block;
-}
-#video {
-  width: 100%;
-  display: block;
-}
+.video-container.active { display: block; }
+#video { width: 100%; display: block; }
 .scan-line {
   position: absolute;
   width: 80%;
@@ -128,21 +130,78 @@ button.danger { background: #ef4444; }
   color: white;
 }
 canvas { display: none; }
+
+.history-item {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.history-customer {
+  font-weight: 700;
+  font-size: 16px;
+  color: #111827;
+}
+.history-time {
+  font-size: 12px;
+  color: #6b7280;
+}
+.history-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 8px 0;
+  font-size: 14px;
+}
+.history-amount {
+  color: #059669;
+  font-weight: 600;
+}
+.history-points {
+  color: #667eea;
+  font-weight: 600;
+}
+.history-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.edit-form {
+  background: #fef3c7;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  display: none;
+}
+.edit-form.active { display: block; }
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
 </style>
 </head>
 <body>
 
 <div class="container">
   <div class="card">
-    <h1>🌯 Dönerkings Scanner</h1>
+    <h1>🌯 Dönerkings Scanner PRO</h1>
     <div class="info">Status: <span id="status">Bereit ✅</span></div>
   </div>
 
   <div class="card">
     <div class="tabs">
-      <button class="tab active" onclick="showTab('scan')">📸 QR Scannen</button>
-      <button class="tab" onclick="showTab('manual')">⌨️ Manuell</button>
-      <button class="tab" onclick="showTab('code')">🎁 Code prüfen</button>
+      <button class="tab active" onclick="showTab('scan')">📸 Scannen</button>
+      <button class="tab" onclick="showTab('manual')">📱 Handynummer</button>
+      <button class="tab" onclick="showTab('history')">📋 Verlauf</button>
+      <button class="tab" onclick="showTab('code')">🎁 Code</button>
     </div>
   </div>
 
@@ -150,7 +209,7 @@ canvas { display: none; }
   <div id="tab-scan" class="card">
     <h2>📸 QR-Code scannen</h2>
     <button id="startBtn" onclick="startCamera()">📸 Kamera starten</button>
-    <button id="stopBtn" onclick="stopCamera()" class="danger" style="display:none;">⏹️ Kamera stoppen</button>
+    <button id="stopBtn" onclick="stopCamera()" class="danger" style="display:none;">⏹️ Stoppen</button>
     
     <div class="video-container" id="videoContainer">
       <video id="video" autoplay playsinline></video>
@@ -168,26 +227,34 @@ canvas { display: none; }
         <p><strong>Punkte:</strong> <span id="custPoints">-</span></p>
       </div>
       
-      <h3 style="margin-top: 16px; margin-bottom: 8px;">Betrag eingeben:</h3>
-      <input id="scannedAmount" type="number" step="0.01" placeholder="Betrag in € (z.B. 7.50)">
+      <h3>Betrag eingeben:</h3>
+      <input id="scannedAmount" type="number" step="0.01" placeholder="z.B. 7.50">
       <button onclick="addPointsFromScan()" class="success">💰 Punkte gutschreiben</button>
       <div id="addPointsResult"></div>
     </div>
   </div>
 
-  <!-- TAB 2: MANUELLE EINGABE -->
+  <!-- TAB 2: HANDYNUMMER -->
   <div id="tab-manual" class="card" style="display:none;">
-    <h2>⌨️ Manuelle Eingabe</h2>
-    <input id="qrId" placeholder="QR-ID des Kunden (z.B. TEST-ABC123)">
+    <h2>📱 Eingabe per Handynummer</h2>
+    <input id="phone" type="tel" placeholder="Handynummer (z.B. 0151...)">
     <input id="amount" type="number" step="0.01" placeholder="Betrag in € (z.B. 7.50)">
-    <button onclick="addPoints()">💰 Punkte gutschreiben</button>
-    <div id="pointsResult"></div>
+    <button onclick="addPointsByPhone()">💰 Punkte gutschreiben</button>
+    <div id="phoneResult"></div>
   </div>
 
-  <!-- TAB 3: CODE PRÜFEN -->
+  <!-- TAB 3: VERLAUF -->
+  <div id="tab-history" class="card" style="display:none;">
+    <h2>📋 Scan-Verlauf (Heute)</h2>
+    <div id="historyList">
+      <div class="info" style="text-align: center; padding: 20px;">Noch keine Scans heute</div>
+    </div>
+  </div>
+
+  <!-- TAB 4: CODE PRÜFEN -->
   <div id="tab-code" class="card" style="display:none;">
     <h2>🎁 Code prüfen</h2>
-    <input id="code" placeholder="6-stelliger Code (z.B. ABC123)" maxlength="6" style="text-transform: uppercase;">
+    <input id="code" placeholder="6-stelliger Code" maxlength="6" style="text-transform: uppercase;">
     <button onclick="verifyCode()">✅ Code verifizieren</button>
     <div id="codeResult"></div>
   </div>
@@ -219,16 +286,12 @@ function showTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
   document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none')
   
-  if (tab === 'scan') {
-    document.querySelector('.tab:nth-child(1)').classList.add('active')
-    document.getElementById('tab-scan').style.display = 'block'
-  } else if (tab === 'manual') {
-    document.querySelector('.tab:nth-child(2)').classList.add('active')
-    document.getElementById('tab-manual').style.display = 'block'
-  } else if (tab === 'code') {
-    document.querySelector('.tab:nth-child(3)').classList.add('active')
-    document.getElementById('tab-code').style.display = 'block'
-  }
+  const tabs = ['scan', 'manual', 'history', 'code']
+  const index = tabs.indexOf(tab)
+  document.querySelector(`.tab:nth-child(${index + 1})`).classList.add('active')
+  document.getElementById(`tab-${tab}`).style.display = 'block'
+  
+  if (tab === 'history') loadHistory()
 }
 
 async function startCamera() {
@@ -238,29 +301,21 @@ async function startCamera() {
     document.getElementById('videoContainer').classList.add('active')
     document.getElementById('customerCard').style.display = 'none'
     
-    const constraints = {
-      video: { 
-        facingMode: 'environment',
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      }
-    }
-    
-    stream = await navigator.mediaDevices.getUserMedia(constraints)
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    })
     video.srcObject = stream
     
     video.onloadedmetadata = () => {
       video.play()
       scanning = true
       requestAnimationFrame(scanQR)
-      showResult('scanResult', '📸 Kamera aktiv - Halte QR-Code vor die Kamera', true)
+      showResult('scanResult', '📸 Kamera aktiv', true)
     }
-    
   } catch (err) {
-    showResult('scanResult', '❌ Kamera-Zugriff verweigert: ' + err.message, false)
+    showResult('scanResult', '❌ Kamera-Fehler: ' + err.message, false)
     document.getElementById('startBtn').style.display = 'block'
     document.getElementById('stopBtn').style.display = 'none'
-    document.getElementById('videoContainer').classList.remove('active')
   }
 }
 
@@ -299,7 +354,7 @@ function scanQR() {
 }
 
 async function onQRDetected(qrCode) {
-  showResult('scanResult', '✅ QR-Code erkannt: ' + qrCode, true)
+  showResult('scanResult', '✅ QR erkannt: ' + qrCode, true)
   
   try {
     const { data, error } = await supabase.rpc('get_customer_by_qr', { p_qr_id: qrCode })
@@ -310,6 +365,7 @@ async function onQRDetected(qrCode) {
     currentCustomer = {
       qr_id: data.qr_id,
       name: data.name,
+      phone: data.phone,
       points: data.points
     }
     
@@ -319,7 +375,6 @@ async function onQRDetected(qrCode) {
     document.getElementById('customerCard').style.display = 'block'
     document.getElementById('scannedAmount').value = ''
     document.getElementById('scannedAmount').focus()
-    
   } catch (e) {
     showResult('scanResult', '❌ ' + e.message, false)
     setTimeout(() => {
@@ -331,9 +386,8 @@ async function onQRDetected(qrCode) {
 
 async function addPointsFromScan() {
   const amount = parseFloat(document.getElementById('scannedAmount').value)
-  
   if (!amount || amount <= 0) {
-    showResult('addPointsResult', '❌ Bitte gültigen Betrag eingeben!', false)
+    showResult('addPointsResult', '❌ Betrag eingeben!', false)
     return
   }
   
@@ -346,63 +400,164 @@ async function addPointsFromScan() {
     
     if (error) throw error
     
-    // Zeige Erfolgs-Dialog der NICHT automatisch verschwindet
-    const confirmed = confirm(
-      `✅ ERFOLGREICH GUTGESCHRIEBEN!\n\n` +
-      `Kunde: ${data.customer}\n` +
-      `Betrag: ${amount.toFixed(2)} €\n` +
-      `Gutgeschriebene Punkte: ${data.added}\n` +
-      `Neuer Punktestand: ${data.points}\n\n` +
-      `Klicke OK zum Bestätigen`
-    )
+    alert(`✅ ERFOLGREICH!\n\nKunde: ${currentCustomer.name}\nBetrag: ${amount.toFixed(2)} €\nPunkte: +${data.added}\nNeuer Stand: ${data.points}`)
     
-    if (confirmed) {
-      document.getElementById('customerCard').style.display = 'none'
-      document.getElementById('scanResult').innerHTML = ''
-      document.getElementById('addPointsResult').innerHTML = ''
-      document.getElementById('scannedAmount').value = ''
-    }
-    
+    document.getElementById('customerCard').style.display = 'none'
+    document.getElementById('scanResult').innerHTML = ''
+    document.getElementById('scannedAmount').value = ''
   } catch (e) {
     alert('❌ FEHLER!\n\n' + e.message)
   }
 }
 
-async function addPoints() {
-  const qrId = document.getElementById('qrId').value.trim()
+async function addPointsByPhone() {
+  const phone = document.getElementById('phone').value.trim()
   const amount = parseFloat(document.getElementById('amount').value)
   
-  if (!qrId) {
-    showResult('pointsResult', '❌ Bitte QR-ID eingeben!', false)
+  if (!phone) {
+    showResult('phoneResult', '❌ Handynummer eingeben!', false)
     return
   }
-  
   if (!amount || amount <= 0) {
-    showResult('pointsResult', '❌ Bitte gültigen Betrag eingeben!', false)
+    showResult('phoneResult', '❌ Betrag eingeben!', false)
     return
   }
   
   try {
+    // Erst Kunde finden
+    const { data: customer, error: findErr } = await supabase.rpc('get_customer_by_phone', { p_phone: phone })
+    if (findErr) throw findErr
+    if (!customer.ok) throw new Error('Handynummer nicht gefunden')
+    
+    // Dann Punkte gutschreiben
     const { data, error } = await supabase.rpc('add_points', {
-      p_qr_id: qrId,
+      p_qr_id: customer.qr_id,
       p_amount: amount,
       p_staff: 'SCANNER'
     })
     
     if (error) throw error
     
-    showResult('pointsResult', 
-      `✅ Erfolgreich gutgeschrieben!<br>
-      Kunde: ${data.customer}<br>
-      Betrag: ${amount.toFixed(2)} €<br>
-      Gutgeschriebene Punkte: ${data.added}<br>
-      Neuer Punktestand: ${data.points}`, 
+    showResult('phoneResult', 
+      `✅ Erfolgreich!<br>Kunde: ${customer.name}<br>Betrag: ${amount.toFixed(2)} €<br>Punkte: +${data.added}<br>Neuer Stand: ${data.points}`,
       true)
     
+    document.getElementById('phone').value = ''
     document.getElementById('amount').value = ''
-    
   } catch (e) {
-    showResult('pointsResult', '❌ Fehler: ' + e.message, false)
+    showResult('phoneResult', '❌ ' + e.message, false)
+  }
+}
+
+async function loadHistory() {
+  try {
+    const today = new Date().toISOString().split('T')[0]
+    
+    const { data, error } = await supabase
+      .from('transactions')
+      .select(`
+        id,
+        user_id,
+        amount_eur,
+        points,
+        created_at,
+        customers (name, phone, qr_id)
+      `)
+      .eq('type', 'credit')
+      .gte('created_at', today)
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    
+    const list = document.getElementById('historyList')
+    
+    if (!data || data.length === 0) {
+      list.innerHTML = '<div class="info" style="text-align:center;padding:20px">Noch keine Scans heute</div>'
+      return
+    }
+    
+    list.innerHTML = data.map(tx => {
+      const time = new Date(tx.created_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+      const customer = tx.customers
+      
+      return `
+        <div class="history-item">
+          <div class="history-header">
+            <div class="history-customer">${customer.name}</div>
+            <div class="history-time">${time}</div>
+          </div>
+          <div class="history-details">
+            <div>📱 ${customer.phone}</div>
+            <div>🆔 ${customer.qr_id}</div>
+            <div class="history-amount">💰 ${tx.amount_eur.toFixed(2)} €</div>
+            <div class="history-points">⭐ ${tx.points} Punkte</div>
+          </div>
+          <div class="history-actions">
+            <button class="small secondary" onclick="editTransaction('${tx.id}', '${customer.qr_id}', ${tx.amount_eur}, ${tx.points})">✏️ Bearbeiten</button>
+          </div>
+          <div id="edit-${tx.id}" class="edit-form">
+            <h4 style="margin-bottom:8px">Betrag korrigieren:</h4>
+            <input type="number" step="0.01" id="newAmount-${tx.id}" value="${tx.amount_eur}" style="margin-bottom:8px">
+            <div class="info" style="margin-bottom:8px">Neue Punkte: <strong id="newPoints-${tx.id}">${tx.points}</strong></div>
+            <div class="two-col">
+              <button class="small success" onclick="saveEdit('${tx.id}', '${customer.qr_id}', ${tx.points})">💾 Speichern</button>
+              <button class="small danger" onclick="cancelEdit('${tx.id}')">❌ Abbrechen</button>
+            </div>
+          </div>
+        </div>
+      `
+    }).join('')
+  } catch (e) {
+    document.getElementById('historyList').innerHTML = `<div class="error">${e.message}</div>`
+  }
+}
+
+function editTransaction(txId, qrId, oldAmount, oldPoints) {
+  document.getElementById(`edit-${txId}`).classList.add('active')
+  
+  const input = document.getElementById(`newAmount-${txId}`)
+  input.oninput = () => {
+    const newAmount = parseFloat(input.value) || 0
+    const newPoints = Math.round(newAmount * 10)
+    document.getElementById(`newPoints-${txId}`).textContent = newPoints
+  }
+}
+
+function cancelEdit(txId) {
+  document.getElementById(`edit-${txId}`).classList.remove('active')
+}
+
+async function saveEdit(txId, qrId, oldPoints) {
+  const newAmount = parseFloat(document.getElementById(`newAmount-${txId}`).value)
+  const newPoints = Math.round(newAmount * 10)
+  const diff = newPoints - oldPoints
+  
+  if (!confirm(`Betrag ändern?\n\nAlte Punkte: ${oldPoints}\nNeue Punkte: ${newPoints}\nDifferenz: ${diff > 0 ? '+' : ''}${diff}`)) return
+  
+  try {
+    // Update transaction
+    const { error: txErr } = await supabase
+      .from('transactions')
+      .update({ amount_eur: newAmount, points: newPoints })
+      .eq('id', txId)
+    
+    if (txErr) throw txErr
+    
+    // Update customer points
+    const { data: customer } = await supabase.rpc('get_customer_by_qr', { p_qr_id: qrId })
+    if (customer.ok) {
+      const { error: custErr } = await supabase
+        .from('customers')
+        .update({ points: customer.points + diff })
+        .eq('qr_id', qrId)
+      
+      if (custErr) throw custErr
+    }
+    
+    alert('✅ Erfolgreich geändert!')
+    loadHistory()
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
   }
 }
 
@@ -410,7 +565,7 @@ async function verifyCode() {
   const code = document.getElementById('code').value.toUpperCase().trim()
   
   if (!code || code.length !== 6) {
-    showResult('codeResult', '❌ Bitte 6-stelligen Code eingeben!', false)
+    showResult('codeResult', '❌ 6-stelligen Code eingeben!', false)
     return
   }
   
@@ -420,25 +575,21 @@ async function verifyCode() {
     if (error) throw error
     
     showResult('codeResult', 
-      `✅ Code gültig!<br>
-      Prämie: <strong>${data.reward_name}</strong><br>
-      Kosten: ${data.points_cost} Punkte<br><br>
-      👉 Prämie kann ausgegeben werden!`, 
+      `✅ Code gültig!<br>Prämie: <strong>${data.reward_name}</strong><br>Kosten: ${data.points_cost} Punkte<br><br>👉 Prämie ausgeben!`,
       true)
     
     document.getElementById('code').value = ''
-    
   } catch (e) {
-    let errorMsg = e.message
-    if (errorMsg.includes('not_found')) errorMsg = 'Code nicht gefunden'
-    if (errorMsg.includes('already_used')) errorMsg = 'Code wurde bereits verwendet'
-    if (errorMsg.includes('expired')) errorMsg = 'Code ist abgelaufen'
+    let msg = e.message
+    if (msg.includes('not_found')) msg = 'Code nicht gefunden'
+    if (msg.includes('already_used')) msg = 'Code bereits verwendet'
+    if (msg.includes('expired')) msg = 'Code abgelaufen'
     
-    showResult('codeResult', '❌ ' + errorMsg, false)
+    showResult('codeResult', '❌ ' + msg, false)
   }
 }
 
-console.log('✅ Scanner-App geladen!')
+console.log('✅ Scanner PRO geladen!')
 </script>
 
 </body>
