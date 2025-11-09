@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jetzt mitmachen - Dönerkings Loyalty</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.container { max-width: 500px; width: 100%; }
+.hero {
+  text-align: center;
+  color: white;
+  margin-bottom: 30px;
+}
+.hero h1 {
+  font-size: 42px;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+.hero p {
+  font-size: 18px;
+  opacity: 0.95;
+  line-height: 1.5;
+}
+.hero .highlight {
+  font-size: 24px;
+  font-weight: 700;
+  margin-top: 16px;
+  background: rgba(255,255,255,0.2);
+  padding: 12px 20px;
+  border-radius: 12px;
+  display: inline-block;
+}
+.card {
+  background: white;
+  border-radius: 24px;
+  padding: 32px 28px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+.benefits {
+  margin-bottom: 24px;
+}
+.benefit {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+}
+.benefit-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.benefit-text {
+  font-size: 15px;
+  color: #374151;
+  line-height: 1.4;
+}
+.form-group {
+  margin-bottom: 16px;
+}
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: border 0.3s;
+}
+input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+button {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  transition: transform 0.2s;
+  margin-top: 8px;
+}
+button:active { transform: scale(0.98); }
+button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.result {
+  padding: 14px;
+  border-radius: 12px;
+  margin-top: 16px;
+  text-align: center;
+  font-size: 14px;
+}
+.success { background: #d1fae5; color: #065f46; }
+.error { background: #fee2e2; color: #991b1b; }
+.qr-success {
+  text-align: center;
+  display: none;
+  animation: fadeIn 0.5s;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.qr-success h2 {
+  color: #667eea;
+  margin-bottom: 16px;
+  font-size: 24px;
+}
+.qr-code-box {
+  background: #f9fafb;
+  border-radius: 16px;
+  padding: 24px;
+  margin: 20px 0;
+}
+.qr-code-img {
+  width: 280px;
+  height: 280px;
+  margin: 0 auto 16px;
+  border-radius: 12px;
+  background: white;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.qr-id {
+  font-size: 18px;
+  font-weight: 700;
+  color: #374151;
+  letter-spacing: 2px;
+  margin: 12px 0;
+}
+.points-display {
+  width: 120px;
+  height: 120px;
+  margin: 20px auto;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+.points-num { font-size: 36px; font-weight: 700; }
+.points-label { font-size: 14px; opacity: 0.9; }
+.instruction {
+  background: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  padding: 14px;
+  border-radius: 8px;
+  margin-top: 16px;
+  font-size: 14px;
+  color: #92400e;
+  line-height: 1.5;
+}
+.action-buttons {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+.btn-secondary {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  box-shadow: none;
+}
+.privacy {
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255,255,255,0.8);
+  margin-top: 20px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="hero">
+    <h1>🌯 Dönerkings</h1>
+    <p>Willkommen beim Treueprogramm!</p>
+    <div class="highlight">1 € = 10 Punkte</div>
+  </div>
+  <div class="card">
+    <div id="regForm">
+      <h2 style="margin-bottom: 20px; color: #111827; font-size: 22px;">Jetzt kostenlos mitmachen</h2>
+      <div class="benefits">
+        <div class="benefit">
+          <div class="benefit-icon">🎁</div>
+          <div class="benefit-text">Bei jedem Einkauf automatisch Punkte sammeln</div>
+        </div>
+        <div class="benefit">
+          <div class="benefit-icon">🆓</div>
+          <div class="benefit-text">Prämien einlösen: Getränke, Pommes, Döner & mehr</div>
+        </div>
+        <div class="benefit">
+          <div class="benefit-icon">📱</div>
+          <div class="benefit-text">Dein persönlicher QR-Code immer dabei</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Dein Name</label>
+        <input id="name" type="text" placeholder="z.B. Max Mustermann" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label>E-Mail Adresse</label>
+        <input id="email" type="email" placeholder="z.B. max@beispiel.de" autocomplete="email">
+      </div>
+      <button id="btnJoin" onclick="join()">
+        <span id="btnText">✨ Jetzt kostenlos registrieren</span>
+      </button>
+      <div id="result"></div>
+      <div class="privacy">
+        Mit der Registrierung akzeptierst du unsere Datenschutzbestimmungen.
+      </div>
+    </div>
+    <div id="qrSuccess" class="qr-success">
+      <h2>🎉 Willkommen!</h2>
+      <div class="points-display">
+        <div class="points-num" id="displayPoints">0</div>
+        <div class="points-label">Punkte</div>
+      </div>
+      <p style="color: #6b7280; margin: 16px 0;">
+        <strong id="displayName">-</strong><br>
+        <span id="displayEmail">-</span>
+      </p>
+      <div class="qr-code-box">
+        <h3 style="margin-bottom: 12px; color: #374151;">Dein persönlicher Treue-QR</h3>
+        <img id="qrImage" class="qr-code-img" alt="QR Code">
+        <div class="qr-id" id="displayQrId">-</div>
+      </div>
+      <div class="instruction">
+        <strong>💡 So funktioniert's:</strong><br>
+        1. Screenshot von diesem QR-Code machen<br>
+        2. Beim nächsten Besuch QR-Code vorzeigen<br>
+        3. Punkte sammeln & Prämien einlösen!
+      </div>
+      <div class="action-buttons">
+        <button onclick="openMyAccount()">📱 Mein Konto öffnen</button>
+        <button class="btn-secondary" onclick="shareQR()">📤 QR-Code teilen</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://pskuvrahvxlzrnxmuqnc.supabase.co'
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
+const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)
+function showResult(m,s){document.getElementById('result').innerHTML=`<div class="result ${s?'success':'error'}">${m}</div>`}
+async function join(){
+const n=document.getElementById('name').value.trim()
+const e=document.getElementById('email').value.trim()
+if(!n||!e){showResult('Bitte Name und E-Mail eingeben!',false);return}
+const btn=document.getElementById('btnJoin')
+btn.disabled=true
+document.getElementById('btnText').textContent='⏳ Wird registriert...'
+try{
+const qr='C'+Math.random().toString(36).substr(2,8).toUpperCase()
+const{data,error}=await supabase.from('customers').insert({name:n,phone:e,qr_id:qr,points:0}).select().single()
+if(error)throw error
+const c={id:data.id,name:n,email:e,qr_id:data.qr_id,points:data.points||0}
+localStorage.setItem('customerData',JSON.stringify(c))
+showQRCode(c)
+}catch(err){
+showResult('❌ '+err.message,false)
+btn.disabled=false
+document.getElementById('btnText').textContent='✨ Jetzt kostenlos registrieren'
+}}
+function showQRCode(c){
+document.getElementById('regForm').style.display='none'
+document.getElementById('qrSuccess').style.display='block'
+document.getElementById('displayName').textContent=c.name
+document.getElementById('displayEmail').textContent=c.email
+document.getElementById('displayPoints').textContent=c.points
+document.getElementById('displayQrId').textContent=c.qr_id
+document.getElementById('qrImage').src=`https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${c.qr_id}`
+}
+function openMyAccount(){window.location.href='/kunde.html'}
+function shareQR(){
+const qr=document.getElementById('displayQrId').textContent
+const t=`Mein Dönerkings Treue-QR: ${qr}\n\nMach mit: ${window.location.origin}/join.html`
+if(navigator.share){navigator.share({title:'Dönerkings Loyalty',text:t})}
+else{alert('QR-ID kopiert: '+qr);navigator.clipboard.writeText(qr)}
+}
+window.onload=()=>{
+const s=localStorage.getItem('customerData')
+if(s){try{showQRCode(JSON.parse(s))}catch(e){}}
+}
+console.log('✅ Registrierung geladen')
+</script>
+</body>
+</html>
