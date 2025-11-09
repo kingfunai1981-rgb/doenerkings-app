@@ -20,7 +20,7 @@ body {
   margin-bottom: 16px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
-h1 { color: #667eea; margin-bottom: 10px; }
+h1 { color: #667eea; margin-bottom: 10px; font-size: 28px; }
 h2 { font-size: 18px; margin-bottom: 12px; }
 input {
   width: 100%;
@@ -43,6 +43,8 @@ button {
   margin-top: 8px;
 }
 button:hover { opacity: 0.9; }
+button.secondary { background: #6b7280; }
+button.success { background: #10b981; }
 .result {
   padding: 12px;
   border-radius: 8px;
@@ -52,6 +54,69 @@ button:hover { opacity: 0.9; }
 .success { background: #d1fae5; color: #065f46; }
 .error { background: #fee2e2; color: #991b1b; }
 .info { color: #666; font-size: 14px; margin-top: 8px; }
+
+#qr-video {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 10px;
+  background: #000;
+  display: none;
+}
+#qr-video.active {
+  display: block;
+}
+.scan-box {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+.scan-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 250px;
+  height: 250px;
+  border: 3px solid #10b981;
+  border-radius: 10px;
+  pointer-events: none;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+}
+.customer-info {
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 10px;
+  margin-top: 12px;
+}
+.customer-info h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: #667eea;
+}
+.customer-info p {
+  margin: 4px 0;
+  color: #374151;
+}
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.tab {
+  flex: 1;
+  padding: 12px;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #6b7280;
+}
+.tab.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
 </style>
 </head>
 <body>
@@ -59,35 +124,57 @@ button:hover { opacity: 0.9; }
 <div class="container">
   <div class="card">
     <h1>🌯 Dönerkings Scanner</h1>
-    <div class="info">Status: <span id="status">Lädt...</span></div>
+    <div class="info">Status: <span id="status">Bereit ✅</span></div>
   </div>
 
+  <!-- TABS -->
   <div class="card">
-    <h2>🔐 Mitarbeiter Login</h2>
-    <input id="email" type="email" placeholder="E-Mail">
-    <input id="password" type="password" placeholder="Passwort">
-    <button onclick="login()">Anmelden</button>
-    <button onclick="logout()" style="background: #6b7280;">Abmelden</button>
-    <div id="loginResult"></div>
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('scan')">📸 QR Scannen</button>
+      <button class="tab" onclick="showTab('manual')">⌨️ Manuell</button>
+      <button class="tab" onclick="showTab('code')">🎁 Code prüfen</button>
+    </div>
   </div>
 
-  <div class="card">
-    <h2>🧪 Test: Kunde anlegen</h2>
-    <input id="testName" placeholder="Name (z.B. Max Mustermann)" value="Test Kunde">
-    <input id="testPhone" placeholder="Telefon (z.B. 0151...)" value="01511234567">
-    <button onclick="createTestCustomer()">Kunde erstellen</button>
-    <div id="testResult"></div>
+  <!-- TAB 1: QR SCANNER -->
+  <div id="tab-scan" class="card">
+    <h2>📸 QR-Code scannen</h2>
+    <button id="startScan" onclick="startScanning()">Kamera starten</button>
+    <button id="stopScan" onclick="stopScanning()" style="display:none; background:#ef4444;">Kamera stoppen</button>
+    
+    <div class="scan-box" style="margin-top: 16px;">
+      <video id="qr-video" playsinline></video>
+      <div class="scan-overlay" id="scan-overlay" style="display:none;"></div>
+    </div>
+    
+    <div id="scanResult"></div>
+    
+    <!-- KUNDE GEFUNDEN -->
+    <div id="customerCard" style="display:none;">
+      <div class="customer-info">
+        <h3 id="custName">-</h3>
+        <p><strong>QR-ID:</strong> <span id="custQR">-</span></p>
+        <p><strong>Punkte:</strong> <span id="custPoints">-</span></p>
+      </div>
+      
+      <h3 style="margin-top: 16px; margin-bottom: 8px;">Betrag eingeben:</h3>
+      <input id="scannedAmount" type="number" step="0.01" placeholder="Betrag in € (z.B. 7.50)">
+      <button onclick="addPointsFromScan()" class="success">Punkte gutschreiben</button>
+      <div id="addPointsResult"></div>
+    </div>
   </div>
 
-  <div class="card">
-    <h2>📱 Punkte gutschreiben</h2>
+  <!-- TAB 2: MANUELLE EINGABE -->
+  <div id="tab-manual" class="card" style="display:none;">
+    <h2>⌨️ Manuelle Eingabe</h2>
     <input id="qrId" placeholder="QR-ID des Kunden">
     <input id="amount" type="number" step="0.01" placeholder="Betrag in € (z.B. 7.50)">
     <button onclick="addPoints()">Punkte gutschreiben</button>
     <div id="pointsResult"></div>
   </div>
 
-  <div class="card">
+  <!-- TAB 3: CODE PRÜFEN -->
+  <div id="tab-code" class="card" style="display:none;">
     <h2>🎁 Code prüfen</h2>
     <input id="code" placeholder="6-stelliger Code (z.B. ABC123)" style="text-transform: uppercase;">
     <button onclick="verifyCode()">Code verifizieren</button>
@@ -95,99 +182,153 @@ button:hover { opacity: 0.9; }
   </div>
 </div>
 
-<!-- Supabase Library (CDN - funktioniert garantiert!) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 <script>
-// ========================================
-// HIER DEINE URLS EINTRAGEN! (bereits gesetzt)
-// ========================================
 const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 
-// Supabase Client erstellen
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+let html5QrcodeScanner = null
+let currentCustomer = null
 
-// Status anzeigen
-document.getElementById('status').textContent = 'Bereit ✅'
-
-// Hilfsfunktion für Nachrichten
 function showResult(elementId, message, isSuccess) {
   const el = document.getElementById(elementId)
   el.innerHTML = `<div class="result ${isSuccess ? 'success' : 'error'}">${message}</div>`
 }
 
-// LOGIN
-async function login() {
-  const email = document.getElementById('email').value
-  const password = document.getElementById('password').value
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+  document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none')
   
-  if (!email || !password) {
-    showResult('loginResult', 'Bitte E-Mail und Passwort eingeben!', false)
+  if (tab === 'scan') {
+    document.querySelector('.tab:nth-child(1)').classList.add('active')
+    document.getElementById('tab-scan').style.display = 'block'
+  } else if (tab === 'manual') {
+    stopScanning()
+    document.querySelector('.tab:nth-child(2)').classList.add('active')
+    document.getElementById('tab-manual').style.display = 'block'
+  } else if (tab === 'code') {
+    stopScanning()
+    document.querySelector('.tab:nth-child(3)').classList.add('active')
+    document.getElementById('tab-code').style.display = 'block'
+  }
+}
+
+async function startScanning() {
+  try {
+    document.getElementById('startScan').style.display = 'none'
+    document.getElementById('stopScan').style.display = 'block'
+    document.getElementById('qr-video').classList.add('active')
+    document.getElementById('scan-overlay').style.display = 'block'
+    document.getElementById('customerCard').style.display = 'none'
+    
+    html5QrcodeScanner = new Html5Qrcode("qr-video")
+    
+    const config = { 
+      fps: 10, 
+      qrbox: { width: 250, height: 250 }
+    }
+    
+    await html5QrcodeScanner.start(
+      { facingMode: "environment" },
+      config,
+      onScanSuccess,
+      onScanFailure
+    )
+    
+    showResult('scanResult', '📸 Kamera aktiv - QR-Code vor die Kamera halten...', true)
+    
+  } catch (err) {
+    showResult('scanResult', '❌ Kamera-Zugriff fehlgeschlagen: ' + err.message, false)
+    document.getElementById('startScan').style.display = 'block'
+    document.getElementById('stopScan').style.display = 'none'
+  }
+}
+
+function stopScanning() {
+  if (html5QrcodeScanner) {
+    html5QrcodeScanner.stop().then(() => {
+      html5QrcodeScanner = null
+      document.getElementById('qr-video').classList.remove('active')
+      document.getElementById('scan-overlay').style.display = 'none'
+      document.getElementById('startScan').style.display = 'block'
+      document.getElementById('stopScan').style.display = 'none'
+    }).catch(() => {})
+  }
+}
+
+async function onScanSuccess(decodedText) {
+  stopScanning()
+  
+  showResult('scanResult', '✅ QR-Code erkannt: ' + decodedText, true)
+  
+  try {
+    const { data, error } = await supabase.rpc('get_customer_by_qr', { p_qr_id: decodedText })
+    
+    if (error) throw error
+    if (!data.ok) throw new Error('Kunde nicht gefunden')
+    
+    currentCustomer = {
+      qr_id: data.qr_id,
+      name: data.name,
+      points: data.points
+    }
+    
+    document.getElementById('custName').textContent = data.name
+    document.getElementById('custQR').textContent = data.qr_id
+    document.getElementById('custPoints').textContent = data.points
+    document.getElementById('customerCard').style.display = 'block'
+    document.getElementById('scannedAmount').focus()
+    
+  } catch (e) {
+    showResult('scanResult', '❌ ' + e.message, false)
+  }
+}
+
+function onScanFailure(error) {
+  // Ignoriere Scan-Fehler (normal beim Suchen)
+}
+
+async function addPointsFromScan() {
+  const amount = parseFloat(document.getElementById('scannedAmount').value)
+  
+  if (!amount || amount <= 0) {
+    showResult('addPointsResult', '❌ Bitte gültigen Betrag eingeben!', false)
     return
   }
   
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: email,
-    password: password
-  })
-  
-  if (error) {
-    showResult('loginResult', '❌ Login fehlgeschlagen: ' + error.message, false)
-  } else {
-    showResult('loginResult', '✅ Erfolgreich angemeldet als: ' + data.user.email, true)
-    document.getElementById('status').textContent = 'Angemeldet: ' + data.user.email
-  }
-}
-
-// LOGOUT
-async function logout() {
-  await supabase.auth.signOut()
-  showResult('loginResult', 'Abgemeldet', true)
-  document.getElementById('status').textContent = 'Nicht angemeldet'
-}
-
-// TEST-KUNDE ERSTELLEN
-async function createTestCustomer() {
-  const name = document.getElementById('testName').value || 'Test Kunde'
-  const phone = document.getElementById('testPhone').value || '01511234567'
-  
   try {
-    // Generiere zufällige QR-ID
-    const qrId = 'TEST-' + Math.random().toString(36).substr(2, 6).toUpperCase()
-    
-    // Kunde in DB einfügen
-    const { data, error } = await supabase
-      .from('customers')
-      .insert({
-        name: name,
-        phone: phone,
-        qr_id: qrId,
-        points: 0
-      })
-      .select()
-      .single()
+    const { data, error } = await supabase.rpc('add_points', {
+      p_qr_id: currentCustomer.qr_id,
+      p_amount: amount,
+      p_staff: 'SCANNER'
+    })
     
     if (error) throw error
     
-    showResult('testResult', 
-      `✅ Kunde erstellt!<br>
-      Name: ${data.name}<br>
-      Telefon: ${data.phone}<br>
-      QR-ID: <strong>${data.qr_id}</strong><br>
-      Punkte: ${data.points}<br><br>
-      👉 Kopiere die QR-ID für den nächsten Schritt!`, 
+    showResult('addPointsResult', 
+      `✅ Erfolgreich gutgeschrieben!<br>
+      Betrag: ${amount.toFixed(2)} €<br>
+      Gutgeschriebene Punkte: ${data.added}<br>
+      Neuer Punktestand: ${data.points}`, 
       true)
     
-    // QR-ID automatisch ins Feld eintragen
-    document.getElementById('qrId').value = data.qr_id
+    document.getElementById('custPoints').textContent = data.points
+    document.getElementById('scannedAmount').value = ''
+    
+    setTimeout(() => {
+      document.getElementById('customerCard').style.display = 'none'
+      document.getElementById('scanResult').innerHTML = ''
+      document.getElementById('addPointsResult').innerHTML = ''
+    }, 3000)
     
   } catch (e) {
-    showResult('testResult', '❌ Fehler: ' + e.message, false)
+    showResult('addPointsResult', '❌ Fehler: ' + e.message, false)
   }
 }
 
-// PUNKTE GUTSCHREIBEN
 async function addPoints() {
   const qrId = document.getElementById('qrId').value
   const amount = parseFloat(document.getElementById('amount').value)
@@ -218,7 +359,6 @@ async function addPoints() {
       Neuer Punktestand: ${data.points}`, 
       true)
     
-    // Felder leeren
     document.getElementById('amount').value = ''
     
   } catch (e) {
@@ -226,7 +366,6 @@ async function addPoints() {
   }
 }
 
-// CODE VERIFIZIEREN
 async function verifyCode() {
   const code = document.getElementById('code').value.toUpperCase()
   
@@ -261,7 +400,7 @@ async function verifyCode() {
   }
 }
 
-console.log('✅ App geladen und bereit!')
+console.log('✅ Scanner-App geladen!')
 </script>
 
 </body>
