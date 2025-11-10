@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dönerkings Scanner PRO</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { 
+  font-family: system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+.container { max-width: 900px; margin: 0 auto; }
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+h1 { color: #667eea; margin-bottom: 10px; font-size: 28px; }
+h2 { font-size: 18px; margin-bottom: 12px; }
+input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+button:hover { opacity: 0.9; }
+.result {
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+.success { background: #d1fae5; color: #065f46; }
+.error { background: #fee2e2; color: #991b1b; }
+.info { background: #dbeafe; color: #1e40af; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <h1>🌯 Dönerkings Scanner PRO</h1>
+    <div style="color: #666; font-size: 14px;">Status: <span id="status">Bereit ✅</span></div>
+  </div>
+
+  <div class="card">
+    <h2>📱 Punkte gutschreiben</h2>
+    <input id="phone" type="tel" placeholder="Handynummer (z.B. 01511234567)">
+    <input id="amount" type="number" step="0.01" placeholder="Betrag in € (z.B. 10.00)">
+    <button onclick="addPoints()">💰 Punkte gutschreiben</button>
+    <div id="result"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+function showResult(message, type) {
+  const el = document.getElementById('result')
+  el.className = `result ${type}`
+  el.innerHTML = message
+}
+
+async function addPoints() {
+  const phone = document.getElementById('phone').value.trim()
+  const amount = parseFloat(document.getElementById('amount').value)
+  
+  if (!phone) {
+    showResult('❌ Handynummer eingeben!', 'error')
+    return
+  }
+  if (!amount || amount <= 0) {
+    showResult('❌ Gültigen Betrag eingeben!', 'error')
+    return
+  }
+  
+  showResult('🔍 Suche Kunde...', 'info')
+  
+  try {
+    // Kunde suchen
+    const { data: customers, error: findError } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('phone', phone)
+      .limit(1)
+    
+    if (findError) throw findError
+    if (!customers || customers.length === 0) {
+      throw new Error('Handynummer nicht gefunden')
+    }
+    
+    const customer = customers[0]
+    
+    showResult('✅ Kunde gefunden! Schreibe Punkte gut...', 'info')
+    
+    // Punkte berechnen
+    const pointsToAdd = Math.round(amount * 10)
+    const newTotal = customer.points + pointsToAdd
+    
+    // Transaktion einfügen
+    const { error: txError } = await supabase
+      .from('transactions')
+      .insert({
+        customer_id: customer.id,
+        type: 'credit',
+        amount_eur: amount,
+        points: pointsToAdd,
+        staff: 'SCANNER'
+      })
+    
+    if (txError) throw txError
+    
+    // Punkte updaten
+    const { error: updateError } = await supabase
+      .from('customers')
+      .update({ points: newTotal })
+      .eq('id', customer.id)
+    
+    if (updateError) throw updateError
+    
+    showResult(
+      `✅ <strong>ERFOLGREICH!</strong><br><br>` +
+      `👤 Kunde: <strong>${customer.name}</strong><br>` +
+      `💰 Betrag: ${amount.toFixed(2)} €<br>` +
+      `⭐ Punkte: +${pointsToAdd}<br>` +
+      `📊 Neuer Stand: <strong>${newTotal} Punkte</strong>`,
+      'success'
+    )
+    
+    // Felder leeren
+    document.getElementById('phone').value = ''
+    document.getElementById('amount').value = ''
+    
+  } catch (err) {
+    showResult(`❌ <strong>Fehler:</strong> ${err.message}`, 'error')
+  }
+}
+
+console.log('✅ Scanner PRO geladen!')
+</script>
+
+</body>
+</html>
