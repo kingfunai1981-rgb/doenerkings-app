@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jetzt mitmachen - Dönerkings Loyalty</title>
+<title>Jetzt mitmachen - Dönerkings</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { 
@@ -231,8 +231,8 @@ button:disabled {
         <input id="name" type="text" placeholder="z.B. Max Mustermann" autocomplete="name">
       </div>
       <div class="form-group">
-        <label>E-Mail Adresse</label>
-        <input id="email" type="email" placeholder="z.B. max@beispiel.de" autocomplete="email">
+        <label>Handynummer</label>
+        <input id="phone" type="tel" placeholder="z.B. 0151..." autocomplete="tel">
       </div>
       <button id="btnJoin" onclick="join()">
         <span id="btnText">✨ Jetzt kostenlos registrieren</span>
@@ -250,7 +250,7 @@ button:disabled {
       </div>
       <p style="color: #6b7280; margin: 16px 0;">
         <strong id="displayName">-</strong><br>
-        <span id="displayEmail">-</span>
+        <span id="displayPhone">-</span>
       </p>
       <div class="qr-code-box">
         <h3 style="margin-bottom: 12px; color: #374151;">Dein persönlicher Treue-QR</h3>
@@ -278,16 +278,15 @@ const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)
 function showResult(m,s){document.getElementById('result').innerHTML=`<div class="result ${s?'success':'error'}">${m}</div>`}
 async function join(){
 const n=document.getElementById('name').value.trim()
-const e=document.getElementById('email').value.trim()
-if(!n||!e){showResult('Bitte Name und E-Mail eingeben!',false);return}
+const p=document.getElementById('phone').value.trim()
+if(!n||!p){showResult('Bitte Name und Handynummer eingeben!',false);return}
 const btn=document.getElementById('btnJoin')
 btn.disabled=true
 document.getElementById('btnText').textContent='⏳ Wird registriert...'
 try{
-const qr='C'+Math.random().toString(36).substr(2,8).toUpperCase()
-const{data,error}=await supabase.from('customers').insert({name:n,phone:e,qr_id:qr,points:0}).select().single()
+const{data,error}=await supabase.rpc('signup_customer',{p_name:n,p_phone:p})
 if(error)throw error
-const c={id:data.id,name:n,email:e,qr_id:data.qr_id,points:data.points||0}
+const c={name:n,phone:p,qr_id:data.qr_id,points:data.points||0}
 localStorage.setItem('customerData',JSON.stringify(c))
 showQRCode(c)
 }catch(err){
@@ -299,7 +298,7 @@ function showQRCode(c){
 document.getElementById('regForm').style.display='none'
 document.getElementById('qrSuccess').style.display='block'
 document.getElementById('displayName').textContent=c.name
-document.getElementById('displayEmail').textContent=c.email
+document.getElementById('displayPhone').textContent=c.phone
 document.getElementById('displayPoints').textContent=c.points
 document.getElementById('displayQrId').textContent=c.qr_id
 document.getElementById('qrImage').src=`https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${c.qr_id}`
@@ -307,7 +306,7 @@ document.getElementById('qrImage').src=`https://api.qrserver.com/v1/create-qr-co
 function openMyAccount(){window.location.href='/kunde.html'}
 function shareQR(){
 const qr=document.getElementById('displayQrId').textContent
-const t=`Mein Dönerkings Treue-QR: ${qr}\n\nMach mit: ${window.location.origin}/join.html`
+const t=`Mein Dönerkings Treue-QR: ${qr}`
 if(navigator.share){navigator.share({title:'Dönerkings Loyalty',text:t})}
 else{alert('QR-ID kopiert: '+qr);navigator.clipboard.writeText(qr)}
 }
@@ -315,7 +314,6 @@ window.onload=()=>{
 const s=localStorage.getItem('customerData')
 if(s){try{showQRCode(JSON.parse(s))}catch(e){}}
 }
-console.log('✅ Registrierung geladen')
 </script>
 </body>
 </html>
