@@ -331,8 +331,8 @@ async function register() {
       return
     }
     
-    // QR-ID generieren (6 Zeichen)
-    const qrId = Math.random().toString(36).substring(2, 8).toUpperCase()
+    // QR-ID generieren (4-stellige Zahl)
+    const qrId = Math.floor(1000 + Math.random() * 9000).toString()
     
     // Kunde erstellen
     const { data, error } = await supabase
