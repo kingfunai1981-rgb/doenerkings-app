@@ -126,8 +126,8 @@ async function addPoints() {
       .from('transactions')
       .insert({
         customer_id: customer.id,
-        type: 'credit',
-        amount_eur: amount,
+        type: 'earn',
+        amount: amount,
         points: pointsToAdd,
         staff: 'SCANNER'
       })
