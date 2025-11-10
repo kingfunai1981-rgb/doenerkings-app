@@ -1,30 +1,110 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><title>QR-Poster</title><style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#fff}.poster{text-align:center;padding:40px;max-width:400px}h1{font-size:48px;margin-bottom:20px;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.qr{margin:30px 0;padding:20px;background:#f9fafb;border-radius:20px}p{font-size:24px;line-height:1.6;color:#374151}.highlight{font-size:32px;font-weight:bold;color:#667eea;margin:20px 0}</style></head><body><div class="poster"><h1>🌯 Dönerkings<br>Treueprogramm</h1><div class="qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://doenerkings-app.vercel.app/join.html" alt="QR Code" style="width:100%;max-width:300px"></div><p>📱 QR-Code scannen<br>& mitmachen!</p><div class="highlight">1 € = 10 Punkte</div><p style="font-size:18px">✨ Kostenlos registrieren<br>🎁 Prämien einlösen<br>💰 Punkte sammeln</p></div></body></html>
-```
-
-### **3. Du hast schon:**
-- ✅ `index.html` (Scanner-App)
-- ✅ `kunde.html` (Kunden-App)
-
----
-
-## 🎯 **JETZT HOCHLADEN:**
-
-1. **`join.html`** → GitHub → Create new file → Code einfügen
-2. **`poster.html`** → GitHub → Create new file → Code einfügen
-3. Warte 1 Minute → Vercel deployed automatisch!
-
----
-
-## 📱 **DEINE FINALEN URLs:**
-```
-Scanner (Mitarbeiter):
-https://doenerkings-app.vercel.app
-
-Registrierung (Kunden):
-https://doenerkings-app.vercel.app/join.html
-
-Kunden-Konto:
-https://doenerkings-app.vercel.app/kunde.html
-
-Poster (Ausdrucken):
-https://doenerkings-app.vercel.app/poster.html
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poster - Dönerkings</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f3f4f6;
+  padding: 20px;
+}
+.poster {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 60px 40px;
+  text-align: center;
+  border-radius: 20px;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.qr-box {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  margin: 30px 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.qr-box img {
+  width: 100%;
+  max-width: 300px;
+  border-radius: 10px;
+}
+.highlight {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 20px 0;
+  background: rgba(255,255,255,0.2);
+  padding: 16px;
+  border-radius: 12px;
+}
+.steps {
+  text-align: left;
+  font-size: 18px;
+  line-height: 2;
+  margin-top: 30px;
+  background: rgba(255,255,255,0.1);
+  padding: 20px 30px;
+  border-radius: 12px;
+}
+.steps h3 {
+  font-size: 24px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.btn {
+  margin-top: 20px;
+  padding: 14px 32px;
+  background: white;
+  color: #667eea;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+@media print {
+  body { background: white; }
+  .btn { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="poster">
+  <h1>🌯 Dönerkings</h1>
+  <p style="font-size: 24px; margin-bottom: 10px;">Treueprogramm</p>
+  
+  <div class="qr-box">
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://doenerkings-app.vercel.app/join.html" alt="QR Code">
+  </div>
+  
+  <div class="highlight">1 € = 10 Punkte</div>
+  
+  <div class="steps">
+    <h3>So einfach geht's:</h3>
+    <div>📱 QR-Code scannen</div>
+    <div>📝 Kostenlos registrieren</div>
+    <div>💰 Punkte sammeln</div>
+    <div>🎁 Prämien einlösen</div>
+  </div>
+  
+  <button class="btn" onclick="window.print()">🖨️ Poster drucken</button>
+</div>
+</body>
+</html>
