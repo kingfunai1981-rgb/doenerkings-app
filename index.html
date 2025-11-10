@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dönerkings Loyalty</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { 
+  font-family: system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+.container { max-width: 600px; margin: 0 auto; }
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+h1 { color: #667eea; margin-bottom: 10px; font-size: 28px; text-align: center; }
+h2 { font-size: 20px; margin-bottom: 16px; color: #374151; }
+h3 { font-size: 16px; margin: 12px 0; color: #374151; }
+
+/* QR Scanner */
+.video-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 16px auto;
+  background: #000;
+  border-radius: 10px;
+  overflow: hidden;
+}
+#video { width: 100%; display: block; }
+.scan-line {
+  position: absolute;
+  width: 80%;
+  height: 2px;
+  background: #10b981;
+  left: 10%;
+  top: 50%;
+  box-shadow: 0 0 10px #10b981;
+  animation: scan 2s ease-in-out infinite;
+}
+@keyframes scan {
+  0%, 100% { top: 20%; }
+  50% { top: 80%; }
+}
+.scan-corners {
+  position: absolute;
+  inset: 10%;
+  border: 2px solid #10b981;
+  border-radius: 10px;
+}
+canvas { display: none; }
+
+/* Forms */
+input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+button:hover { opacity: 0.9; }
+button.secondary { background: #6b7280; }
+button.danger { background: #ef4444; }
+
+/* Results */
+.result {
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  font-size: 14px;
+  text-align: center;
+}
+.success { background: #d1fae5; color: #065f46; }
+.error { background: #fee2e2; color: #991b1b; }
+.info { background: #dbeafe; color: #1e40af; }
+
+/* Points Display */
+.points-circle {
+  width: 160px;
+  height: 160px;
+  margin: 20px auto;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+.points-num { font-size: 48px; font-weight: 700; }
+.points-label { font-size: 14px; opacity: 0.9; }
+
+/* Rewards */
+.reward {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.reward h3 { font-size: 16px; margin: 0 0 4px 0; }
+.reward .pts { font-size: 14px; color: #667eea; font-weight: 600; }
+.reward button {
+  width: auto;
+  padding: 10px 20px;
+  margin: 0;
+  font-size: 14px;
+}
+.reward button:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Screens */
+.screen { display: none; }
+.screen.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- SCREEN 1: QR SCANNEN -->
+  <div id="screen-scan" class="screen active">
+    <div class="card">
+      <h1>🌯 Dönerkings Loyalty</h1>
+      <p style="text-align: center; color: #666; margin-bottom: 20px;">
+        Scanne deinen QR-Code um dich anzumelden
+      </p>
+    </div>
+    
+    <div class="card">
+      <h2>📸 QR-Code scannen</h2>
+      <div class="video-container">
+        <video id="video" autoplay playsinline></video>
+        <div class="scan-corners"></div>
+        <div class="scan-line"></div>
+      </div>
+      <canvas id="canvas"></canvas>
+      <div id="scan-result"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: REGISTRIERUNG -->
+  <div id="screen-register" class="screen">
+    <div class="card">
+      <h1>🎉 Willkommen!</h1>
+      <p style="text-align: center; color: #666; margin-bottom: 20px;">
+        Dieser QR-Code ist noch nicht registriert
+      </p>
+    </div>
+    
+    <div class="card">
+      <h2>Jetzt registrieren</h2>
+      <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
+        QR-ID: <strong id="reg-qr-id">-</strong>
+      </p>
+      <input id="reg-name" placeholder="Dein Name (z.B. Max Mustermann)">
+      <input id="reg-phone" type="tel" placeholder="Handynummer (z.B. 01511234567)">
+      <button onclick="register()">✅ Registrieren</button>
+      <button class="secondary" onclick="resetScan()">↩️ Zurück</button>
+      <div id="reg-result"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: KUNDEN-APP -->
+  <div id="screen-app" class="screen">
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h1 style="margin: 0;">Mein Konto</h1>
+        <button onclick="logout()" style="width: auto; padding: 8px 16px; background: #f3f4f6; color: #667eea; font-size: 14px;">Abmelden</button>
+      </div>
+      
+      <div class="points-circle">
+        <div class="points-num" id="app-points">0</div>
+        <div class="points-label">Punkte</div>
+      </div>
+      
+      <div style="text-align: center; color: #666;">
+        <div style="font-weight: 600; font-size: 18px; color: #111;" id="app-name">-</div>
+        <div style="font-size: 14px; margin-top: 4px;" id="app-phone">-</div>
+        <div style="font-size: 12px; margin-top: 8px;">QR-ID: <strong id="app-qr-id">-</strong></div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>🎁 Prämien einlösen</h2>
+      <div class="reward">
+        <div>
+          <h3>Getränk 0,5l</h3>
+          <div class="pts">50 Punkte</div>
+        </div>
+        <button onclick="redeem('Getränk 0,5l', 50)" id="btn-50">Einlösen</button>
+      </div>
+      <div class="reward">
+        <div>
+          <h3>Pommes</h3>
+          <div class="pts">100 Punkte</div>
+        </div>
+        <button onclick="redeem('Pommes', 100)" id="btn-100">Einlösen</button>
+      </div>
+      <div class="reward">
+        <div>
+          <h3>Döner</h3>
+          <div class="pts">200 Punkte</div>
+        </div>
+        <button onclick="redeem('Döner', 200)" id="btn-200">Einlösen</button>
+      </div>
+      <div class="reward">
+        <div>
+          <h3>Menü (Döner + Getränk)</h3>
+          <div class="pts">300 Punkte</div>
+        </div>
+        <button onclick="redeem('Menü', 300)" id="btn-300">Einlösen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
+
+<script>
+const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+let video = document.getElementById('video')
+let canvas = document.getElementById('canvas')
+let ctx = canvas.getContext('2d')
+let scanning = false
+let stream = null
+let scannedQR = null
+let currentCustomer = null
+
+function showScreen(screenName) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
+  document.getElementById(`screen-${screenName}`).classList.add('active')
+}
+
+function showResult(elementId, message, type) {
+  const el = document.getElementById(elementId)
+  el.className = `result ${type}`
+  el.innerHTML = message
+}
+
+// === QR SCANNER ===
+async function startCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+    })
+    video.srcObject = stream
+    
+    video.onloadedmetadata = () => {
+      video.play()
+      scanning = true
+      requestAnimationFrame(scanQR)
+      showResult('scan-result', '📸 Kamera aktiv - Halte deinen QR-Code vor die Kamera', 'success')
+    }
+  } catch (err) {
+    showResult('scan-result', '❌ Kamera-Fehler: ' + err.message, 'error')
+  }
+}
+
+function stopCamera() {
+  scanning = false
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop())
+    stream = null
+  }
+  video.srcObject = null
+}
+
+function scanQR() {
+  if (!scanning) return
+  
+  if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+    
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    const code = jsQR(imageData.data, imageData.width, imageData.height)
+    
+    if (code) {
+      scanning = false
+      stopCamera()
+      onQRDetected(code.data)
+      return
+    }
+  }
+  
+  requestAnimationFrame(scanQR)
+}
+
+async function onQRDetected(qrCode) {
+  scannedQR = qrCode
+  showResult('scan-result', '✅ QR erkannt: ' + qrCode + ' - Prüfe...', 'success')
+  
+  try {
+    const { data: customers, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('qr_id', qrCode)
+      .limit(1)
+    
+    if (error) throw error
+    
+    if (!customers || customers.length === 0) {
+      // Nicht registriert
+      document.getElementById('reg-qr-id').textContent = qrCode
+      showScreen('register')
+    } else {
+      // Bereits registriert
+      loadCustomer(customers[0])
+    }
+  } catch (e) {
+    showResult('scan-result', '❌ Fehler: ' + e.message, 'error')
+    setTimeout(() => startCamera(), 2000)
+  }
+}
+
+// === REGISTRIERUNG ===
+async function register() {
+  const name = document.getElementById('reg-name').value.trim()
+  const phone = document.getElementById('reg-phone').value.trim()
+  
+  if (!name || !phone) {
+    showResult('reg-result', '❌ Bitte Name und Handynummer eingeben!', 'error')
+    return
+  }
+  
+  try {
+    showResult('reg-result', '⏳ Wird registriert...', 'info')
+    
+    const { data, error } = await supabase
+      .from('customers')
+      .insert({
+        qr_id: scannedQR,
+        name: name,
+        phone: phone,
+        points: 0
+      })
+      .select()
+      .single()
+    
+    if (error) throw error
+    
+    showResult('reg-result', '✅ Erfolgreich registriert!', 'success')
+    setTimeout(() => loadCustomer(data), 1000)
+  } catch (e) {
+    showResult('reg-result', '❌ Fehler: ' + e.message, 'error')
+  }
+}
+
+// === KUNDEN-APP ===
+function loadCustomer(customer) {
+  currentCustomer = customer
+  
+  document.getElementById('app-name').textContent = customer.name
+  document.getElementById('app-phone').textContent = customer.phone
+  document.getElementById('app-qr-id').textContent = customer.qr_id
+  document.getElementById('app-points').textContent = customer.points
+  
+  updateRewardButtons(customer.points)
+  showScreen('app')
+}
+
+function updateRewardButtons(points) {
+  document.getElementById('btn-50').disabled = points < 50
+  document.getElementById('btn-100').disabled = points < 100
+  document.getElementById('btn-200').disabled = points < 200
+  document.getElementById('btn-300').disabled = points < 300
+}
+
+async function redeem(rewardName, cost) {
+  if (!currentCustomer) return
+  
+  if (!confirm(`${rewardName} für ${cost} Punkte einlösen?`)) return
+  
+  try {
+    const newPoints = currentCustomer.points - cost
+    
+    // Transaktion einfügen
+    const { error: txError } = await supabase
+      .from('transactions')
+      .insert({
+        customer_id: currentCustomer.id,
+        type: 'redeem',
+        amount: 0,
+        points: -cost,
+        staff: 'SELBST'
+      })
+    
+    if (txError) throw txError
+    
+    // Punkte aktualisieren
+    const { error: updateError } = await supabase
+      .from('customers')
+      .update({ points: newPoints })
+      .eq('id', currentCustomer.id)
+    
+    if (updateError) throw updateError
+    
+    // Code generieren (6-stellig)
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase()
+    const expires = new Date(Date.now() + 24*60*60*1000)
+    
+    // Code in DB speichern
+    await supabase.from('redeem_codes').insert({
+      code: code,
+      customer_id: currentCustomer.id,
+      reward_name: rewardName,
+      points_cost: cost,
+      valid_until: expires.toISOString()
+    })
+    
+    alert(`✅ Erfolgreich eingelöst!\n\n🎁 ${rewardName}\n🔑 Code: ${code}\n\nZeige diesen Code an der Kasse!\nGültig bis: ${expires.toLocaleString('de-DE')}`)
+    
+    // Aktualisieren
+    currentCustomer.points = newPoints
+    document.getElementById('app-points').textContent = newPoints
+    updateRewardButtons(newPoints)
+    
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+function logout() {
+  currentCustomer = null
+  scannedQR = null
+  resetScan()
+}
+
+function resetScan() {
+  showScreen('scan')
+  startCamera()
+}
+
+// Auto-start
+window.onload = () => {
+  startCamera()
+}
+
+console.log('✅ Kunden-App geladen!')
+</script>
+
+</body>
+</html>
