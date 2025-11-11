@@ -5,9 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dönerkings Scanner PRO</title>
 <style>
+@font-face {
+  font-family: 'Flame';
+  src: url('Flame-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { 
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: 'Flame', system-ui, -apple-system, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   padding: 20px;
@@ -594,18 +601,30 @@ async function addPointsFromScan() {
     
     if (updateError) throw updateError
     
-    alert(`✅ ERFOLGREICH!\n\nKunde: ${currentCustomer.name}\nBetrag: ${amount.toFixed(2)} €\nPunkte: +${pointsToAdd}\nNeuer Stand: ${newTotal}`)
+    showResult('result-scan',
+      `✅ <strong>ERFOLGREICH!</strong><br><br>` +
+      `👤 Kunde: <strong>${currentCustomer.name}</strong><br>` +
+      `💰 Betrag: ${amount.toFixed(2)} €<br>` +
+      `⭐ Punkte: +${pointsToAdd}<br>` +
+      `📊 Neuer Stand: <strong>${newTotal} Punkte</strong>`,
+      'success'
+    )
     
-    document.getElementById('customerCard').style.display = 'none'
-    document.getElementById('result-qr').innerHTML = ''
-    document.getElementById('scannedAmount').value = ''
+    setTimeout(() => {
+      document.getElementById('customerCard').style.display = 'none'
+      document.getElementById('result-qr').innerHTML = ''
+      document.getElementById('scannedAmount').value = ''
+      document.getElementById('result-scan').innerHTML = ''
+    }, 3000)
+    
   } catch (e) {
-    alert('❌ FEHLER!\n\n' + e.message)
+    showResult('result-scan', '❌ Fehler: ' + e.message, 'error')
   }
 }
 
 async function loadHistory() {
   try {
+    // Lade Transaktionen MIT den zugehörigen redeem_codes
     const { data, error } = await supabase
       .from('transactions')
       .select(`
@@ -615,7 +634,8 @@ async function loadHistory() {
         amount,
         points,
         created_at,
-        customers (name, phone, qr_id)
+        customers (name, phone, qr_id),
+        redeem_codes (code, reward_name)
       `)
       .order('created_at', { ascending: false })
       .limit(50)
@@ -642,6 +662,14 @@ async function loadHistory() {
       const typeIcon = isRedeem ? '🎁' : '💰'
       const typeLabel = isRedeem ? 'Eingelöst' : 'Gutgeschrieben'
       
+      // Bei Einlösung: Zeige Code statt QR-ID
+      let idDisplay = ''
+      if (isRedeem && tx.redeem_codes && tx.redeem_codes.length > 0) {
+        idDisplay = `🔑 Code: ${tx.redeem_codes[0].code}`
+      } else {
+        idDisplay = `🆔 ${customer.qr_id}`
+      }
+      
       return `
         <div class="${itemClass}">
           <div class="history-header">
@@ -650,7 +678,7 @@ async function loadHistory() {
           </div>
           <div class="history-details">
             <div>📱 ${customer.phone}</div>
-            <div>🆔 ${customer.qr_id}</div>
+            <div>${idDisplay}</div>
             ${isRedeem ? 
               `<div style="color: #92400e; font-weight: 600;">${typeLabel}</div>` :
               `<div class="history-amount">${typeIcon} ${tx.amount.toFixed(2)} €</div>`
@@ -833,17 +861,18 @@ async function verifyCode() {
   }
 }
 
+// ============================================
+// ✅ CODE BESTÄTIGEN - OHNE POPUPS!
+// ============================================
 async function confirmCode(code) {
   if (!currentCodeData) return
-  
-  if (!confirm(`Prämie wirklich ausgeben?\n\n${currentCodeData.points_cost} Punkte werden vom Kunden abgezogen!`)) return
   
   try {
     const customer = currentCodeData.customers
     const newPoints = customer.points - currentCodeData.points_cost
     
     // Transaktion erstellen
-    const { error: txError } = await supabase
+    const { data: txData, error: txError } = await supabase
       .from('transactions')
       .insert({
         customer_id: currentCodeData.customer_id,
@@ -852,8 +881,22 @@ async function confirmCode(code) {
         points: -currentCodeData.points_cost,
         staff: 'SCANNER'
       })
+      .select()
+      .single()
     
     if (txError) throw txError
+    
+    // Verknüpfe Transaction mit redeem_code
+    const { error: linkError } = await supabase
+      .from('redeem_codes')
+      .update({ 
+        transaction_id: txData.id,
+        confirmed: true, 
+        used: true 
+      })
+      .eq('code', code)
+    
+    if (linkError) throw linkError
     
     // Punkte abziehen
     const { error: updateError } = await supabase
@@ -863,31 +906,56 @@ async function confirmCode(code) {
     
     if (updateError) throw updateError
     
-    // Code als bestätigt markieren
-    const { error: codeError } = await supabase
-      .from('redeem_codes')
-      .update({ confirmed: true, used: true })
-      .eq('code', code)
-    
-    if (codeError) throw codeError
-    
-    alert(`✅ ERFOLGREICH!\n\nPrämie: ${currentCodeData.reward_name}\nKunde: ${customer.name}\nPunkte abgezogen: ${currentCodeData.points_cost}\nNeuer Stand: ${newPoints}`)
+    // Erfolg anzeigen
+    showResult('result-code',
+      `✅ <strong>PRÄMIE AUSGEGEBEN!</strong><br><br>` +
+      `🎁 Prämie: <strong>${currentCodeData.reward_name}</strong><br>` +
+      `👤 Kunde: <strong>${customer.name}</strong><br>` +
+      `⭐ Punkte abgezogen: ${currentCodeData.points_cost}<br>` +
+      `📊 Neuer Stand: <strong>${newPoints} Punkte</strong>`,
+      'success'
+    )
     
     document.getElementById('code-details').style.display = 'none'
     currentCodeData = null
     
   } catch (e) {
-    alert('❌ Fehler: ' + e.message)
+    showResult('result-code', '❌ Fehler: ' + e.message, 'error')
   }
 }
 
 function cancelCodeConfirm() {
   document.getElementById('code-details').style.display = 'none'
   currentCodeData = null
+  showResult('result-code', '', 'info')
 }
 
-console.log('✅ Scanner PRO geladen mit Telefonnummer-Normalisierung!')
+console.log('✅ Scanner PRO geladen mit Flame Font!')
 </script>
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
