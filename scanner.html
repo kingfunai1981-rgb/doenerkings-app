@@ -24,7 +24,6 @@ h1 { color: #667eea; margin-bottom: 10px; font-size: 28px; }
 h2 { font-size: 18px; margin-bottom: 12px; color: #374151; }
 h3 { font-size: 16px; margin: 16px 0 8px 0; color: #374151; }
 
-/* Tabs */
 .tabs {
   display: flex;
   gap: 8px;
@@ -48,7 +47,6 @@ h3 { font-size: 16px; margin: 16px 0 8px 0; color: #374151; }
   color: white;
 }
 
-/* Forms */
 input {
   width: 100%;
   padding: 12px;
@@ -81,7 +79,6 @@ button.small {
   margin: 4px;
 }
 
-/* Results */
 .result {
   padding: 12px;
   border-radius: 8px;
@@ -92,7 +89,6 @@ button.small {
 .error { background: #fee2e2; color: #991b1b; }
 .info { background: #dbeafe; color: #1e40af; }
 
-/* QR Scanner */
 .video-container {
   position: relative;
   width: 100%;
@@ -127,7 +123,6 @@ button.small {
 }
 canvas { display: none; }
 
-/* Customer Card */
 .customer-info {
   background: #f9fafb;
   padding: 16px;
@@ -144,7 +139,6 @@ canvas { display: none; }
   color: #374151;
 }
 
-/* History */
 .history-item {
   background: #f9fafb;
   border: 1px solid #e5e7eb;
@@ -182,7 +176,6 @@ canvas { display: none; }
   font-weight: 600;
 }
 
-/* Edit Form */
 .edit-form {
   background: #fef3c7;
   border: 1px solid #fbbf24;
@@ -204,7 +197,26 @@ canvas { display: none; }
   margin-top: 8px;
 }
 
-/* Tab content */
+.code-item {
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.code-item h3 {
+  color: #92400e;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+.code-item .code {
+  font-size: 36px;
+  font-weight: 700;
+  color: #f59e0b;
+  letter-spacing: 8px;
+  margin: 12px 0;
+}
+
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 </style>
@@ -226,7 +238,6 @@ canvas { display: none; }
     </div>
   </div>
 
-  <!-- TAB: HANDYNUMMER -->
   <div id="tab-phone" class="card tab-content active">
     <h2>📱 Punkte per Handynummer gutschreiben</h2>
     <input id="phone" type="tel" placeholder="Handynummer (z.B. 01511234567)">
@@ -235,7 +246,6 @@ canvas { display: none; }
     <div id="result-phone"></div>
   </div>
 
-  <!-- TAB: QR-SCANNER -->
   <div id="tab-qr" class="card tab-content">
     <h2>📸 QR-Code scannen</h2>
     <button id="startBtn" onclick="startCamera()">📸 Kamera starten</button>
@@ -264,7 +274,6 @@ canvas { display: none; }
     </div>
   </div>
 
-  <!-- TAB: VERLAUF -->
   <div id="tab-history" class="card tab-content">
     <h2>📋 Verlauf (Letzte 50 Scans)</h2>
     <button onclick="loadHistory()" class="secondary">🔄 Aktualisieren</button>
@@ -273,12 +282,12 @@ canvas { display: none; }
     </div>
   </div>
 
-  <!-- TAB: CODE PRÜFEN -->
   <div id="tab-code" class="card tab-content">
-    <h2>🎁 Prämien-Code verifizieren</h2>
+    <h2>🎁 Prämien-Code prüfen & bestätigen</h2>
     <input id="code" placeholder="4-stelliger Code" maxlength="4">
-    <button onclick="verifyCode()">✅ Code verifizieren</button>
+    <button onclick="verifyCode()">✅ Code prüfen</button>
     <div id="result-code"></div>
+    <div id="code-details" style="display: none; margin-top: 20px;"></div>
   </div>
 </div>
 
@@ -297,6 +306,7 @@ let ctx = canvas.getContext('2d')
 let scanning = false
 let stream = null
 let currentCustomer = null
+let currentCodeData = null
 
 function showResult(elementId, message, type) {
   const el = document.getElementById(elementId)
@@ -318,7 +328,6 @@ function showTab(tabName) {
   if (tabName === 'history') loadHistory()
 }
 
-// === HANDYNUMMER ===
 async function addPointsByPhone() {
   const phone = document.getElementById('phone').value.trim()
   const amount = parseFloat(document.getElementById('amount').value)
@@ -386,7 +395,6 @@ async function addPointsByPhone() {
   }
 }
 
-// === QR-SCANNER ===
 async function startCamera() {
   try {
     document.getElementById('startBtn').style.display = 'none'
@@ -534,7 +542,6 @@ async function addPointsFromScan() {
   }
 }
 
-// === VERLAUF ===
 async function loadHistory() {
   try {
     const { data, error } = await supabase
@@ -693,7 +700,6 @@ async function deleteTransaction(txId, qrId, points) {
   }
 }
 
-// === CODE VERIFIZIEREN ===
 async function verifyCode() {
   const code = document.getElementById('code').value.trim()
   
@@ -705,7 +711,7 @@ async function verifyCode() {
   try {
     const { data, error } = await supabase
       .from('redeem_codes')
-      .select('*')
+      .select('*, customers(name, phone, qr_id, points)')
       .eq('code', code)
       .limit(1)
     
@@ -713,22 +719,97 @@ async function verifyCode() {
     if (!data || data.length === 0) throw new Error('Code nicht gefunden')
     
     const codeData = data[0]
+    currentCodeData = codeData
     
     if (codeData.used) throw new Error('Code bereits verwendet')
+    if (codeData.confirmed) throw new Error('Code bereits bestätigt')
     if (new Date(codeData.valid_until) < new Date()) throw new Error('Code abgelaufen')
     
-    showResult('result-code',
-      `✅ <strong>Code gültig!</strong><br><br>` +
-      `🎁 Prämie: <strong>${codeData.reward_name}</strong><br>` +
-      `⭐ Kosten: ${codeData.points_cost} Punkte<br><br>` +
-      `👉 Prämie kann ausgegeben werden!`,
-      'success'
-    )
+    const customer = codeData.customers
+    const expires = new Date(codeData.valid_until).toLocaleString('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+    
+    showResult('result-code', '✅ Code gefunden!', 'success')
+    
+    document.getElementById('code-details').style.display = 'block'
+    document.getElementById('code-details').innerHTML = `
+      <div class="code-item">
+        <h3>🎁 ${codeData.reward_name}</h3>
+        <div class="code">${code}</div>
+        <div style="font-size: 14px; color: #92400e; margin-bottom: 16px;">
+          <strong>Kunde:</strong> ${customer.name}<br>
+          <strong>Aktuell:</strong> ${customer.points} Punkte<br>
+          <strong>Kosten:</strong> ${codeData.points_cost} Punkte<br>
+          <strong>Danach:</strong> ${customer.points - codeData.points_cost} Punkte<br>
+          <strong>Gültig bis:</strong> ${expires}
+        </div>
+        <button class="success" onclick="confirmCode('${code}')">✅ Bestätigen & Punkte abziehen</button>
+        <button class="secondary" onclick="cancelCodeConfirm()">❌ Abbrechen</button>
+      </div>
+    `
     
     document.getElementById('code').value = ''
   } catch (e) {
     showResult('result-code', '❌ ' + e.message, 'error')
+    document.getElementById('code-details').style.display = 'none'
   }
+}
+
+async function confirmCode(code) {
+  if (!currentCodeData) return
+  
+  if (!confirm(`Prämie wirklich ausgeben?\n\n${currentCodeData.points_cost} Punkte werden vom Kunden abgezogen!`)) return
+  
+  try {
+    const customer = currentCodeData.customers
+    const newPoints = customer.points - currentCodeData.points_cost
+    
+    // Transaktion erstellen
+    const { error: txError } = await supabase
+      .from('transactions')
+      .insert({
+        customer_id: currentCodeData.customer_id,
+        type: 'redeem',
+        amount: 0,
+        points: -currentCodeData.points_cost,
+        staff: 'SCANNER'
+      })
+    
+    if (txError) throw txError
+    
+    // Punkte abziehen
+    const { error: updateError } = await supabase
+      .from('customers')
+      .update({ points: newPoints })
+      .eq('id', currentCodeData.customer_id)
+    
+    if (updateError) throw updateError
+    
+    // Code als bestätigt markieren
+    const { error: codeError } = await supabase
+      .from('redeem_codes')
+      .update({ confirmed: true, used: true })
+      .eq('code', code)
+    
+    if (codeError) throw codeError
+    
+    alert(`✅ ERFOLGREICH!\n\nPrämie: ${currentCodeData.reward_name}\nKunde: ${customer.name}\nPunkte abgezogen: ${currentCodeData.points_cost}\nNeuer Stand: ${newPoints}`)
+    
+    document.getElementById('code-details').style.display = 'none'
+    currentCodeData = null
+    
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+function cancelCodeConfirm() {
+  document.getElementById('code-details').style.display = 'none'
+  currentCodeData = null
 }
 
 console.log('✅ Scanner PRO geladen!')
