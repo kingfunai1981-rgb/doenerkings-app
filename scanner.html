@@ -648,19 +648,24 @@ async function loadHistory() {
       return
     }
     
-    // Lade alle redeem_codes für diese Transaktionen
-    const txIds = data.filter(tx => tx.type === 'redeem').map(tx => tx.id)
-    let codesByTxId = {}
+    // Lade alle redeem_codes für Kunden mit Einlösungen
+    const customerIds = [...new Set(data.filter(tx => tx.type === 'redeem').map(tx => tx.customer_id))]
+    let codesByCustomer = {}
     
-    if (txIds.length > 0) {
+    if (customerIds.length > 0) {
       const { data: codes } = await supabase
         .from('redeem_codes')
-        .select('transaction_id, code, reward_name')
-        .in('transaction_id', txIds)
+        .select('customer_id, code, reward_name, confirmed, created_at')
+        .in('customer_id', customerIds)
+        .eq('confirmed', true)
+        .order('created_at', { ascending: false })
       
       if (codes) {
         codes.forEach(code => {
-          codesByTxId[code.transaction_id] = code
+          if (!codesByCustomer[code.customer_id]) {
+            codesByCustomer[code.customer_id] = []
+          }
+          codesByCustomer[code.customer_id].push(code)
         })
       }
     }
@@ -678,12 +683,21 @@ async function loadHistory() {
       const typeIcon = isRedeem ? '🎁' : '💰'
       const typeLabel = isRedeem ? 'Eingelöst' : 'Gutgeschrieben'
       
-      // Bei Einlösung: Zeige Code statt QR-ID
-      let idDisplay = ''
-      if (isRedeem && codesByTxId[tx.id]) {
-        idDisplay = `🔑 Code: ${codesByTxId[tx.id].code}`
-      } else {
-        idDisplay = `🆔 ${customer.qr_id}`
+      // Bei Einlösung: Finde passenden Code basierend auf Zeitstempel
+      let idDisplay = `🆔 ${customer.qr_id}` // Default: Kunden-ID
+      
+      if (isRedeem && codesByCustomer[tx.customer_id]) {
+        const txTime = new Date(tx.created_at).getTime()
+        // Finde Code der zeitlich am nächsten zur Transaction ist (±5 Minuten)
+        const matchingCode = codesByCustomer[tx.customer_id].find(code => {
+          const codeTime = new Date(code.created_at).getTime()
+          const diff = Math.abs(txTime - codeTime)
+          return diff < 5 * 60 * 1000 // 5 Minuten Toleranz
+        })
+        
+        if (matchingCode) {
+          idDisplay = `🔑 Code: ${matchingCode.code}`
+        }
       }
       
       return `
