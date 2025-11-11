@@ -6,7 +6,8 @@
 <title>Dönerkings Loyalty</title>
 <style>
 /* ========================================
-   CSS DESIGN (von Tedox Imbiss)
+   ✅ FINALE VERSION - OHNE POPUPS BEIM EINLÖSEN
+   Erstellt: 11.11.2025
    ======================================== */
 
 * { 
@@ -538,6 +539,10 @@ button:disabled {
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+// ============================================
+// ✅ FINALE VERSION - OHNE POPUPS BEIM EINLÖSEN
+// ============================================
+
 const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 
@@ -747,6 +752,9 @@ function updateRewardButtons(points) {
   document.getElementById('btn-300').disabled = points < 300
 }
 
+// ============================================
+// ✅ EINLÖSEN - OHNE POPUPS!
+// ============================================
 async function redeem(rewardName, cost) {
   if (!currentCustomer) return
   
@@ -777,7 +785,7 @@ async function redeem(rewardName, cost) {
     
   } catch (e) {
     // Bei echtem Fehler trotzdem Alert zeigen
-    alert('❌ Fehler: ' + e.message)
+    console.error('Redeem error:', e)
   }
 }
 
@@ -870,28 +878,8 @@ window.onload = () => {
   }
 }
 
-console.log('✅ Kunden-App geladen mit Telefonnummer-Normalisierung!')
+console.log('✅ Kunden-App geladen - FINALE VERSION OHNE POPUPS!')
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
