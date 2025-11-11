@@ -902,7 +902,7 @@ async function confirmCode(code) {
     const newPoints = customer.points - currentCodeData.points_cost
     
     // Transaktion erstellen
-    const { data: txData, error: txError } = await supabase
+    const { error: txError } = await supabase
       .from('transactions')
       .insert({
         customer_id: currentCodeData.customer_id,
@@ -911,22 +911,19 @@ async function confirmCode(code) {
         points: -currentCodeData.points_cost,
         staff: 'SCANNER'
       })
-      .select()
-      .single()
     
     if (txError) throw txError
     
-    // Verknüpfe Transaction mit redeem_code
-    const { error: linkError } = await supabase
+    // Code als bestätigt markieren (ohne transaction_id)
+    const { error: codeError } = await supabase
       .from('redeem_codes')
       .update({ 
-        transaction_id: txData.id,
         confirmed: true, 
         used: true 
       })
       .eq('code', code)
     
-    if (linkError) throw linkError
+    if (codeError) throw codeError
     
     // Punkte abziehen
     const { error: updateError } = await supabase
