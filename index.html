@@ -73,6 +73,15 @@ button.secondary {
   border: 2px solid #667eea;
   box-shadow: none;
 }
+button.small {
+  width: auto;
+  padding: 10px 20px;
+  font-size: 14px;
+  margin: 4px;
+}
+button.danger {
+  background: #ef4444;
+}
 
 /* Results */
 .result {
@@ -85,6 +94,7 @@ button.secondary {
 .success { background: #d1fae5; color: #065f46; }
 .error { background: #fee2e2; color: #991b1b; }
 .info { background: #dbeafe; color: #1e40af; }
+.warning { background: #fef3c7; color: #92400e; }
 
 /* QR Display */
 .qr-box {
@@ -156,6 +166,27 @@ button.secondary {
   color: #9ca3af;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+/* Pending Codes */
+.pending-code {
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.pending-code h3 {
+  color: #92400e;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+.pending-code .code {
+  font-size: 32px;
+  font-weight: 700;
+  color: #f59e0b;
+  letter-spacing: 6px;
+  margin: 12px 0;
 }
 
 /* Screens */
@@ -251,6 +282,14 @@ button.secondary {
         <div class="qr-id" id="app-qr-id">------</div>
       </div>
     </div>
+
+    <!-- Offene Einlösungen -->
+    <div id="pending-section" style="display: none;">
+      <div class="card">
+        <h2>⏳ Wartet auf Bestätigung</h2>
+        <div id="pending-list"></div>
+      </div>
+    </div>
     
     <div class="card">
       <h2>🎁 Prämien einlösen</h2>
@@ -294,6 +333,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 let currentCustomer = null
+let refreshInterval = null
 
 function showScreen(screenName) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
@@ -319,7 +359,6 @@ async function register() {
   try {
     showResult('reg-result', '⏳ Wird registriert...', 'info')
     
-    // Prüfen ob Nummer schon existiert
     const { data: existing } = await supabase
       .from('customers')
       .select('*')
@@ -331,10 +370,8 @@ async function register() {
       return
     }
     
-    // QR-ID generieren (4-stellige Zahl)
     const qrId = Math.floor(1000 + Math.random() * 9000).toString()
     
-    // Kunde erstellen
     const { data, error } = await supabase
       .from('customers')
       .insert({
@@ -350,7 +387,6 @@ async function register() {
     
     showResult('reg-result', '✅ Erfolgreich registriert!', 'success')
     
-    // Auto-Login
     setTimeout(() => {
       localStorage.setItem('customerData', JSON.stringify(data))
       loadCustomer(data)
@@ -399,17 +435,46 @@ async function login() {
 }
 
 // === KUNDEN-APP ===
-function loadCustomer(customer) {
+async function loadCustomer(customer) {
   currentCustomer = customer
   
-  document.getElementById('app-name').textContent = customer.name
-  document.getElementById('app-phone').textContent = customer.phone
-  document.getElementById('app-points').textContent = customer.points
+  await refreshCustomerData()
+  
   document.getElementById('app-qr-id').textContent = customer.qr_id
   document.getElementById('app-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${customer.qr_id}`
   
-  updateRewardButtons(customer.points)
   showScreen('app')
+  
+  // Auto-Refresh alle 5 Sekunden
+  if (refreshInterval) clearInterval(refreshInterval)
+  refreshInterval = setInterval(refreshCustomerData, 5000)
+  
+  // Offene Codes laden
+  loadPendingCodes()
+}
+
+async function refreshCustomerData() {
+  if (!currentCustomer) return
+  
+  try {
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('id', currentCustomer.id)
+      .single()
+    
+    if (error) throw error
+    
+    currentCustomer = data
+    document.getElementById('app-name').textContent = data.name
+    document.getElementById('app-phone').textContent = data.phone
+    document.getElementById('app-points').textContent = data.points
+    
+    updateRewardButtons(data.points)
+    localStorage.setItem('customerData', JSON.stringify(data))
+  } catch (e) {
+    console.error('Refresh error:', e)
+  }
 }
 
 function updateRewardButtons(points) {
@@ -422,122 +487,116 @@ function updateRewardButtons(points) {
 async function redeem(rewardName, cost) {
   if (!currentCustomer) return
   
-  if (!confirm(`${rewardName} für ${cost} Punkte einlösen?`)) return
+  if (currentCustomer.points < cost) {
+    alert('❌ Nicht genug Punkte!')
+    return
+  }
+  
+  if (!confirm(`${rewardName} für ${cost} Punkte einlösen?\n\nDer Code muss vom Mitarbeiter bestätigt werden.`)) return
   
   try {
-    const newPoints = currentCustomer.points - cost
-    
-    if (newPoints < 0) {
-      alert('❌ Nicht genug Punkte!')
-      return
-    }
-    
-    // 4-stelligen Code generieren
     const code = Math.floor(1000 + Math.random() * 9000).toString()
     const expires = new Date(Date.now() + 24*60*60*1000)
     
-    // Transaktion
-    const { error: txError } = await supabase
-      .from('transactions')
-      .insert({
-        customer_id: currentCustomer.id,
-        type: 'redeem',
-        amount: 0,
-        points: -cost,
-        staff: 'SELBST'
-      })
-    
-    if (txError) throw txError
-    
-    // Punkte aktualisieren
-    const { error: updateError } = await supabase
-      .from('customers')
-      .update({ points: newPoints })
-      .eq('id', currentCustomer.id)
-    
-    if (updateError) throw updateError
-    
-    // Code speichern
-    await supabase.from('redeem_codes').insert({
+    // Code erstellen mit Status "pending"
+    const { error } = await supabase.from('redeem_codes').insert({
       code: code,
       customer_id: currentCustomer.id,
       reward_name: rewardName,
       points_cost: cost,
       valid_until: expires.toISOString(),
-      used: false
+      used: false,
+      confirmed: false
     })
     
-    // Lokal aktualisieren
-    currentCustomer.points = newPoints
-    document.getElementById('app-points').textContent = newPoints
-    updateRewardButtons(newPoints)
-    localStorage.setItem('customerData', JSON.stringify(currentCustomer))
+    if (error) throw error
     
-    // Erfolgs-Screen anzeigen
-    showRedeemSuccess(rewardName, code, expires)
+    alert(`✅ Code erstellt!\n\n🔑 Code: ${code}\n\nZeige diesen Code dem Mitarbeiter.\nPunkte werden nach Bestätigung abgezogen.`)
+    
+    loadPendingCodes()
     
   } catch (e) {
     alert('❌ Fehler: ' + e.message)
   }
 }
 
-function showRedeemSuccess(rewardName, code, expires) {
-  const overlay = document.createElement('div')
-  overlay.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 20px;
-  `
+async function loadPendingCodes() {
+  if (!currentCustomer) return
   
-  overlay.innerHTML = `
-    <div style="background: white; border-radius: 20px; padding: 32px; max-width: 400px; width: 100%; text-align: center;">
-      <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
-      <h2 style="color: #667eea; margin-bottom: 16px;">Erfolgreich eingelöst!</h2>
-      <div style="background: #f9fafb; border-radius: 12px; padding: 20px; margin: 20px 0;">
-        <div style="font-size: 18px; font-weight: 600; color: #374151; margin-bottom: 12px;">🎁 ${rewardName}</div>
-        <div style="font-size: 14px; color: #6b7280; margin-bottom: 16px;">Zeige diesen Code an der Kasse:</div>
-        <div style="font-size: 48px; font-weight: 700; color: #667eea; letter-spacing: 8px; margin: 16px 0;">${code}</div>
-        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-          <div style="font-size: 14px; color: #6b7280; margin-bottom: 12px;">Oder zeige deinen QR-Code:</div>
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${currentCustomer.qr_id}" 
-               style="width: 200px; height: 200px; border-radius: 12px; background: white; padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-          <div style="font-size: 16px; font-weight: 600; color: #667eea; letter-spacing: 3px; margin-top: 12px;">${currentCustomer.qr_id}</div>
+  try {
+    const { data, error } = await supabase
+      .from('redeem_codes')
+      .select('*')
+      .eq('customer_id', currentCustomer.id)
+      .eq('confirmed', false)
+      .eq('used', false)
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    
+    const section = document.getElementById('pending-section')
+    const list = document.getElementById('pending-list')
+    
+    if (!data || data.length === 0) {
+      section.style.display = 'none'
+      return
+    }
+    
+    section.style.display = 'block'
+    
+    list.innerHTML = data.map(item => {
+      const expires = new Date(item.valid_until).toLocaleString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+      
+      return `
+        <div class="pending-code">
+          <h3>🎁 ${item.reward_name}</h3>
+          <div class="code">${item.code}</div>
+          <div style="font-size: 13px; color: #92400e; margin-bottom: 12px;">
+            Gültig bis: ${expires}<br>
+            Kosten: ${item.points_cost} Punkte
+          </div>
+          <button class="small danger" onclick="cancelCode('${item.code}')">🗑️ Stornieren</button>
         </div>
-      </div>
-      <div style="font-size: 12px; color: #6b7280; margin-bottom: 20px;">
-        Gültig bis: ${expires.toLocaleString('de-DE', {
-          day: '2-digit',
-          month: '2-digit', 
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        })}
-      </div>
-      <button onclick="this.parentElement.parentElement.remove()" 
-              style="width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer;">
-        OK
-      </button>
-    </div>
-  `
+      `
+    }).join('')
+    
+  } catch (e) {
+    console.error('Load pending error:', e)
+  }
+}
+
+async function cancelCode(code) {
+  if (!confirm('Code wirklich stornieren?')) return
   
-  document.body.appendChild(overlay)
+  try {
+    const { error } = await supabase
+      .from('redeem_codes')
+      .delete()
+      .eq('code', code)
+      .eq('confirmed', false)
+    
+    if (error) throw error
+    
+    alert('✅ Code storniert!')
+    loadPendingCodes()
+    
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
+  }
 }
 
 function logout() {
+  if (refreshInterval) clearInterval(refreshInterval)
   currentCustomer = null
   localStorage.removeItem('customerData')
   showScreen('start')
 }
 
-// Auto-Login beim Start
 window.onload = () => {
   const stored = localStorage.getItem('customerData')
   if (stored) {
