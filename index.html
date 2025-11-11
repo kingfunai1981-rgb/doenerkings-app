@@ -750,8 +750,8 @@ function updateRewardButtons(points) {
 async function redeem(rewardName, cost) {
   if (!currentCustomer) return
   
+  // Wenn nicht genug Punkte, einfach nichts tun (kein Popup)
   if (currentCustomer.points < cost) {
-    alert('❌ Nicht genug Punkte!')
     return
   }
   
@@ -776,6 +776,7 @@ async function redeem(rewardName, cost) {
     loadPendingCodes()
     
   } catch (e) {
+    // Bei echtem Fehler trotzdem Alert zeigen
     alert('❌ Fehler: ' + e.message)
   }
 }
