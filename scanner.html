@@ -624,7 +624,7 @@ async function addPointsFromScan() {
 
 async function loadHistory() {
   try {
-    // Lade Transaktionen MIT den zugehörigen redeem_codes
+    // Lade Transaktionen
     const { data, error } = await supabase
       .from('transactions')
       .select(`
@@ -634,8 +634,7 @@ async function loadHistory() {
         amount,
         points,
         created_at,
-        customers (name, phone, qr_id),
-        redeem_codes (code, reward_name)
+        customers (name, phone, qr_id)
       `)
       .order('created_at', { ascending: false })
       .limit(50)
@@ -647,6 +646,23 @@ async function loadHistory() {
     if (!data || data.length === 0) {
       list.innerHTML = '<div style="text-align:center;padding:20px;color:#666">Noch keine Transaktionen</div>'
       return
+    }
+    
+    // Lade alle redeem_codes für diese Transaktionen
+    const txIds = data.filter(tx => tx.type === 'redeem').map(tx => tx.id)
+    let codesByTxId = {}
+    
+    if (txIds.length > 0) {
+      const { data: codes } = await supabase
+        .from('redeem_codes')
+        .select('transaction_id, code, reward_name')
+        .in('transaction_id', txIds)
+      
+      if (codes) {
+        codes.forEach(code => {
+          codesByTxId[code.transaction_id] = code
+        })
+      }
     }
     
     list.innerHTML = data.map(tx => {
@@ -664,8 +680,8 @@ async function loadHistory() {
       
       // Bei Einlösung: Zeige Code statt QR-ID
       let idDisplay = ''
-      if (isRedeem && tx.redeem_codes && tx.redeem_codes.length > 0) {
-        idDisplay = `🔑 Code: ${tx.redeem_codes[0].code}`
+      if (isRedeem && codesByTxId[tx.id]) {
+        idDisplay = `🔑 Code: ${codesByTxId[tx.id].code}`
       } else {
         idDisplay = `🆔 ${customer.qr_id}`
       }
