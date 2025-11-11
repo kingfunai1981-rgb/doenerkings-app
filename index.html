@@ -5,131 +5,232 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dönerkings Loyalty</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { 
-  font-family: system-ui, -apple-system, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh;
-  padding: 20px;
+/* ========================================
+   CSS DESIGN (von Tedox Imbiss)
+   ======================================== */
+
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
 }
-.container { max-width: 500px; margin: 0 auto; }
+
+body { 
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #f5f5f5;
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+}
+
+.container { 
+  max-width: 500px; 
+  margin: 0 auto;
+  background: white;
+  min-height: 100vh;
+}
+
+/* Header mit Bild */
+.header-image {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-size: cover;
+  background-position: 50% 50%;
+  padding: 60px 20px 40px;
+  text-align: center;
+  position: relative;
+}
+
+.header-image h1 {
+  color: white;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.header-image p {
+  color: white;
+  font-size: 16px;
+  opacity: 0.95;
+  margin-bottom: 4px;
+}
+
+.header-image p.small {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+/* Card Design */
 .card {
   background: white;
-  border-radius: 20px;
-  padding: 32px;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: 0;
+  padding: 24px 16px;
+  margin-bottom: 0;
+  border-bottom: 1px solid #f0f0f0;
 }
-h1 { 
-  color: #667eea; 
-  margin-bottom: 10px; 
-  font-size: 32px; 
-  text-align: center;
-}
+
+/* Typography */
 h2 { 
-  font-size: 22px; 
-  margin-bottom: 16px; 
-  color: #374151;
-  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #232122;
 }
-p.subtitle {
-  text-align: center;
-  color: #6b7280;
-  font-size: 16px;
-  margin-bottom: 24px;
-  line-height: 1.5;
+
+.subtitle {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 20px;
 }
 
 /* Forms */
 input {
   width: 100%;
-  padding: 14px;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  font-size: 16px;
-  margin-bottom: 12px;
+  padding: 12px 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  margin-bottom: 10px;
+  background: #fafafa;
+  transition: all 0.2s;
 }
+
 input:focus {
   outline: none;
   border-color: #667eea;
+  background: white;
 }
+
+/* Buttons */
 button {
   width: 100%;
-  padding: 16px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  padding: 14px;
+  background: #667eea;
   color: white;
   border: none;
-  border-radius: 12px;
-  font-size: 16px;
+  border-radius: 8px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 8px;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  margin-top: 6px;
+  transition: all 0.2s;
 }
-button:hover { opacity: 0.9; }
+
+button:hover { 
+  background: #5568d3;
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
 button.secondary {
-  background: white;
+  background: #f5f5f5;
   color: #667eea;
-  border: 2px solid #667eea;
-  box-shadow: none;
+  border: 1px solid #e0e0e0;
 }
+
+button.secondary:hover {
+  background: #ebebeb;
+}
+
 button.small {
   width: auto;
-  padding: 10px 20px;
-  font-size: 14px;
+  padding: 8px 16px;
+  font-size: 13px;
   margin: 4px;
+  display: inline-block;
 }
+
 button.danger {
   background: #ef4444;
 }
 
+button.danger:hover {
+  background: #dc2626;
+}
+
+button:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* Results */
 .result {
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 12px;
-  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-top: 10px;
+  font-size: 13px;
   text-align: center;
 }
-.success { background: #d1fae5; color: #065f46; }
-.error { background: #fee2e2; color: #991b1b; }
-.info { background: #dbeafe; color: #1e40af; }
-.warning { background: #fef3c7; color: #92400e; }
+
+.success { 
+  background: #d1fae5; 
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.error { 
+  background: #fee2e2; 
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.info { 
+  background: #dbeafe; 
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.warning { 
+  background: #fef3c7; 
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
 
 /* QR Display */
 .qr-box {
-  background: #f9fafb;
-  border-radius: 16px;
-  padding: 24px;
-  text-align: center;
-  margin: 20px 0;
-}
-.qr-img {
-  width: 260px;
-  height: 260px;
-  margin: 0 auto 16px;
-  background: white;
-  padding: 12px;
+  background: #fafafa;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-.qr-id {
-  font-size: 28px;
-  font-weight: 700;
-  color: #667eea;
-  letter-spacing: 4px;
+  padding: 20px;
+  text-align: center;
   margin: 16px 0;
-}
-.qr-label {
-  font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 8px;
+  border: 1px solid #f0f0f0;
 }
 
-/* Points */
+.qr-img {
+  width: 220px;
+  height: 220px;
+  margin: 0 auto 12px;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.qr-id {
+  font-size: 24px;
+  font-weight: 700;
+  color: #667eea;
+  letter-spacing: 3px;
+  margin: 12px 0;
+  font-family: 'Courier New', monospace;
+}
+
+.qr-label {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+/* Points Circle */
 .points-circle {
-  width: 140px;
-  height: 140px;
+  width: 120px;
+  height: 120px;
   margin: 20px auto;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea, #764ba2);
@@ -138,77 +239,173 @@ button.danger {
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
 }
-.points-num { font-size: 42px; font-weight: 700; }
-.points-label { font-size: 14px; opacity: 0.9; }
 
-/* Rewards */
-.reward {
-  background: #f9fafb;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
+.points-num { 
+  font-size: 36px; 
+  font-weight: 700;
+  line-height: 1;
+}
+
+.points-label { 
+  font-size: 12px; 
+  opacity: 0.9;
+  margin-top: 4px;
+}
+
+/* User Info */
+.user-info {
+  text-align: center;
+  margin-top: 16px;
+  padding-bottom: 8px;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 17px;
+  color: #232122;
+  margin-bottom: 4px;
+}
+
+.user-phone {
+  font-size: 13px;
+  color: #666;
+}
+
+/* Header Actions */
+.header-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 16px;
 }
-.reward h3 { font-size: 16px; margin: 0 0 4px 0; }
-.reward .pts { font-size: 14px; color: #667eea; font-weight: 600; }
+
+.header-actions h2 {
+  margin: 0;
+}
+
+/* Rewards List */
+.reward {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #f0f0f0;
+  transition: all 0.2s;
+}
+
+.reward:hover {
+  background: #f5f5f5;
+  border-color: #e0e0e0;
+}
+
+.reward-info h3 { 
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: #232122;
+}
+
+.reward-info .pts { 
+  font-size: 13px;
+  color: #667eea;
+  font-weight: 600;
+}
+
 .reward button {
   width: auto;
-  padding: 10px 20px;
+  padding: 10px 18px;
   margin: 0;
-  font-size: 14px;
-}
-.reward button:disabled {
-  background: #e5e7eb;
-  color: #9ca3af;
-  cursor: not-allowed;
-  box-shadow: none;
+  font-size: 13px;
+  min-width: 90px;
 }
 
 /* Pending Codes */
 .pending-code {
-  background: #fef3c7;
-  border: 2px solid #f59e0b;
-  border-radius: 12px;
+  background: #fffbeb;
+  border: 2px solid #fbbf24;
+  border-radius: 10px;
   padding: 16px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
+
 .pending-code h3 {
   color: #92400e;
-  font-size: 16px;
+  font-size: 15px;
+  font-weight: 600;
   margin-bottom: 8px;
 }
+
 .pending-code .code {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
   color: #f59e0b;
-  letter-spacing: 6px;
-  margin: 12px 0;
+  letter-spacing: 5px;
+  margin: 10px 0;
+  font-family: 'Courier New', monospace;
+}
+
+.pending-code .code-info {
+  font-size: 12px;
+  color: #92400e;
+  margin-bottom: 10px;
+  line-height: 1.5;
 }
 
 /* Screens */
-.screen { display: none; }
-.screen.active { display: block; }
+.screen { 
+  display: none; 
+}
 
-/* Hero */
-.hero {
-  text-align: center;
-  color: white;
-  padding: 20px 0;
-  margin-bottom: 20px;
+.screen.active { 
+  display: block; 
 }
-.hero h1 {
-  color: white;
-  font-size: 36px;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+
+/* Section Spacing */
+.section {
+  padding: 16px;
+  border-bottom: 8px solid #f5f5f5;
 }
-.hero p {
+
+.section:last-child {
+  border-bottom: none;
+  padding-bottom: 40px;
+}
+
+.section-title {
   font-size: 18px;
-  opacity: 0.95;
-  margin-top: 8px;
+  font-weight: 700;
+  color: #232122;
+  margin-bottom: 14px;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  font-size: 14px;
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.3;
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  .container {
+    max-width: 100%;
+  }
+  
+  .card {
+    border-radius: 0;
+  }
 }
 </style>
 </head>
@@ -217,10 +414,10 @@ button.danger {
 <div class="container">
   <!-- SCREEN 1: START -->
   <div id="screen-start" class="screen active">
-    <div class="hero">
+    <div class="header-image">
       <h1>🌯 Dönerkings</h1>
       <p>Treue wird belohnt!</p>
-      <p style="font-size: 14px; opacity: 0.8; margin-top: 4px;">1 € = 10 Punkte</p>
+      <p class="small">1 € = 10 Punkte</p>
     </div>
     
     <div class="card">
@@ -233,6 +430,10 @@ button.danger {
 
   <!-- SCREEN 2: REGISTRIERUNG -->
   <div id="screen-register" class="screen">
+    <div class="header-image">
+      <h1>🌯 Dönerkings</h1>
+    </div>
+    
     <div class="card">
       <h2>Jetzt registrieren</h2>
       <input id="reg-name" type="text" placeholder="Dein Name (z.B. Max Mustermann)">
@@ -245,6 +446,10 @@ button.danger {
 
   <!-- SCREEN 3: LOGIN -->
   <div id="screen-login" class="screen">
+    <div class="header-image">
+      <h1>🌯 Dönerkings</h1>
+    </div>
+    
     <div class="card">
       <h2>Anmelden</h2>
       <input id="login-phone" type="tel" placeholder="Handynummer">
@@ -256,10 +461,15 @@ button.danger {
 
   <!-- SCREEN 4: KUNDEN-APP -->
   <div id="screen-app" class="screen">
+    <div class="header-image">
+      <h1>🌯 Dönerkings</h1>
+      <p>Mein Konto</p>
+    </div>
+    
     <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin: 0;">Mein Konto</h2>
-        <button onclick="logout()" style="width: auto; padding: 8px 16px; background: #f3f4f6; color: #667eea; font-size: 14px; margin: 0; box-shadow: none;">Abmelden</button>
+      <div class="header-actions">
+        <h2 style="margin: 0;">Meine Punkte</h2>
+        <button onclick="logout()" class="small secondary">Abmelden</button>
       </div>
       
       <div class="points-circle">
@@ -267,9 +477,9 @@ button.danger {
         <div class="points-label">Punkte</div>
       </div>
       
-      <div style="text-align: center; margin-top: 16px;">
-        <div style="font-weight: 600; font-size: 18px; color: #111;" id="app-name">-</div>
-        <div style="font-size: 14px; color: #6b7280; margin-top: 4px;" id="app-phone">-</div>
+      <div class="user-info">
+        <div class="user-name" id="app-name">-</div>
+        <div class="user-phone" id="app-phone">-</div>
       </div>
     </div>
     
@@ -294,28 +504,28 @@ button.danger {
     <div class="card">
       <h2>🎁 Prämien einlösen</h2>
       <div class="reward">
-        <div>
+        <div class="reward-info">
           <h3>Getränk 0,5l</h3>
           <div class="pts">50 Punkte</div>
         </div>
         <button onclick="redeem('Getränk 0,5l', 50)" id="btn-50">Einlösen</button>
       </div>
       <div class="reward">
-        <div>
+        <div class="reward-info">
           <h3>Pommes</h3>
           <div class="pts">100 Punkte</div>
         </div>
         <button onclick="redeem('Pommes', 100)" id="btn-100">Einlösen</button>
       </div>
       <div class="reward">
-        <div>
+        <div class="reward-info">
           <h3>Döner</h3>
           <div class="pts">200 Punkte</div>
         </div>
         <button onclick="redeem('Döner', 200)" id="btn-200">Einlösen</button>
       </div>
       <div class="reward">
-        <div>
+        <div class="reward-info">
           <h3>Menü (Döner + Getränk)</h3>
           <div class="pts">300 Punkte</div>
         </div>
@@ -335,6 +545,37 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 let currentCustomer = null
 let refreshInterval = null
 
+// ============================================
+// 📞 TELEFONNUMMER NORMALISIERUNG
+// ============================================
+function normalizePhone(phone) {
+  // Entferne alle Leerzeichen, Bindestriche, Klammern
+  let normalized = phone.replace(/[\s\-\(\)]/g, '')
+  
+  // Entferne führende Nullen bei internationalen Nummern
+  // +4917621672130 → 4917621672130
+  // 004917621672130 → 4917621672130
+  if (normalized.startsWith('+')) {
+    normalized = normalized.substring(1)
+  }
+  if (normalized.startsWith('00')) {
+    normalized = normalized.substring(2)
+  }
+  
+  // Wenn die Nummer mit 49 beginnt (Deutschland), konvertiere zu 0-Format
+  // 4917621672130 → 017621672130
+  if (normalized.startsWith('49') && normalized.length > 10) {
+    normalized = '0' + normalized.substring(2)
+  }
+  
+  // Wenn keine führende 0, füge sie hinzu (für deutsche Nummern)
+  if (!normalized.startsWith('0') && normalized.length >= 10) {
+    normalized = '0' + normalized
+  }
+  
+  return normalized
+}
+
 function showScreen(screenName) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
   document.getElementById(`screen-${screenName}`).classList.add('active')
@@ -349,12 +590,15 @@ function showResult(elementId, message, type) {
 // === REGISTRIERUNG ===
 async function register() {
   const name = document.getElementById('reg-name').value.trim()
-  const phone = document.getElementById('reg-phone').value.trim()
+  const phoneRaw = document.getElementById('reg-phone').value.trim()
   
-  if (!name || !phone) {
+  if (!name || !phoneRaw) {
     showResult('reg-result', '❌ Bitte Name und Handynummer eingeben!', 'error')
     return
   }
+  
+  // Normalisiere die Telefonnummer
+  const phone = normalizePhone(phoneRaw)
   
   try {
     showResult('reg-result', '⏳ Wird registriert...', 'info')
@@ -377,7 +621,7 @@ async function register() {
       .insert({
         qr_id: qrId,
         name: name,
-        phone: phone,
+        phone: phone, // Gespeichert im normalisierten Format
         points: 0
       })
       .select()
@@ -399,12 +643,15 @@ async function register() {
 
 // === LOGIN ===
 async function login() {
-  const phone = document.getElementById('login-phone').value.trim()
+  const phoneRaw = document.getElementById('login-phone').value.trim()
   
-  if (!phone) {
+  if (!phoneRaw) {
     showResult('login-result', '❌ Bitte Handynummer eingeben!', 'error')
     return
   }
+  
+  // Normalisiere die Telefonnummer
+  const phone = normalizePhone(phoneRaw)
   
   try {
     showResult('login-result', '⏳ Suche Konto...', 'info')
@@ -412,7 +659,7 @@ async function login() {
     const { data: customers, error } = await supabase
       .from('customers')
       .select('*')
-      .eq('phone', phone)
+      .eq('phone', phone) // Suche mit normalisierter Nummer
       .limit(1)
     
     if (error) throw error
@@ -441,7 +688,7 @@ async function loadCustomer(customer) {
   await refreshCustomerData()
   
   document.getElementById('app-qr-id').textContent = customer.qr_id
-  document.getElementById('app-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${customer.qr_id}`
+  document.getElementById('app-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${customer.qr_id}`
   
   showScreen('app')
   
@@ -556,7 +803,7 @@ async function loadPendingCodes() {
         <div class="pending-code">
           <h3>🎁 ${item.reward_name}</h3>
           <div class="code">${item.code}</div>
-          <div style="font-size: 13px; color: #92400e; margin-bottom: 12px;">
+          <div class="code-info">
             Gültig bis: ${expires}<br>
             Kosten: ${item.points_cost} Punkte
           </div>
@@ -609,7 +856,7 @@ window.onload = () => {
   }
 }
 
-console.log('✅ Kunden-App geladen!')
+console.log('✅ Kunden-App geladen mit Telefonnummer-Normalisierung!')
 </script>
 
 </body>
