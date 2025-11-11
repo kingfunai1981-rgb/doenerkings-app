@@ -649,65 +649,47 @@ async function loadHistory() {
     }
     
     // Lade alle redeem_codes für Kunden mit Einlösungen
-    const customerIds = [...new Set(data.filter(tx => tx.type === 'redeem').map(tx => tx.customer_id))]
-    let allCodes = []
+    const redeemTxs = data.filter(tx => tx.type === 'redeem')
+    const customerIds = [...new Set(redeemTxs.map(tx => tx.customer_id))]
+    
+    const codeByTxId = {}
     
     if (customerIds.length > 0) {
-      const { data: codes } = await supabase
-        .from('redeem_codes')
-        .select('customer_id, code, reward_name, confirmed, created_at')
-        .in('customer_id', customerIds)
-        .eq('confirmed', true)
-        .order('created_at', { ascending: false }) // NEUESTE ZUERST!
-      
-      if (codes) {
-        allCodes = codes
-      }
-    }
-    
-    // WICHTIG: Ordne VORHER jeden Code der passenden Transaktion zu
-    // Wir arbeiten die Transaktionen von NEUESTE zu ÄLTESTE ab
-    const codeByTxId = {}
-    const usedCodes = new Set()
-    
-    // Erstelle eine Kopie der Codes sortiert nach Zeit (neueste zuerst)
-    const sortedCodes = [...allCodes].sort((a, b) => 
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    )
-    
-    data.forEach(tx => {
-      if (tx.type === 'redeem') {
-        const txTime = new Date(tx.created_at).getTime()
+      // Für jeden Kunden separat
+      for (const customerId of customerIds) {
+        // Hole alle Transaktionen dieses Kunden, sortiert nach Zeit (älteste zuerst)
+        const customerTxs = redeemTxs
+          .filter(tx => tx.customer_id === customerId)
+          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
         
-        // Finde besten passenden Code
-        let bestMatch = null
-        let smallestDiff = Infinity
+        // Hole alle Codes dieses Kunden, sortiert nach Zeit (älteste zuerst)
+        const { data: codes } = await supabase
+          .from('redeem_codes')
+          .select('code, created_at')
+          .eq('customer_id', customerId)
+          .eq('confirmed', true)
+          .order('created_at', { ascending: true })
         
-        sortedCodes.forEach(code => {
-          // Skip wenn Code schon verwendet wurde
-          if (usedCodes.has(code.code)) return
+        if (codes && codes.length > 0) {
+          // Ordne jeden Code der nächsten Transaktion zu (in chronologischer Reihenfolge)
+          let codeIndex = 0
           
-          // Nur Codes vom gleichen Kunden
-          if (code.customer_id !== tx.customer_id) return
-          
-          const codeTime = new Date(code.created_at).getTime()
-          const diff = Math.abs(txTime - codeTime)
-          
-          // Code muss VOR oder zur gleichen Zeit wie die Transaktion sein (mit 60s Toleranz)
-          // Und zeitlich näher als bisheriger bestMatch
-          // Maximal 1 Stunde Unterschied erlaubt
-          if (codeTime <= txTime + 60000 && diff < smallestDiff && diff < 60 * 60 * 1000) {
-            smallestDiff = diff
-            bestMatch = code
-          }
-        })
-        
-        if (bestMatch) {
-          codeByTxId[tx.id] = bestMatch.code
-          usedCodes.add(bestMatch.code) // Markiere als verwendet
+          customerTxs.forEach(tx => {
+            if (codeIndex < codes.length) {
+              const txTime = new Date(tx.created_at).getTime()
+              const code = codes[codeIndex]
+              const codeTime = new Date(code.created_at).getTime()
+              
+              // Code muss VOR oder knapp nach der Transaktion sein (max 2 Minuten nach)
+              if (codeTime <= txTime + 2 * 60 * 1000) {
+                codeByTxId[tx.id] = code.code
+                codeIndex++ // Nächster Code für nächste Transaktion
+              }
+            }
+          })
         }
       }
-    })
+    }
     
     list.innerHTML = data.map(tx => {
       const date = new Date(tx.created_at)
@@ -722,7 +704,7 @@ async function loadHistory() {
       const typeIcon = isRedeem ? '🎁' : '💰'
       const typeLabel = isRedeem ? 'Eingelöst' : 'Gutgeschrieben'
       
-      // Bei Einlösung: Hole zugeordneten Code
+      // Bei Einlösung: Zeige zugeordneten Code (falls vorhanden)
       let idDisplay = `🆔 ${customer.qr_id}` // Default: Kunden-ID
       
       if (isRedeem && codeByTxId[tx.id]) {
@@ -986,10 +968,32 @@ function cancelCodeConfirm() {
   showResult('result-code', '', 'info')
 }
 
-console.log('✅ Scanner PRO geladen mit Flame Font und KORRIGIERTER Code-Zuordnung!')
+console.log('✅ Scanner PRO geladen mit Flame Font!')
 </script>
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
