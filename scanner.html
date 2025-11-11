@@ -658,7 +658,7 @@ async function loadHistory() {
         .select('customer_id, code, reward_name, confirmed, created_at')
         .in('customer_id', customerIds)
         .eq('confirmed', true)
-        .order('created_at', { ascending: true }) // Älteste zuerst!
+        .order('created_at', { ascending: false }) // NEUESTE ZUERST!
       
       if (codes) {
         allCodes = codes
@@ -666,8 +666,14 @@ async function loadHistory() {
     }
     
     // WICHTIG: Ordne VORHER jeden Code der passenden Transaktion zu
+    // Wir arbeiten die Transaktionen von NEUESTE zu ÄLTESTE ab
     const codeByTxId = {}
     const usedCodes = new Set()
+    
+    // Erstelle eine Kopie der Codes sortiert nach Zeit (neueste zuerst)
+    const sortedCodes = [...allCodes].sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
     
     data.forEach(tx => {
       if (tx.type === 'redeem') {
@@ -677,7 +683,7 @@ async function loadHistory() {
         let bestMatch = null
         let smallestDiff = Infinity
         
-        allCodes.forEach(code => {
+        sortedCodes.forEach(code => {
           // Skip wenn Code schon verwendet wurde
           if (usedCodes.has(code.code)) return
           
@@ -687,8 +693,9 @@ async function loadHistory() {
           const codeTime = new Date(code.created_at).getTime()
           const diff = Math.abs(txTime - codeTime)
           
-          // Code muss VOR oder zur gleichen Zeit wie die Transaktion sein
+          // Code muss VOR oder zur gleichen Zeit wie die Transaktion sein (mit 60s Toleranz)
           // Und zeitlich näher als bisheriger bestMatch
+          // Maximal 1 Stunde Unterschied erlaubt
           if (codeTime <= txTime + 60000 && diff < smallestDiff && diff < 60 * 60 * 1000) {
             smallestDiff = diff
             bestMatch = code
@@ -979,32 +986,10 @@ function cancelCodeConfirm() {
   showResult('result-code', '', 'info')
 }
 
-console.log('✅ Scanner PRO geladen mit Flame Font!')
+console.log('✅ Scanner PRO geladen mit Flame Font und KORRIGIERTER Code-Zuordnung!')
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
