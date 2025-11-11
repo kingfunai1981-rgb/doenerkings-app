@@ -658,12 +658,49 @@ async function loadHistory() {
         .select('customer_id, code, reward_name, confirmed, created_at')
         .in('customer_id', customerIds)
         .eq('confirmed', true)
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: true }) // Älteste zuerst!
       
       if (codes) {
         allCodes = codes
       }
     }
+    
+    // WICHTIG: Ordne VORHER jeden Code der passenden Transaktion zu
+    const codeByTxId = {}
+    const usedCodes = new Set()
+    
+    data.forEach(tx => {
+      if (tx.type === 'redeem') {
+        const txTime = new Date(tx.created_at).getTime()
+        
+        // Finde besten passenden Code
+        let bestMatch = null
+        let smallestDiff = Infinity
+        
+        allCodes.forEach(code => {
+          // Skip wenn Code schon verwendet wurde
+          if (usedCodes.has(code.code)) return
+          
+          // Nur Codes vom gleichen Kunden
+          if (code.customer_id !== tx.customer_id) return
+          
+          const codeTime = new Date(code.created_at).getTime()
+          const diff = Math.abs(txTime - codeTime)
+          
+          // Code muss VOR oder zur gleichen Zeit wie die Transaktion sein
+          // Und zeitlich näher als bisheriger bestMatch
+          if (codeTime <= txTime + 60000 && diff < smallestDiff && diff < 60 * 60 * 1000) {
+            smallestDiff = diff
+            bestMatch = code
+          }
+        })
+        
+        if (bestMatch) {
+          codeByTxId[tx.id] = bestMatch.code
+          usedCodes.add(bestMatch.code) // Markiere als verwendet
+        }
+      }
+    })
     
     list.innerHTML = data.map(tx => {
       const date = new Date(tx.created_at)
@@ -678,38 +715,11 @@ async function loadHistory() {
       const typeIcon = isRedeem ? '🎁' : '💰'
       const typeLabel = isRedeem ? 'Eingelöst' : 'Gutgeschrieben'
       
-      // Bei Einlösung: Finde den Code der zeitlich am nächsten zur Transaction ist
+      // Bei Einlösung: Hole zugeordneten Code
       let idDisplay = `🆔 ${customer.qr_id}` // Default: Kunden-ID
       
-      if (isRedeem) {
-        const txTime = new Date(tx.created_at).getTime()
-        
-        // Finde ALLE Codes dieses Kunden
-        const customerCodes = allCodes.filter(c => c.customer_id === tx.customer_id)
-        
-        if (customerCodes.length > 0) {
-          // Finde den Code mit dem kleinsten Zeitunterschied
-          let bestMatch = null
-          let smallestDiff = Infinity
-          
-          customerCodes.forEach(code => {
-            const codeTime = new Date(code.created_at).getTime()
-            const diff = Math.abs(txTime - codeTime)
-            
-            // Code muss VOR oder zur gleichen Zeit wie die Transaktion sein
-            if (codeTime <= txTime && diff < smallestDiff) {
-              smallestDiff = diff
-              bestMatch = code
-            }
-          })
-          
-          if (bestMatch && smallestDiff < 60 * 60 * 1000) { // Max 1 Stunde Unterschied
-            idDisplay = `🔑 Code: ${bestMatch.code}`
-            // Markiere diesen Code als verwendet, damit er nicht nochmal genommen wird
-            const index = allCodes.indexOf(bestMatch)
-            if (index > -1) allCodes.splice(index, 1)
-          }
-        }
+      if (isRedeem && codeByTxId[tx.id]) {
+        idDisplay = `🔑 Code: ${codeByTxId[tx.id]}`
       }
       
       return `
