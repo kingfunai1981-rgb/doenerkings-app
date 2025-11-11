@@ -600,6 +600,22 @@ async function register() {
   // Normalisiere die Telefonnummer
   const phone = normalizePhone(phoneRaw)
   
+  // Prüfe ob nur Ziffern (keine Buchstaben)
+  if (!/^\d+$/.test(phone)) {
+    showResult('reg-result', '❌ Ungültige Handynummer! Nur Ziffern erlaubt.', 'error')
+    return
+  }
+  
+  // Validiere die Länge (10-17 Ziffern)
+  if (phone.length < 10) {
+    showResult('reg-result', '❌ Telefonnummer zu kurz! Mindestens 10 Ziffern erforderlich (z.B. 0151234567)', 'error')
+    return
+  }
+  if (phone.length > 17) {
+    showResult('reg-result', '❌ Telefonnummer zu lang! Maximal 17 Ziffern erlaubt', 'error')
+    return
+  }
+  
   try {
     showResult('reg-result', '⏳ Wird registriert...', 'info')
     
@@ -861,3 +877,15 @@ console.log('✅ Kunden-App geladen mit Telefonnummer-Normalisierung!')
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
