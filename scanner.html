@@ -254,7 +254,7 @@ canvas { display: none; }
   <!-- TAB: CODE PRÜFEN -->
   <div id="tab-code" class="card tab-content">
     <h2>🎁 Prämien-Code verifizieren</h2>
-    <input id="code" placeholder="6-stelliger Code" maxlength="6" style="text-transform: uppercase;">
+    <input id="code" placeholder="4-stelliger Code" maxlength="4" style="text-transform: uppercase;">
     <button onclick="verifyCode()">✅ Code verifizieren</button>
     <div id="result-code"></div>
   </div>
@@ -373,18 +373,26 @@ async function startCamera() {
     document.getElementById('videoContainer').classList.add('active')
     document.getElementById('customerCard').style.display = 'none'
     
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-    })
+    // Mobile-optimierte Einstellungen
+    const constraints = {
+      video: {
+        facingMode: 'environment',
+        width: { ideal: 1280, max: 1920 },
+        height: { ideal: 720, max: 1080 }
+      }
+    }
+    
+    stream = await navigator.mediaDevices.getUserMedia(constraints)
     video.srcObject = stream
     
     video.onloadedmetadata = () => {
       video.play()
       scanning = true
-      requestAnimationFrame(scanQR)
+      scanQR() // Starte Scanning
       showResult('result-qr', '📸 Kamera aktiv - Halte QR-Code vor die Kamera', 'success')
     }
   } catch (err) {
+    console.error('Camera error:', err)
     showResult('result-qr', '❌ Kamera-Fehler: ' + err.message, 'error')
     document.getElementById('startBtn').style.display = 'block'
     document.getElementById('stopBtn').style.display = 'none'
@@ -397,32 +405,44 @@ function stopCamera() {
     stream.getTracks().forEach(track => track.stop())
     stream = null
   }
-  video.srcObject = null
+  if (video) video.srcObject = null
   document.getElementById('videoContainer').classList.remove('active')
   document.getElementById('startBtn').style.display = 'block'
   document.getElementById('stopBtn').style.display = 'none'
 }
 
 function scanQR() {
-  if (!scanning) return
+  if (!scanning || !video) return
   
-  if (video.readyState === video.HAVE_ENOUGH_DATA) {
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-    
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    const code = jsQR(imageData.data, imageData.width, imageData.height)
-    
-    if (code) {
-      scanning = false
-      stopCamera()
-      onQRDetected(code.data)
-      return
+  try {
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      
+      if (canvas.width > 0 && canvas.height > 0) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert"
+        })
+        
+        if (code && code.data) {
+          scanning = false
+          stopCamera()
+          onQRDetected(code.data)
+          return
+        }
+      }
     }
+  } catch (err) {
+    console.error('Scan error:', err)
   }
   
-  requestAnimationFrame(scanQR)
+  // Langsamer scannen um Performance zu verbessern
+  if (scanning) {
+    setTimeout(() => requestAnimationFrame(scanQR), 100)
+  }
 }
 
 async function onQRDetected(qrCode) {
@@ -549,10 +569,10 @@ async function loadHistory() {
 
 // === CODE VERIFIZIEREN ===
 async function verifyCode() {
-  const code = document.getElementById('code').value.toUpperCase().trim()
+  const code = document.getElementById('code').value.trim()
   
-  if (!code || code.length !== 6) {
-    showResult('result-code', '❌ 6-stelligen Code eingeben!', 'error')
+  if (!code || code.length !== 4) {
+    showResult('result-code', '❌ 4-stelligen Code eingeben!', 'error')
     return
   }
   
