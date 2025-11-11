@@ -755,8 +755,6 @@ async function redeem(rewardName, cost) {
     return
   }
   
-  if (!confirm(`${rewardName} für ${cost} Punkte einlösen?\n\nDer Code muss vom Mitarbeiter bestätigt werden.`)) return
-  
   try {
     const code = Math.floor(1000 + Math.random() * 9000).toString()
     const expires = new Date(Date.now() + 24*60*60*1000)
@@ -774,8 +772,7 @@ async function redeem(rewardName, cost) {
     
     if (error) throw error
     
-    alert(`✅ Code erstellt!\n\n🔑 Code: ${code}\n\nZeige diesen Code dem Mitarbeiter.\nPunkte werden nach Bestätigung abgezogen.`)
-    
+    // Code wurde erstellt - Section wird automatisch aktualisiert
     loadPendingCodes()
     
   } catch (e) {
@@ -877,15 +874,3 @@ console.log('✅ Kunden-App geladen mit Telefonnummer-Normalisierung!')
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
