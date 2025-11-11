@@ -1,6 +1,4 @@
-/* Hide tabs */
-.tab-content { display: none; }
-.tab-content.active { display: block; }<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -205,6 +203,10 @@ canvas { display: none; }
   gap: 8px;
   margin-top: 8px;
 }
+
+/* Tab content */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
 </style>
 </head>
 <body>
@@ -274,7 +276,7 @@ canvas { display: none; }
   <!-- TAB: CODE PRÜFEN -->
   <div id="tab-code" class="card tab-content">
     <h2>🎁 Prämien-Code verifizieren</h2>
-    <input id="code" placeholder="4-stelliger Code" maxlength="4" style="text-transform: uppercase;">
+    <input id="code" placeholder="4-stelliger Code" maxlength="4">
     <button onclick="verifyCode()">✅ Code verifizieren</button>
     <div id="result-code"></div>
   </div>
@@ -303,24 +305,16 @@ function showResult(elementId, message, type) {
 }
 
 function showTab(tabName) {
-  // Kamera stoppen wenn Tab gewechselt wird
   if (tabName !== 'qr') stopCamera()
   
-  // Tabs aktivieren/deaktivieren
-  document.querySelectorAll('.tab').forEach((t, index) => {
-    t.classList.remove('active')
-    if ((tabName === 'phone' && index === 0) ||
-        (tabName === 'qr' && index === 1) ||
-        (tabName === 'history' && index === 2) ||
-        (tabName === 'code' && index === 3)) {
-      t.classList.add('active')
-    }
-  })
-  
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'))
+  
+  const tabs = ['phone', 'qr', 'history', 'code']
+  const index = tabs.indexOf(tabName)
+  document.querySelectorAll('.tab')[index].classList.add('active')
   document.getElementById(`tab-${tabName}`).classList.add('active')
   
-  // Verlauf laden wenn Tab geöffnet wird
   if (tabName === 'history') loadHistory()
 }
 
@@ -400,7 +394,6 @@ async function startCamera() {
     document.getElementById('videoContainer').classList.add('active')
     document.getElementById('customerCard').style.display = 'none'
     
-    // Mobile-optimierte Einstellungen
     const constraints = {
       video: {
         facingMode: 'environment',
@@ -415,7 +408,7 @@ async function startCamera() {
     video.onloadedmetadata = () => {
       video.play()
       scanning = true
-      scanQR() // Starte Scanning
+      scanQR()
       showResult('result-qr', '📸 Kamera aktiv - Halte QR-Code vor die Kamera', 'success')
     }
   } catch (err) {
@@ -466,7 +459,6 @@ function scanQR() {
     console.error('Scan error:', err)
   }
   
-  // Langsamer scannen um Performance zu verbessern
   if (scanning) {
     setTimeout(() => requestAnimationFrame(scanQR), 100)
   }
@@ -587,7 +579,7 @@ async function loadHistory() {
             <div class="history-points">⭐ ${tx.points} Punkte</div>
           </div>
           <div style="margin-top: 8px;">
-            <button class="small secondary" onclick="editTransaction('${tx.id}', '${customer.qr_id}', ${tx.amount}, ${tx.points}, '${customer.name}')">✏️ Korrigieren</button>
+            <button class="small secondary" onclick="editTransaction('${tx.id}', '${customer.qr_id}', ${tx.amount}, ${tx.points})">✏️ Korrigieren</button>
             <button class="small danger" onclick="deleteTransaction('${tx.id}', '${customer.qr_id}', ${tx.points})">🗑️ Löschen</button>
           </div>
           <div id="edit-${tx.id}" class="edit-form">
@@ -609,7 +601,7 @@ async function loadHistory() {
   }
 }
 
-function editTransaction(txId, qrId, oldAmount, oldPoints, customerName) {
+function editTransaction(txId, qrId, oldAmount, oldPoints) {
   document.getElementById(`edit-${txId}`).classList.add('active')
   
   const input = document.getElementById(`newAmount-${txId}`)
@@ -639,18 +631,13 @@ async function saveEdit(txId, qrId, oldPoints) {
   if (!confirm(`Betrag ändern?\n\nAlter Betrag: ${(oldPoints / 10).toFixed(2)} € (${oldPoints} Punkte)\nNeuer Betrag: ${newAmount.toFixed(2)} € (${newPoints} Punkte)\nDifferenz: ${diff > 0 ? '+' : ''}${diff} Punkte`)) return
   
   try {
-    // Transaktion aktualisieren
     const { error: txErr } = await supabase
       .from('transactions')
-      .update({ 
-        amount: newAmount, 
-        points: newPoints 
-      })
+      .update({ amount: newAmount, points: newPoints })
       .eq('id', txId)
     
     if (txErr) throw txErr
     
-    // Kundenpunkte aktualisieren
     const { data: customer } = await supabase
       .from('customers')
       .select('points')
@@ -677,7 +664,6 @@ async function deleteTransaction(txId, qrId, points) {
   if (!confirm(`Diese Transaktion wirklich löschen?\n\n${points} Punkte werden vom Kunden abgezogen!`)) return
   
   try {
-    // Transaktion löschen
     const { error: txErr } = await supabase
       .from('transactions')
       .delete()
@@ -685,7 +671,6 @@ async function deleteTransaction(txId, qrId, points) {
     
     if (txErr) throw txErr
     
-    // Punkte vom Kunden abziehen
     const { data: customer } = await supabase
       .from('customers')
       .select('points')
