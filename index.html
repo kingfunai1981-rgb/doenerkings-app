@@ -958,7 +958,7 @@ async function loadBonuses() {
       if (bonus.bonus_type === 'double_points') {
         descText = 'Beim nächsten Einkauf bekommst du doppelte Punkte!'
       } else {
-        descText = 'Beim nächsten Einkauf erhältst du 300 Extra-Punkte!'
+        descText = 'Beim nächsten Einkauf erhältst du 100 Extra-Punkte!'
       }
       
       if (isActive) {
@@ -970,7 +970,7 @@ async function loadBonuses() {
       
       return `
         <div class="bonus-item ${isActive ? 'active' : ''}">
-          <h3>${bonus.bonus_type === 'double_points' ? '⭐ 2× Punkte' : '💰 +300 Bonus-Punkte'}</h3>
+          <h3>${bonus.bonus_type === 'double_points' ? '⭐ 2× Punkte' : '💰 +100 Bonus-Punkte'}</h3>
           <div class="bonus-desc">${descText}</div>
           ${statusText ? `<div class="bonus-status">${statusText}</div>` : ''}
           ${buttonHTML}
