@@ -836,6 +836,7 @@ async function loadPendingCodes() {
   if (!currentCustomer) return
   
   try {
+    // ✅ ERZWINGE FRISCHE DATEN (kein Cache)
     const { data, error } = await supabase
       .from('redeem_codes')
       .select('*')
@@ -849,8 +850,10 @@ async function loadPendingCodes() {
     const section = document.getElementById('pending-section')
     const list = document.getElementById('pending-list')
     
+    // ✅ WENN KEINE OFFENEN CODES, SECTION AUSBLENDEN
     if (!data || data.length === 0) {
       section.style.display = 'none'
+      list.innerHTML = '' // Clear content
       return
     }
     
