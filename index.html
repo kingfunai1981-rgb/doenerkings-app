@@ -568,31 +568,38 @@ button:disabled {
       <h2>🎁 Prämien einlösen</h2>
       <div class="reward">
         <div class="reward-info">
-          <h3>Getränk 0,5l</h3>
-          <div class="pts">50 Punkte</div>
+          <h3>Ayran (0.25 l)</h3>
+          <div class="pts">250 Punkte</div>
         </div>
-        <button onclick="redeem('Getränk 0,5l', 50)" id="btn-50">Einlösen</button>
+        <button onclick="redeem('Ayran (0.25 l)', 250)" id="btn-250">Einlösen</button>
       </div>
       <div class="reward">
         <div class="reward-info">
           <h3>Pommes</h3>
-          <div class="pts">100 Punkte</div>
+          <div class="pts">500 Punkte</div>
         </div>
-        <button onclick="redeem('Pommes', 100)" id="btn-100">Einlösen</button>
+        <button onclick="redeem('Pommes', 500)" id="btn-500">Einlösen</button>
       </div>
       <div class="reward">
         <div class="reward-info">
-          <h3>Döner</h3>
-          <div class="pts">200 Punkte</div>
+          <h3>Döner Box</h3>
+          <div class="pts">750 Punkte</div>
         </div>
-        <button onclick="redeem('Döner', 200)" id="btn-200">Einlösen</button>
+        <button onclick="redeem('Döner Box', 750)" id="btn-750">Einlösen</button>
       </div>
       <div class="reward">
         <div class="reward-info">
-          <h3>Menü (Döner + Getränk)</h3>
-          <div class="pts">300 Punkte</div>
+          <h3>Döner XL</h3>
+          <div class="pts">1000 Punkte</div>
         </div>
-        <button onclick="redeem('Menü', 300)" id="btn-300">Einlösen</button>
+        <button onclick="redeem('Döner XL', 1000)" id="btn-1000">Einlösen</button>
+      </div>
+      <div class="reward">
+        <div class="reward-info">
+          <h3>Döner Teller</h3>
+          <div class="pts">1250 Punkte</div>
+        </div>
+        <button onclick="redeem('Döner Teller', 1250)" id="btn-1250">Einlösen</button>
       </div>
     </div>
   </div>
@@ -796,10 +803,11 @@ async function refreshCustomerData() {
 }
 
 function updateRewardButtons(points) {
-  document.getElementById('btn-50').disabled = points < 50
-  document.getElementById('btn-100').disabled = points < 100
-  document.getElementById('btn-200').disabled = points < 200
-  document.getElementById('btn-300').disabled = points < 300
+  document.getElementById('btn-250').disabled = points < 250
+  document.getElementById('btn-500').disabled = points < 500
+  document.getElementById('btn-750').disabled = points < 750
+  document.getElementById('btn-1000').disabled = points < 1000
+  document.getElementById('btn-1250').disabled = points < 1250
 }
 
 async function redeem(rewardName, cost) {
