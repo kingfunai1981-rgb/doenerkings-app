@@ -511,6 +511,14 @@ button:disabled {
       <h1>🌯 Dönerkings</h1>
       <p>Mein Konto</p>
     </div>
+
+    <!-- ✅ BELOHNUNGEN SECTION - OBEN -->
+    <div id="bonuses-section" style="display: none;">
+      <div class="card">
+        <h2>🎉 Meine Belohnungen</h2>
+        <div id="bonuses-list"></div>
+      </div>
+    </div>
     
     <div class="card">
       <div class="header-actions">
@@ -539,14 +547,6 @@ button:disabled {
       </div>
     </div>
 
-    <!-- ✅ BELOHNUNGEN SECTION -->
-    <div id="bonuses-section" style="display: none;">
-      <div class="card">
-        <h2>🎉 Meine Belohnungen</h2>
-        <div id="bonuses-list"></div>
-      </div>
-    </div>
-
     <!-- Offene Einlösungen -->
     <div id="pending-section" style="display: none;">
       <div class="card">
@@ -562,28 +562,28 @@ button:disabled {
           <h3>Getränk 0,5l</h3>
           <div class="pts">50 Punkte</div>
         </div>
-        <button onclick="redeem('Getränk 0,5l', 50)" id="btn-50">Einlösen</button>
+        <button onclick="redeem('Getränk 0,5l', 50)" id="btn-50" style="min-width: 100px;">Einlösen</button>
       </div>
       <div class="reward">
         <div class="reward-info">
           <h3>Pommes</h3>
           <div class="pts">100 Punkte</div>
         </div>
-        <button onclick="redeem('Pommes', 100)" id="btn-100">Einlösen</button>
+        <button onclick="redeem('Pommes', 100)" id="btn-100" style="min-width: 100px;">Einlösen</button>
       </div>
       <div class="reward">
         <div class="reward-info">
           <h3>Döner</h3>
           <div class="pts">200 Punkte</div>
         </div>
-        <button onclick="redeem('Döner', 200)" id="btn-200">Einlösen</button>
+        <button onclick="redeem('Döner', 200)" id="btn-200" style="min-width: 100px;">Einlösen</button>
       </div>
       <div class="reward">
         <div class="reward-info">
           <h3>Menü (Döner + Getränk)</h3>
           <div class="pts">300 Punkte</div>
         </div>
-        <button onclick="redeem('Menü', 300)" id="btn-300">Einlösen</button>
+        <button onclick="redeem('Menü', 300)" id="btn-300" style="min-width: 100px;">Einlösen</button>
       </div>
     </div>
   </div>
@@ -775,6 +775,9 @@ async function refreshCustomerData() {
     
     updateRewardButtons(data.points)
     localStorage.setItem('customerData', JSON.stringify(data))
+    
+    // ✅ AUCH BELOHNUNGEN AKTUALISIEREN
+    loadBonuses()
   } catch (e) {
     console.error('Refresh error:', e)
   }
@@ -930,9 +933,8 @@ async function loadBonuses() {
         statusText = '✅ Bereits verwendet'
       } else if (isActive) {
         statusText = '🔥 Aktiv für nächsten Einkauf!'
-        buttonHTML = '<div style="font-size: 13px; margin-top: 8px; opacity: 0.9;">Zeige beim nächsten Besuch deinen QR-Code!</div>'
       } else {
-        statusText = '⏳ Bereit zum Aktivieren'
+        // Pending - zeige nur Button, kein Status-Text
         buttonHTML = `<button onclick="activateBonus('${bonus.id}')">🚀 Jetzt aktivieren</button>`
       }
       
@@ -940,7 +942,7 @@ async function loadBonuses() {
         <div class="bonus-item ${isActive ? 'active' : ''}">
           <h3>${bonus.bonus_type === 'double_points' ? '⭐ 2× Punkte' : '💰 +300 Bonus-Punkte'}</h3>
           <div class="bonus-desc">${descText}</div>
-          <div class="bonus-status">${statusText}</div>
+          ${statusText ? `<div class="bonus-status">${statusText}</div>` : ''}
           ${buttonHTML}
         </div>
       `
