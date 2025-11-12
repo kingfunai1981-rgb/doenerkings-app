@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Döner Boxx Scanner</title>
+<title>Döner Boxx Scanner PRO</title>
 <style>
 @font-face {
   font-family: 'Flame';
@@ -251,7 +251,7 @@ canvas { display: none; }
 
 <div class="container">
   <div class="card">
-    <h1>🌯 Döner Boxx Scanner</h1>
+    <h1>🌯 Döner Boxx Scanner PRO</h1>
     <div style="color: #666; font-size: 14px;">Status: <span id="status">Bereit ✅</span></div>
   </div>
 
@@ -265,8 +265,8 @@ canvas { display: none; }
   </div>
 
   <div id="tab-phone" class="card tab-content active">
-    <h2>📱 Punkte per Handynummer, Email oder QR-ID gutschreiben</h2>
-    <input id="phone" type="text" placeholder="Handynummer, Email oder QR-ID">
+    <h2>📱 Punkte per Handynummer oder QR-ID gutschreiben</h2>
+    <input id="phone" type="text" placeholder="Handynummer oder QR-ID">
     <input id="amount" type="number" step="0.01" placeholder="Betrag in € (z.B. 10.00)">
     <button onclick="addPointsByPhone()">💰 Punkte gutschreiben</button>
     <div id="result-phone"></div>
@@ -397,6 +397,7 @@ async function addPointsByPhone() {
   try {
     let customer = null
     
+    // Prüfe ob es eine QR-ID ist (4 Ziffern)
     if (/^\d{4}$/.test(phoneOrId)) {
       const { data: customers, error: findError } = await supabase
         .from('customers')
@@ -410,20 +411,7 @@ async function addPointsByPhone() {
       }
     }
     
-    // ✅ Prüfe ob es eine Email ist
-    if (!customer && phoneOrId.includes('@')) {
-      const { data: customers, error: findError } = await supabase
-        .from('customers')
-        .select('*')
-        .eq('email', phoneOrId)
-        .limit(1)
-      
-      if (findError) throw findError
-      if (customers && customers.length > 0) {
-        customer = customers[0]
-      }
-    }
-    
+    // Falls nicht gefunden, versuche als Telefonnummer (normalisiert)
     if (!customer) {
       const normalizedPhone = normalizePhone(phoneOrId)
       
@@ -440,7 +428,7 @@ async function addPointsByPhone() {
     }
     
     if (!customer) {
-      throw new Error('Handynummer, Email oder QR-ID nicht gefunden')
+      throw new Error('Handynummer oder QR-ID nicht gefunden')
     }
     
     // ✅ PRÜFE OB KUNDE EINE BELOHNUNG AKTIVIERT HAT
@@ -1120,9 +1108,8 @@ function cancelCodeConfirm() {
   showResult('result-code', '', 'info')
 }
 
-console.log('✅ Scanner geladen mit Flame Font & Belohnungen!')
+console.log('✅ Scanner PRO geladen mit Flame Font & Belohnungen!')
 </script>
 
 </body>
 </html>
-
