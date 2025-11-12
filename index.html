@@ -146,6 +146,12 @@ button.secondary:hover {
   background: #ebebeb;
 }
 
+button.secondary.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
 button.small {
   width: auto;
   padding: 8px 16px;
@@ -492,7 +498,7 @@ button:disabled {
     <div class="card">
       <h2>Jetzt registrieren</h2>
       <input id="reg-name" type="text" placeholder="Dein Name (z.B. Max Mustermann)">
-      <input id="reg-phone" type="tel" placeholder="Handynummer (z.B. 01511234567)">
+      <input id="reg-phone" type="tel" placeholder="Handynummer (z.B. 0151 1234567 oder +49 151 1234567)">
       <button onclick="register()">✅ Registrieren</button>
       <button class="secondary" onclick="showScreen('start')">↩️ Zurück</button>
       <div id="reg-result"></div>
@@ -668,7 +674,7 @@ async function register() {
   }
   
   if (phone.length < 10) {
-    showResult('reg-result', '❌ Telefonnummer zu kurz! Mindestens 10 Ziffern erforderlich (z.B. 0151234567)', 'error')
+    showResult('reg-result', '❌ Telefonnummer zu kurz! Mindestens 10 Ziffern erforderlich', 'error')
     return
   }
   if (phone.length > 17) {
@@ -698,7 +704,10 @@ async function register() {
         qr_id: qrId,
         name: name,
         phone: phone,
-        points: 0
+        email: null,
+        points: 0,
+        email_verified: false,
+        auth_user_id: null
       })
       .select()
       .single()
