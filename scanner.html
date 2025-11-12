@@ -452,10 +452,10 @@ async function addPointsByPhone() {
         pointsToAdd = pointsToAdd * 2
         bonusApplied = '⭐ 2× Punkte angewendet!'
       } else if (bonus.bonus_type === 'bonus_points') {
-        // +300 Bonuspunkte
-        bonusPointsAdded = 300
-        pointsToAdd = pointsToAdd + 300
-        bonusApplied = '💰 +300 Bonus-Punkte angewendet!'
+        // +100 Bonuspunkte
+        bonusPointsAdded = 100
+        pointsToAdd = pointsToAdd + 100
+        bonusApplied = '💰 +100 Bonus-Punkte angewendet!'
       }
       
       // Markiere Belohnung als verwendet
@@ -490,7 +490,7 @@ async function addPointsByPhone() {
     // ✅ ZYKLUS-SYSTEM: Prüfe ob neue Belohnungen erstellt werden sollen
     // Alle 6 Besuche wiederholt sich das Muster:
     // Besuch 3, 9, 15... → 2× Punkte
-    // Besuch 6, 12, 18... → +300 Punkte
+    // Besuch 6, 12, 18... → +100 Punkte
     const { data: txCount } = await supabase
       .from('transactions')
       .select('id', { count: 'exact' })
@@ -509,7 +509,7 @@ async function addPointsByPhone() {
       })
     }
     
-    // Bei Position 0 im Zyklus (Besuch 6, 12, 18, 24...): +300 Punkte
+    // Bei Position 0 im Zyklus (Besuch 6, 12, 18, 24...): +100 Punkte
     if (cyclePosition === 0 && totalOrders > 0) {
       await supabase.from('bonuses').insert({
         customer_id: customer.id,
@@ -645,7 +645,7 @@ async function onQRDetected(qrCode) {
     const badgeEl = document.getElementById('activeBonusBadge')
     if (activeBonuses && activeBonuses.length > 0) {
       const bonus = activeBonuses[0]
-      const text = bonus.bonus_type === 'double_points' ? '🔥 2× Punkte aktiv!' : '🎁 +300 Bonus aktiv!'
+      const text = bonus.bonus_type === 'double_points' ? '🔥 2× Punkte aktiv!' : '🎁 +100 Bonus aktiv!'
       badgeEl.innerHTML = `<div class="bonus-badge">${text}</div>`
     } else {
       badgeEl.innerHTML = ''
@@ -691,9 +691,9 @@ async function addPointsFromScan() {
         pointsToAdd = pointsToAdd * 2
         bonusApplied = '⭐ 2× Punkte angewendet!'
       } else if (bonus.bonus_type === 'bonus_points') {
-        bonusPointsAdded = 300
-        pointsToAdd = pointsToAdd + 300
-        bonusApplied = '💰 +300 Bonus-Punkte angewendet!'
+        bonusPointsAdded = 100
+        pointsToAdd = pointsToAdd + 100
+        bonusApplied = '💰 +100 Bonus-Punkte angewendet!'
       }
       
       await supabase
@@ -743,7 +743,7 @@ async function addPointsFromScan() {
       })
     }
     
-    // Besuch 6, 12, 18, 24... → +300 Punkte
+    // Besuch 6, 12, 18, 24... → +100 Punkte
     if (cyclePosition === 0 && totalOrders > 0) {
       await supabase.from('bonuses').insert({
         customer_id: currentCustomer.id,
