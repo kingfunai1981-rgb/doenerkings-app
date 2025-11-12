@@ -326,6 +326,15 @@ button:disabled {
   font-weight: 600;
 }
 
+/* ✅ Reward Buttons gleiche Breite */
+.reward button {
+  width: 100px !important;
+  min-width: 100px !important;
+  max-width: 100px !important;
+  padding: 10px 12px !important;
+  font-size: 13px !important;
+}
+
 /* Pending Codes */
 .pending-code {
   background: #fffbeb;
@@ -562,28 +571,28 @@ button:disabled {
           <h3>Getränk 0,5l</h3>
           <div class="pts">50 Punkte</div>
         </div>
-        <button onclick="redeem('Getränk 0,5l', 50)" id="btn-50" style="min-width: 100px;">Einlösen</button>
+        <button onclick="redeem('Getränk 0,5l', 50)" id="btn-50">Einlösen</button>
       </div>
       <div class="reward">
         <div class="reward-info">
           <h3>Pommes</h3>
           <div class="pts">100 Punkte</div>
         </div>
-        <button onclick="redeem('Pommes', 100)" id="btn-100" style="min-width: 100px;">Einlösen</button>
+        <button onclick="redeem('Pommes', 100)" id="btn-100">Einlösen</button>
       </div>
       <div class="reward">
         <div class="reward-info">
           <h3>Döner</h3>
           <div class="pts">200 Punkte</div>
         </div>
-        <button onclick="redeem('Döner', 200)" id="btn-200" style="min-width: 100px;">Einlösen</button>
+        <button onclick="redeem('Döner', 200)" id="btn-200">Einlösen</button>
       </div>
       <div class="reward">
         <div class="reward-info">
           <h3>Menü (Döner + Getränk)</h3>
           <div class="pts">300 Punkte</div>
         </div>
-        <button onclick="redeem('Menü', 300)" id="btn-300" style="min-width: 100px;">Einlösen</button>
+        <button onclick="redeem('Menü', 300)" id="btn-300">Einlösen</button>
       </div>
     </div>
   </div>
@@ -901,6 +910,7 @@ async function loadBonuses() {
       .from('bonuses')
       .select('*')
       .eq('customer_id', currentCustomer.id)
+      .neq('status', 'used') // ✅ KEINE VERWENDETEN BELOHNUNGEN ANZEIGEN
       .order('created_at', { ascending: false })
     
     if (error) throw error
@@ -917,7 +927,6 @@ async function loadBonuses() {
     
     list.innerHTML = data.map(bonus => {
       const isActive = bonus.status === 'active'
-      const isUsed = bonus.status === 'used'
       
       let statusText = ''
       let buttonHTML = ''
@@ -929,12 +938,10 @@ async function loadBonuses() {
         descText = 'Beim nächsten Einkauf erhältst du 300 Extra-Punkte!'
       }
       
-      if (isUsed) {
-        statusText = '✅ Bereits verwendet'
-      } else if (isActive) {
+      if (isActive) {
         statusText = '🔥 Aktiv für nächsten Einkauf!'
       } else {
-        // Pending - zeige nur Button, kein Status-Text
+        // Pending - zeige nur Button
         buttonHTML = `<button onclick="activateBonus('${bonus.id}')">🚀 Jetzt aktivieren</button>`
       }
       
@@ -963,8 +970,7 @@ async function activateBonus(bonusId) {
       .eq('status', 'active')
     
     if (existingActive && existingActive.length > 0) {
-      alert('⚠️ Du hast bereits eine aktive Belohnung! Verwende sie erst beim nächsten Einkauf.')
-      return
+      return // ✅ KEIN POPUP, EINFACH NICHTS TUN
     }
     
     const { error } = await supabase
@@ -974,11 +980,11 @@ async function activateBonus(bonusId) {
     
     if (error) throw error
     
-    alert('🎉 Belohnung aktiviert! Zeige beim nächsten Einkauf deinen QR-Code.')
+    // ✅ KEIN POPUP - nur aktualisieren
     loadBonuses()
     
   } catch (e) {
-    alert('❌ Fehler: ' + e.message)
+    console.error('Activate error:', e)
   }
 }
 
