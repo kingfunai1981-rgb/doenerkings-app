@@ -146,12 +146,6 @@ button.secondary:hover {
   background: #ebebeb;
 }
 
-button.secondary.active {
-  background: #667eea;
-  color: white;
-  border-color: #667eea;
-}
-
 button.small {
   width: auto;
   padding: 8px 16px;
@@ -476,7 +470,7 @@ button:disabled {
   <!-- SCREEN 1: START -->
   <div id="screen-start" class="screen active">
     <div class="header-image">
-      <h1>🌯 Dönerkings</h1>
+      <h1>🌯 Döner Boxx</h1>
       <p>Treue wird belohnt!</p>
       <p class="small">1 € = 10 Punkte</p>
     </div>
@@ -492,32 +486,13 @@ button:disabled {
   <!-- SCREEN 2: REGISTRIERUNG -->
   <div id="screen-register" class="screen">
     <div class="header-image">
-      <h1>🌯 Dönerkings</h1>
+      <h1>🌯 Döner Boxx</h1>
     </div>
     
     <div class="card">
       <h2>Jetzt registrieren</h2>
-      <p class="subtitle">Wähle deine bevorzugte Anmeldemethode:</p>
-      
-      <!-- Auswahl: Email oder Telefon -->
-      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-        <button id="btn-email-method" class="secondary" onclick="selectRegMethod('email')" style="flex: 1;">📧 Mit Email</button>
-        <button id="btn-phone-method" class="secondary active" onclick="selectRegMethod('phone')" style="flex: 1;">📱 Mit Telefon</button>
-      </div>
-      
       <input id="reg-name" type="text" placeholder="Dein Name (z.B. Max Mustermann)">
-      
-      <!-- Email Felder (versteckt) -->
-      <div id="email-fields" style="display: none;">
-        <input id="reg-email" type="email" placeholder="Email (z.B. max@beispiel.de)">
-        <input id="reg-password" type="password" placeholder="Passwort (mind. 6 Zeichen)">
-      </div>
-      
-      <!-- Telefon Feld (sichtbar) -->
-      <div id="phone-fields">
-        <input id="reg-phone" type="tel" placeholder="Handynummer (z.B. 01511234567)">
-      </div>
-      
+      <input id="reg-phone" type="tel" placeholder="Handynummer (z.B. 01511234567)">
       <button onclick="register()">✅ Registrieren</button>
       <button class="secondary" onclick="showScreen('start')">↩️ Zurück</button>
       <div id="reg-result"></div>
@@ -527,13 +502,12 @@ button:disabled {
   <!-- SCREEN 3: LOGIN -->
   <div id="screen-login" class="screen">
     <div class="header-image">
-      <h1>🌯 Dönerkings</h1>
+      <h1>🌯 Döner Boxx</h1>
     </div>
     
     <div class="card">
       <h2>Anmelden</h2>
-      <input id="login-identifier" type="text" placeholder="Email oder Handynummer">
-      <input id="login-password" type="password" placeholder="Passwort (nur bei Email)">
+      <input id="login-phone" type="tel" placeholder="Handynummer">
       <button onclick="login()">🔑 Anmelden</button>
       <button class="secondary" onclick="showScreen('start')">↩️ Zurück</button>
       <div id="login-result"></div>
@@ -543,7 +517,7 @@ button:disabled {
   <!-- SCREEN 4: KUNDEN-APP -->
   <div id="screen-app" class="screen">
     <div class="header-image">
-      <h1>🌯 Dönerkings</h1>
+      <h1>🌯 Döner Boxx</h1>
       <p>Mein Konto</p>
       <div style="position: absolute; top: 20px; right: 20px;">
         <button onclick="logout()" class="small secondary" style="margin: 0;">Abmelden</button>
@@ -644,23 +618,6 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 let currentCustomer = null
 let refreshInterval = null
-let regMethod = 'phone' // Standard: Telefon
-
-function selectRegMethod(method) {
-  regMethod = method
-  
-  if (method === 'email') {
-    document.getElementById('email-fields').style.display = 'block'
-    document.getElementById('phone-fields').style.display = 'none'
-    document.getElementById('btn-email-method').classList.add('active')
-    document.getElementById('btn-phone-method').classList.remove('active')
-  } else {
-    document.getElementById('email-fields').style.display = 'none'
-    document.getElementById('phone-fields').style.display = 'block'
-    document.getElementById('btn-email-method').classList.remove('active')
-    document.getElementById('btn-phone-method').classList.add('active')
-  }
-}
 
 function normalizePhone(phone) {
   let normalized = phone.replace(/[\s\-\(\)]/g, '')
@@ -696,147 +653,64 @@ function showResult(elementId, message, type) {
 
 async function register() {
   const name = document.getElementById('reg-name').value.trim()
+  const phoneRaw = document.getElementById('reg-phone').value.trim()
   
-  if (!name) {
-    showResult('reg-result', '❌ Bitte Name eingeben!', 'error')
+  if (!name || !phoneRaw) {
+    showResult('reg-result', '❌ Bitte Name und Handynummer eingeben!', 'error')
+    return
+  }
+  
+  const phone = normalizePhone(phoneRaw)
+  
+  if (!/^\d+$/.test(phone)) {
+    showResult('reg-result', '❌ Ungültige Handynummer! Nur Ziffern erlaubt.', 'error')
+    return
+  }
+  
+  if (phone.length < 10) {
+    showResult('reg-result', '❌ Telefonnummer zu kurz! Mindestens 10 Ziffern erforderlich (z.B. 0151234567)', 'error')
+    return
+  }
+  if (phone.length > 17) {
+    showResult('reg-result', '❌ Telefonnummer zu lang! Maximal 17 Ziffern erlaubt', 'error')
     return
   }
   
   try {
     showResult('reg-result', '⏳ Wird registriert...', 'info')
     
-    if (regMethod === 'email') {
-      // ✅ REGISTRIERUNG MIT EMAIL
-      const email = document.getElementById('reg-email').value.trim()
-      const password = document.getElementById('reg-password').value.trim()
-      
-      if (!email || !password) {
-        showResult('reg-result', '❌ Bitte Email und Passwort eingeben!', 'error')
-        return
-      }
-      
-      if (password.length < 6) {
-        showResult('reg-result', '❌ Passwort muss mindestens 6 Zeichen haben!', 'error')
-        return
-      }
-      
-      // Prüfe ob Email schon existiert
-      const { data: existing } = await supabase
-        .from('customers')
-        .select('*')
-        .eq('email', email)
-        .limit(1)
-      
-      if (existing && existing.length > 0) {
-        showResult('reg-result', '❌ Diese Email ist bereits registriert!', 'error')
-        return
-      }
-      
-      // Erstelle Auth User
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-          data: {
-            name: name
-          }
-        }
-      })
-      
-      if (authError) throw authError
-      
-      // Erstelle Customer (noch nicht verifiziert)
-      const qrId = Math.floor(1000 + Math.random() * 9000).toString()
-      
-      const { data: customer, error: dbError } = await supabase
-        .from('customers')
-        .insert({
-          qr_id: qrId,
-          name: name,
-          email: email,
-          phone: null,
-          points: 0,
-          email_verified: false,
-          auth_user_id: authData.user.id
-        })
-        .select()
-        .single()
-      
-      if (dbError) throw dbError
-      
-      showResult('reg-result', 
-        '✅ Registrierung erfolgreich!<br><br>' +
-        '📧 Bitte überprüfe deine Emails und klicke auf den Bestätigungslink.<br><br>' +
-        'Erst dann kannst du dich anmelden!', 
-        'success'
-      )
-      
-      // Felder leeren
-      document.getElementById('reg-name').value = ''
-      document.getElementById('reg-email').value = ''
-      document.getElementById('reg-password').value = ''
-      
-    } else {
-      // ✅ REGISTRIERUNG MIT TELEFON
-      const phoneRaw = document.getElementById('reg-phone').value.trim()
-      
-      if (!phoneRaw) {
-        showResult('reg-result', '❌ Bitte Handynummer eingeben!', 'error')
-        return
-      }
-      
-      const phone = normalizePhone(phoneRaw)
-      
-      if (!/^\d+$/.test(phone)) {
-        showResult('reg-result', '❌ Ungültige Handynummer! Nur Ziffern erlaubt.', 'error')
-        return
-      }
-      
-      if (phone.length < 10) {
-        showResult('reg-result', '❌ Telefonnummer zu kurz! Mindestens 10 Ziffern erforderlich', 'error')
-        return
-      }
-      if (phone.length > 17) {
-        showResult('reg-result', '❌ Telefonnummer zu lang! Maximal 17 Ziffern erlaubt', 'error')
-        return
-      }
-      
-      const { data: existing } = await supabase
-        .from('customers')
-        .select('*')
-        .eq('phone', phone)
-        .limit(1)
-      
-      if (existing && existing.length > 0) {
-        showResult('reg-result', '❌ Diese Nummer ist bereits registriert! Bitte anmelden.', 'error')
-        return
-      }
-      
-      const qrId = Math.floor(1000 + Math.random() * 9000).toString()
-      
-      const { data, error } = await supabase
-        .from('customers')
-        .insert({
-          qr_id: qrId,
-          name: name,
-          phone: phone,
-          email: null,
-          points: 0,
-          email_verified: false,
-          auth_user_id: null
-        })
-        .select()
-        .single()
-      
-      if (error) throw error
-      
-      showResult('reg-result', '✅ Erfolgreich registriert!', 'success')
-      
-      setTimeout(() => {
-        localStorage.setItem('customerData', JSON.stringify(data))
-        loadCustomer(data)
-      }, 1000)
+    const { data: existing } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('phone', phone)
+      .limit(1)
+    
+    if (existing && existing.length > 0) {
+      showResult('reg-result', '❌ Diese Nummer ist bereits registriert! Bitte anmelden.', 'error')
+      return
     }
+    
+    const qrId = Math.floor(1000 + Math.random() * 9000).toString()
+    
+    const { data, error } = await supabase
+      .from('customers')
+      .insert({
+        qr_id: qrId,
+        name: name,
+        phone: phone,
+        points: 0
+      })
+      .select()
+      .single()
+    
+    if (error) throw error
+    
+    showResult('reg-result', '✅ Erfolgreich registriert!', 'success')
+    
+    setTimeout(() => {
+      localStorage.setItem('customerData', JSON.stringify(data))
+      loadCustomer(data)
+    }, 1000)
     
   } catch (e) {
     showResult('reg-result', '❌ Fehler: ' + e.message, 'error')
@@ -844,89 +718,37 @@ async function register() {
 }
 
 async function login() {
-  const identifier = document.getElementById('login-identifier').value.trim()
-  const password = document.getElementById('login-password').value.trim()
+  const phoneRaw = document.getElementById('login-phone').value.trim()
   
-  if (!identifier) {
-    showResult('login-result', '❌ Bitte Email oder Handynummer eingeben!', 'error')
+  if (!phoneRaw) {
+    showResult('login-result', '❌ Bitte Handynummer eingeben!', 'error')
     return
   }
+  
+  const phone = normalizePhone(phoneRaw)
   
   try {
     showResult('login-result', '⏳ Suche Konto...', 'info')
     
-    // Prüfe ob Email (enthält @) oder Telefon
-    const isEmail = identifier.includes('@')
+    const { data: customers, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('phone', phone)
+      .limit(1)
     
-    if (isEmail) {
-      // ✅ LOGIN MIT EMAIL
-      if (!password) {
-        showResult('login-result', '❌ Bitte Passwort eingeben!', 'error')
-        return
-      }
-      
-      // Supabase Auth Login
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: identifier,
-        password: password
-      })
-      
-      if (authError) {
-        if (authError.message.includes('Invalid login credentials')) {
-          showResult('login-result', '❌ Email oder Passwort falsch!', 'error')
-        } else if (authError.message.includes('Email not confirmed')) {
-          showResult('login-result', '❌ Bitte bestätige zuerst deine Email!', 'error')
-        } else {
-          throw authError
-        }
-        return
-      }
-      
-      // Hole Customer Daten
-      const { data: customers, error } = await supabase
-        .from('customers')
-        .select('*')
-        .eq('email', identifier)
-        .limit(1)
-      
-      if (error) throw error
-      
-      if (!customers || customers.length === 0) {
-        showResult('login-result', '❌ Konto nicht gefunden!', 'error')
-        return
-      }
-      
-      showResult('login-result', '✅ Erfolgreich angemeldet!', 'success')
-      
-      setTimeout(() => {
-        localStorage.setItem('customerData', JSON.stringify(customers[0]))
-        loadCustomer(customers[0])
-      }, 500)
-      
-    } else {
-      // ✅ LOGIN MIT TELEFON
-      const phone = normalizePhone(identifier)
-      
-      const { data: customers, error } = await supabase
-        .from('customers')
-        .select('*')
-        .eq('phone', phone)
-        .limit(1)
-      
-      if (error) throw error
-      
-      if (!customers || customers.length === 0) {
-        showResult('login-result', '❌ Handynummer nicht gefunden. Bitte registrieren!', 'error')
-        return
-      }
-      
-      showResult('login-result', '✅ Erfolgreich angemeldet!', 'success')
-      
-      setTimeout(() => {
-        localStorage.setItem('customerData', JSON.stringify(customers[0]))
-        loadCustomer(customers[0])
-      }, 500)
+    if (error) throw error
+    
+    if (!customers || customers.length === 0) {
+      showResult('login-result', '❌ Handynummer nicht gefunden. Bitte registrieren!', 'error')
+      return
     }
+    
+    showResult('login-result', '✅ Erfolgreich angemeldet!', 'success')
+    
+    setTimeout(() => {
+      localStorage.setItem('customerData', JSON.stringify(customers[0]))
+      loadCustomer(customers[0])
+    }, 500)
     
   } catch (e) {
     showResult('login-result', '❌ Fehler: ' + e.message, 'error')
