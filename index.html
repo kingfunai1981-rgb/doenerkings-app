@@ -470,7 +470,7 @@ button:disabled {
   <!-- SCREEN 1: START -->
   <div id="screen-start" class="screen active">
     <div class="header-image">
-      <h1>🌯 Döner Boxx</h1>
+      <h1>🌯 Dönerkings</h1>
       <p>Treue wird belohnt!</p>
       <p class="small">1 € = 10 Punkte</p>
     </div>
@@ -486,7 +486,7 @@ button:disabled {
   <!-- SCREEN 2: REGISTRIERUNG -->
   <div id="screen-register" class="screen">
     <div class="header-image">
-      <h1>🌯 Döner Boxx</h1>
+      <h1>🌯 Dönerkings</h1>
     </div>
     
     <div class="card">
@@ -502,7 +502,7 @@ button:disabled {
   <!-- SCREEN 3: LOGIN -->
   <div id="screen-login" class="screen">
     <div class="header-image">
-      <h1>🌯 Döner Boxx</h1>
+      <h1>🌯 Dönerkings</h1>
     </div>
     
     <div class="card">
@@ -517,8 +517,11 @@ button:disabled {
   <!-- SCREEN 4: KUNDEN-APP -->
   <div id="screen-app" class="screen">
     <div class="header-image">
-      <h1>🌯 Döner Boxx</h1>
+      <h1>🌯 Dönerkings</h1>
       <p>Mein Konto</p>
+      <div style="position: absolute; top: 20px; right: 20px;">
+        <button onclick="logout()" class="small secondary" style="margin: 0;">Abmelden</button>
+      </div>
     </div>
 
     <!-- ✅ BELOHNUNGEN SECTION - OBEN -->
@@ -530,10 +533,7 @@ button:disabled {
     </div>
     
     <div class="card">
-      <div class="header-actions">
-        <h2 style="margin: 0;">Meine Punkte</h2>
-        <button onclick="logout()" class="small secondary">Abmelden</button>
-      </div>
+      <h2>Meine Punkte</h2>
       
       <div class="points-circle">
         <div class="points-num" id="app-points">0</div>
@@ -1026,4 +1026,3 @@ console.log('✅ Kunden-App geladen mit Flame Font & Belohnungen!')
 
 </body>
 </html>
-
