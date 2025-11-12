@@ -787,6 +787,9 @@ async function refreshCustomerData() {
     
     // ✅ AUCH BELOHNUNGEN AKTUALISIEREN
     loadBonuses()
+    
+    // ✅ AUCH OFFENE CODES AKTUALISIEREN
+    loadPendingCodes()
   } catch (e) {
     console.error('Refresh error:', e)
   }
