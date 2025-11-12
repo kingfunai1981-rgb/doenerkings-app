@@ -5,9 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dönerkings Scanner PRO</title>
 <style>
+@font-face {
+  font-family: 'Flame';
+  src: url('Flame-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { 
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: 'Flame', system-ui, -apple-system, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   padding: 20px;
@@ -139,12 +146,28 @@ canvas { display: none; }
   color: #374151;
 }
 
+/* ✅ BONUS BADGE */
+.bonus-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
 .history-item {
   background: #f9fafb;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   padding: 14px;
   margin-bottom: 10px;
+}
+.history-item.redeem {
+  background: #fef3c7;
+  border-color: #fbbf24;
 }
 .history-header {
   display: flex;
@@ -174,6 +197,9 @@ canvas { display: none; }
 .history-points {
   color: #667eea;
   font-weight: 600;
+}
+.history-points.negative {
+  color: #ef4444;
 }
 
 .edit-form {
@@ -239,8 +265,8 @@ canvas { display: none; }
   </div>
 
   <div id="tab-phone" class="card tab-content active">
-    <h2>📱 Punkte per Handynummer gutschreiben</h2>
-    <input id="phone" type="tel" placeholder="Handynummer (z.B. 01511234567)">
+    <h2>📱 Punkte per Handynummer oder QR-ID gutschreiben</h2>
+    <input id="phone" type="text" placeholder="Handynummer (z.B. 01511234567) oder QR-ID (z.B. 1234)">
     <input id="amount" type="number" step="0.01" placeholder="Betrag in € (z.B. 10.00)">
     <button onclick="addPointsByPhone()">💰 Punkte gutschreiben</button>
     <div id="result-phone"></div>
@@ -265,6 +291,7 @@ canvas { display: none; }
         <h3 id="custName">-</h3>
         <p><strong>QR-ID:</strong> <span id="custQR">-</span></p>
         <p><strong>Punkte:</strong> <span id="custPoints">-</span></p>
+        <div id="activeBonusBadge"></div>
       </div>
       
       <h3>Betrag eingeben:</h3>
@@ -275,10 +302,10 @@ canvas { display: none; }
   </div>
 
   <div id="tab-history" class="card tab-content">
-    <h2>📋 Verlauf (Letzte 50 Scans)</h2>
+    <h2>📋 Verlauf (Letzte 50 Transaktionen)</h2>
     <button onclick="loadHistory()" class="secondary">🔄 Aktualisieren</button>
     <div id="historyList" style="margin-top: 16px;">
-      <div style="text-align: center; padding: 20px; color: #666;">Noch keine Scans</div>
+      <div style="text-align: center; padding: 20px; color: #666;">Noch keine Transaktionen</div>
     </div>
   </div>
 
@@ -308,6 +335,27 @@ let stream = null
 let currentCustomer = null
 let currentCodeData = null
 
+function normalizePhone(phone) {
+  let normalized = phone.replace(/[\s\-\(\)]/g, '')
+  
+  if (normalized.startsWith('+')) {
+    normalized = normalized.substring(1)
+  }
+  if (normalized.startsWith('00')) {
+    normalized = normalized.substring(2)
+  }
+  
+  if (normalized.startsWith('49') && normalized.length > 10) {
+    normalized = '0' + normalized.substring(2)
+  }
+  
+  if (!normalized.startsWith('0') && normalized.length >= 10) {
+    normalized = '0' + normalized
+  }
+  
+  return normalized
+}
+
 function showResult(elementId, message, type) {
   const el = document.getElementById(elementId)
   el.className = `result ${type}`
@@ -328,12 +376,15 @@ function showTab(tabName) {
   if (tabName === 'history') loadHistory()
 }
 
+// ============================================
+// ✅ PUNKTE GUTSCHREIBEN MIT BELOHNUNGEN
+// ============================================
 async function addPointsByPhone() {
-  const phone = document.getElementById('phone').value.trim()
+  const phoneOrId = document.getElementById('phone').value.trim()
   const amount = parseFloat(document.getElementById('amount').value)
   
-  if (!phone) {
-    showResult('result-phone', '❌ Handynummer eingeben!', 'error')
+  if (!phoneOrId) {
+    showResult('result-phone', '❌ Handynummer oder QR-ID eingeben!', 'error')
     return
   }
   if (!amount || amount <= 0) {
@@ -344,48 +395,74 @@ async function addPointsByPhone() {
   showResult('result-phone', '🔍 Suche Kunde...', 'info')
   
   try {
-    const { data: customers, error: findError } = await supabase
-      .from('customers')
-      .select('*')
-      .eq('phone', phone)
-      .limit(1)
+    let customer = null
     
-    if (findError) throw findError
-    if (!customers || customers.length === 0) {
-      throw new Error('Handynummer nicht gefunden')
+    if (/^\d{4}$/.test(phoneOrId)) {
+      const { data: customers, error: findError } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('qr_id', phoneOrId)
+        .limit(1)
+      
+      if (findError) throw findError
+      if (customers && customers.length > 0) {
+        customer = customers[0]
+      }
     }
     
-    const customer = customers[0]
+    if (!customer) {
+      const normalizedPhone = normalizePhone(phoneOrId)
+      
+      const { data: customers, error: findError } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('phone', normalizedPhone)
+        .limit(1)
+      
+      if (findError) throw findError
+      if (customers && customers.length > 0) {
+        customer = customers[0]
+      }
+    }
     
-    // Prüfen ob aktive Belohnung vorhanden
-    const { data: activeReward } = await supabase
-      .from('customer_rewards')
+    if (!customer) {
+      throw new Error('Handynummer oder QR-ID nicht gefunden')
+    }
+    
+    // ✅ PRÜFE OB KUNDE EINE BELOHNUNG AKTIVIERT HAT
+    const { data: activeBonuses } = await supabase
+      .from('bonuses')
       .select('*')
       .eq('customer_id', customer.id)
       .eq('status', 'active')
-      .limit(1)
     
     let pointsToAdd = Math.round(amount * 10)
-    let bonusInfo = ''
+    let bonusApplied = null
+    let bonusPointsAdded = 0
     
-    // Belohnung anwenden
-    if (activeReward && activeReward.length > 0) {
-      const reward = activeReward[0]
+    // NUR wenn Kunde die Belohnung vorher aktiviert hat!
+    if (activeBonuses && activeBonuses.length > 0) {
+      const bonus = activeBonuses[0]
       
-      if (reward.reward_type === '2x_points') {
+      if (bonus.bonus_type === 'double_points') {
+        // Verdopple die Punkte
+        bonusPointsAdded = pointsToAdd
         pointsToAdd = pointsToAdd * 2
-        bonusInfo = '<br>🎁 <strong>2× Punkte Bonus angewendet!</strong>'
-      } else if (reward.reward_type === '300_bonus') {
+        bonusApplied = '⭐ 2× Punkte angewendet!'
+      } else if (bonus.bonus_type === 'bonus_points') {
+        // +300 Bonuspunkte
+        bonusPointsAdded = 300
         pointsToAdd = pointsToAdd + 300
-        bonusInfo = '<br>🏆 <strong>+300 Bonus-Punkte!</strong>'
+        bonusApplied = '💰 +300 Bonus-Punkte angewendet!'
       }
       
-      // Belohnung als verwendet markieren
+      // Markiere Belohnung als verwendet
       await supabase
-        .from('customer_rewards')
-        .update({ status: 'used', used_at: new Date().toISOString() })
-        .eq('id', reward.id)
+        .from('bonuses')
+        .update({ status: 'used' })
+        .eq('id', bonus.id)
     }
+    // Sonst: Normale Punkte (10 pro Euro)
     
     const newTotal = customer.points + pointsToAdd
     
@@ -408,14 +485,45 @@ async function addPointsByPhone() {
     
     if (updateError) throw updateError
     
-    showResult('result-phone',
-      `✅ <strong>ERFOLGREICH!</strong><br><br>` +
+    // ✅ PRÜFE OB NEUE BELOHNUNGEN ERSTELLT WERDEN SOLLEN
+    const { data: txCount } = await supabase
+      .from('transactions')
+      .select('id', { count: 'exact' })
+      .eq('customer_id', customer.id)
+      .eq('type', 'earn')
+    
+    const totalOrders = txCount ? txCount.length : 0
+    
+    // Nach 2. Bestellung: 2× Punkte
+    if (totalOrders === 2) {
+      await supabase.from('bonuses').insert({
+        customer_id: customer.id,
+        bonus_type: 'double_points',
+        status: 'pending'
+      })
+    }
+    
+    // Nach 5. Bestellung: +300 Punkte
+    if (totalOrders === 5) {
+      await supabase.from('bonuses').insert({
+        customer_id: customer.id,
+        bonus_type: 'bonus_points',
+        status: 'pending'
+      })
+    }
+    
+    let resultHTML = `✅ <strong>ERFOLGREICH!</strong><br><br>` +
       `👤 Kunde: <strong>${customer.name}</strong><br>` +
       `💰 Betrag: ${amount.toFixed(2)} €<br>` +
-      `⭐ Punkte: +${pointsToAdd}${bonusInfo}<br>` +
-      `📊 Neuer Stand: <strong>${newTotal} Punkte</strong>`,
-      'success'
-    )
+      `⭐ Punkte: +${Math.round(amount * 10)}`
+    
+    if (bonusApplied) {
+      resultHTML += `<br>🎉 <strong>${bonusApplied}</strong><br>🎁 Bonus: +${bonusPointsAdded} Punkte`
+    }
+    
+    resultHTML += `<br>📊 Neuer Stand: <strong>${newTotal} Punkte</strong>`
+    
+    showResult('result-phone', resultHTML, 'success')
     
     document.getElementById('phone').value = ''
     document.getElementById('amount').value = ''
@@ -520,6 +628,23 @@ async function onQRDetected(qrCode) {
     document.getElementById('custName').textContent = currentCustomer.name
     document.getElementById('custQR').textContent = currentCustomer.qr_id
     document.getElementById('custPoints').textContent = currentCustomer.points
+    
+    // ✅ ZEIGE AKTIVE BELOHNUNGEN
+    const { data: activeBonuses } = await supabase
+      .from('bonuses')
+      .select('*')
+      .eq('customer_id', currentCustomer.id)
+      .eq('status', 'active')
+    
+    const badgeEl = document.getElementById('activeBonusBadge')
+    if (activeBonuses && activeBonuses.length > 0) {
+      const bonus = activeBonuses[0]
+      const text = bonus.bonus_type === 'double_points' ? '🔥 2× Punkte aktiv!' : '🎁 +300 Bonus aktiv!'
+      badgeEl.innerHTML = `<div class="bonus-badge">${text}</div>`
+    } else {
+      badgeEl.innerHTML = ''
+    }
+    
     document.getElementById('customerCard').style.display = 'block'
     document.getElementById('scannedAmount').value = ''
     document.getElementById('scannedAmount').focus()
@@ -540,7 +665,38 @@ async function addPointsFromScan() {
   }
   
   try {
-    const pointsToAdd = Math.round(amount * 10)
+    // ✅ PRÜFE OB KUNDE EINE BELOHNUNG AKTIVIERT HAT
+    const { data: activeBonuses } = await supabase
+      .from('bonuses')
+      .select('*')
+      .eq('customer_id', currentCustomer.id)
+      .eq('status', 'active')
+    
+    let pointsToAdd = Math.round(amount * 10)
+    let bonusApplied = null
+    let bonusPointsAdded = 0
+    
+    // NUR wenn Kunde die Belohnung vorher aktiviert hat!
+    if (activeBonuses && activeBonuses.length > 0) {
+      const bonus = activeBonuses[0]
+      
+      if (bonus.bonus_type === 'double_points') {
+        bonusPointsAdded = pointsToAdd
+        pointsToAdd = pointsToAdd * 2
+        bonusApplied = '⭐ 2× Punkte angewendet!'
+      } else if (bonus.bonus_type === 'bonus_points') {
+        bonusPointsAdded = 300
+        pointsToAdd = pointsToAdd + 300
+        bonusApplied = '💰 +300 Bonus-Punkte angewendet!'
+      }
+      
+      await supabase
+        .from('bonuses')
+        .update({ status: 'used' })
+        .eq('id', bonus.id)
+    }
+    // Sonst: Normale Punkte (10 pro Euro)
+    
     const newTotal = currentCustomer.points + pointsToAdd
     
     const { error: txError } = await supabase
@@ -562,13 +718,53 @@ async function addPointsFromScan() {
     
     if (updateError) throw updateError
     
-    alert(`✅ ERFOLGREICH!\n\nKunde: ${currentCustomer.name}\nBetrag: ${amount.toFixed(2)} €\nPunkte: +${pointsToAdd}\nNeuer Stand: ${newTotal}`)
+    // ✅ PRÜFE OB NEUE BELOHNUNGEN ERSTELLT WERDEN SOLLEN
+    const { data: txCount } = await supabase
+      .from('transactions')
+      .select('id', { count: 'exact' })
+      .eq('customer_id', currentCustomer.id)
+      .eq('type', 'earn')
     
-    document.getElementById('customerCard').style.display = 'none'
-    document.getElementById('result-qr').innerHTML = ''
-    document.getElementById('scannedAmount').value = ''
+    const totalOrders = txCount ? txCount.length : 0
+    
+    if (totalOrders === 2) {
+      await supabase.from('bonuses').insert({
+        customer_id: currentCustomer.id,
+        bonus_type: 'double_points',
+        status: 'pending'
+      })
+    }
+    
+    if (totalOrders === 5) {
+      await supabase.from('bonuses').insert({
+        customer_id: currentCustomer.id,
+        bonus_type: 'bonus_points',
+        status: 'pending'
+      })
+    }
+    
+    let resultHTML = `✅ <strong>ERFOLGREICH!</strong><br><br>` +
+      `👤 Kunde: <strong>${currentCustomer.name}</strong><br>` +
+      `💰 Betrag: ${amount.toFixed(2)} €<br>` +
+      `⭐ Punkte: +${Math.round(amount * 10)}`
+    
+    if (bonusApplied) {
+      resultHTML += `<br>🎉 <strong>${bonusApplied}</strong><br>🎁 Bonus: +${bonusPointsAdded} Punkte`
+    }
+    
+    resultHTML += `<br>📊 Neuer Stand: <strong>${newTotal} Punkte</strong>`
+    
+    showResult('result-scan', resultHTML, 'success')
+    
+    setTimeout(() => {
+      document.getElementById('customerCard').style.display = 'none'
+      document.getElementById('result-qr').innerHTML = ''
+      document.getElementById('scannedAmount').value = ''
+      document.getElementById('result-scan').innerHTML = ''
+    }, 3000)
+    
   } catch (e) {
-    alert('❌ FEHLER!\n\n' + e.message)
+    showResult('result-scan', '❌ Fehler: ' + e.message, 'error')
   }
 }
 
@@ -579,12 +775,12 @@ async function loadHistory() {
       .select(`
         id,
         customer_id,
+        type,
         amount,
         points,
         created_at,
         customers (name, phone, qr_id)
       `)
-      .eq('type', 'earn')
       .order('created_at', { ascending: false })
       .limit(50)
     
@@ -593,8 +789,45 @@ async function loadHistory() {
     const list = document.getElementById('historyList')
     
     if (!data || data.length === 0) {
-      list.innerHTML = '<div style="text-align:center;padding:20px;color:#666">Noch keine Scans</div>'
+      list.innerHTML = '<div style="text-align:center;padding:20px;color:#666">Noch keine Transaktionen</div>'
       return
+    }
+    
+    const redeemTxs = data.filter(tx => tx.type === 'redeem')
+    const customerIds = [...new Set(redeemTxs.map(tx => tx.customer_id))]
+    
+    const codeByTxId = {}
+    
+    if (customerIds.length > 0) {
+      for (const customerId of customerIds) {
+        const customerTxs = redeemTxs
+          .filter(tx => tx.customer_id === customerId)
+          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+        
+        const { data: codes } = await supabase
+          .from('redeem_codes')
+          .select('code, created_at')
+          .eq('customer_id', customerId)
+          .eq('confirmed', true)
+          .order('created_at', { ascending: true })
+        
+        if (codes && codes.length > 0) {
+          let codeIndex = 0
+          
+          customerTxs.forEach(tx => {
+            if (codeIndex < codes.length) {
+              const txTime = new Date(tx.created_at).getTime()
+              const code = codes[codeIndex]
+              const codeTime = new Date(code.created_at).getTime()
+              
+              if (codeTime <= txTime + 2 * 60 * 1000) {
+                codeByTxId[tx.id] = code.code
+                codeIndex++
+              }
+            }
+          })
+        }
+      }
     }
     
     list.innerHTML = data.map(tx => {
@@ -603,18 +836,35 @@ async function loadHistory() {
       const time = date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
       const customer = tx.customers
       
+      const isRedeem = tx.type === 'redeem'
+      const itemClass = isRedeem ? 'history-item redeem' : 'history-item'
+      const pointsClass = isRedeem ? 'history-points negative' : 'history-points'
+      const pointsDisplay = isRedeem ? `⭐ ${tx.points} Punkte` : `⭐ +${tx.points} Punkte`
+      const typeIcon = isRedeem ? '🎁' : '💰'
+      const typeLabel = isRedeem ? 'Eingelöst' : 'Gutgeschrieben'
+      
+      let idDisplay = `🆔 ${customer.qr_id}`
+      
+      if (isRedeem && codeByTxId[tx.id]) {
+        idDisplay = `🔑 Code: ${codeByTxId[tx.id]}`
+      }
+      
       return `
-        <div class="history-item">
+        <div class="${itemClass}">
           <div class="history-header">
-            <div class="history-customer">${customer.name}</div>
+            <div class="history-customer">${typeIcon} ${customer.name}</div>
             <div class="history-time">${dateStr} ${time}</div>
           </div>
           <div class="history-details">
             <div>📱 ${customer.phone}</div>
-            <div>🆔 ${customer.qr_id}</div>
-            <div class="history-amount">💰 ${tx.amount.toFixed(2)} €</div>
-            <div class="history-points">⭐ ${tx.points} Punkte</div>
+            <div>${idDisplay}</div>
+            ${isRedeem ? 
+              `<div style="color: #92400e; font-weight: 600;">${typeLabel}</div>` :
+              `<div class="history-amount">${typeIcon} ${tx.amount.toFixed(2)} €</div>`
+            }
+            <div class="${pointsClass}">${pointsDisplay}</div>
           </div>
+          ${!isRedeem ? `
           <div style="margin-top: 8px;">
             <button class="small secondary" onclick="editTransaction('${tx.id}', '${customer.qr_id}', ${tx.amount}, ${tx.points})">✏️ Korrigieren</button>
             <button class="small danger" onclick="deleteTransaction('${tx.id}', '${customer.qr_id}', ${tx.points})">🗑️ Löschen</button>
@@ -630,6 +880,7 @@ async function loadHistory() {
               <button class="small secondary" onclick="cancelEdit('${tx.id}')">❌ Abbrechen</button>
             </div>
           </div>
+          ` : ''}
         </div>
       `
     }).join('')
@@ -792,13 +1043,10 @@ async function verifyCode() {
 async function confirmCode(code) {
   if (!currentCodeData) return
   
-  if (!confirm(`Prämie wirklich ausgeben?\n\n${currentCodeData.points_cost} Punkte werden vom Kunden abgezogen!`)) return
-  
   try {
     const customer = currentCodeData.customers
     const newPoints = customer.points - currentCodeData.points_cost
     
-    // Transaktion erstellen
     const { error: txError } = await supabase
       .from('transactions')
       .insert({
@@ -811,7 +1059,16 @@ async function confirmCode(code) {
     
     if (txError) throw txError
     
-    // Punkte abziehen
+    const { error: codeError } = await supabase
+      .from('redeem_codes')
+      .update({ 
+        confirmed: true, 
+        used: true 
+      })
+      .eq('code', code)
+    
+    if (codeError) throw codeError
+    
     const { error: updateError } = await supabase
       .from('customers')
       .update({ points: newPoints })
@@ -819,30 +1076,30 @@ async function confirmCode(code) {
     
     if (updateError) throw updateError
     
-    // Code als bestätigt markieren
-    const { error: codeError } = await supabase
-      .from('redeem_codes')
-      .update({ confirmed: true, used: true })
-      .eq('code', code)
-    
-    if (codeError) throw codeError
-    
-    alert(`✅ ERFOLGREICH!\n\nPrämie: ${currentCodeData.reward_name}\nKunde: ${customer.name}\nPunkte abgezogen: ${currentCodeData.points_cost}\nNeuer Stand: ${newPoints}`)
+    showResult('result-code',
+      `✅ <strong>PRÄMIE AUSGEGEBEN!</strong><br><br>` +
+      `🎁 Prämie: <strong>${currentCodeData.reward_name}</strong><br>` +
+      `👤 Kunde: <strong>${customer.name}</strong><br>` +
+      `⭐ Punkte abgezogen: ${currentCodeData.points_cost}<br>` +
+      `📊 Neuer Stand: <strong>${newPoints} Punkte</strong>`,
+      'success'
+    )
     
     document.getElementById('code-details').style.display = 'none'
     currentCodeData = null
     
   } catch (e) {
-    alert('❌ Fehler: ' + e.message)
+    showResult('result-code', '❌ Fehler: ' + e.message, 'error')
   }
 }
 
 function cancelCodeConfirm() {
   document.getElementById('code-details').style.display = 'none'
   currentCodeData = null
+  showResult('result-code', '', 'info')
 }
 
-console.log('✅ Scanner PRO geladen!')
+console.log('✅ Scanner PRO geladen mit Flame Font & Belohnungen!')
 </script>
 
 </body>
