@@ -1123,7 +1123,7 @@ async function loadBonuses() {
       if (isActive) {
         statusText = '🔥 Aktiv für nächsten Einkauf!'
       } else {
-        buttonHTML = `<button onclick="activateBonus('${bonus.id}')">🚀 Jetzt aktivieren</button>`
+        buttonHTML = `<button onclick="activateBonus(${bonus.id})">🚀 Jetzt aktivieren</button>`
       }
       
       return `
@@ -1236,7 +1236,7 @@ async function loadCoupons() {
           ${expiryText}
           ${isActivated ? 
             '<div class="coupon-activated-badge">✅ Aktiviert! Zeige Code beim Scannen</div>' : 
-            `<button onclick="activateCoupon('${coupon.id}')">🚀 Jetzt aktivieren</button>`
+            `<button onclick="activateCoupon(${coupon.id})">🚀 Jetzt aktivieren</button>`
           }
         </div>
       `
