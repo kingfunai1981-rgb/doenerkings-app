@@ -902,7 +902,7 @@ async function loadHistory() {
           .from('redeem_codes')
           .select('code, created_at')
           .eq('customer_id', customerId)
-          .eq('confirmed', true)
+          .eq('used', true)
           .order('created_at', { ascending: true })
         
         if (codes && codes.length > 0) {
