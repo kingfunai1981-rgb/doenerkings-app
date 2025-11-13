@@ -1253,7 +1253,8 @@ async function loadCoupons() {
           <div class="coupon-code-display">${coupon.code}</div>
           ${expiryText}
           ${isActivated ? 
-            '<div class="coupon-activated-badge">✅ Aktiviert! Zeige Code beim Scannen</div>' : 
+            `<div class="coupon-activated-badge">✅ Aktiviert! Zeige Code beim Scannen</div>
+             <button onclick="deactivateCoupon(${coupon.id})" style="background: #ef4444; margin-top: 8px;">❌ Stornieren</button>` : 
             `<button onclick="activateCoupon(${coupon.id})">🚀 Jetzt aktivieren</button>`
           }
         </div>
@@ -1301,6 +1302,29 @@ async function activateCoupon(couponId) {
     
   } catch (e) {
     console.error('❌ Fehler beim Aktivieren:', e.message)
+    loadCoupons()
+  }
+}
+
+async function deactivateCoupon(couponId) {
+  try {
+    const id = parseInt(couponId)
+    
+    // Lösche die Aktivierung (nur wenn noch nicht verwendet)
+    const { error } = await supabase
+      .from('activated_coupons')
+      .delete()
+      .eq('customer_id', currentCustomer.id)
+      .eq('coupon_id', id)
+      .eq('is_used', false)
+    
+    if (error) throw error
+    
+    // Sofort neu laden
+    loadCoupons()
+    
+  } catch (e) {
+    console.error('❌ Fehler beim Stornieren:', e.message)
     loadCoupons()
   }
 }
