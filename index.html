@@ -724,6 +724,25 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 let currentCustomer = null
 let refreshInterval = null
+let rewardPattern = []
+
+// Lade Bonusmuster beim Start
+async function loadRewardPattern() {
+  try {
+    const { data, error } = await supabase
+      .from('reward_pattern')
+      .select('*')
+      .single()
+    
+    if (data && data.pattern) {
+      rewardPattern = data.pattern
+    }
+  } catch (e) {
+    console.error('Pattern load error:', e)
+  }
+}
+
+loadRewardPattern()
 
 function normalizePhone(phone) {
   let normalized = phone.replace(/[\s\-\(\)]/g, '')
@@ -813,6 +832,28 @@ async function register() {
       .single()
     
     if (error) throw error
+    
+    // ✅ ERSTELLE BONUS FÜR BESUCH 1
+    // Position 0 im Muster = Besuch 1
+    if (rewardPattern && rewardPattern[0]) {
+      const reward = rewardPattern[0]
+      
+      if (reward.type === 'double') {
+        await supabase.from('bonuses').insert({
+          customer_id: data.id,
+          bonus_type: 'double_points',
+          bonus_amount: 0,
+          status: 'pending'
+        })
+      } else if (reward.type === 'bonus' && reward.bonus > 0) {
+        await supabase.from('bonuses').insert({
+          customer_id: data.id,
+          bonus_type: 'bonus_points',
+          bonus_amount: reward.bonus,
+          status: 'pending'
+        })
+      }
+    }
     
     showResult('reg-result', '✅ Erfolgreich registriert!', 'success')
     
@@ -1018,11 +1059,13 @@ async function cancelCode(code) {
     
     if (error) throw error
     
-    alert('✅ Code storniert!')
+    // Stilles Reload ohne Popup
     loadPendingCodes()
     
   } catch (e) {
-    alert('❌ Fehler: ' + e.message)
+    console.error('Cancel error:', e)
+    // Stilles Reload ohne Popup
+    loadPendingCodes()
   }
 }
 
@@ -1037,7 +1080,7 @@ async function loadBonuses() {
       .from('bonuses')
       .select('*')
       .eq('customer_id', currentCustomer.id)
-      .neq('status', 'used') // ✅ KEINE VERWENDETEN BELOHNUNGEN ANZEIGEN
+      .neq('status', 'used')
       .order('created_at', { ascending: false })
     
     if (error) throw error
@@ -1069,7 +1112,6 @@ async function loadBonuses() {
       if (isActive) {
         statusText = '🔥 Aktiv für nächsten Einkauf!'
       } else {
-        // Pending - zeige nur Button
         buttonHTML = `<button onclick="activateBonus('${bonus.id}')">🚀 Jetzt aktivieren</button>`
       }
       
@@ -1205,7 +1247,8 @@ async function activateCoupon(couponId) {
       .eq('is_used', false)
     
     if (existing && existing.length > 0) {
-      alert('✅ Coupon ist bereits aktiviert!')
+      // Bereits aktiviert - nichts tun, nur neu laden
+      loadCoupons()
       return
     }
     
@@ -1221,11 +1264,12 @@ async function activateCoupon(couponId) {
     
     if (error) throw error
     
-    alert('✅ Coupon aktiviert! Zeige den Code beim nächsten Besuch.')
+    // Kein Popup - einfach neu laden
     loadCoupons()
     
   } catch (e) {
-    alert('❌ Fehler: ' + e.message)
+    console.error('❌ Fehler beim Aktivieren:', e.message)
+    loadCoupons()
   }
 }
 
