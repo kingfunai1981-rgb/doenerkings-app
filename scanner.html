@@ -310,9 +310,12 @@ canvas { display: none; }
   </div>
 
   <div id="tab-code" class="card tab-content">
-    <h2>🎁 Prämien-Code prüfen & bestätigen</h2>
+    <h2>🎁 Code prüfen & einlösen</h2>
+    <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
+      Prämien-Code (Einlösung für Ayran, Pommes, etc.) ODER Coupon-Code (Deal der Woche)
+    </p>
     <input id="code" placeholder="4-stelliger Code" maxlength="4">
-    <button onclick="verifyCode()">✅ Code prüfen</button>
+    <button onclick="verifyAnyCode()">🔍 Code prüfen</button>
     <div id="result-code"></div>
     <div id="code-details" style="display: none; margin-top: 20px;"></div>
   </div>
@@ -1188,6 +1191,226 @@ function cancelCodeConfirm() {
   document.getElementById('code-details').style.display = 'none'
   currentCodeData = null
   showResult('result-code', '', 'info')
+}
+
+// ============================================
+// ✅ COUPON SYSTEM
+// ============================================
+async function verifyAnyCode() {
+  const code = document.getElementById('code').value.trim()
+  
+  if (!code || code.length !== 4) {
+    showResult('result-code', '❌ 4-stelligen Code eingeben!', 'error')
+    return
+  }
+  
+  showResult('result-code', '🔍 Suche Code...', 'info')
+  
+  // ERST: Prüfe ob es ein Coupon ist
+  try {
+    const { data: coupon, error: couponError } = await supabase
+      .from('coupons')
+      .select('*')
+      .eq('code', code)
+      .eq('is_active', true)
+      .single()
+    
+    if (coupon) {
+      // Es ist ein COUPON!
+      await handleCouponCode(coupon, code)
+      return
+    }
+  } catch (e) {
+    // Kein Coupon, weiter zu Prämien-Code
+  }
+  
+  // DANN: Prüfe ob es ein Prämien-Code ist
+  try {
+    const { data, error } = await supabase
+      .from('redeem_codes')
+      .select('*, customers(name, phone, qr_id, points)')
+      .eq('code', code)
+      .limit(1)
+    
+    if (error) throw error
+    if (!data || data.length === 0) throw new Error('Code nicht gefunden')
+    
+    // Es ist ein PRÄMIEN-CODE!
+    await handleRedeemCode(data[0], code)
+    
+  } catch (e) {
+    showResult('result-code', '❌ ' + e.message, 'error')
+  }
+}
+
+async function handleCouponCode(coupon, code) {
+  try {
+    // Prüfe ob abgelaufen
+    if (new Date(coupon.expires_at) < new Date()) {
+      throw new Error('Coupon ist abgelaufen')
+    }
+    
+    // Suche welcher Kunde diesen Coupon aktiviert hat
+    const { data: activated, error: activatedError } = await supabase
+      .from('activated_coupons')
+      .select('*, customers(name, phone, qr_id)')
+      .eq('coupon_id', coupon.id)
+      .eq('is_used', false)
+    
+    if (activatedError) throw activatedError
+    
+    if (!activated || activated.length === 0) {
+      throw new Error('Dieser Coupon wurde von keinem Kunden aktiviert')
+    }
+    
+    const activation = activated[0]
+    const customer = activation.customers
+    const expires = new Date(coupon.expires_at).toLocaleDateString('de-DE')
+    
+    document.getElementById('code-details').style.display = 'block'
+    document.getElementById('code-details').innerHTML = `
+      <div class="code-item" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #f59e0b;">
+        <h3>🎟️ ${coupon.title}</h3>
+        <div class="code">${code}</div>
+        <div style="font-size: 14px; color: #92400e; margin: 12px 0;">
+          <strong>Produkt:</strong> ${coupon.product}<br>
+          <strong>Preis:</strong> ${coupon.price}<br>
+          <strong>Kunde:</strong> ${customer.name} (${customer.phone})<br>
+          <strong>Gültig bis:</strong> ${expires}
+        </div>
+        <button onclick="useCoupon('${activation.id}')" class="success" style="width: 100%; margin-bottom: 8px;">
+          ✅ Coupon einlösen
+        </button>
+        <button onclick="cancelCodeConfirm()" class="secondary" style="width: 100%;">
+          ❌ Abbrechen
+        </button>
+      </div>
+    `
+    
+    showResult('result-code', '✅ Coupon gefunden!', 'success')
+    
+  } catch (e) {
+    showResult('result-code', '❌ ' + e.message, 'error')
+    document.getElementById('code-details').style.display = 'none'
+  }
+}
+
+async function handleRedeemCode(codeData, code) {
+  try {
+    currentCodeData = codeData
+    
+    if (codeData.used) throw new Error('Code bereits verwendet')
+    if (codeData.confirmed) throw new Error('Code bereits bestätigt')
+    if (new Date(codeData.valid_until) < new Date()) throw new Error('Code abgelaufen')
+    
+    const customer = codeData.customers
+    const expires = new Date(codeData.valid_until).toLocaleString('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+    
+    showResult('result-code', '✅ Prämien-Code gefunden!', 'success')
+    
+    document.getElementById('code-details').style.display = 'block'
+    document.getElementById('code-details').innerHTML = `
+      <div class="code-item">
+        <h3>🎁 ${codeData.reward_name}</h3>
+        <div class="code">${code}</div>
+        <div style="font-size: 14px; color: #92400e; margin-bottom: 16px;">
+          <strong>Kunde:</strong> ${customer.name}<br>
+          <strong>Aktuell:</strong> ${customer.points} Punkte<br>
+          <strong>Kosten:</strong> ${codeData.points_cost} Punkte<br>
+          <strong>Danach:</strong> ${customer.points - codeData.points_cost} Punkte<br>
+          <strong>Gültig bis:</strong> ${expires}
+        </div>
+        <button onclick="confirmRedeemCode()" class="success" style="width: 100%; margin-bottom: 8px;">
+          ✅ Bestätigen & Punkte abziehen
+        </button>
+        <button onclick="cancelCodeConfirm()" class="secondary" style="width: 100%;">
+          ❌ Abbrechen
+        </button>
+      </div>
+    `
+  } catch (e) {
+    showResult('result-code', '❌ ' + e.message, 'error')
+  }
+}
+
+async function confirmRedeemCode() {
+  if (!currentCodeData) return
+  
+  try {
+    showResult('result-code', '⏳ Bestätige Code...', 'info')
+    
+    const newPoints = currentCodeData.customers.points - currentCodeData.points_cost
+    
+    const { error: updateError } = await supabase
+      .from('customers')
+      .update({ points: newPoints })
+      .eq('id', currentCodeData.customer_id)
+    
+    if (updateError) throw updateError
+    
+    const { error: codeError } = await supabase
+      .from('redeem_codes')
+      .update({ 
+        confirmed: true, 
+        confirmed_at: new Date().toISOString() 
+      })
+      .eq('code', currentCodeData.code)
+    
+    if (codeError) throw codeError
+    
+    showResult('result-code', '✅ Code erfolgreich eingelöst!', 'success')
+    
+    document.getElementById('code').value = ''
+    document.getElementById('code-details').style.display = 'none'
+    currentCodeData = null
+    
+  } catch (e) {
+    showResult('result-code', '❌ Fehler: ' + e.message, 'error')
+  }
+}
+
+async function useCoupon(activationId) {
+  try {
+    showResult('result-code', '⏳ Löse Coupon ein...', 'info')
+    
+    const { error } = await supabase
+      .from('activated_coupons')
+      .update({ 
+        is_used: true,
+        used_at: new Date().toISOString()
+      })
+      .eq('id', activationId)
+    
+    if (error) throw error
+    
+    showResult('result-code', '✅ Coupon erfolgreich eingelöst!', 'success')
+    
+    document.getElementById('code').value = ''
+    document.getElementById('code-details').style.display = 'none'
+    
+  } catch (e) {
+    showResult('result-code', '❌ Fehler: ' + e.message, 'error')
+  }
+}
+
+function cancelCodeConfirm() {
+  document.getElementById('code-details').style.display = 'none'
+  currentCodeData = null
+  showResult('result-code', '', 'info')
+}
+
+// Alte Funktionen entfernen, neue nutzen
+async function verifyCode() {
+  await verifyAnyCode()
+}
+
+async function verifyCoupon() {
+  await verifyAnyCode()
 }
 
 console.log('✅ Scanner PRO geladen mit Flame Font & Belohnungen!')
