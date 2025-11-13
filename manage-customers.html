@@ -1013,6 +1013,31 @@ async function loadCoupons() {
         coupon.is_active = false
       }
 
+      // Hole aktivierte Kunden für diesen Coupon
+      const { data: activations } = await supabase
+        .from('activated_coupons')
+        .select('unique_code, is_used, activated_at, customers(name, phone)')
+        .eq('coupon_id', coupon.id)
+        .order('activated_at', { ascending: false })
+      
+      let activationsHTML = ''
+      if (activations && activations.length > 0) {
+        activationsHTML = `
+          <div style="margin-top: 12px; padding: 8px; background: #f3f4f6; border-radius: 6px;">
+            <strong>👥 Aktiviert von ${activations.length} Kunde(n):</strong>
+            <div style="margin-top: 6px; max-height: 150px; overflow-y: auto;">
+              ${activations.map(a => `
+                <div style="font-size: 12px; padding: 4px 0; border-bottom: 1px solid #e5e7eb;">
+                  <strong>${a.customers?.name || 'Unbekannt'}</strong> (${a.customers?.phone || '?'})
+                  → Code: <span style="font-family: monospace; font-weight: bold; color: #059669;">${a.unique_code}</span>
+                  ${a.is_used ? '<span style="color: #dc2626;">✓ Eingelöst</span>' : '<span style="color: #059669;">⏳ Offen</span>'}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `
+      }
+
       let expiryText = ''
       if (isExpired) {
         expiryText = `<span class="coupon-expiry warning">❌ Abgelaufen</span>`
@@ -1038,6 +1063,7 @@ async function loadCoupons() {
             ${coupon.description ? `<p>📝 ${coupon.description}</p>` : ''}
             ${expiryText}
             <p style="margin-top:6px; font-size:12px; color:#9ca3af;">Erstellt: ${formatDate(coupon.created_at)}</p>
+            ${activationsHTML}
           </div>
           <div class="coupon-actions">
             ${coupon.is_active && !isExpired ? 
