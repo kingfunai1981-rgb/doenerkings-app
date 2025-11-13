@@ -834,9 +834,20 @@ async function register() {
     if (error) throw error
     
     // ✅ ERSTELLE BONUS FÜR BESUCH 1
+    // Lade Muster DIREKT (falls noch nicht geladen)
+    let pattern = rewardPattern
+    if (!pattern || pattern.length === 0) {
+      const { data: patternData } = await supabase
+        .from('reward_pattern')
+        .select('pattern')
+        .single()
+      
+      pattern = patternData?.pattern || []
+    }
+    
     // Position 0 im Muster = Besuch 1
-    if (rewardPattern && rewardPattern[0]) {
-      const reward = rewardPattern[0]
+    if (pattern && pattern[0]) {
+      const reward = pattern[0]
       
       if (reward.type === 'double') {
         await supabase.from('bonuses').insert({
@@ -1238,16 +1249,19 @@ async function loadCoupons() {
 
 async function activateCoupon(couponId) {
   try {
+    // Konvertiere zu Nummer
+    const id = parseInt(couponId)
+    
     // Prüfen ob bereits aktiviert
     const { data: existing } = await supabase
       .from('activated_coupons')
       .select('*')
       .eq('customer_id', currentCustomer.id)
-      .eq('coupon_id', couponId)
+      .eq('coupon_id', id)
       .eq('is_used', false)
     
     if (existing && existing.length > 0) {
-      // Bereits aktiviert - nichts tun, nur neu laden
+      // Bereits aktiviert - nur neu laden
       loadCoupons()
       return
     }
@@ -1257,14 +1271,14 @@ async function activateCoupon(couponId) {
       .from('activated_coupons')
       .insert({
         customer_id: currentCustomer.id,
-        coupon_id: couponId,
+        coupon_id: id,
         activated_at: new Date().toISOString(),
         is_used: false
       })
     
     if (error) throw error
     
-    // Kein Popup - einfach neu laden
+    // Sofort neu laden um aktivierten Status zu zeigen
     loadCoupons()
     
   } catch (e) {
