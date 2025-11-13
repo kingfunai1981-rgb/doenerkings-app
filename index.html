@@ -1054,6 +1054,7 @@ async function loadBonuses() {
     
     list.innerHTML = data.map(bonus => {
       const isActive = bonus.status === 'active'
+      const bonusAmount = bonus.bonus_amount || 100
       
       let statusText = ''
       let buttonHTML = ''
@@ -1062,7 +1063,7 @@ async function loadBonuses() {
       if (bonus.bonus_type === 'double_points') {
         descText = 'Beim nächsten Einkauf bekommst du doppelte Punkte!'
       } else {
-        descText = 'Beim nächsten Einkauf erhältst du 100 Extra-Punkte!'
+        descText = `Beim nächsten Einkauf erhältst du ${bonusAmount} Extra-Punkte!`
       }
       
       if (isActive) {
@@ -1074,7 +1075,7 @@ async function loadBonuses() {
       
       return `
         <div class="bonus-item ${isActive ? 'active' : ''}">
-          <h3>${bonus.bonus_type === 'double_points' ? '⭐ Doppelte Punkte' : '💰 +100 Bonus-Punkte'}</h3>
+          <h3>${bonus.bonus_type === 'double_points' ? '⭐ Doppelte Punkte' : `💰 +${bonusAmount} Bonus-Punkte`}</h3>
           <div class="bonus-desc">${descText}</div>
           ${statusText ? `<div class="bonus-status">${statusText}</div>` : ''}
           ${buttonHTML}
@@ -1252,4 +1253,3 @@ console.log('✅ Kunden-App geladen mit Flame Font & Belohnungen!')
 
 </body>
 </html>
-
