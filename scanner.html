@@ -1097,7 +1097,7 @@ async function verifyCode() {
     currentCodeData = codeData
     
     if (codeData.used) throw new Error('Code bereits verwendet')
-    if (codeData.confirmed) throw new Error('Code bereits bestätigt')
+    if (codeData.used) throw new Error('Code bereits bestätigt')
     if (new Date(codeData.valid_until) < new Date()) throw new Error('Code abgelaufen')
     
     const customer = codeData.customers
@@ -1156,7 +1156,7 @@ async function confirmCode(code) {
     const { error: codeError } = await supabase
       .from('redeem_codes')
       .update({ 
-        confirmed: true, 
+        used: true, 
         used: true 
       })
       .eq('code', code)
@@ -1206,22 +1206,22 @@ async function verifyAnyCode() {
   
   showResult('result-code', '🔍 Suche Code...', 'info')
   
-  // ERST: Prüfe ob es ein Coupon ist
+  // ERST: Prüfe ob es ein COUPON ist (suche nach unique_code)
   try {
-    const { data: coupon, error: couponError } = await supabase
-      .from('coupons')
-      .select('*')
-      .eq('code', code)
-      .eq('is_active', true)
+    const { data: activation, error: activationError } = await supabase
+      .from('activated_coupons')
+      .select('*, coupons(*), customers(name, phone, qr_id, points)')
+      .eq('unique_code', code)
+      .eq('is_used', false)
       .single()
     
-    if (coupon) {
+    if (activation && activation.coupons) {
       // Es ist ein COUPON!
-      await handleCouponCode(coupon, code)
+      await handleCouponCode(activation, code)
       return
     }
   } catch (e) {
-    // Kein Coupon, weiter zu Prämien-Code
+    // Kein Coupon mit diesem Code, weiter zu Prämien-Code
   }
   
   // DANN: Prüfe ob es ein Prämien-Code ist
@@ -1243,29 +1243,18 @@ async function verifyAnyCode() {
   }
 }
 
-async function handleCouponCode(coupon, code) {
+async function handleCouponCode(activation, code) {
   try {
+    const coupon = activation.coupons
+    const customer = activation.customers
+    
     // Prüfe ob abgelaufen
     if (new Date(coupon.expires_at) < new Date()) {
       throw new Error('Coupon ist abgelaufen')
     }
     
-    // Suche welcher Kunde diesen Coupon aktiviert hat
-    const { data: activated, error: activatedError } = await supabase
-      .from('activated_coupons')
-      .select('*, customers(name, phone, qr_id)')
-      .eq('coupon_id', coupon.id)
-      .eq('is_used', false)
-    
-    if (activatedError) throw activatedError
-    
-    if (!activated || activated.length === 0) {
-      throw new Error('Dieser Coupon wurde von keinem Kunden aktiviert')
-    }
-    
-    const activation = activated[0]
-    const customer = activation.customers
     const expires = new Date(coupon.expires_at).toLocaleDateString('de-DE')
+    const formattedPrice = parseFloat(coupon.price || 0).toFixed(2).replace('.', ',') + ' €'
     
     document.getElementById('code-details').style.display = 'block'
     document.getElementById('code-details').innerHTML = `
@@ -1274,8 +1263,9 @@ async function handleCouponCode(coupon, code) {
         <div class="code">${code}</div>
         <div style="font-size: 14px; color: #92400e; margin: 12px 0;">
           <strong>Produkt:</strong> ${coupon.product}<br>
-          <strong>Preis:</strong> ${coupon.price}<br>
+          <strong>Preis:</strong> ${formattedPrice}<br>
           <strong>Kunde:</strong> ${customer.name} (${customer.phone})<br>
+          <strong>Punkte:</strong> ${customer.points}<br>
           <strong>Gültig bis:</strong> ${expires}
         </div>
         <button onclick="useCoupon('${activation.id}')" class="success" style="width: 100%; margin-bottom: 8px;">
@@ -1300,7 +1290,7 @@ async function handleRedeemCode(codeData, code) {
     currentCodeData = codeData
     
     if (codeData.used) throw new Error('Code bereits verwendet')
-    if (codeData.confirmed) throw new Error('Code bereits bestätigt')
+    if (codeData.used) throw new Error('Code bereits bestätigt')
     if (new Date(codeData.valid_until) < new Date()) throw new Error('Code abgelaufen')
     
     const customer = codeData.customers
@@ -1356,8 +1346,8 @@ async function confirmRedeemCode() {
     const { error: codeError } = await supabase
       .from('redeem_codes')
       .update({ 
-        confirmed: true, 
-        confirmed_at: new Date().toISOString() 
+        used: true, 
+        used_at: new Date().toISOString() 
       })
       .eq('code', currentCodeData.code)
     
