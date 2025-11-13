@@ -1339,6 +1339,21 @@ async function confirmRedeemCode() {
     
     const newPoints = currentCodeData.customers.points - currentCodeData.points_cost
     
+    // 1. Transaction erstellen
+    const { error: txError } = await supabase
+      .from('transactions')
+      .insert({
+        customer_id: currentCodeData.customer_id,
+        type: 'redeem',
+        amount: 0,
+        points: -currentCodeData.points_cost,
+        staff: 'Scanner',
+        notes: currentCodeData.reward_name
+      })
+    
+    if (txError) throw txError
+    
+    // 2. Punkte abziehen
     const { error: updateError } = await supabase
       .from('customers')
       .update({ points: newPoints })
@@ -1346,6 +1361,7 @@ async function confirmRedeemCode() {
     
     if (updateError) throw updateError
     
+    // 3. Code als verwendet markieren
     const { error: codeError } = await supabase
       .from('redeem_codes')
       .update({ 
