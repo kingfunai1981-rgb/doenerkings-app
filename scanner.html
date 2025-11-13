@@ -489,7 +489,7 @@ async function addPointsByPhone() {
     
     // ✅ ZYKLUS-SYSTEM: Prüfe ob neue Belohnungen erstellt werden sollen
     // Alle 6 Besuche wiederholt sich das Muster:
-    // Besuch 3, 9, 15... → Doppelte Punkte
+    // Besuch 2, 8, 14... → Doppelte Punkte
     // Besuch 6, 12, 18... → +100 Punkte
     const { data: txCount } = await supabase
       .from('transactions')
@@ -498,10 +498,10 @@ async function addPointsByPhone() {
       .eq('type', 'earn')
     
     const totalOrders = txCount ? txCount.length : 0
-    const cyclePosition = totalOrders % 6 // Position im 6er-Zyklus
+    const cyclePosition = totalOrders % 10 // Position im 10er-Zyklus
     
-    // Bei Position 3 im Zyklus (Besuch 3, 9, 15, 21...): Doppelte Punkte
-    if (cyclePosition === 3) {
+    // Bei Position 2, 4, 8, 0 (=10) im Zyklus: Doppelte Punkte
+    if (cyclePosition === 2 || cyclePosition === 4 || cyclePosition === 8 || (cyclePosition === 0 && totalOrders > 0)) {
       await supabase.from('bonuses').insert({
         customer_id: customer.id,
         bonus_type: 'double_points',
@@ -509,8 +509,8 @@ async function addPointsByPhone() {
       })
     }
     
-    // Bei Position 0 im Zyklus (Besuch 6, 12, 18, 24...): +100 Punkte
-    if (cyclePosition === 0 && totalOrders > 0) {
+    // Bei Position 6 im Zyklus: +100 Punkte
+    if (cyclePosition === 6) {
       await supabase.from('bonuses').insert({
         customer_id: customer.id,
         bonus_type: 'bonus_points',
@@ -732,10 +732,10 @@ async function addPointsFromScan() {
       .eq('type', 'earn')
     
     const totalOrders = txCount ? txCount.length : 0
-    const cyclePosition = totalOrders % 6
+    const cyclePosition = totalOrders % 10
     
-    // Besuch 3, 9, 15, 21... → Doppelte Punkte
-    if (cyclePosition === 3) {
+    // Besuch 2, 4, 8, 10 (und dann 12, 14, 18, 20...) → Doppelte Punkte
+    if (cyclePosition === 2 || cyclePosition === 4 || cyclePosition === 8 || (cyclePosition === 0 && totalOrders > 0)) {
       await supabase.from('bonuses').insert({
         customer_id: currentCustomer.id,
         bonus_type: 'double_points',
@@ -743,8 +743,8 @@ async function addPointsFromScan() {
       })
     }
     
-    // Besuch 6, 12, 18, 24... → +100 Punkte
-    if (cyclePosition === 0 && totalOrders > 0) {
+    // Besuch 6, 16, 26... → +100 Punkte
+    if (cyclePosition === 6) {
       await supabase.from('bonuses').insert({
         customer_id: currentCustomer.id,
         bonus_type: 'bonus_points',
