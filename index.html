@@ -1226,11 +1226,14 @@ async function loadCoupons() {
         expiryText = `<span class="coupon-expiry">⏰ Läuft in ${daysLeft} Tagen ab</span>`
       }
       
+      // Formatiere Preis
+      const formattedPrice = parseFloat(coupon.price || 0).toFixed(2).replace('.', ',') + ' €'
+      
       return `
         <div class="coupon-item ${isActivated ? 'activated' : ''}">
           <h3>${coupon.title}</h3>
           <div class="coupon-product">🍴 ${coupon.product}</div>
-          <div class="coupon-price">💰 ${coupon.price}</div>
+          <div class="coupon-price">💰 ${formattedPrice}</div>
           ${coupon.description ? `<div class="coupon-desc">📝 ${coupon.description}</div>` : ''}
           <div class="coupon-code-display">${coupon.code}</div>
           ${expiryText}
