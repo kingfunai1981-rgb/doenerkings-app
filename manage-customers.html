@@ -1041,10 +1041,10 @@ async function loadCoupons() {
           </div>
           <div class="coupon-actions">
             ${coupon.is_active && !isExpired ? 
-              `<button class="danger" onclick="deactivateCoupon('${coupon.id}', '${coupon.code}')">❌ Deaktivieren</button>` :
-              `<button class="success" onclick="activateCoupon('${coupon.id}', '${coupon.code}')">✅ Aktivieren</button>`
+              `<button class="danger" onclick="deactivateCoupon(${coupon.id}, '${coupon.code}')">❌ Deaktivieren</button>` :
+              `<button class="success" onclick="activateCoupon(${coupon.id}, '${coupon.code}')">✅ Aktivieren</button>`
             }
-            <button class="danger" onclick="deleteCoupon('${coupon.id}', '${coupon.code}')">🗑️ Löschen</button>
+            <button class="danger" onclick="deleteCoupon(${coupon.id}, '${coupon.code}')">🗑️ Löschen</button>
           </div>
         </div>
       `
@@ -1058,59 +1058,53 @@ async function loadCoupons() {
 }
 
 async function deactivateCoupon(id, code) {
-  if (!confirm(`Coupon ${code} deaktivieren?`)) return
-
   try {
     const { error } = await supabase
       .from('coupons')
       .update({ is_active: false })
-      .eq('id', id)
+      .eq('id', parseInt(id))
 
     if (error) throw error
 
-    alert('✅ Coupon deaktiviert!')
     loadCoupons()
 
   } catch (e) {
-    alert('❌ Fehler: ' + e.message)
+    console.error('Deactivate error:', e.message)
+    loadCoupons()
   }
 }
 
 async function activateCoupon(id, code) {
-  if (!confirm(`Coupon ${code} aktivieren?`)) return
-
   try {
     const { error } = await supabase
       .from('coupons')
       .update({ is_active: true })
-      .eq('id', id)
+      .eq('id', parseInt(id))
 
     if (error) throw error
 
-    alert('✅ Coupon aktiviert!')
     loadCoupons()
 
   } catch (e) {
-    alert('❌ Fehler: ' + e.message)
+    console.error('Activate error:', e.message)
+    loadCoupons()
   }
 }
 
 async function deleteCoupon(id, code) {
-  if (!confirm(`Coupon ${code} wirklich löschen?`)) return
-
   try {
     const { error } = await supabase
       .from('coupons')
       .delete()
-      .eq('id', id)
+      .eq('id', parseInt(id))
 
     if (error) throw error
 
-    alert('✅ Coupon gelöscht!')
     loadCoupons()
 
   } catch (e) {
-    alert('❌ Fehler: ' + e.message)
+    console.error('Delete error:', e.message)
+    loadCoupons()
   }
 }
 
