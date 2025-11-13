@@ -1007,8 +1007,7 @@ async function redeem(rewardName, cost) {
       reward_name: rewardName,
       points_cost: cost,
       valid_until: expires.toISOString(),
-      used: false,
-      confirmed: false
+      used: false
     })
     
     if (error) throw error
@@ -1029,7 +1028,6 @@ async function loadPendingCodes() {
       .from('redeem_codes')
       .select('*')
       .eq('customer_id', currentCustomer.id)
-      .eq('confirmed', false)
       .eq('used', false)
       .order('created_at', { ascending: false })
     
@@ -1081,7 +1079,7 @@ async function cancelCode(code) {
       .from('redeem_codes')
       .delete()
       .eq('code', code)
-      .eq('confirmed', false)
+      .eq('used', false)
     
     if (error) throw error
     
