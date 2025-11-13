@@ -489,7 +489,7 @@ async function addPointsByPhone() {
     
     const totalOrders = txCount ? txCount.length : 0
     
-    // ✅ PRÜFE OB KUNDE EINE BELOHNUNG AKTIVIERT HAT
+    // ✅ PRÜFE OB KUNDE EINE BELOHNUNG AKTIVIERT HAT (für DIESEN Besuch)
     const { data: activeBonuses } = await supabase
       .from('bonuses')
       .select('*')
@@ -570,18 +570,16 @@ async function addPointsByPhone() {
     
     if (updateError) throw updateError
     
-    // ✅ ZYKLUS-SYSTEM: Prüfe ob neue Belohnungen erstellt werden sollen
-    // Basiert auf dem konfigurierbaren 10er-Muster
-    // totalOrders ist jetzt die Anzahl NACH diesem Besuch
-    // Wir wollen den Bonus für den NÄCHSTEN Besuch erstellen
-    const nextVisitIndex = totalOrders % 10 // Index für den NÄCHSTEN Besuch (0-9)
+    // ✅ ZYKLUS-SYSTEM: Erstelle Bonus für den NÄCHSTEN Besuch
+    // Nach diesem Besuch hat der Kunde (totalOrders + 1) Besuche gemacht
+    // Wir erstellen jetzt den Bonus für Besuch (totalOrders + 2)
+    // Also Index: (totalOrders + 1) % 10
+    const nextVisitIndex = (totalOrders + 1) % 10
     
-    // Hole das Muster für den NÄCHSTEN Besuch
     if (rewardPattern && rewardPattern[nextVisitIndex]) {
       const reward = rewardPattern[nextVisitIndex]
       
       if (reward.type === 'double') {
-        // Doppelte Punkte für nächsten Besuch
         await supabase.from('bonuses').insert({
           customer_id: customer.id,
           bonus_type: 'double_points',
@@ -589,7 +587,6 @@ async function addPointsByPhone() {
           status: 'pending'
         })
       } else if (reward.type === 'bonus' && reward.bonus > 0) {
-        // Extra Bonuspunkte für nächsten Besuch - SPEICHERE DEN WERT!
         await supabase.from('bonuses').insert({
           customer_id: customer.id,
           bonus_type: 'bonus_points',
@@ -597,7 +594,6 @@ async function addPointsByPhone() {
           status: 'pending'
         })
       }
-      // Bei 'normal' passiert nichts
     }
     
     let resultHTML = `✅ <strong>ERFOLGREICH!</strong><br><br>` +
