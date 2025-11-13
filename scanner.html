@@ -572,11 +572,13 @@ async function addPointsByPhone() {
     
     // ✅ ZYKLUS-SYSTEM: Prüfe ob neue Belohnungen erstellt werden sollen
     // Basiert auf dem konfigurierbaren 10er-Muster
-    const patternIndex = totalOrders % 10 // Position im 10er-Zyklus (0-9)
+    // totalOrders ist jetzt die Anzahl NACH diesem Besuch
+    // Wir wollen den Bonus für den NÄCHSTEN Besuch erstellen
+    const nextVisitIndex = totalOrders % 10 // Index für den NÄCHSTEN Besuch (0-9)
     
-    // Hole das Muster für diese Position
-    if (rewardPattern && rewardPattern[patternIndex]) {
-      const reward = rewardPattern[patternIndex]
+    // Hole das Muster für den NÄCHSTEN Besuch
+    if (rewardPattern && rewardPattern[nextVisitIndex]) {
+      const reward = rewardPattern[nextVisitIndex]
       
       if (reward.type === 'double') {
         // Doppelte Punkte für nächsten Besuch
