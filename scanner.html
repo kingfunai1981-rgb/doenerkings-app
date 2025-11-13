@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Döner Boxx Scanner PRO</title>
+<title>Dönerkings Scanner PRO</title>
 <style>
 @font-face {
   font-family: 'Flame';
@@ -251,7 +251,7 @@ canvas { display: none; }
 
 <div class="container">
   <div class="card">
-    <h1>🌯 Döner Boxx Scanner PRO</h1>
+    <h1>🌯 Dönerkings Scanner PRO</h1>
     <div style="color: #666; font-size: 14px;">Status: <span id="status">Bereit ✅</span></div>
   </div>
 
@@ -450,7 +450,7 @@ async function addPointsByPhone() {
         // Verdopple die Punkte
         bonusPointsAdded = pointsToAdd
         pointsToAdd = pointsToAdd * 2
-        bonusApplied = '⭐ 2× Punkte angewendet!'
+        bonusApplied = '⭐ Doppelte Punkte angewendet!'
       } else if (bonus.bonus_type === 'bonus_points') {
         // +100 Bonuspunkte
         bonusPointsAdded = 100
@@ -489,7 +489,7 @@ async function addPointsByPhone() {
     
     // ✅ ZYKLUS-SYSTEM: Prüfe ob neue Belohnungen erstellt werden sollen
     // Alle 6 Besuche wiederholt sich das Muster:
-    // Besuch 3, 9, 15... → 2× Punkte
+    // Besuch 3, 9, 15... → Doppelte Punkte
     // Besuch 6, 12, 18... → +100 Punkte
     const { data: txCount } = await supabase
       .from('transactions')
@@ -500,7 +500,7 @@ async function addPointsByPhone() {
     const totalOrders = txCount ? txCount.length : 0
     const cyclePosition = totalOrders % 6 // Position im 6er-Zyklus
     
-    // Bei Position 3 im Zyklus (Besuch 3, 9, 15, 21...): 2× Punkte
+    // Bei Position 3 im Zyklus (Besuch 3, 9, 15, 21...): Doppelte Punkte
     if (cyclePosition === 3) {
       await supabase.from('bonuses').insert({
         customer_id: customer.id,
@@ -645,7 +645,7 @@ async function onQRDetected(qrCode) {
     const badgeEl = document.getElementById('activeBonusBadge')
     if (activeBonuses && activeBonuses.length > 0) {
       const bonus = activeBonuses[0]
-      const text = bonus.bonus_type === 'double_points' ? '🔥 2× Punkte aktiv!' : '🎁 +100 Bonus aktiv!'
+      const text = bonus.bonus_type === 'double_points' ? '🔥 Doppelte Punkte aktiv!' : '🎁 +100 Bonus aktiv!'
       badgeEl.innerHTML = `<div class="bonus-badge">${text}</div>`
     } else {
       badgeEl.innerHTML = ''
@@ -689,7 +689,7 @@ async function addPointsFromScan() {
       if (bonus.bonus_type === 'double_points') {
         bonusPointsAdded = pointsToAdd
         pointsToAdd = pointsToAdd * 2
-        bonusApplied = '⭐ 2× Punkte angewendet!'
+        bonusApplied = '⭐ Doppelte Punkte angewendet!'
       } else if (bonus.bonus_type === 'bonus_points') {
         bonusPointsAdded = 100
         pointsToAdd = pointsToAdd + 100
@@ -734,7 +734,7 @@ async function addPointsFromScan() {
     const totalOrders = txCount ? txCount.length : 0
     const cyclePosition = totalOrders % 6
     
-    // Besuch 3, 9, 15, 21... → 2× Punkte
+    // Besuch 3, 9, 15, 21... → Doppelte Punkte
     if (cyclePosition === 3) {
       await supabase.from('bonuses').insert({
         customer_id: currentCustomer.id,
