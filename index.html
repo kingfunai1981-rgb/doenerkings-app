@@ -833,37 +833,52 @@ async function register() {
     
     if (error) throw error
     
+    console.log('✅ Kunde erstellt:', data.id, data.name)
+    
     // ✅ ERSTELLE BONUS FÜR BESUCH 1
     // Lade Muster DIREKT (falls noch nicht geladen)
     let pattern = rewardPattern
     if (!pattern || pattern.length === 0) {
+      console.log('⚠️ Pattern noch nicht geladen, lade jetzt...')
       const { data: patternData } = await supabase
         .from('reward_pattern')
         .select('pattern')
         .single()
       
       pattern = patternData?.pattern || []
+      console.log('📊 Pattern geladen:', pattern)
     }
     
     // Position 0 im Muster = Besuch 1
     if (pattern && pattern[0]) {
       const reward = pattern[0]
+      console.log('🎁 Position 0 (Besuch 1):', reward)
       
       if (reward.type === 'double') {
-        await supabase.from('bonuses').insert({
+        console.log('⭐ Erstelle Doppelpunkte-Bonus...')
+        const { error: bonusError } = await supabase.from('bonuses').insert({
           customer_id: data.id,
           bonus_type: 'double_points',
           bonus_amount: 0,
           status: 'pending'
         })
+        if (bonusError) console.error('❌ Bonus-Fehler:', bonusError)
+        else console.log('✅ Bonus erstellt!')
       } else if (reward.type === 'bonus' && reward.bonus > 0) {
-        await supabase.from('bonuses').insert({
+        console.log(`💰 Erstelle ${reward.bonus} Bonus-Punkte...`)
+        const { error: bonusError } = await supabase.from('bonuses').insert({
           customer_id: data.id,
           bonus_type: 'bonus_points',
           bonus_amount: reward.bonus,
           status: 'pending'
         })
+        if (bonusError) console.error('❌ Bonus-Fehler:', bonusError)
+        else console.log('✅ Bonus erstellt!')
+      } else {
+        console.log('😐 Normal - kein Bonus für Position 0')
       }
+    } else {
+      console.error('❌ Pattern oder Position 0 nicht gefunden!')
     }
     
     showResult('reg-result', '✅ Erfolgreich registriert!', 'success')
