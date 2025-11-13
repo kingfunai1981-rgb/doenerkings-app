@@ -479,7 +479,6 @@ textarea {
       <p><strong>ℹ️ So funktioniert's:</strong> Normal = Standard-Punkte (10P/€) • Verdoppelt = Doppelte Punkte (20P/€) • Bonus = Extra Fixpunkte zusätzlich (z.B. +100P)</p>
     </div>
 
-    <button class="primary" onclick="loadBonusPattern()">🔄 Aktuelles Muster laden</button>
     <div id="result-bonus-load"></div>
 
     <div id="bonusPatternCard" style="display: none;">
@@ -522,7 +521,6 @@ textarea {
 
     <div style="margin-top: 24px;">
       <h2>📋 Aktuelle Coupons</h2>
-      <button class="primary" onclick="loadCoupons()">🔄 Coupons laden</button>
       <div id="result-coupon-load"></div>
       <div id="couponList" style="margin-top: 12px;"></div>
     </div>
@@ -891,6 +889,11 @@ async function saveBonusPattern() {
     
     showResult('result-bonus-save', '✅ Muster gespeichert!', 'success')
     
+    // Auto-Reload nach 1 Sekunde
+    setTimeout(() => {
+      loadBonusPattern()
+    }, 1000)
+    
   } catch (e) {
     showResult('result-bonus-save', '❌ Fehler: ' + e.message, 'error')
   }
@@ -1112,6 +1115,13 @@ async function deleteCoupon(id, code) {
 }
 
 console.log('✅ Kunden-Verwaltung geladen')
+
+// ✅ AUTO-LOAD beim Seitenstart
+window.addEventListener('DOMContentLoaded', function() {
+  loadBonusPattern()
+  loadCoupons()
+})
+
 </script>
 
 </body>
