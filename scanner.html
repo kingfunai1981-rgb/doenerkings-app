@@ -518,9 +518,8 @@ async function addPointsByPhone() {
         pointsToAdd = pointsToAdd * 2
         bonusApplied = '⭐ Doppelte Punkte angewendet!'
       } else if (bonus.bonus_type === 'bonus_points') {
-        // +100 Bonuspunkte (oder anderer Wert aus Muster)
-        const patternIndex = totalOrders % 10
-        const bonusAmount = rewardPattern[patternIndex]?.bonus || 100
+        // Nutze den gespeicherten Bonuswert!
+        const bonusAmount = bonus.bonus_amount || 100
         bonusPointsAdded = bonusAmount
         pointsToAdd = pointsToAdd + bonusAmount
         bonusApplied = `💰 +${bonusAmount} Bonus-Punkte angewendet!`
@@ -584,13 +583,15 @@ async function addPointsByPhone() {
         await supabase.from('bonuses').insert({
           customer_id: customer.id,
           bonus_type: 'double_points',
+          bonus_amount: 0,
           status: 'pending'
         })
       } else if (reward.type === 'bonus' && reward.bonus > 0) {
-        // Extra Bonuspunkte für nächsten Besuch
+        // Extra Bonuspunkte für nächsten Besuch - SPEICHERE DEN WERT!
         await supabase.from('bonuses').insert({
           customer_id: customer.id,
           bonus_type: 'bonus_points',
+          bonus_amount: reward.bonus,
           status: 'pending'
         })
       }
@@ -1196,4 +1197,3 @@ console.log('✅ Scanner PRO geladen mit Flame Font & Belohnungen!')
 
 </body>
 </html>
-
