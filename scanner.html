@@ -887,42 +887,45 @@ async function loadHistory() {
       return
     }
     
-    const redeemTxs = data.filter(tx => tx.type === 'redeem')
-    const customerIds = [...new Set(redeemTxs.map(tx => tx.customer_id))]
+    // Hole ALLE verwendeten redeem_codes
+    const { data: allCodes } = await supabase
+      .from('redeem_codes')
+      .select('code, customer_id, used_at')
+      .eq('used', true)
+      .order('used_at', { ascending: true })
     
+    // Erstelle Map: customer_id -> [codes]
+    const codesByCustomer = {}
+    if (allCodes) {
+      allCodes.forEach(c => {
+        if (!codesByCustomer[c.customer_id]) {
+          codesByCustomer[c.customer_id] = []
+        }
+        codesByCustomer[c.customer_id].push(c)
+      })
+    }
+    
+    // Match codes zu transactions
     const codeByTxId = {}
-    
-    if (customerIds.length > 0) {
-      for (const customerId of customerIds) {
-        const customerTxs = redeemTxs
-          .filter(tx => tx.customer_id === customerId)
-          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+    data.forEach(tx => {
+      if (tx.type === 'redeem' && codesByCustomer[tx.customer_id]) {
+        const codes = codesByCustomer[tx.customer_id]
+        const txTime = new Date(tx.created_at).getTime()
         
-        const { data: codes } = await supabase
-          .from('redeem_codes')
-          .select('code, created_at')
-          .eq('customer_id', customerId)
-          .eq('used', true)
-          .order('created_at', { ascending: true })
+        // Finde den Code der zeitlich am nächsten ist
+        const matchingCode = codes.find(c => {
+          const codeTime = new Date(c.used_at).getTime()
+          return Math.abs(codeTime - txTime) < 5 * 60 * 1000 // 5 Minuten Toleranz
+        })
         
-        if (codes && codes.length > 0) {
-          let codeIndex = 0
-          
-          customerTxs.forEach(tx => {
-            if (codeIndex < codes.length) {
-              const txTime = new Date(tx.created_at).getTime()
-              const code = codes[codeIndex]
-              const codeTime = new Date(code.created_at).getTime()
-              
-              if (codeTime <= txTime + 2 * 60 * 1000) {
-                codeByTxId[tx.id] = code.code
-                codeIndex++
-              }
-            }
-          })
+        if (matchingCode) {
+          codeByTxId[tx.id] = matchingCode.code
+          // Entferne aus Liste damit nicht doppelt gemapped
+          const idx = codes.indexOf(matchingCode)
+          codes.splice(idx, 1)
         }
       }
-    }
+    })
     
     list.innerHTML = data.map(tx => {
       const date = new Date(tx.created_at)
