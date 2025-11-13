@@ -1216,21 +1216,23 @@ async function loadCoupons() {
       return
     }
     
-    // Prüfe welche aktiviert sind
+    // Prüfe welche aktiviert sind (mit unique_code)
     const { data: activated } = await supabase
       .from('activated_coupons')
-      .select('coupon_id')
+      .select('coupon_id, unique_code')
       .eq('customer_id', currentCustomer.id)
       .eq('is_used', false)
     
-    const activatedIds = new Set(activated?.map(a => a.coupon_id) || [])
+    // Map für schnellen Zugriff: coupon_id -> unique_code
+    const activatedMap = new Map(activated?.map(a => [a.coupon_id, a.unique_code]) || [])
     
     section.style.display = 'block'
     
     list.innerHTML = activeCoupons.map(coupon => {
       const expiry = new Date(coupon.expires_at)
       const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24))
-      const isActivated = activatedIds.has(coupon.id)
+      const isActivated = activatedMap.has(coupon.id)
+      const uniqueCode = activatedMap.get(coupon.id) || coupon.code
       
       let expiryText = ''
       if (daysLeft === 0) {
@@ -1250,7 +1252,7 @@ async function loadCoupons() {
           <div class="coupon-product">🍴 ${coupon.product}</div>
           <div class="coupon-price">💰 ${formattedPrice}</div>
           ${coupon.description ? `<div class="coupon-desc">📝 ${coupon.description}</div>` : ''}
-          <div class="coupon-code-display">${coupon.code}</div>
+          <div class="coupon-code-display">${uniqueCode}</div>
           ${expiryText}
           ${isActivated ? 
             `<div class="coupon-activated-badge">✅ Aktiviert! Zeige Code beim Scannen</div>
@@ -1268,7 +1270,6 @@ async function loadCoupons() {
 
 async function activateCoupon(couponId) {
   try {
-    // Konvertiere zu Nummer
     const id = parseInt(couponId)
     
     // Prüfen ob bereits aktiviert
@@ -1280,24 +1281,29 @@ async function activateCoupon(couponId) {
       .eq('is_used', false)
     
     if (existing && existing.length > 0) {
-      // Bereits aktiviert - nur neu laden
       loadCoupons()
       return
     }
     
-    // Aktivieren
+    // Generiere einzigartigen 4-stelligen Code
+    const uniqueCode = Math.floor(1000 + Math.random() * 9000).toString()
+    
+    // Aktivieren mit unique_code
     const { error } = await supabase
       .from('activated_coupons')
       .insert({
         customer_id: currentCustomer.id,
         coupon_id: id,
+        unique_code: uniqueCode,
         activated_at: new Date().toISOString(),
         is_used: false
       })
     
     if (error) throw error
     
-    // Sofort neu laden um aktivierten Status zu zeigen
+    console.log('✅ Coupon aktiviert mit Code:', uniqueCode)
+    
+    // Sofort neu laden um Code zu zeigen
     loadCoupons()
     
   } catch (e) {
