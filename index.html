@@ -837,10 +837,6 @@ button:disabled {
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-// ============================================
-// ✅ MIT BELOHNUNGEN
-// ============================================
-
 const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 
@@ -849,7 +845,6 @@ let currentCustomer = null
 let refreshInterval = null
 let rewardPattern = []
 
-// Lade Bonusmuster beim Start
 async function loadRewardPattern() {
   try {
     const { data, error } = await supabase
@@ -934,4 +929,519 @@ async function register() {
       .limit(1)
     
     if (existing && existing.length > 0) {
-      showResult('reg-result', '❌ Diese Nummer ist bereits registriert! Bitte anm
+      showResult('reg-result', '❌ Diese Nummer ist bereits registriert! Bitte anmelden.', 'error')
+      return
+    }
+    
+    const qrId = Math.floor(1000 + Math.random() * 9000).toString()
+    
+    const { data, error } = await supabase
+      .from('customers')
+      .insert({
+        qr_id: qrId,
+        name: name,
+        phone: phone,
+        email: null,
+        points: 0,
+        email_verified: false,
+        auth_user_id: null
+      })
+      .select()
+      .single()
+    
+    if (error) throw error
+    
+    let pattern = rewardPattern
+    if (!pattern || pattern.length === 0) {
+      const { data: patternData } = await supabase
+        .from('reward_pattern')
+        .select('pattern')
+        .single()
+      
+      pattern = patternData?.pattern || []
+    }
+    
+    if (pattern && pattern[0]) {
+      const reward = pattern[0]
+      
+      if (reward.type === 'double') {
+        await supabase.from('bonuses').insert({
+          customer_id: data.id,
+          bonus_type: 'double_points',
+          bonus_amount: 0,
+          status: 'pending'
+        })
+      } else if (reward.type === 'bonus' && reward.bonus > 0) {
+        await supabase.from('bonuses').insert({
+          customer_id: data.id,
+          bonus_type: 'bonus_points',
+          bonus_amount: reward.bonus,
+          status: 'pending'
+        })
+      }
+    }
+    
+    showResult('reg-result', '✅ Erfolgreich registriert!', 'success')
+    
+    setTimeout(() => {
+      localStorage.setItem('customerData', JSON.stringify(data))
+      loadCustomer(data)
+    }, 1000)
+    
+  } catch (e) {
+    showResult('reg-result', '❌ Fehler: ' + e.message, 'error')
+  }
+}
+
+async function login() {
+  const phoneRaw = document.getElementById('login-phone').value.trim()
+  
+  if (!phoneRaw) {
+    showResult('login-result', '❌ Bitte Handynummer eingeben!', 'error')
+    return
+  }
+  
+  const phone = normalizePhone(phoneRaw)
+  
+  try {
+    showResult('login-result', '⏳ Suche Konto...', 'info')
+    
+    const { data: customers, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('phone', phone)
+      .limit(1)
+    
+    if (error) throw error
+    
+    if (!customers || customers.length === 0) {
+      showResult('login-result', '❌ Handynummer nicht gefunden. Bitte registrieren!', 'error')
+      return
+    }
+    
+    showResult('login-result', '✅ Erfolgreich angemeldet!', 'success')
+    
+    setTimeout(() => {
+      localStorage.setItem('customerData', JSON.stringify(customers[0]))
+      loadCustomer(customers[0])
+    }, 500)
+    
+  } catch (e) {
+    showResult('login-result', '❌ Fehler: ' + e.message, 'error')
+  }
+}
+
+async function loadCustomer(customer) {
+  currentCustomer = customer
+  
+  await refreshCustomerData()
+  
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${customer.qr_id}`
+  document.getElementById('header-qr-mini').src = qrUrl
+  document.getElementById('modal-qr').src = qrUrl
+  document.getElementById('modal-qr-id').textContent = customer.qr_id
+  
+  showScreen('app')
+  
+  if (refreshInterval) clearInterval(refreshInterval)
+  refreshInterval = setInterval(refreshCustomerData, 5000)
+  
+  loadPendingCodes()
+  loadBonuses()
+  loadCoupons()
+}
+
+async function refreshCustomerData() {
+  if (!currentCustomer) return
+  
+  try {
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('id', currentCustomer.id)
+      .single()
+    
+    if (error) throw error
+    
+    currentCustomer = data
+    document.getElementById('app-name').textContent = data.name
+    document.getElementById('app-phone').textContent = data.phone
+    document.getElementById('app-points').textContent = data.points
+    
+    document.getElementById('modal-name').textContent = data.name
+    document.getElementById('modal-phone').textContent = data.phone
+    
+    updateRewardButtons(data.points)
+    localStorage.setItem('customerData', JSON.stringify(data))
+    
+    loadBonuses()
+    loadCoupons()
+    loadPendingCodes()
+  } catch (e) {
+    console.error('Refresh error:', e)
+  }
+}
+
+function openQRModal() {
+  document.getElementById('qr-modal').classList.add('active')
+  document.body.style.overflow = 'hidden'
+}
+
+function closeQRModal(event) {
+  if (!event || event.target.id === 'qr-modal') {
+    document.getElementById('qr-modal').classList.remove('active')
+    document.body.style.overflow = 'auto'
+  }
+}
+
+function updateRewardButtons(points) {
+  document.getElementById('btn-250').disabled = points < 250
+  document.getElementById('btn-500').disabled = points < 500
+  document.getElementById('btn-750').disabled = points < 750
+  document.getElementById('btn-1000').disabled = points < 1000
+  document.getElementById('btn-1250').disabled = points < 1250
+}
+
+async function redeem(rewardName, cost) {
+  if (!currentCustomer) return
+  
+  if (currentCustomer.points < cost) {
+    return
+  }
+  
+  try {
+    const code = Math.floor(1000 + Math.random() * 9000).toString()
+    const expires = new Date(Date.now() + 24*60*60*1000)
+    
+    const { error } = await supabase.from('redeem_codes').insert({
+      code: code,
+      customer_id: currentCustomer.id,
+      reward_name: rewardName,
+      points_cost: cost,
+      valid_until: expires.toISOString(),
+      used: false
+    })
+    
+    if (error) throw error
+    
+    loadPendingCodes()
+    
+  } catch (e) {
+    console.error('Redeem error:', e)
+  }
+}
+
+async function loadPendingCodes() {
+  if (!currentCustomer) return
+  
+  try {
+    const { data, error } = await supabase
+      .from('redeem_codes')
+      .select('*')
+      .eq('customer_id', currentCustomer.id)
+      .eq('used', false)
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    
+    const section = document.getElementById('pending-section')
+    const list = document.getElementById('pending-list')
+    
+    if (!data || data.length === 0) {
+      section.style.display = 'none'
+      list.innerHTML = ''
+      return
+    }
+    
+    section.style.display = 'block'
+    
+    list.innerHTML = data.map(item => {
+      const expires = new Date(item.valid_until).toLocaleString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+      
+      return `
+        <div class="pending-code">
+          <h3>🎁 ${item.reward_name}</h3>
+          <div class="code">${item.code}</div>
+          <div class="code-info">
+            Gültig bis: ${expires}<br>
+            Kosten: ${item.points_cost} Punkte
+          </div>
+          <button class="small danger" onclick="cancelCode('${item.code}')">🗑️ Stornieren</button>
+        </div>
+      `
+    }).join('')
+    
+  } catch (e) {
+    console.error('Load pending error:', e)
+  }
+}
+
+async function cancelCode(code) {
+  if (!confirm('Code wirklich stornieren?')) return
+  
+  try {
+    const { error } = await supabase
+      .from('redeem_codes')
+      .delete()
+      .eq('code', code)
+      .eq('used', false)
+    
+    if (error) throw error
+    
+    loadPendingCodes()
+    
+  } catch (e) {
+    console.error('Cancel error:', e)
+    loadPendingCodes()
+  }
+}
+
+async function loadBonuses() {
+  if (!currentCustomer) return
+  
+  try {
+    const { data, error } = await supabase
+      .from('bonuses')
+      .select('*')
+      .eq('customer_id', currentCustomer.id)
+      .neq('status', 'used')
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    
+    const section = document.getElementById('bonuses-section')
+    const list = document.getElementById('bonuses-list')
+    
+    if (!data || data.length === 0) {
+      section.style.display = 'none'
+      return
+    }
+    
+    section.style.display = 'block'
+    
+    list.innerHTML = data.map(bonus => {
+      const isActive = bonus.status === 'active'
+      const bonusAmount = bonus.bonus_amount || 100
+      
+      let statusText = ''
+      let buttonHTML = ''
+      let descText = ''
+      
+      if (bonus.bonus_type === 'double_points') {
+        descText = 'Beim nächsten Einkauf bekommst du doppelte Punkte!'
+      } else {
+        descText = `Beim nächsten Einkauf erhältst du ${bonusAmount} Extra-Punkte!`
+      }
+      
+      if (isActive) {
+        statusText = '🔥 Aktiv für nächsten Einkauf!'
+      } else {
+        buttonHTML = `<button onclick="activateBonus(${bonus.id})">🚀 Jetzt aktivieren</button>`
+      }
+      
+      return `
+        <div class="bonus-item ${isActive ? 'active' : ''}">
+          <h3>${bonus.bonus_type === 'double_points' ? '⭐ Doppelte Punkte' : `💰 +${bonusAmount} Bonus-Punkte`}</h3>
+          <div class="bonus-desc">${descText}</div>
+          ${statusText ? `<div class="bonus-status">${statusText}</div>` : ''}
+          ${buttonHTML}
+        </div>
+      `
+    }).join('')
+    
+  } catch (e) {
+    console.error('Load bonuses error:', e)
+  }
+}
+
+async function activateBonus(bonusId) {
+  try {
+    const { data: existingActive } = await supabase
+      .from('bonuses')
+      .select('*')
+      .eq('customer_id', currentCustomer.id)
+      .eq('status', 'active')
+    
+    if (existingActive && existingActive.length > 0) {
+      return
+    }
+    
+    const { error } = await supabase
+      .from('bonuses')
+      .update({ status: 'active' })
+      .eq('id', bonusId)
+    
+    if (error) throw error
+    
+    loadBonuses()
+    
+  } catch (e) {
+    console.error('Activate error:', e)
+  }
+}
+
+async function loadCoupons() {
+  if (!currentCustomer) return
+  
+  try {
+    const { data: coupons, error } = await supabase
+      .from('coupons')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    
+    const section = document.getElementById('coupons-section')
+    const list = document.getElementById('coupons-list')
+    
+    if (!coupons || coupons.length === 0) {
+      section.style.display = 'none'
+      return
+    }
+    
+    const now = new Date()
+    const activeCoupons = coupons.filter(c => new Date(c.expires_at) > now)
+    
+    if (activeCoupons.length === 0) {
+      section.style.display = 'none'
+      return
+    }
+    
+    const { data: activated } = await supabase
+      .from('activated_coupons')
+      .select('coupon_id, unique_code')
+      .eq('customer_id', currentCustomer.id)
+      .eq('is_used', false)
+    
+    const activatedMap = new Map(activated?.map(a => [a.coupon_id, a.unique_code]) || [])
+    
+    section.style.display = 'block'
+    
+    list.innerHTML = activeCoupons.map(coupon => {
+      const expiry = new Date(coupon.expires_at)
+      const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24))
+      const isActivated = activatedMap.has(coupon.id)
+      const uniqueCode = activatedMap.get(coupon.id) || coupon.code
+      
+      let expiryText = ''
+      if (daysLeft === 0) {
+        expiryText = '<span class="coupon-expiry warning">⚠️ Läuft heute ab!</span>'
+      } else if (daysLeft <= 3) {
+        expiryText = `<span class="coupon-expiry warning">⏰ Läuft in ${daysLeft} Tagen ab</span>`
+      } else {
+        expiryText = `<span class="coupon-expiry">⏰ Läuft in ${daysLeft} Tagen ab</span>`
+      }
+      
+      const formattedPrice = parseFloat(coupon.price || 0).toFixed(2).replace('.', ',') + ' €'
+      
+      return `
+        <div class="coupon-item ${isActivated ? 'activated' : ''}">
+          <h3>${coupon.title}</h3>
+          <div class="coupon-product">🍴 ${coupon.product}</div>
+          <div class="coupon-price">💰 ${formattedPrice}</div>
+          ${coupon.description ? `<div class="coupon-desc">📝 ${coupon.description}</div>` : ''}
+          <div class="coupon-code-display">${uniqueCode}</div>
+          ${expiryText}
+          ${isActivated ? 
+            `<div class="coupon-activated-badge">✅ Aktiviert! Zeige Code beim Scannen</div>
+             <button onclick="deactivateCoupon(${coupon.id})" style="background: #ef4444; margin-top: 8px;">❌ Stornieren</button>` : 
+            `<button onclick="activateCoupon(${coupon.id})">🚀 Jetzt aktivieren</button>`
+          }
+        </div>
+      `
+    }).join('')
+    
+  } catch (e) {
+    console.error('Load coupons error:', e)
+  }
+}
+
+async function activateCoupon(couponId) {
+  try {
+    const id = parseInt(couponId)
+    
+    const { data: existing } = await supabase
+      .from('activated_coupons')
+      .select('*')
+      .eq('customer_id', currentCustomer.id)
+      .eq('coupon_id', id)
+      .eq('is_used', false)
+    
+    if (existing && existing.length > 0) {
+      loadCoupons()
+      return
+    }
+    
+    const uniqueCode = Math.floor(1000 + Math.random() * 9000).toString()
+    
+    const { error } = await supabase
+      .from('activated_coupons')
+      .insert({
+        customer_id: currentCustomer.id,
+        coupon_id: id,
+        unique_code: uniqueCode,
+        activated_at: new Date().toISOString(),
+        is_used: false
+      })
+    
+    if (error) throw error
+    
+    loadCoupons()
+    
+  } catch (e) {
+    console.error('Fehler beim Aktivieren:', e.message)
+    loadCoupons()
+  }
+}
+
+async function deactivateCoupon(couponId) {
+  try {
+    const id = parseInt(couponId)
+    
+    const { error } = await supabase
+      .from('activated_coupons')
+      .delete()
+      .eq('customer_id', currentCustomer.id)
+      .eq('coupon_id', id)
+      .eq('is_used', false)
+    
+    if (error) throw error
+    
+    loadCoupons()
+    
+  } catch (e) {
+    console.error('Fehler beim Stornieren:', e.message)
+    loadCoupons()
+  }
+}
+
+function logout() {
+  if (refreshInterval) clearInterval(refreshInterval)
+  currentCustomer = null
+  localStorage.removeItem('customerData')
+  showScreen('start')
+}
+
+window.onload = () => {
+  const stored = localStorage.getItem('customerData')
+  if (stored) {
+    try {
+      const customer = JSON.parse(stored)
+      loadCustomer(customer)
+    } catch (e) {
+      localStorage.removeItem('customerData')
+    }
+  }
+}
+
+console.log('✅ Kunden-App geladen mit Flame Font & Belohnungen!')
+</script>
+
+</body>
+</html>
