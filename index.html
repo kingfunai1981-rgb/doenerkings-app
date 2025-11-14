@@ -43,16 +43,16 @@ body {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   background-size: cover;
   background-position: 50% 50%;
-  padding: 60px 20px 30px;
+  padding: 20px 20px 24px;
   text-align: center;
   position: relative;
 }
 
 .header-image h1 {
   color: white;
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   text-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
@@ -1064,12 +1064,7 @@ async function refreshCustomerData() {
     if (error) throw error
     
     currentCustomer = data
-    document.getElementById('app-name').textContent = data.name
-    document.getElementById('app-phone').textContent = data.phone
     document.getElementById('app-points').textContent = data.points
-    
-    document.getElementById('modal-name').textContent = data.name
-    document.getElementById('modal-phone').textContent = data.phone
     
     updateRewardButtons(data.points)
     localStorage.setItem('customerData', JSON.stringify(data))
