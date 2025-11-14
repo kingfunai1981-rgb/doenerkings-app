@@ -74,7 +74,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 24px;
-  margin-top: 16px;
+  margin-top: 8px;
 }
 
 /* ✅ QR-Code im Header */
@@ -539,6 +539,55 @@ button:disabled {
   color: #f59e0b;
 }
 
+/* ✅ CHALLENGE BONUS */
+.challenge-item {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.challenge-item h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.challenge-item .challenge-desc {
+  font-size: 13px;
+  opacity: 0.9;
+  margin-bottom: 12px;
+}
+
+.challenge-progress {
+  background: rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.challenge-progress-bar {
+  background: rgba(255,255,255,0.3);
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.challenge-progress-fill {
+  background: white;
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.challenge-date {
+  font-size: 11px;
+  opacity: 0.8;
+  margin-top: 8px;
+}
+
 /* ✅ COUPONS */
 .coupon-item {
   background: linear-gradient(135deg, #fef3c7, #fde68a);
@@ -737,7 +786,10 @@ button:disabled {
   <!-- SCREEN 4: KUNDEN-APP -->
   <div id="screen-app" class="screen">
     <div class="header-image">
-      <h1>🌯 Döner Boxx</h1>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1 style="margin: 0;">🌯 Döner Boxx</h1>
+        <button onclick="logout()" class="small secondary" style="margin: 0;">Abmelden</button>
+      </div>
       
       <!-- ✅ Punkte und QR nebeneinander -->
       <div class="header-content">
@@ -751,11 +803,7 @@ button:disabled {
         </div>
       </div>
       
-      <p style="font-size: 11px; margin-top: 12px; opacity: 0.9;">Tippe auf QR zum Vergrößern</p>
-      
-      <div style="position: absolute; top: 20px; right: 20px;">
-        <button onclick="logout()" class="small secondary" style="margin: 0;">Abmelden</button>
-      </div>
+      <p style="font-size: 11px; margin-top: 10px; opacity: 0.9;">Tippe auf QR zum Vergrößern</p>
     </div>
 
     <!-- ✅ QR-Modal -->
