@@ -576,6 +576,9 @@ async function addPointsByPhone() {
       }
     }
     
+    // ✅ CHALLENGE PRÜFEN UND FORTSCHRITT ERHÖHEN
+    await checkAndUpdateChallenges(customer.id, amount)
+    
     let resultHTML = `✅ <strong>ERFOLGREICH!</strong><br><br>` +
       `👤 Kunde: <strong>${customer.name}</strong><br>` +
       `💰 Betrag: ${amount.toFixed(2)} €<br>` +
