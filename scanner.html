@@ -146,7 +146,6 @@ canvas { display: none; }
   color: #374151;
 }
 
-/* ✅ BONUS BADGE */
 .bonus-badge {
   display: inline-block;
   background: linear-gradient(135deg, #10b981, #059669);
@@ -337,9 +336,8 @@ let scanning = false
 let stream = null
 let currentCustomer = null
 let currentCodeData = null
-let rewardPattern = [] // ✅ BONUSMUSTER
+let rewardPattern = []
 
-// ✅ BONUSMUSTER BEIM START LADEN
 async function loadRewardPattern() {
   try {
     const { data, error } = await supabase
@@ -352,7 +350,6 @@ async function loadRewardPattern() {
     if (data && data.pattern) {
       rewardPattern = data.pattern
     } else {
-      // Standard-Muster
       rewardPattern = [
         { type: 'normal', bonus: 0 },
         { type: 'double', bonus: 0 },
@@ -368,7 +365,6 @@ async function loadRewardPattern() {
     }
   } catch (e) {
     console.error('Fehler beim Laden des Musters:', e)
-    // Fallback auf Standard
     rewardPattern = [
       { type: 'normal', bonus: 0 },
       { type: 'double', bonus: 0 },
@@ -384,7 +380,6 @@ async function loadRewardPattern() {
   }
 }
 
-// Beim Laden der Seite Muster laden
 loadRewardPattern()
 
 function normalizePhone(phone) {
@@ -428,9 +423,6 @@ function showTab(tabName) {
   if (tabName === 'history') loadHistory()
 }
 
-// ============================================
-// ✅ PUNKTE GUTSCHREIBEN MIT BELOHNUNGEN
-// ============================================
 async function addPointsByPhone() {
   const phoneOrId = document.getElementById('phone').value.trim()
   const amount = parseFloat(document.getElementById('amount').value)
@@ -449,7 +441,6 @@ async function addPointsByPhone() {
   try {
     let customer = null
     
-    // Prüfe ob es eine QR-ID ist (4 Ziffern)
     if (/^\d{4}$/.test(phoneOrId)) {
       const { data: customers, error: findError } = await supabase
         .from('customers')
@@ -463,7 +454,6 @@ async function addPointsByPhone() {
       }
     }
     
-    // Falls nicht gefunden, versuche als Telefonnummer (normalisiert)
     if (!customer) {
       const normalizedPhone = normalizePhone(phoneOrId)
       
@@ -483,7 +473,6 @@ async function addPointsByPhone() {
       throw new Error('Handynummer oder QR-ID nicht gefunden')
     }
     
-    // ✅ ZÄHLE BISHERIGE TRANSAKTIONEN FÜR MUSTER
     const { data: txCount } = await supabase
       .from('transactions')
       .select('id', { count: 'exact' })
@@ -492,14 +481,12 @@ async function addPointsByPhone() {
     
     const totalOrders = txCount ? txCount.length : 0
     
-    // ✅ PRÜFE OB KUNDE EINE BELOHNUNG AKTIVIERT HAT (für DIESEN Besuch)
     const { data: activeBonuses } = await supabase
       .from('bonuses')
       .select('*')
       .eq('customer_id', customer.id)
       .eq('status', 'active')
     
-    // ✅ PRÜFE OB KUNDE EINEN COUPON AKTIVIERT HAT
     const { data: activatedCoupons } = await supabase
       .from('activated_coupons')
       .select('*, coupons(*)')
@@ -511,31 +498,26 @@ async function addPointsByPhone() {
     let bonusPointsAdded = 0
     let couponUsed = null
     
-    // NUR wenn Kunde die Belohnung vorher aktiviert hat!
     if (activeBonuses && activeBonuses.length > 0) {
       const bonus = activeBonuses[0]
       
       if (bonus.bonus_type === 'double_points') {
-        // Verdopple die Punkte
         bonusPointsAdded = pointsToAdd
         pointsToAdd = pointsToAdd * 2
         bonusApplied = '⭐ Doppelte Punkte angewendet!'
       } else if (bonus.bonus_type === 'bonus_points') {
-        // Nutze den gespeicherten Bonuswert!
         const bonusAmount = bonus.bonus_amount || 100
         bonusPointsAdded = bonusAmount
         pointsToAdd = pointsToAdd + bonusAmount
         bonusApplied = `💰 +${bonusAmount} Bonus-Punkte angewendet!`
       }
       
-      // Markiere Belohnung als verwendet
       await supabase
         .from('bonuses')
         .update({ status: 'used' })
         .eq('id', bonus.id)
     }
     
-    // ✅ WENN COUPON AKTIVIERT, MARKIERE ALS VERWENDET
     if (activatedCoupons && activatedCoupons.length > 0) {
       const activated = activatedCoupons[0]
       const coupon = activated.coupons
@@ -550,7 +532,6 @@ async function addPointsByPhone() {
       
       couponUsed = `🎟️ Coupon eingelöst: ${coupon.product} (${coupon.price})`
     }
-    // Sonst: Normale Punkte (10 pro Euro)
     
     const newTotal = customer.points + pointsToAdd
     
@@ -573,10 +554,6 @@ async function addPointsByPhone() {
     
     if (updateError) throw updateError
     
-    // ✅ ZYKLUS-SYSTEM: Erstelle Bonus für den NÄCHSTEN Besuch
-    // Nach diesem Besuch hat der Kunde (totalOrders + 1) Besuche gemacht
-    // Wir erstellen jetzt den Bonus für Besuch (totalOrders + 2)
-    // Also Index: (totalOrders + 1) % 10
     const nextVisitIndex = (totalOrders + 1) % 10
     
     if (rewardPattern && rewardPattern[nextVisitIndex]) {
@@ -720,7 +697,6 @@ async function onQRDetected(qrCode) {
     document.getElementById('custQR').textContent = currentCustomer.qr_id
     document.getElementById('custPoints').textContent = currentCustomer.points
     
-    // ✅ ZEIGE AKTIVE BELOHNUNGEN
     const { data: activeBonuses } = await supabase
       .from('bonuses')
       .select('*')
@@ -756,7 +732,6 @@ async function addPointsFromScan() {
   }
   
   try {
-    // ✅ PRÜFE OB KUNDE EINE BELOHNUNG AKTIVIERT HAT
     const { data: activeBonuses } = await supabase
       .from('bonuses')
       .select('*')
@@ -767,7 +742,6 @@ async function addPointsFromScan() {
     let bonusApplied = null
     let bonusPointsAdded = 0
     
-    // NUR wenn Kunde die Belohnung vorher aktiviert hat!
     if (activeBonuses && activeBonuses.length > 0) {
       const bonus = activeBonuses[0]
       
@@ -786,7 +760,6 @@ async function addPointsFromScan() {
         .update({ status: 'used' })
         .eq('id', bonus.id)
     }
-    // Sonst: Normale Punkte (10 pro Euro)
     
     const newTotal = currentCustomer.points + pointsToAdd
     
@@ -809,7 +782,6 @@ async function addPointsFromScan() {
     
     if (updateError) throw updateError
     
-    // ✅ ZYKLUS-SYSTEM: Prüfe ob neue Belohnungen erstellt werden sollen
     const { data: txCount } = await supabase
       .from('transactions')
       .select('id', { count: 'exact' })
@@ -819,7 +791,6 @@ async function addPointsFromScan() {
     const totalOrders = txCount ? txCount.length : 0
     const cyclePosition = totalOrders % 10
     
-    // Besuch 2, 4, 8, 10 (und dann 12, 14, 18, 20...) → Doppelte Punkte
     if (cyclePosition === 2 || cyclePosition === 4 || cyclePosition === 8 || (cyclePosition === 0 && totalOrders > 0)) {
       await supabase.from('bonuses').insert({
         customer_id: currentCustomer.id,
@@ -828,7 +799,6 @@ async function addPointsFromScan() {
       })
     }
     
-    // Besuch 6, 16, 26... → +100 Punkte
     if (cyclePosition === 6) {
       await supabase.from('bonuses').insert({
         customer_id: currentCustomer.id,
@@ -933,7 +903,7 @@ async function loadHistory() {
       const isRedeem = tx.type === 'redeem'
       const itemClass = isRedeem ? 'history-item redeem' : 'history-item'
       const pointsClass = isRedeem ? 'history-points negative' : 'history-points'
-      const pointsDisplay = isRedeem ? `⭐ ${tx.points} Punkte` : `⭐ +${tx.points} Punkte`
+      const pointsDisplay = isRedeem ? `⭐ ${Math.abs(tx.points)} Punkte` : `⭐ +${tx.points} Punkte`
       const typeIcon = isRedeem ? '🎁' : '💰'
       const typeLabel = isRedeem ? 'Eingelöst' : 'Gutgeschrieben'
       
@@ -1075,127 +1045,6 @@ async function deleteTransaction(txId, qrId, points) {
   }
 }
 
-async function verifyCode() {
-  const code = document.getElementById('code').value.trim()
-  
-  if (!code || code.length !== 4) {
-    showResult('result-code', '❌ 4-stelligen Code eingeben!', 'error')
-    return
-  }
-  
-  try {
-    const { data, error } = await supabase
-      .from('redeem_codes')
-      .select('*, customers(name, phone, qr_id, points)')
-      .eq('code', code)
-      .limit(1)
-    
-    if (error) throw error
-    if (!data || data.length === 0) throw new Error('Code nicht gefunden')
-    
-    const codeData = data[0]
-    currentCodeData = codeData
-    
-    if (codeData.used) throw new Error('Code bereits verwendet')
-    if (codeData.used) throw new Error('Code bereits bestätigt')
-    if (new Date(codeData.valid_until) < new Date()) throw new Error('Code abgelaufen')
-    
-    const customer = codeData.customers
-    const expires = new Date(codeData.valid_until).toLocaleString('de-DE', {
-      day: '2-digit',
-      month: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-    
-    showResult('result-code', '✅ Code gefunden!', 'success')
-    
-    document.getElementById('code-details').style.display = 'block'
-    document.getElementById('code-details').innerHTML = `
-      <div class="code-item">
-        <h3>🎁 ${codeData.reward_name}</h3>
-        <div class="code">${code}</div>
-        <div style="font-size: 14px; color: #92400e; margin-bottom: 16px;">
-          <strong>Kunde:</strong> ${customer.name}<br>
-          <strong>Aktuell:</strong> ${customer.points} Punkte<br>
-          <strong>Kosten:</strong> ${codeData.points_cost} Punkte<br>
-          <strong>Danach:</strong> ${customer.points - codeData.points_cost} Punkte<br>
-          <strong>Gültig bis:</strong> ${expires}
-        </div>
-        <button class="success" onclick="confirmCode('${code}')">✅ Bestätigen & Punkte abziehen</button>
-        <button class="secondary" onclick="cancelCodeConfirm()">❌ Abbrechen</button>
-      </div>
-    `
-    
-    document.getElementById('code').value = ''
-  } catch (e) {
-    showResult('result-code', '❌ ' + e.message, 'error')
-    document.getElementById('code-details').style.display = 'none'
-  }
-}
-
-async function confirmCode(code) {
-  if (!currentCodeData) return
-  
-  try {
-    const customer = currentCodeData.customers
-    const newPoints = customer.points - currentCodeData.points_cost
-    
-    const { error: txError } = await supabase
-      .from('transactions')
-      .insert({
-        customer_id: currentCodeData.customer_id,
-        type: 'redeem',
-        amount: 0,
-        points: -currentCodeData.points_cost,
-        staff: 'SCANNER'
-      })
-    
-    if (txError) throw txError
-    
-    const { error: codeError } = await supabase
-      .from('redeem_codes')
-      .update({ 
-        used: true, 
-        used: true 
-      })
-      .eq('code', code)
-    
-    if (codeError) throw codeError
-    
-    const { error: updateError } = await supabase
-      .from('customers')
-      .update({ points: newPoints })
-      .eq('id', currentCodeData.customer_id)
-    
-    if (updateError) throw updateError
-    
-    showResult('result-code',
-      `✅ <strong>PRÄMIE AUSGEGEBEN!</strong><br><br>` +
-      `🎁 Prämie: <strong>${currentCodeData.reward_name}</strong><br>` +
-      `👤 Kunde: <strong>${customer.name}</strong><br>` +
-      `⭐ Punkte abgezogen: ${currentCodeData.points_cost}<br>` +
-      `📊 Neuer Stand: <strong>${newPoints} Punkte</strong>`,
-      'success'
-    )
-    
-    document.getElementById('code-details').style.display = 'none'
-    currentCodeData = null
-    
-  } catch (e) {
-    showResult('result-code', '❌ Fehler: ' + e.message, 'error')
-  }
-}
-
-function cancelCodeConfirm() {
-  document.getElementById('code-details').style.display = 'none'
-  currentCodeData = null
-  showResult('result-code', '', 'info')
-}
-
-// ============================================
-// ✅ COUPON SYSTEM
-// ============================================
 async function verifyAnyCode() {
   const code = document.getElementById('code').value.trim()
   
@@ -1206,7 +1055,6 @@ async function verifyAnyCode() {
   
   showResult('result-code', '🔍 Suche Code...', 'info')
   
-  // ERST: Prüfe ob es ein COUPON ist (suche nach unique_code)
   try {
     const { data: activation, error: activationError } = await supabase
       .from('activated_coupons')
@@ -1216,15 +1064,13 @@ async function verifyAnyCode() {
       .single()
     
     if (activation && activation.coupons) {
-      // Es ist ein COUPON!
       await handleCouponCode(activation, code)
       return
     }
   } catch (e) {
-    // Kein Coupon mit diesem Code, weiter zu Prämien-Code
+    // Kein Coupon
   }
   
-  // DANN: Prüfe ob es ein Prämien-Code ist
   try {
     const { data, error } = await supabase
       .from('redeem_codes')
@@ -1235,7 +1081,6 @@ async function verifyAnyCode() {
     if (error) throw error
     if (!data || data.length === 0) throw new Error('Code nicht gefunden')
     
-    // Es ist ein PRÄMIEN-CODE!
     await handleRedeemCode(data[0], code)
     
   } catch (e) {
@@ -1248,7 +1093,6 @@ async function handleCouponCode(activation, code) {
     const coupon = activation.coupons
     const customer = activation.customers
     
-    // Prüfe ob abgelaufen
     if (new Date(coupon.expires_at) < new Date()) {
       throw new Error('Coupon ist abgelaufen')
     }
@@ -1290,7 +1134,6 @@ async function handleRedeemCode(codeData, code) {
     currentCodeData = codeData
     
     if (codeData.used) throw new Error('Code bereits verwendet')
-    if (codeData.used) throw new Error('Code bereits bestätigt')
     if (new Date(codeData.valid_until) < new Date()) throw new Error('Code abgelaufen')
     
     const customer = codeData.customers
@@ -1336,7 +1179,6 @@ async function confirmRedeemCode() {
     
     const newPoints = currentCodeData.customers.points - currentCodeData.points_cost
     
-    // 1. Transaction erstellen
     const { error: txError } = await supabase
       .from('transactions')
       .insert({
@@ -1350,7 +1192,6 @@ async function confirmRedeemCode() {
     
     if (txError) throw txError
     
-    // 2. Punkte abziehen
     const { error: updateError } = await supabase
       .from('customers')
       .update({ points: newPoints })
@@ -1358,7 +1199,6 @@ async function confirmRedeemCode() {
     
     if (updateError) throw updateError
     
-    // 3. Code als verwendet markieren
     const { error: codeError } = await supabase
       .from('redeem_codes')
       .update({ 
@@ -1408,15 +1248,6 @@ function cancelCodeConfirm() {
   document.getElementById('code-details').style.display = 'none'
   currentCodeData = null
   showResult('result-code', '', 'info')
-}
-
-// Alte Funktionen entfernen, neue nutzen
-async function verifyCode() {
-  await verifyAnyCode()
-}
-
-async function verifyCoupon() {
-  await verifyAnyCode()
 }
 
 console.log('✅ Scanner PRO geladen mit Flame Font & Belohnungen!')
