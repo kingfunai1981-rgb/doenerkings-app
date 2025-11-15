@@ -614,6 +614,10 @@ async function login() {
 async function loadCustomer(customer) {
   currentCustomer = customer
   await refreshCustomerData()
+  
+  // ✅ AUTO-FIX: Erstelle ersten Bonus wenn Kunde keine Bestellungen und keinen Bonus hat
+  await ensureFirstBonus(customer.id)
+  
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${customer.qr_id}`
   document.getElementById('header-qr-mini').src = qrUrl
   document.getElementById('modal-qr').src = qrUrl
@@ -625,6 +629,60 @@ async function loadCustomer(customer) {
   loadBonuses()
   loadCoupons()
   loadChallenges()
+}
+
+async function ensureFirstBonus(customerId) {
+  try {
+    // Prüfe ob Kunde schon Bestellungen hat
+    const { data: transactions } = await supabase
+      .from('transactions')
+      .select('id')
+      .eq('customer_id', customerId)
+      .eq('type', 'earn')
+    
+    // Wenn schon Bestellungen existieren, nichts tun
+    if (transactions && transactions.length > 0) return
+    
+    // Prüfe ob schon Boni existieren
+    const { data: bonuses } = await supabase
+      .from('bonuses')
+      .select('id')
+      .eq('customer_id', customerId)
+      .in('status', ['pending', 'active'])
+    
+    // Wenn schon Boni existieren, nichts tun
+    if (bonuses && bonuses.length > 0) return
+    
+    // Lade aktuelles Muster
+    let pattern = rewardPattern
+    if (!pattern || pattern.length === 0) {
+      const { data: patternData } = await supabase.from('reward_pattern').select('pattern').single()
+      pattern = patternData?.pattern || []
+    }
+    
+    // Erstelle Bonus für ersten Besuch (Index 0)
+    if (pattern && pattern[0]) {
+      const reward = pattern[0]
+      console.log('✅ Erstelle ersten Bonus für neuen Kunden:', reward)
+      if (reward.type === 'double') {
+        await supabase.from('bonuses').insert({ 
+          customer_id: customerId, 
+          bonus_type: 'double_points', 
+          bonus_amount: 0, 
+          status: 'pending' 
+        })
+      } else if (reward.type === 'bonus' && reward.bonus > 0) {
+        await supabase.from('bonuses').insert({ 
+          customer_id: customerId, 
+          bonus_type: 'bonus_points', 
+          bonus_amount: reward.bonus, 
+          status: 'pending' 
+        })
+      }
+    }
+  } catch (e) {
+    console.error('ensureFirstBonus error:', e)
+  }
 }
 
 async function refreshCustomerData() {
