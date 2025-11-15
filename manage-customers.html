@@ -471,7 +471,7 @@ textarea {
     <label class="form-label">🎯 Bonus-Typ</label>
     <select id="globalBonusType" onchange="toggleBonusAmount()">
       <option value="bonus_points">💰 Extra-Punkte</option>
-      <option value="double_points">⭐ Doppelte Punkte</option>
+      <option value="double_points">⭐ Doppel-Punkte</option>
     </select>
 
     <div id="globalBonusAmountField">
@@ -481,12 +481,6 @@ textarea {
 
     <label class="form-label">📅 Gültig bis</label>
     <input type="date" id="globalBonusExpiry">
-
-    <label class="form-label">📝 Titel (optional)</label>
-    <input type="text" id="globalBonusTitle" placeholder="z.B. Wochenend-Special">
-
-    <label class="form-label">📄 Beschreibung (optional)</label>
-    <input type="text" id="globalBonusDesc" placeholder="z.B. Nur dieses Wochenende!">
 
     <button class="success" onclick="createGlobalBonus()">🚀 Bonus erstellen</button>
     <div id="result-global-bonus"></div>
