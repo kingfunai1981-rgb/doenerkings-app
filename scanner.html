@@ -402,6 +402,7 @@ async function checkAndUpdateChallenges(customerId, amount) {
     for (const challenge of activeChallenges) {
       if (amount < challenge.min_order_amount) continue
       
+      // ✅ NUR wenn Challenge bereits aktiviert wurde!
       const { data: progress } = await supabase
         .from('challenge_progress')
         .select('*')
@@ -409,32 +410,23 @@ async function checkAndUpdateChallenges(customerId, amount) {
         .eq('challenge_id', challenge.id)
         .single()
       
-      if (progress && progress.is_completed) continue
+      // ✅ WENN NICHT AKTIVIERT, ÜBERSPRINGEN!
+      if (!progress) continue
       
-      const currentOrders = progress ? progress.completed_orders : 0
+      if (progress.is_completed) continue
+      
+      const currentOrders = progress.completed_orders
       const newOrders = currentOrders + 1
       
       if (newOrders >= challenge.required_orders) {
-        if (progress) {
-          await supabase
-            .from('challenge_progress')
-            .update({ 
-              completed_orders: newOrders,
-              is_completed: true,
-              completed_at: new Date().toISOString()
-            })
-            .eq('id', progress.id)
-        } else {
-          await supabase
-            .from('challenge_progress')
-            .insert({
-              customer_id: customerId,
-              challenge_id: challenge.id,
-              completed_orders: newOrders,
-              is_completed: true,
-              completed_at: new Date().toISOString()
-            })
-        }
+        await supabase
+          .from('challenge_progress')
+          .update({ 
+            completed_orders: newOrders,
+            is_completed: true,
+            completed_at: new Date().toISOString()
+          })
+          .eq('id', progress.id)
         
         const { data: customer } = await supabase
           .from('customers')
@@ -460,21 +452,10 @@ async function checkAndUpdateChallenges(customerId, amount) {
             })
         }
       } else {
-        if (progress) {
-          await supabase
-            .from('challenge_progress')
-            .update({ completed_orders: newOrders })
-            .eq('id', progress.id)
-        } else {
-          await supabase
-            .from('challenge_progress')
-            .insert({
-              customer_id: customerId,
-              challenge_id: challenge.id,
-              completed_orders: newOrders,
-              is_completed: false
-            })
-        }
+        await supabase
+          .from('challenge_progress')
+          .update({ completed_orders: newOrders })
+          .eq('id', progress.id)
       }
     }
   } catch (e) {
