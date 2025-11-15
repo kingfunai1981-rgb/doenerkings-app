@@ -652,12 +652,13 @@ async function ensureFirstBonus(customerId) {
       return
     }
     
-    // ✅ Kunde hat 0 Bestellungen - lösche ALLE Boni (egal ob richtig oder falsch)
-    console.log('🔄 Kunde hat 0 Bestellungen - setze Boni zurück')
+    // ✅ Kunde hat 0 Bestellungen - lösche NUR PENDING Boni (nicht active!)
+    console.log('🔄 Kunde hat 0 Bestellungen - setze pending Boni zurück')
     await supabase
       .from('bonuses')
       .delete()
       .eq('customer_id', customerId)
+      .eq('status', 'pending')
     
     // Lade aktuelles Muster
     let pattern = rewardPattern
