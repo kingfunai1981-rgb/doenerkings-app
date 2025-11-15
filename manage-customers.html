@@ -12,355 +12,66 @@ body {
   min-height: 100vh;
   padding: 20px;
 }
-.container { 
-  max-width: 1200px; 
-  margin: 0 auto;
-}
-.card {
-  background: white;
-  border-radius: 20px;
-  padding: 24px;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-h1 {
-  color: #667eea;
-  font-size: 28px;
-  margin-bottom: 8px;
-}
-h2 {
-  color: #374151;
-  font-size: 20px;
-  margin-bottom: 16px;
-}
-.subtitle {
-  color: #6b7280;
-  font-size: 14px;
-  margin-bottom: 20px;
-}
-.stats {
-  background: #f9fafb;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 16px;
-}
-.stat-item {
-  text-align: center;
-  padding: 12px;
-}
-.stat-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: #667eea;
-}
-.stat-label {
-  font-size: 13px;
-  color: #6b7280;
-  margin-top: 4px;
-}
-button {
-  padding: 12px 20px;
-  border: none;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-button.primary {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  width: 100%;
-  margin-bottom: 10px;
-}
-button.primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-button.danger {
-  background: #ef4444;
-  color: white;
-  padding: 8px 16px;
-  font-size: 14px;
-}
-button.danger:hover {
-  background: #dc2626;
-}
-button.danger-all {
-  background: #ef4444;
-  color: white;
-  width: 100%;
-  font-size: 16px;
-  padding: 14px;
-}
-button.danger-all:hover {
-  background: #dc2626;
-  transform: translateY(-1px);
-}
-button.success {
-  background: #10b981;
-  color: white;
-  width: 100%;
-  margin-bottom: 10px;
-}
-button.success:hover {
-  background: #059669;
-}
-input, select, textarea {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid #e5e7eb;
-  border-radius: 10px;
-  font-size: 15px;
-  margin-bottom: 10px;
-  transition: all 0.2s;
-}
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: #667eea;
-}
-textarea {
-  resize: vertical;
-  min-height: 60px;
-}
-.form-label {
-  display: block;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 6px;
-  font-size: 14px;
-}
-.visit-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  margin: 16px 0;
-}
-.visit-card {
-  background: #f9fafb;
-  border: 2px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 12px;
-  text-align: center;
-}
-.visit-number {
-  font-size: 20px;
-  font-weight: 700;
-  color: #667eea;
-  margin-bottom: 8px;
-}
-.visit-card select {
-  padding: 8px;
-  font-size: 13px;
-  margin-bottom: 6px;
-}
-.visit-card select.normal {
-  background: #f3f4f6;
-}
-.visit-card select.double {
-  background: #fef3c7;
-  border-color: #f59e0b;
-}
-.visit-card select.bonus {
-  background: #d1fae5;
-  border-color: #10b981;
-}
-.visit-card input {
-  padding: 6px;
-  font-size: 14px;
-  text-align: center;
-  margin: 0;
-}
-
-/* ✅ FIXE VORSCHAU - immer 10 pro Reihe */
-.preview-box {
-  background: #f9fafb;
-  border: 2px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 16px;
-  margin-top: 16px;
-}
-.preview-items {
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  gap: 6px;
-  margin-top: 10px;
-}
-.preview-item {
-  padding: 6px 4px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  text-align: center;
-}
-.preview-item.normal {
-  background: #f3f4f6;
-  color: #374151;
-}
-.preview-item.double {
-  background: #fef3c7;
-  color: #92400e;
-}
-.preview-item.bonus {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.warning {
-  background: #fef3c7;
-  border: 2px solid #f59e0b;
-  color: #92400e;
-  padding: 14px;
-  border-radius: 10px;
-  margin-bottom: 16px;
-  font-size: 14px;
-  font-weight: 600;
-}
-.customer-list {
-  max-height: 600px;
-  overflow-y: auto;
-  margin-top: 16px;
-}
-.customer-item {
-  background: #f9fafb;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: all 0.2s;
-}
-.customer-item:hover {
-  border-color: #667eea;
-  background: #f3f4f6;
-}
-.customer-info {
-  flex: 1;
-}
-.customer-info h3 {
-  color: #111827;
-  font-size: 18px;
-  margin-bottom: 6px;
-  font-weight: 700;
-}
-.customer-info p {
-  color: #6b7280;
-  font-size: 13px;
-  margin: 3px 0;
-}
-.customer-info .qr-id {
-  display: inline-block;
-  background: #667eea;
-  color: white;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  margin-top: 6px;
-  font-family: monospace;
-  letter-spacing: 2px;
-}
-.customer-stats {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  margin-right: 16px;
-}
-.customer-points {
-  text-align: center;
-}
-.customer-points .value {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 20px;
-  display: block;
-  margin-bottom: 4px;
-}
-.customer-points .label {
-  font-size: 11px;
-  color: #6b7280;
-  font-weight: 600;
-}
-.customer-txs {
-  text-align: center;
-}
-.customer-txs .value {
-  background: #10b981;
-  color: white;
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 20px;
-  display: block;
-  margin-bottom: 4px;
-}
-.customer-txs .label {
-  font-size: 11px;
-  color: #6b7280;
-  font-weight: 600;
-}
-.result {
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 12px;
-  font-size: 14px;
-  text-align: center;
-  font-weight: 600;
-}
-.success { 
-  background: #d1fae5; 
-  color: #065f46;
-  border: 2px solid #10b981;
-}
-.error { 
-  background: #fee2e2; 
-  color: #991b1b;
-  border: 2px solid #ef4444;
-}
-.info { 
-  background: #dbeafe; 
-  color: #1e40af;
-  border: 2px solid #3b82f6;
-}
-.info-box {
-  background: #dbeafe;
-  border: 2px solid #3b82f6;
-  padding: 14px;
-  border-radius: 10px;
-  margin-bottom: 16px;
-}
-.info-box p {
-  color: #1e40af;
-  font-size: 13px;
-  line-height: 1.5;
-  margin: 0;
-}
-
-/* ✅ CHALLENGE BONUS */
-.challenge-form {
-  background: #fef3c7;
-  border: 2px solid #f59e0b;
-  border-radius: 10px;
-  padding: 16px;
-  margin-top: 16px;
-}
-.challenge-form h3 {
-  color: #92400e;
-  margin-bottom: 12px;
-}
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
+.container { max-width: 1200px; margin: 0 auto; }
+.card { background: white; border-radius: 20px; padding: 24px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+h1 { color: #667eea; font-size: 28px; margin-bottom: 8px; }
+h2 { color: #374151; font-size: 20px; margin-bottom: 16px; }
+.subtitle { color: #6b7280; font-size: 14px; margin-bottom: 20px; }
+.stats { background: #f9fafb; border-radius: 12px; padding: 16px; margin-bottom: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; }
+.stat-item { text-align: center; padding: 12px; }
+.stat-value { font-size: 32px; font-weight: 700; color: #667eea; }
+.stat-label { font-size: 13px; color: #6b7280; margin-top: 4px; }
+button { padding: 12px 20px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+button.primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; width: 100%; margin-bottom: 10px; }
+button.primary:hover { opacity: 0.9; transform: translateY(-1px); }
+button.danger { background: #ef4444; color: white; padding: 8px 16px; font-size: 14px; }
+button.danger:hover { background: #dc2626; }
+button.danger-all { background: #ef4444; color: white; width: 100%; font-size: 16px; padding: 14px; }
+button.danger-all:hover { background: #dc2626; transform: translateY(-1px); }
+button.success { background: #10b981; color: white; width: 100%; margin-bottom: 10px; }
+button.success:hover { background: #059669; }
+input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 15px; margin-bottom: 10px; transition: all 0.2s; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #667eea; }
+textarea { resize: vertical; min-height: 60px; }
+.form-label { display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 14px; }
+.visit-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 16px 0; }
+.visit-card { background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 10px; padding: 12px; text-align: center; }
+.visit-number { font-size: 20px; font-weight: 700; color: #667eea; margin-bottom: 8px; }
+.visit-card select { padding: 8px; font-size: 13px; margin-bottom: 6px; }
+.visit-card select.normal { background: #f3f4f6; }
+.visit-card select.double { background: #fef3c7; border-color: #f59e0b; }
+.visit-card select.bonus { background: #d1fae5; border-color: #10b981; }
+.visit-card input { padding: 6px; font-size: 14px; text-align: center; margin: 0; }
+.preview-box { background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 10px; padding: 16px; margin-top: 16px; }
+.preview-items { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; margin-top: 10px; }
+.preview-item { padding: 6px 4px; border-radius: 6px; font-size: 11px; font-weight: 600; text-align: center; }
+.preview-item.normal { background: #f3f4f6; color: #374151; }
+.preview-item.double { background: #fef3c7; color: #92400e; }
+.preview-item.bonus { background: #d1fae5; color: #065f46; }
+.warning { background: #fef3c7; border: 2px solid #f59e0b; color: #92400e; padding: 14px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; font-weight: 600; }
+.customer-list { max-height: 600px; overflow-y: auto; margin-top: 16px; }
+.customer-item { background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
+.customer-item:hover { border-color: #667eea; background: #f3f4f6; }
+.customer-info { flex: 1; }
+.customer-info h3 { color: #111827; font-size: 18px; margin-bottom: 6px; font-weight: 700; }
+.customer-info p { color: #6b7280; font-size: 13px; margin: 3px 0; }
+.customer-info .qr-id { display: inline-block; background: #667eea; color: white; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 700; margin-top: 6px; font-family: monospace; letter-spacing: 2px; }
+.customer-stats { display: flex; gap: 16px; align-items: center; margin-right: 16px; }
+.customer-points { text-align: center; }
+.customer-points .value { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 20px; display: block; margin-bottom: 4px; }
+.customer-points .label { font-size: 11px; color: #6b7280; font-weight: 600; }
+.customer-txs { text-align: center; }
+.customer-txs .value { background: #10b981; color: white; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 20px; display: block; margin-bottom: 4px; }
+.customer-txs .label { font-size: 11px; color: #6b7280; font-weight: 600; }
+.result { padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 14px; text-align: center; font-weight: 600; }
+.success { background: #d1fae5; color: #065f46; border: 2px solid #10b981; }
+.error { background: #fee2e2; color: #991b1b; border: 2px solid #ef4444; }
+.info { background: #dbeafe; color: #1e40af; border: 2px solid #3b82f6; }
+.info-box { background: #dbeafe; border: 2px solid #3b82f6; padding: 14px; border-radius: 10px; margin-bottom: 16px; }
+.info-box p { color: #1e40af; font-size: 13px; line-height: 1.5; margin: 0; }
+.challenge-form { background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px; margin-top: 16px; }
+.challenge-form h3 { color: #92400e; margin-bottom: 12px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 </style>
 </head>
 <body>
@@ -374,143 +85,81 @@ textarea {
   <div class="card">
     <h2>📊 Übersicht</h2>
     <div class="stats">
-      <div class="stat-item">
-        <div class="stat-value" id="totalCustomers">-</div>
-        <div class="stat-label">Kunden</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value" id="totalTransactions">-</div>
-        <div class="stat-label">Transaktionen</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value" id="totalCodes">-</div>
-        <div class="stat-label">Codes</div>
-      </div>
+      <div class="stat-item"><div class="stat-value" id="totalCustomers">-</div><div class="stat-label">Kunden</div></div>
+      <div class="stat-item"><div class="stat-value" id="totalTransactions">-</div><div class="stat-label">Transaktionen</div></div>
+      <div class="stat-item"><div class="stat-value" id="totalCodes">-</div><div class="stat-label">Codes</div></div>
     </div>
     <button class="primary" onclick="loadAllData()">🔄 Alle Kunden laden</button>
     <div id="result-main"></div>
   </div>
 
-  <!-- BONUSSYSTEM -->
   <div class="card">
     <h2>⭐ Bonussystem konfigurieren (10er-Rhythmus)</h2>
     <p class="subtitle">Stelle ein, was bei welchem Besuch passiert (wiederholt sich automatisch)</p>
-    
-    <div class="info-box">
-      <p><strong>ℹ️ So funktioniert's:</strong> Normal = Standard-Punkte (10P/€) • Verdoppelt = Doppelte Punkte (20P/€) • Bonus = Extra Fixpunkte zusätzlich (z.B. +100P)</p>
-    </div>
-
+    <div class="info-box"><p><strong>ℹ️ So funktioniert's:</strong> Normal = Standard-Punkte (10P/€) • Verdoppelt = Doppelte Punkte (20P/€) • Bonus = Extra Fixpunkte zusätzlich (z.B. +100P)</p></div>
     <div id="result-bonus-load"></div>
-
     <div id="bonusPatternCard" style="display: none;">
       <div class="visit-grid" id="visitGrid"></div>
-
       <div class="preview-box">
         <h3 style="color: #374151; font-size: 14px; margin-bottom: 8px;">📋 Vorschau nächste 20 Besuche:</h3>
         <div class="preview-items" id="previewItems"></div>
       </div>
-
       <button class="success" onclick="saveBonusPattern()">💾 Muster speichern</button>
       <div id="result-bonus-save"></div>
     </div>
   </div>
 
-  <!-- ✅ CHALLENGE BONUS ERSTELLEN -->
   <div class="card">
     <h2>🎯 Challenge-Bonus erstellen</h2>
     <p class="subtitle">Erstelle zeitlich begrenzte Herausforderungen mit Mindestbestellwert</p>
-
     <div class="challenge-form">
       <h3>Neue Challenge</h3>
-      
       <div class="form-grid">
-        <div>
-          <label class="form-label">🎁 Extra-Punkte</label>
-          <input type="number" id="challengePoints" placeholder="z.B. 300" value="300">
-        </div>
-        <div>
-          <label class="form-label">🔢 Anzahl Bestellungen</label>
-          <input type="number" id="challengeOrders" placeholder="z.B. 2" value="2" min="1">
-        </div>
+        <div><label class="form-label">🎁 Extra-Punkte</label><input type="number" id="challengePoints" placeholder="z.B. 300" value="300"></div>
+        <div><label class="form-label">🔢 Anzahl Bestellungen</label><input type="number" id="challengeOrders" placeholder="z.B. 2" value="2" min="1"></div>
       </div>
-
       <label class="form-label">💰 Mindestbestellwert pro Bestellung (€)</label>
       <input type="number" id="challengeMinAmount" placeholder="z.B. 10" value="10" step="0.01">
-
       <div class="form-grid">
-        <div>
-          <label class="form-label">📅 Start-Datum</label>
-          <input type="date" id="challengeStart">
-        </div>
-        <div>
-          <label class="form-label">📅 End-Datum</label>
-          <input type="date" id="challengeEnd">
-        </div>
+        <div><label class="form-label">📅 Start-Datum</label><input type="date" id="challengeStart"></div>
+        <div><label class="form-label">📅 End-Datum</label><input type="date" id="challengeEnd"></div>
       </div>
-
       <button class="success" onclick="createChallenge()">🚀 Challenge erstellen</button>
       <div id="result-challenge"></div>
     </div>
-
-    <div style="margin-top: 20px;">
-      <h3>📋 Aktive Challenges</h3>
-      <div id="challengeList"></div>
-    </div>
+    <div style="margin-top: 20px;"><h3>📋 Aktive Challenges</h3><div id="challengeList"></div></div>
   </div>
 
-  <!-- COUPONS -->
   <div class="card">
     <h2>🎟️ Coupon-System (Deal der Woche)</h2>
-    <p class="subtitle">Erstelle Angebote mit Ablaufdatum und 4-stelligem Code</p>
-
+    <p class="subtitle">Erstelle Angebote mit Ablaufdatum</p>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-      <div>
-        <label class="form-label">🍴 Produktname</label>
-        <input type="text" id="couponProduct" placeholder="z.B. Lahmacun Spezial">
-      </div>
-      <div>
-        <label class="form-label">💰 Preis</label>
-        <input type="text" id="couponPrice" placeholder="z.B. 7,50 €">
-      </div>
+      <div><label class="form-label">🍴 Produktname</label><input type="text" id="couponProduct" placeholder="z.B. Lahmacun Spezial"></div>
+      <div><label class="form-label">💰 Preis</label><input type="text" id="couponPrice" placeholder="z.B. 7,50"></div>
     </div>
-
     <label class="form-label">📝 Beschreibung (optional)</label>
     <textarea id="couponDesc" placeholder="z.B. Mit extra Käse und Getränk"></textarea>
-
     <label class="form-label">⏰ Läuft ab in ... Tagen</label>
     <input type="number" id="couponDays" value="7" min="1" max="365">
-
     <button class="success" onclick="createCoupon()">🎁 Coupon erstellen</button>
     <div id="result-coupon-create"></div>
-
-    <div style="margin-top: 24px;">
-      <h2>📋 Aktuelle Coupons</h2>
-      <div id="result-coupon-load"></div>
-      <div id="couponList" style="margin-top: 12px;"></div>
-    </div>
+    <div style="margin-top: 24px;"><h2>📋 Aktuelle Coupons</h2><div id="result-coupon-load"></div><div id="couponList" style="margin-top: 12px;"></div></div>
   </div>
 
-  <!-- KUNDENLISTE -->
   <div class="card" id="customerCard" style="display: none;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
       <h2 style="margin: 0;">📋 Kundenliste</h2>
       <button class="danger-all" onclick="deleteAllCustomers()">🗑️ ALLE löschen</button>
     </div>
-    
-    <div class="warning">
-      ⚠️ <strong>Hinweis:</strong> Beim Löschen eines Kunden werden auch alle zugehörigen Transaktionen und Codes gelöscht!
-    </div>
-    
+    <div class="warning">⚠️ <strong>Hinweis:</strong> Beim Löschen eines Kunden werden auch alle zugehörigen Transaktionen und Codes gelöscht!</div>
     <div class="customer-list" id="customerList"></div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
 const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
-
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 function showResult(elementId, message, type) {
@@ -521,54 +170,27 @@ function showResult(elementId, message, type) {
 
 async function loadAllData() {
   showResult('result-main', '📊 Lade Daten...', 'info')
-  
   try {
-    const { data: customers, error: custError } = await supabase
-      .from('customers')
-      .select('*')
-      .order('created_at', { ascending: false })
-    
+    const { data: customers, error: custError } = await supabase.from('customers').select('*').order('created_at', { ascending: false })
     if (custError) throw custError
-    
-    const { count: txCount, error: txError } = await supabase
-      .from('transactions')
-      .select('*', { count: 'exact', head: true })
-    
+    const { count: txCount, error: txError } = await supabase.from('transactions').select('*', { count: 'exact', head: true })
     if (txError) throw txError
-    
-    const { count: codeCount, error: codeError } = await supabase
-      .from('redeem_codes')
-      .select('*', { count: 'exact', head: true })
-    
+    const { count: codeCount, error: codeError } = await supabase.from('redeem_codes').select('*', { count: 'exact', head: true })
     if (codeError) throw codeError
-    
     document.getElementById('totalCustomers').textContent = customers?.length || 0
     document.getElementById('totalTransactions').textContent = txCount || 0
     document.getElementById('totalCodes').textContent = codeCount || 0
-    
     if (!customers || customers.length === 0) {
       document.getElementById('customerCard').style.display = 'none'
-      showResult('result-main', '✅ Keine Kunden vorhanden - Datenbank ist leer!', 'success')
+      showResult('result-main', '✅ Keine Kunden vorhanden!', 'success')
       return
     }
-    
     document.getElementById('customerCard').style.display = 'block'
-    
     const customerList = document.getElementById('customerList')
     customerList.innerHTML = ''
-    
     for (const customer of customers) {
-      const { count: customerTxCount } = await supabase
-        .from('transactions')
-        .select('*', { count: 'exact', head: true })
-        .eq('customer_id', customer.id)
-      
-      const created = new Date(customer.created_at).toLocaleDateString('de-DE', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      })
-      
+      const { count: customerTxCount } = await supabase.from('transactions').select('*', { count: 'exact', head: true }).eq('customer_id', customer.id)
+      const created = new Date(customer.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
       customerList.innerHTML += `
         <div class="customer-item">
           <div class="customer-info">
@@ -578,162 +200,67 @@ async function loadAllData() {
             <span class="qr-id">QR: ${customer.qr_id}</span>
           </div>
           <div class="customer-stats">
-            <div class="customer-points">
-              <span class="value">${customer.points}</span>
-              <span class="label">Punkte</span>
-            </div>
-            <div class="customer-txs">
-              <span class="value">${customerTxCount || 0}</span>
-              <span class="label">Transaktionen</span>
-            </div>
+            <div class="customer-points"><span class="value">${customer.points}</span><span class="label">Punkte</span></div>
+            <div class="customer-txs"><span class="value">${customerTxCount || 0}</span><span class="label">Transaktionen</span></div>
           </div>
           <button class="danger" onclick="deleteSingleCustomer('${customer.id}', '${customer.name}')">🗑️ Löschen</button>
         </div>
       `
     }
-    
     showResult('result-main', '✅ Daten geladen!', 'success')
-    
   } catch (e) {
     showResult('result-main', '❌ Fehler: ' + e.message, 'error')
   }
 }
 
 async function deleteSingleCustomer(customerId, customerName) {
-  if (!confirm(`Kunde "${customerName}" wirklich löschen?\n\n✖️ Kunde wird gelöscht\n✖️ Alle Transaktionen werden gelöscht\n✖️ Alle Codes werden gelöscht`)) {
-    return
-  }
-  
+  if (!confirm(`Kunde "${customerName}" wirklich löschen?\n\n✖️ Kunde wird gelöscht\n✖️ Alle Transaktionen werden gelöscht\n✖️ Alle Codes werden gelöscht`)) return
   try {
-    const { error: codeError } = await supabase
-      .from('redeem_codes')
-      .delete()
-      .eq('customer_id', customerId)
-    
-    if (codeError) throw new Error('Codes: ' + codeError.message)
-    
-    const { error: txError } = await supabase
-      .from('transactions')
-      .delete()
-      .eq('customer_id', customerId)
-    
-    if (txError) throw new Error('Transaktionen: ' + txError.message)
-    
-    const { error: custError } = await supabase
-      .from('customers')
-      .delete()
-      .eq('id', customerId)
-    
-    if (custError) throw new Error('Kunde: ' + custError.message)
-    
+    await supabase.from('redeem_codes').delete().eq('customer_id', customerId)
+    await supabase.from('transactions').delete().eq('customer_id', customerId)
+    await supabase.from('customers').delete().eq('id', customerId)
     alert(`✅ Kunde "${customerName}" wurde erfolgreich gelöscht!`)
     loadAllData()
-    
   } catch (e) {
-    alert('❌ Fehler beim Löschen: ' + e.message)
+    alert('❌ Fehler: ' + e.message)
   }
 }
 
 async function deleteAllCustomers() {
-  const confirmed = confirm(
-    '⚠️ ALLE KUNDEN LÖSCHEN?\n\n' +
-    'Diese Aktion löscht:\n' +
-    '✖️ Alle Kunden\n' +
-    '✖️ Alle Transaktionen\n' +
-    '✖️ Alle Codes\n\n' +
-    'Wirklich fortfahren?'
-  )
-  
-  if (!confirmed) return
-  
-  const doubleCheck = prompt('Tippe "ALLES LÖSCHEN" ein, um zu bestätigen:')
-  
-  if (doubleCheck !== 'ALLES LÖSCHEN') {
-    alert('❌ Abgebrochen - falsche Eingabe')
-    return
-  }
-  
+  if (!confirm('⚠️ ALLE KUNDEN LÖSCHEN?\n\nDiese Aktion löscht:\n✖️ Alle Kunden\n✖️ Alle Transaktionen\n✖️ Alle Codes\n\nWirklich fortfahren?')) return
+  const doubleCheck = prompt('Tippe "ALLES LÖSCHEN" ein:')
+  if (doubleCheck !== 'ALLES LÖSCHEN') { alert('❌ Abgebrochen'); return }
   try {
-    showResult('result-main', '🗑️ Lösche alle Daten...', 'info')
-    
-    const { error: codeError } = await supabase
-      .from('redeem_codes')
-      .delete()
-      .gte('id', 0)
-    
-    if (codeError) throw new Error('Codes: ' + codeError.message)
-    
-    const { error: txError } = await supabase
-      .from('transactions')
-      .delete()
-      .gte('id', 0)
-    
-    if (txError) throw new Error('Transaktionen: ' + txError.message)
-    
-    const { error: custError } = await supabase
-      .from('customers')
-      .delete()
-      .gte('id', 0)
-    
-    if (custError) throw new Error('Kunden: ' + custError.message)
-    
-    showResult('result-main', 
-      '✅ <strong>ALLE DATEN GELÖSCHT!</strong><br><br>' +
-      '✔️ Alle Kunden gelöscht<br>' +
-      '✔️ Alle Transaktionen gelöscht<br>' +
-      '✔️ Alle Codes gelöscht',
-      'success'
-    )
-    
+    showResult('result-main', '🗑️ Lösche...', 'info')
+    await supabase.from('redeem_codes').delete().gte('id', 0)
+    await supabase.from('transactions').delete().gte('id', 0)
+    await supabase.from('customers').delete().gte('id', 0)
+    showResult('result-main', '✅ ALLE DATEN GELÖSCHT!', 'success')
     document.getElementById('customerCard').style.display = 'none'
     document.getElementById('totalCustomers').textContent = '0'
     document.getElementById('totalTransactions').textContent = '0'
     document.getElementById('totalCodes').textContent = '0'
-    
   } catch (e) {
-    showResult('result-main', '❌ <strong>FEHLER!</strong><br><br>' + e.message, 'error')
+    showResult('result-main', '❌ FEHLER: ' + e.message, 'error')
   }
 }
 
-// ============================================
-// BONUSSYSTEM
-// ============================================
 let bonusPattern = []
 
 async function loadBonusPattern() {
-  showResult('result-bonus-load', '📊 Lade Muster...', 'info')
-  
+  showResult('result-bonus-load', '📊 Lade...', 'info')
   try {
-    const { data, error } = await supabase
-      .from('reward_pattern')
-      .select('*')
-      .single()
-    
+    const { data, error } = await supabase.from('reward_pattern').select('*').single()
     if (error && error.code !== 'PGRST116') throw error
-    
     if (data && data.pattern) {
       bonusPattern = data.pattern
     } else {
-      bonusPattern = [
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 }
-      ]
+      bonusPattern = Array(10).fill(null).map(() => ({ type: 'normal', bonus: 0 }))
     }
-    
     renderBonusPattern()
     updatePreview()
-    
     document.getElementById('bonusPatternCard').style.display = 'block'
     showResult('result-bonus-load', '✅ Muster geladen!', 'success')
-    
   } catch (e) {
     showResult('result-bonus-load', '❌ Fehler: ' + e.message, 'error')
   }
@@ -742,10 +269,8 @@ async function loadBonusPattern() {
 function renderBonusPattern() {
   const grid = document.getElementById('visitGrid')
   grid.innerHTML = ''
-  
   for (let i = 0; i < 10; i++) {
     const visit = bonusPattern[i] || { type: 'normal', bonus: 0 }
-    
     grid.innerHTML += `
       <div class="visit-card">
         <div class="visit-number">${i + 1}.</div>
@@ -765,10 +290,8 @@ function renderBonusPattern() {
 function updateVisitType(index) {
   const select = document.getElementById(`type-${index}`)
   const type = select.value
-  
   bonusPattern[index].type = type
   select.className = type
-  
   const bonusDiv = document.getElementById(`bonus-${index}`)
   if (type === 'bonus') {
     bonusDiv.style.display = 'block'
@@ -780,7 +303,6 @@ function updateVisitType(index) {
     bonusDiv.style.display = 'none'
     bonusPattern[index].bonus = 0
   }
-  
   updatePreview()
 }
 
@@ -792,102 +314,52 @@ function updateBonus(index, value) {
 function updatePreview() {
   const preview = document.getElementById('previewItems')
   preview.innerHTML = ''
-  
   for (let i = 1; i <= 20; i++) {
     const patternIndex = (i - 1) % 10
     const visit = bonusPattern[patternIndex]
-    
     let text = `${i}.`
     if (visit.type === 'normal') text += ' Normal'
     if (visit.type === 'double') text += ' 2x'
     if (visit.type === 'bonus') text += ` +${visit.bonus}P`
-    
     preview.innerHTML += `<span class="preview-item ${visit.type}">${text}</span>`
   }
 }
 
 async function saveBonusPattern() {
   showResult('result-bonus-save', '💾 Speichere...', 'info')
-  
   try {
-    const { data: existing } = await supabase
-      .from('reward_pattern')
-      .select('id')
-      .single()
+    const { error: deleteError } = await supabase.from('bonuses').delete().in('status', ['pending', 'active'])
+    if (deleteError) throw deleteError
+    console.log('✅ Alte Boni gelöscht')
     
+    const { data: existing } = await supabase.from('reward_pattern').select('id').single()
     if (existing) {
-      const { error } = await supabase
-        .from('reward_pattern')
-        .update({ 
-          pattern: bonusPattern,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', existing.id)
-      
+      const { error } = await supabase.from('reward_pattern').update({ pattern: bonusPattern, updated_at: new Date().toISOString() }).eq('id', existing.id)
       if (error) throw error
     } else {
-      const { error } = await supabase
-        .from('reward_pattern')
-        .insert({ 
-          pattern: bonusPattern,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-      
+      const { error } = await supabase.from('reward_pattern').insert({ pattern: bonusPattern, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })
       if (error) throw error
     }
-    
-    showResult('result-bonus-save', '✅ Muster gespeichert!', 'success')
-    
-    setTimeout(() => {
-      loadBonusPattern()
-    }, 1000)
-    
+    showResult('result-bonus-save', '✅ Muster gespeichert! Alte Boni zurückgesetzt.', 'success')
+    setTimeout(() => loadBonusPattern(), 1000)
   } catch (e) {
     showResult('result-bonus-save', '❌ Fehler: ' + e.message, 'error')
   }
 }
 
-// ============================================
-// ✅ CHALLENGE BONUS
-// ============================================
 async function createChallenge() {
   const points = parseInt(document.getElementById('challengePoints').value)
   const orders = parseInt(document.getElementById('challengeOrders').value)
   const minAmount = parseFloat(document.getElementById('challengeMinAmount').value)
   const startDate = document.getElementById('challengeStart').value
   const endDate = document.getElementById('challengeEnd').value
-  
-  if (!points || !orders || !minAmount || !startDate || !endDate) {
-    showResult('result-challenge', '❌ Bitte alle Felder ausfüllen!', 'error')
-    return
-  }
-  
-  if (new Date(endDate) <= new Date(startDate)) {
-    showResult('result-challenge', '❌ End-Datum muss nach Start-Datum liegen!', 'error')
-    return
-  }
-  
+  if (!points || !orders || !minAmount || !startDate || !endDate) { showResult('result-challenge', '❌ Alle Felder ausfüllen!', 'error'); return }
+  if (new Date(endDate) <= new Date(startDate)) { showResult('result-challenge', '❌ End-Datum muss nach Start liegen!', 'error'); return }
   try {
-    showResult('result-challenge', '⏳ Erstelle Challenge...', 'info')
-    
-    const { error } = await supabase
-      .from('challenges')
-      .insert({
-        bonus_points: points,
-        required_orders: orders,
-        min_order_amount: minAmount,
-        start_date: startDate,
-        end_date: endDate,
-        is_active: true,
-        created_at: new Date().toISOString()
-      })
-    
-    if (error) throw error
-    
+    showResult('result-challenge', '⏳ Erstelle...', 'info')
+    await supabase.from('challenges').insert({ bonus_points: points, required_orders: orders, min_order_amount: minAmount, start_date: startDate, end_date: endDate, is_active: true, created_at: new Date().toISOString() })
     showResult('result-challenge', '✅ Challenge erstellt!', 'success')
     loadChallenges()
-    
   } catch (e) {
     showResult('result-challenge', '❌ Fehler: ' + e.message, 'error')
   }
@@ -895,346 +367,22 @@ async function createChallenge() {
 
 async function loadChallenges() {
   try {
-    const { data: challenges, error } = await supabase
-      .from('challenges')
-      .select('*')
-      .order('created_at', { ascending: false })
-    
-    if (error) throw error
-    
+    const { data: challenges } = await supabase.from('challenges').select('*').order('created_at', { ascending: false })
     const list = document.getElementById('challengeList')
-    
-    if (!challenges || challenges.length === 0) {
-      list.innerHTML = '<div class="result info">Keine Challenges vorhanden</div>'
-      return
-    }
-    
+    if (!challenges || challenges.length === 0) { list.innerHTML = '<div class="result info">Keine Challenges</div>'; return }
     list.innerHTML = challenges.map(c => {
       const start = new Date(c.start_date).toLocaleDateString('de-DE')
       const end = new Date(c.end_date).toLocaleDateString('de-DE')
-      const now = new Date()
-      const isExpired = new Date(c.end_date) < now
+      const isExpired = new Date(c.end_date) < new Date()
       const isActive = c.is_active && !isExpired
-      
       return `
         <div style="background: ${isActive ? '#d1fae5' : '#fee2e2'}; border: 2px solid ${isActive ? '#10b981' : '#ef4444'}; border-radius: 10px; padding: 16px; margin-top: 12px;">
-          <div style="display: flex; justify-content: space-between; align-items: start;">
+          <div style="display: flex; justify-content: space-between;">
             <div style="flex: 1;">
-              <h3 style="color: #111827; margin-bottom: 8px;">
-                🎁 ${c.bonus_points} Punkte für ${c.required_orders} Bestellungen ab ${c.min_order_amount} €
-              </h3>
-              <p style="font-size: 13px; color: #6b7280; margin: 4px 0;">
-                📅 Gültig: ${start} - ${end}
-              </p>
-              <p style="font-size: 12px; color: ${isActive ? '#059669' : '#dc2626'}; font-weight: 600; margin-top: 6px;">
-                ${isActive ? '✅ Aktiv' : isExpired ? '❌ Abgelaufen' : '⏸️ Inaktiv'}
-              </p>
+              <h3 style="color: #111827; margin-bottom: 8px;">🎁 ${c.bonus_points}P für ${c.required_orders} Bestellungen ab ${c.min_order_amount} €</h3>
+              <p style="font-size: 13px; color: #6b7280;">📅 ${start} - ${end}</p>
+              <p style="font-size: 12px; color: ${isActive ? '#059669' : '#dc2626'}; font-weight: 600; margin-top: 6px;">${isActive ? '✅ Aktiv' : isExpired ? '❌ Abgelaufen' : '⏸️ Inaktiv'}</p>
             </div>
             <div style="display: flex; gap: 6px;">
-              ${isActive ? 
-                `<button class="danger" style="padding: 8px 14px; font-size: 13px; width: auto;" onclick="toggleChallenge(${c.id}, false)">⏸️ Deaktivieren</button>` :
-                `<button class="success" style="padding: 8px 14px; font-size: 13px; width: auto; margin: 0;" onclick="toggleChallenge(${c.id}, true)">✅ Aktivieren</button>`
-              }
+              ${isActive ? `<button class="danger" style="padding: 8px 14px; font-size: 13px; width: auto;" onclick="toggleChallenge(${c.id}, false)">⏸️ Deaktivieren</button>` : `<button class="success" style="padding: 8px 14px; font-size: 13px; width: auto; margin: 0;" onclick="toggleChallenge(${c.id}, true)">✅ Aktivieren</button>`}
               <button class="danger" style="padding: 8px 14px; font-size: 13px; width: auto;" onclick="deleteChallenge(${c.id})">🗑️</button>
-            </div>
-          </div>
-        </div>
-      `
-    }).join('')
-    
-  } catch (e) {
-    console.error('Load challenges error:', e)
-  }
-}
-
-async function toggleChallenge(id, active) {
-  try {
-    const { error } = await supabase
-      .from('challenges')
-      .update({ is_active: active })
-      .eq('id', id)
-    
-    if (error) throw error
-    loadChallenges()
-  } catch (e) {
-    alert('❌ Fehler: ' + e.message)
-  }
-}
-
-async function deleteChallenge(id) {
-  if (!confirm('Challenge wirklich löschen?')) return
-  
-  try {
-    const { error } = await supabase
-      .from('challenges')
-      .delete()
-      .eq('id', id)
-    
-    if (error) throw error
-    loadChallenges()
-  } catch (e) {
-    alert('❌ Fehler: ' + e.message)
-  }
-}
-
-// ============================================
-// COUPON SYSTEM
-// ============================================
-function generateCouponCode() {
-  return Math.floor(1000 + Math.random() * 9000).toString()
-}
-
-function calculateExpiryDate(days) {
-  const date = new Date()
-  date.setDate(date.getDate() + days)
-  return date.toISOString()
-}
-
-function formatDate(dateString) {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('de-DE', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  })
-}
-
-function getDaysUntil(dateString) {
-  const now = new Date()
-  const expiry = new Date(dateString)
-  const diff = expiry - now
-  const days = Math.ceil(diff / (1000 * 60 * 60 * 24))
-  return days
-}
-
-async function createCoupon() {
-  const product = document.getElementById('couponProduct').value.trim()
-  const price = document.getElementById('couponPrice').value.trim()
-  const description = document.getElementById('couponDesc').value.trim()
-  const days = parseInt(document.getElementById('couponDays').value)
-
-  if (!product || !price) {
-    showResult('result-coupon-create', '❌ Bitte Produktname und Preis ausfüllen!', 'error')
-    return
-  }
-
-  showResult('result-coupon-create', '🎁 Erstelle Coupon...', 'info')
-
-  try {
-    const code = generateCouponCode()
-    const expiryDate = calculateExpiryDate(days)
-
-    const { error } = await supabase
-      .from('coupons')
-      .insert({
-        code: code,
-        title: 'Deal der Woche',
-        product: product,
-        price: price,
-        description: description,
-        expires_at: expiryDate,
-        is_active: true,
-        created_at: new Date().toISOString()
-      })
-
-    if (error) throw error
-
-    showResult('result-coupon-create', 
-      `✅ <strong>Coupon erstellt!</strong><br>` +
-      `Code: <strong style="font-size:20px; letter-spacing:3px;">${code}</strong><br>` +
-      `Läuft ab: ${formatDate(expiryDate)}`,
-      'success'
-    )
-
-    document.getElementById('couponProduct').value = ''
-    document.getElementById('couponPrice').value = ''
-    document.getElementById('couponDesc').value = ''
-
-    loadCoupons()
-
-  } catch (e) {
-    showResult('result-coupon-create', '❌ Fehler: ' + e.message, 'error')
-  }
-}
-
-async function loadCoupons() {
-  showResult('result-coupon-load', '📊 Lade Coupons...', 'info')
-
-  try {
-    const { data: coupons, error } = await supabase
-      .from('coupons')
-      .select('*')
-      .order('created_at', { ascending: false })
-
-    if (error) throw error
-
-    const list = document.getElementById('couponList')
-
-    if (!coupons || coupons.length === 0) {
-      list.innerHTML = '<div class="result info">Keine Coupons vorhanden</div>'
-      showResult('result-coupon-load', '', 'info')
-      return
-    }
-
-    list.innerHTML = ''
-
-    for (const coupon of coupons) {
-      const daysLeft = getDaysUntil(coupon.expires_at)
-      const isExpired = daysLeft < 0
-      const isSoon = daysLeft <= 3 && daysLeft >= 0
-
-      if (isExpired && coupon.is_active) {
-        await supabase
-          .from('coupons')
-          .update({ is_active: false })
-          .eq('id', coupon.id)
-        coupon.is_active = false
-      }
-
-      const { data: activations } = await supabase
-        .from('activated_coupons')
-        .select('unique_code, is_used, activated_at, customers(name, phone)')
-        .eq('coupon_id', coupon.id)
-        .order('activated_at', { ascending: false })
-      
-      let activationsHTML = ''
-      if (activations && activations.length > 0) {
-        activationsHTML = `
-          <div style="margin-top: 12px; padding: 8px; background: #f3f4f6; border-radius: 6px;">
-            <strong>👥 Aktiviert von ${activations.length} Kunde(n):</strong>
-            <div style="margin-top: 6px; max-height: 150px; overflow-y: auto;">
-              ${activations.map(a => `
-                <div style="font-size: 12px; padding: 4px 0; border-bottom: 1px solid #e5e7eb;">
-                  <strong>${a.customers?.name || 'Unbekannt'}</strong> (${a.customers?.phone || '?'})
-                  → Code: <span style="font-family: monospace; font-weight: bold; color: #059669;">${a.unique_code}</span>
-                  ${a.is_used ? '<span style="color: #dc2626;">✓ Eingelöst</span>' : '<span style="color: #059669;">⏳ Offen</span>'}
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        `
-      }
-
-      let expiryText = ''
-      if (isExpired) {
-        expiryText = `<span style="background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">❌ Abgelaufen</span>`
-      } else if (daysLeft === 0) {
-        expiryText = `<span style="background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">⚠️ Läuft heute ab!</span>`
-      } else if (isSoon) {
-        expiryText = `<span style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">⏰ ${daysLeft} Tage</span>`
-      } else {
-        expiryText = `<span style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">⏰ ${daysLeft} Tage</span>`
-      }
-
-      list.innerHTML += `
-        <div style="background: #f9fafb; border: 2px solid ${isExpired ? '#ef4444' : '#e5e7eb'}; border-radius: 12px; padding: 16px; margin-bottom: 12px; ${isExpired ? 'opacity: 0.6;' : ''}">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 8px 16px; border-radius: 8px; font-size: 24px; font-weight: 700; font-family: monospace; letter-spacing: 4px;">
-              ${coupon.code}
-            </div>
-            <span style="padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; background: ${coupon.is_active ? '#d1fae5' : '#fee2e2'}; color: ${coupon.is_active ? '#065f46' : '#991b1b'};">
-              ${coupon.is_active ? '✅ Aktiv' : '❌ Inaktiv'}
-            </span>
-          </div>
-          <div>
-            <h3 style="color: #111827; font-size: 16px; margin-bottom: 6px;">🍴 ${coupon.product}</h3>
-            <div style="font-size: 18px; font-weight: 700; color: #10b981; margin: 6px 0;">💰 ${coupon.price}</div>
-            ${coupon.description ? `<p style="color: #6b7280; font-size: 13px; margin: 3px 0;">📝 ${coupon.description}</p>` : ''}
-            ${expiryText}
-            <p style="margin-top:6px; font-size:12px; color:#9ca3af;">Erstellt: ${formatDate(coupon.created_at)}</p>
-            ${activationsHTML}
-          </div>
-          <div style="display: flex; gap: 6px; margin-top: 10px;">
-            ${coupon.is_active && !isExpired ? 
-              `<button class="danger" style="width: auto; padding: 8px 14px; font-size: 13px;" onclick="deactivateCoupon(${coupon.id})">❌ Deaktivieren</button>` :
-              `<button class="success" style="width: auto; padding: 8px 14px; font-size: 13px; margin: 0;" onclick="activateCoupon(${coupon.id})">✅ Aktivieren</button>`
-            }
-            <button class="danger" style="width: auto; padding: 8px 14px; font-size: 13px;" onclick="deleteCoupon(${coupon.id})">🗑️ Löschen</button>
-          </div>
-        </div>
-      `
-    }
-
-    showResult('result-coupon-load', '✅ Coupons geladen!', 'success')
-
-  } catch (e) {
-    showResult('result-coupon-load', '❌ Fehler: ' + e.message, 'error')
-  }
-}
-
-async function deactivateCoupon(id) {
-  try {
-    const { error } = await supabase
-      .from('coupons')
-      .update({ is_active: false })
-      .eq('id', parseInt(id))
-
-    if (error) throw error
-    loadCoupons()
-  } catch (e) {
-    console.error('Deactivate error:', e.message)
-    loadCoupons()
-  }
-}
-
-async function activateCoupon(id) {
-  try {
-    const { error } = await supabase
-      .from('coupons')
-      .update({ is_active: true })
-      .eq('id', parseInt(id))
-
-    if (error) throw error
-    loadCoupons()
-  } catch (e) {
-    console.error('Activate error:', e.message)
-    loadCoupons()
-  }
-}
-
-async function deleteCoupon(id) {
-  try {
-    const { error } = await supabase
-      .from('coupons')
-      .delete()
-      .eq('id', parseInt(id))
-
-    if (error) throw error
-    loadCoupons()
-  } catch (e) {
-    console.error('Delete error:', e.message)
-    loadCoupons()
-  }
-}
-
-// ✅ AUTO-LOAD beim Seitenstart
-window.addEventListener('DOMContentLoaded', function() {
-  loadBonusPattern()
-  loadCoupons()
-  loadChallenges()
-  
-  // ✅ Setze IMMER aktuelles Datum als Start
-  const today = new Date().toISOString().split('T')[0]
-  document.getElementById('challengeStart').value = today
-  
-  // Setze 7 Tage später als Ende
-  const nextWeek = new Date()
-  nextWeek.setDate(nextWeek.getDate() + 7)
-  document.getElementById('challengeEnd').value = nextWeek.toISOString().split('T')[0]
-  
-  // ✅ UPDATE: Bei jedem Reload das Start-Datum aktualisieren
-  setInterval(() => {
-    const currentStart = document.getElementById('challengeStart').value
-    const today = new Date().toISOString().split('T')[0]
-    // Nur updaten wenn User nichts geändert hat
-    if (!currentStart || currentStart < today) {
-      document.getElementById('challengeStart').value = today
-    }
-  }, 60000) // Alle 60 Sekunden prüfen
-})
-
-console.log('✅ Kunden-Verwaltung geladen mit Challenge-Bonus!')
-</script>
-
-</body>
-</html>
