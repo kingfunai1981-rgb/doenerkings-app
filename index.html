@@ -825,6 +825,14 @@ button:disabled {
       </div>
     </div>
 
+    <!-- ✅ CHALLENGES SECTION -->
+    <div id="challenges-section" style="display: none;">
+      <div class="card">
+        <h2>🎯 Aktuelle Challenges</h2>
+        <div id="challenges-list"></div>
+      </div>
+    </div>
+
     <!-- ✅ COUPONS SECTION -->
     <div id="coupons-section" style="display: none;">
       <div class="card">
@@ -1097,6 +1105,7 @@ async function loadCustomer(customer) {
   loadPendingCodes()
   loadBonuses()
   loadCoupons()
+  loadChallenges()
 }
 
 async function refreshCustomerData() {
@@ -1120,6 +1129,7 @@ async function refreshCustomerData() {
     loadBonuses()
     loadCoupons()
     loadPendingCodes()
+    loadChallenges()
   } catch (e) {
     console.error('Refresh error:', e)
   }
@@ -1325,6 +1335,123 @@ async function activateBonus(bonusId) {
     
   } catch (e) {
     console.error('Activate error:', e)
+  }
+}
+
+// ============================================
+// ✅ CHALLENGES SYSTEM
+// ============================================
+async function loadChallenges() {
+  if (!currentCustomer) return
+  
+  try {
+    const now = new Date()
+    
+    const { data: challenges, error } = await supabase
+      .from('challenges')
+      .select('*')
+      .eq('is_active', true)
+      .gte('end_date', now.toISOString().split('T')[0])
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    
+    const section = document.getElementById('challenges-section')
+    const list = document.getElementById('challenges-list')
+    
+    if (!challenges || challenges.length === 0) {
+      section.style.display = 'none'
+      return
+    }
+    
+    section.style.display = 'block'
+    
+    const challengeHTML = []
+    
+    for (const challenge of challenges) {
+      const { data: progress } = await supabase
+        .from('challenge_progress')
+        .select('*')
+        .eq('customer_id', currentCustomer.id)
+        .eq('challenge_id', challenge.id)
+        .single()
+      
+      const isActivated = progress !== null
+      const completedOrders = progress?.completed_orders || 0
+      const isCompleted = progress?.is_completed || false
+      const progressPercent = Math.min((completedOrders / challenge.required_orders) * 100, 100)
+      
+      const startDate = new Date(challenge.start_date).toLocaleDateString('de-DE')
+      const endDate = new Date(challenge.end_date).toLocaleDateString('de-DE')
+      
+      const remaining = challenge.required_orders - completedOrders
+      
+      if (!isActivated) {
+        // ✅ NICHT AKTIVIERT - Zeige Aktivierungs-Button
+        challengeHTML.push(`
+          <div class="challenge-item">
+            <h3>🎁 ${challenge.bonus_points} Extra-Punkte für ${challenge.required_orders} Bestellungen ab ${challenge.min_order_amount} €</h3>
+            <div class="challenge-desc">
+              Aktiviere diese Challenge um teilzunehmen!
+            </div>
+            <div class="challenge-date">
+              📅 Gültig: ${startDate} - ${endDate}
+            </div>
+            <button onclick="activateChallenge(${challenge.id})" style="margin-top: 12px;">🚀 Jetzt aktivieren</button>
+          </div>
+        `)
+      } else {
+        // ✅ AKTIVIERT - Zeige Fortschritt
+        challengeHTML.push(`
+          <div class="challenge-item" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+            <h3>🎁 ${challenge.bonus_points} Extra-Punkte für ${challenge.required_orders} Bestellungen ab ${challenge.min_order_amount} €</h3>
+            <div class="challenge-desc">
+              ${isCompleted ? 
+                '✅ Challenge abgeschlossen! Punkte wurden gutgeschrieben.' : 
+                `${remaining} ${remaining === 1 ? 'Bestellung' : 'Bestellungen'} offen`
+              }
+            </div>
+            <div class="challenge-progress">
+              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600;">
+                <span>${completedOrders} / ${challenge.required_orders} Bestellungen</span>
+                <span>${Math.round(progressPercent)}%</span>
+              </div>
+              <div class="challenge-progress-bar">
+                <div class="challenge-progress-fill" style="width: ${progressPercent}%"></div>
+              </div>
+            </div>
+            <div class="challenge-date">
+              📅 Gültig: ${startDate} - ${endDate}
+            </div>
+          </div>
+        `)
+      }
+    }
+    
+    list.innerHTML = challengeHTML.join('')
+    
+  } catch (e) {
+    console.error('Load challenges error:', e)
+  }
+}
+
+async function activateChallenge(challengeId) {
+  try {
+    const { error } = await supabase
+      .from('challenge_progress')
+      .insert({
+        customer_id: currentCustomer.id,
+        challenge_id: challengeId,
+        completed_orders: 0,
+        is_completed: false
+      })
+    
+    if (error) throw error
+    
+    loadChallenges()
+    
+  } catch (e) {
+    console.error('Activate challenge error:', e)
   }
 }
 
