@@ -596,7 +596,8 @@ async function confirmRedeemCode() {
     
     const newPoints = currentCodeData.customers.points - currentCodeData.points_cost
     
-    await supabase.from('transactions').insert({ customer_id: currentCodeData.customer_id, type: 'redeem', amount: 0, points: -currentCodeData.points_cost, staff: 'Scanner', notes: currentCodeData.reward_name })
+    // ✅ Speichere BEIDES: Reward-Name UND Code
+    await supabase.from('transactions').insert({ customer_id: currentCodeData.customer_id, type: 'redeem', amount: 0, points: -currentCodeData.points_cost, staff: 'Scanner', notes: `${currentCodeData.reward_name} (Code: ${currentCodeData.code})` })
     await supabase.from('customers').update({ points: newPoints }).eq('id', currentCodeData.customer_id)
     await supabase.from('redeem_codes').update({ used: true, used_at: new Date().toISOString() }).eq('code', currentCodeData.code)
     
