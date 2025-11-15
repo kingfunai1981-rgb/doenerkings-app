@@ -688,12 +688,19 @@ async function ensureFirstBonus(customerId) {
 async function refreshCustomerData() {
   if (!currentCustomer) return
   try {
+    // ✅ Lade Bonusmuster neu (falls Manager es geändert hat)
+    await loadRewardPattern()
+    
     const { data, error } = await supabase.from('customers').select('*').eq('id', currentCustomer.id).single()
     if (error) throw error
     currentCustomer = data
     document.getElementById('app-points').textContent = data.points
     updateRewardButtons(data.points)
     localStorage.setItem('customerData', JSON.stringify(data))
+    
+    // ✅ Prüfe ob erster Bonus fehlt und erstelle ihn wenn nötig
+    await ensureFirstBonus(currentCustomer.id)
+    
     loadBonuses()
     loadCoupons()
     loadPendingCodes()
