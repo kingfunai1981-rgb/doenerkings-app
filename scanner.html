@@ -231,11 +231,12 @@ canvas { display: none; }
 }
 .code-item h3 {
   color: #92400e;
-  font-size: 18px;
-  margin-bottom: 8px;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 12px;
 }
 .code-item .code {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 700;
   color: #f59e0b;
   letter-spacing: 8px;
@@ -653,11 +654,13 @@ async function addPointsByPhone() {
     
     if (updateError) throw updateError
     
+    // ✅ ZYKLUS-SYSTEM: Erstelle Bonus für den NÄCHSTEN Besuch NUR wenn im Muster definiert
     const nextVisitIndex = (totalOrders + 1) % 10
     
     if (rewardPattern && rewardPattern[nextVisitIndex]) {
       const reward = rewardPattern[nextVisitIndex]
       
+      // NUR erstellen wenn NICHT normal!
       if (reward.type === 'double') {
         await supabase.from('bonuses').insert({
           customer_id: customer.id,
@@ -700,105 +703,6 @@ async function addPointsByPhone() {
     
   } catch (err) {
     showResult('result-phone', `❌ <strong>Fehler:</strong> ${err.message}`, 'error')
-  }
-}
-
-// ============================================
-// ✅ CHALLENGE SYSTEM
-// ============================================
-async function checkAndUpdateChallenges(customerId, amount) {
-  try {
-    const now = new Date().toISOString().split('T')[0]
-    
-    const { data: activeChallenges } = await supabase
-      .from('challenges')
-      .select('*')
-      .eq('is_active', true)
-      .lte('start_date', now)
-      .gte('end_date', now)
-    
-    if (!activeChallenges || activeChallenges.length === 0) return
-    
-    for (const challenge of activeChallenges) {
-      if (amount < challenge.min_order_amount) continue
-      
-      const { data: progress } = await supabase
-        .from('challenge_progress')
-        .select('*')
-        .eq('customer_id', customerId)
-        .eq('challenge_id', challenge.id)
-        .single()
-      
-      if (progress && progress.is_completed) continue
-      
-      const currentOrders = progress ? progress.completed_orders : 0
-      const newOrders = currentOrders + 1
-      
-      if (newOrders >= challenge.required_orders) {
-        if (progress) {
-          await supabase
-            .from('challenge_progress')
-            .update({ 
-              completed_orders: newOrders,
-              is_completed: true,
-              completed_at: new Date().toISOString()
-            })
-            .eq('id', progress.id)
-        } else {
-          await supabase
-            .from('challenge_progress')
-            .insert({
-              customer_id: customerId,
-              challenge_id: challenge.id,
-              completed_orders: newOrders,
-              is_completed: true,
-              completed_at: new Date().toISOString()
-            })
-        }
-        
-        const { data: customer } = await supabase
-          .from('customers')
-          .select('points')
-          .eq('id', customerId)
-          .single()
-        
-        if (customer) {
-          await supabase
-            .from('customers')
-            .update({ points: customer.points + challenge.bonus_points })
-            .eq('id', customerId)
-          
-          await supabase
-            .from('transactions')
-            .insert({
-              customer_id: customerId,
-              type: 'earn',
-              amount: 0,
-              points: challenge.bonus_points,
-              staff: 'CHALLENGE',
-              notes: `Challenge abgeschlossen: ${challenge.bonus_points} Punkte`
-            })
-        }
-      } else {
-        if (progress) {
-          await supabase
-            .from('challenge_progress')
-            .update({ completed_orders: newOrders })
-            .eq('id', progress.id)
-        } else {
-          await supabase
-            .from('challenge_progress')
-            .insert({
-              customer_id: customerId,
-              challenge_id: challenge.id,
-              completed_orders: newOrders,
-              is_completed: false
-            })
-        }
-      }
-    }
-  } catch (e) {
-    console.error('Challenge check error:', e)
   }
 }
 
@@ -992,20 +896,26 @@ async function addPointsFromScan() {
     const totalOrders = txCount ? txCount.length : 0
     const cyclePosition = totalOrders % 10
     
-    if (cyclePosition === 2 || cyclePosition === 4 || cyclePosition === 8 || (cyclePosition === 0 && totalOrders > 0)) {
-      await supabase.from('bonuses').insert({
-        customer_id: currentCustomer.id,
-        bonus_type: 'double_points',
-        status: 'pending'
-      })
-    }
+    // ✅ NUR Bonus erstellen wenn im Muster definiert (NICHT bei normal!)
+    const nextVisitIndex = cyclePosition % 10
     
-    if (cyclePosition === 6) {
-      await supabase.from('bonuses').insert({
-        customer_id: currentCustomer.id,
-        bonus_type: 'bonus_points',
-        status: 'pending'
-      })
+    if (rewardPattern && rewardPattern[nextVisitIndex]) {
+      const reward = rewardPattern[nextVisitIndex]
+      
+      if (reward.type === 'double') {
+        await supabase.from('bonuses').insert({
+          customer_id: currentCustomer.id,
+          bonus_type: 'double_points',
+          status: 'pending'
+        })
+      } else if (reward.type === 'bonus' && reward.bonus > 0) {
+        await supabase.from('bonuses').insert({
+          customer_id: currentCustomer.id,
+          bonus_type: 'bonus_points',
+          bonus_amount: reward.bonus,
+          status: 'pending'
+        })
+      }
     }
     
     // ✅ CHALLENGE PRÜFEN
