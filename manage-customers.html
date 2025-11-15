@@ -818,14 +818,6 @@ async function saveBonusPattern() {
     
     if (deleteBonusError) console.warn('Pending Bonus-Löschung:', deleteBonusError.message)
     
-    // ✅ Lösche auch challenge_bonus falls vorhanden
-    const { error: deleteError } = await supabase
-      .from('customers')
-      .update({ challenge_bonus: null })
-      .not('challenge_bonus', 'is', null)
-    
-    if (deleteError) console.warn('Challenge-Bonus-Löschung:', deleteError.message)
-    
     const { data: existing } = await supabase
       .from('reward_pattern')
       .select('id')
