@@ -643,16 +643,6 @@ async function ensureFirstBonus(customerId) {
     // Wenn schon Bestellungen existieren, nichts tun
     if (transactions && transactions.length > 0) return
     
-    // Prüfe ob schon Boni existieren
-    const { data: bonuses } = await supabase
-      .from('bonuses')
-      .select('id')
-      .eq('customer_id', customerId)
-      .in('status', ['pending', 'active'])
-    
-    // Wenn schon Boni existieren, nichts tun
-    if (bonuses && bonuses.length > 0) return
-    
     // Lade aktuelles Muster
     let pattern = rewardPattern
     if (!pattern || pattern.length === 0) {
@@ -660,25 +650,64 @@ async function ensureFirstBonus(customerId) {
       pattern = patternData?.pattern || []
     }
     
-    // Erstelle Bonus für ersten Besuch (Index 0)
-    if (pattern && pattern[0]) {
-      const reward = pattern[0]
-      console.log('✅ Erstelle ersten Bonus für neuen Kunden:', reward)
-      if (reward.type === 'double') {
-        await supabase.from('bonuses').insert({ 
-          customer_id: customerId, 
-          bonus_type: 'double_points', 
-          bonus_amount: 0, 
-          status: 'pending' 
-        })
-      } else if (reward.type === 'bonus' && reward.bonus > 0) {
-        await supabase.from('bonuses').insert({ 
-          customer_id: customerId, 
-          bonus_type: 'bonus_points', 
-          bonus_amount: reward.bonus, 
-          status: 'pending' 
-        })
+    if (!pattern || !pattern[0]) return
+    
+    const reward = pattern[0]
+    
+    // ✅ NEU: Prüfe ob der RICHTIGE Bonus für das aktuelle Muster existiert
+    const { data: existingBonuses } = await supabase
+      .from('bonuses')
+      .select('*')
+      .eq('customer_id', customerId)
+      .in('status', ['pending', 'active'])
+    
+    // Prüfe ob der richtige Bonus-Typ und Betrag existiert
+    let correctBonusExists = false
+    if (existingBonuses && existingBonuses.length > 0) {
+      for (const bonus of existingBonuses) {
+        if (reward.type === 'double' && bonus.bonus_type === 'double_points') {
+          correctBonusExists = true
+          break
+        }
+        if (reward.type === 'bonus' && bonus.bonus_type === 'bonus_points' && bonus.bonus_amount === reward.bonus) {
+          correctBonusExists = true
+          break
+        }
       }
+    }
+    
+    // Wenn der richtige Bonus existiert, nichts tun
+    if (correctBonusExists) {
+      console.log('✅ Korrekter Bonus existiert bereits')
+      return
+    }
+    
+    // ✅ Lösche FALSCHE Boni (z.B. alte Boni nach Muster-Änderung)
+    if (existingBonuses && existingBonuses.length > 0) {
+      console.log('🗑️ Lösche alte/falsche Boni')
+      await supabase
+        .from('bonuses')
+        .delete()
+        .eq('customer_id', customerId)
+        .in('status', ['pending', 'active'])
+    }
+    
+    // Erstelle den richtigen Bonus für ersten Besuch (Index 0)
+    console.log('✅ Erstelle neuen Bonus:', reward)
+    if (reward.type === 'double') {
+      await supabase.from('bonuses').insert({ 
+        customer_id: customerId, 
+        bonus_type: 'double_points', 
+        bonus_amount: 0, 
+        status: 'pending' 
+      })
+    } else if (reward.type === 'bonus' && reward.bonus > 0) {
+      await supabase.from('bonuses').insert({ 
+        customer_id: customerId, 
+        bonus_type: 'bonus_points', 
+        bonus_amount: reward.bonus, 
+        status: 'pending' 
+      })
     }
   } catch (e) {
     console.error('ensureFirstBonus error:', e)
