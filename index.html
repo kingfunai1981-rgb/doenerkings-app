@@ -615,6 +615,7 @@ async function cancelCode(code) {
 async function loadGlobalBonuses() {
   if (!currentCustomer) return
   try {
+    console.log('🔄 Lade globale Bonusse...')
     const now = new Date().toISOString().split('T')[0]
     
     // Lade aktive globale Bonusse
@@ -626,6 +627,8 @@ async function loadGlobalBonuses() {
       .order('created_at', { ascending: false })
     
     if (error) throw error
+    
+    console.log('✅ Globale Bonusse geladen:', bonuses?.length || 0)
     
     const section = document.getElementById('bonuses-section')
     const list = document.getElementById('bonuses-list')
@@ -662,7 +665,7 @@ async function loadGlobalBonuses() {
       `
     }).join('')
   } catch (e) { 
-    console.error('Load bonuses error:', e) 
+    console.error('❌ Load bonuses error:', e) 
   }
 }
 
