@@ -638,11 +638,21 @@ async function loadGlobalBonuses() {
       return
     }
     
+    // Prüfe welche Bonusse der Kunde bereits aktiviert hat
+    const { data: activatedBonuses } = await supabase
+      .from('activated_global_bonuses')
+      .select('global_bonus_id, is_used')
+      .eq('customer_id', currentCustomer.id)
+    
+    const activatedMap = new Map(activatedBonuses?.map(a => [a.global_bonus_id, a.is_used]) || [])
+    
     section.style.display = 'block'
     list.innerHTML = bonuses.map(bonus => {
       const bonusAmount = bonus.bonus_amount || 100
-      let descText = ''
+      const isActivated = activatedMap.has(bonus.id)
+      const isUsed = activatedMap.get(bonus.id)
       
+      let descText = ''
       if (bonus.bonus_type === 'double_points') {
         descText = 'Beim nächsten Einkauf bekommst du doppelte Punkte!'
       } else {
@@ -656,16 +666,66 @@ async function loadGlobalBonuses() {
       const expiry = new Date(bonus.expires_at)
       const daysLeft = Math.ceil((expiry - new Date()) / (1000 * 60 * 60 * 24))
       
+      let statusText = ''
+      let buttonHTML = ''
+      
+      if (isUsed) {
+        statusText = '✅ Wurde bereits verwendet'
+      } else if (isActivated) {
+        statusText = '🔥 Aktiv für nächsten Einkauf!'
+      } else {
+        statusText = `⏳ Bereit zum Aktivieren (noch ${daysLeft} ${daysLeft === 1 ? 'Tag' : 'Tage'})`
+        buttonHTML = `<button onclick="activateGlobalBonus(${bonus.id})">🚀 Jetzt aktivieren</button>`
+      }
+      
       return `
-        <div class="bonus-item active">
+        <div class="bonus-item ${isActivated && !isUsed ? 'active' : ''}">
           <h3>${bonus.title || (bonus.bonus_type === 'double_points' ? '⭐ Doppelte Punkte' : `💰 +${bonusAmount} Bonus-Punkte`)}</h3>
           <div class="bonus-desc">${descText}</div>
-          <div class="bonus-status">🔥 Aktiv! Gültig noch ${daysLeft} ${daysLeft === 1 ? 'Tag' : 'Tage'}</div>
+          <div class="bonus-status">${statusText}</div>
+          ${buttonHTML}
         </div>
       `
     }).join('')
   } catch (e) { 
     console.error('❌ Load bonuses error:', e) 
+  }
+}
+
+async function activateGlobalBonus(bonusId) {
+  try {
+    console.log('🚀 Aktiviere globalen Bonus:', bonusId)
+    
+    // Prüfe ob bereits ein aktiver globaler Bonus existiert
+    const { data: existingActive } = await supabase
+      .from('activated_global_bonuses')
+      .select('*')
+      .eq('customer_id', currentCustomer.id)
+      .eq('is_used', false)
+    
+    if (existingActive && existingActive.length > 0) {
+      alert('❌ Du hast bereits einen aktiven Bonus! Bitte verwende ihn zuerst.')
+      return
+    }
+    
+    // Aktiviere den Bonus
+    const { error } = await supabase
+      .from('activated_global_bonuses')
+      .insert({
+        customer_id: currentCustomer.id,
+        global_bonus_id: bonusId,
+        activated_at: new Date().toISOString(),
+        is_used: false
+      })
+    
+    if (error) throw error
+    
+    console.log('✅ Globaler Bonus aktiviert!')
+    loadGlobalBonuses()
+    
+  } catch (e) {
+    console.error('❌ Activate error:', e)
+    alert('❌ Fehler beim Aktivieren: ' + e.message)
   }
 }
 
