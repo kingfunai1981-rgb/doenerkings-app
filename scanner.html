@@ -496,6 +496,10 @@ async function loadHistory() {
             ${isRedeem ? `<div style="color:#92400e;font-weight:600;">🎁 ${tx.notes || 'Eingelöst'}</div>` : `<div style="color:#059669;font-weight:600;">💰 ${tx.amount.toFixed(2)} €</div>`}
             <div style="color:${isRedeem ? '#ef4444' : '#667eea'};font-weight:600;">⭐ ${isRedeem ? Math.abs(tx.points) : '+' + tx.points}P</div>
           </div>
+          <div style="display:flex;gap:6px;margin-top:10px;">
+            <button class="small secondary" onclick="editTransaction(${tx.id}, ${tx.amount}, ${tx.points}, ${tx.customer_id})">✏️ Bearbeiten</button>
+            <button class="small danger" onclick="deleteTransaction(${tx.id}, ${tx.customer_id}, ${tx.points})">🗑️ Löschen</button>
+          </div>
         </div>
       `
     }).join('')
@@ -631,6 +635,45 @@ function cancelCodeConfirm() {
   document.getElementById('code-details').style.display = 'none'
   currentCodeData = null
   showResult('result-code', '', 'info')
+}
+
+async function editTransaction(txId, currentAmount, currentPoints, customerId) {
+  const newAmount = prompt('Neuer Betrag in € eingeben:', currentAmount)
+  if (!newAmount || isNaN(newAmount)) return
+  
+  const amount = parseFloat(newAmount)
+  const newPoints = Math.round(amount * 10)
+  const pointsDiff = newPoints - currentPoints
+  
+  try {
+    await supabase.from('transactions').update({ amount: amount, points: newPoints }).eq('id', txId)
+    
+    const { data: customer } = await supabase.from('customers').select('points').eq('id', customerId).single()
+    if (customer) {
+      await supabase.from('customers').update({ points: customer.points + pointsDiff }).eq('id', customerId)
+    }
+    
+    loadHistory()
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+async function deleteTransaction(txId, customerId, points) {
+  if (!confirm('Transaktion wirklich löschen? Punkte werden zurückgesetzt.')) return
+  
+  try {
+    await supabase.from('transactions').delete().eq('id', txId)
+    
+    const { data: customer } = await supabase.from('customers').select('points').eq('id', customerId).single()
+    if (customer) {
+      await supabase.from('customers').update({ points: customer.points - points }).eq('id', customerId)
+    }
+    
+    loadHistory()
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
+  }
 }
 
 console.log('✅ Scanner PRO geladen - FIXED Bonus Logic!')
