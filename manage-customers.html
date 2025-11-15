@@ -732,7 +732,7 @@ async function loadBonusPattern() {
     updatePreview()
     
     document.getElementById('bonusPatternCard').style.display = 'block'
-    showResult('result-bonus-load', '✅ Muster geladen!', 'success')
+    showResult('result-bonus-load', '', 'success')
     
   } catch (e) {
     showResult('result-bonus-load', '❌ Fehler: ' + e.message, 'error')
@@ -1167,7 +1167,7 @@ async function loadCoupons() {
       `
     }
 
-    showResult('result-coupon-load', '✅ Coupons geladen!', 'success')
+    showResult('result-coupon-load', '', 'success')
 
   } catch (e) {
     showResult('result-coupon-load', '❌ Fehler: ' + e.message, 'error')
