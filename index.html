@@ -860,11 +860,21 @@ async function loadBonuses() {
 
 async function activateBonus(bonusId) {
   try {
+    console.log('🚀 Versuche Bonus zu aktivieren:', bonusId)
     const { data: existingActive } = await supabase.from('bonuses').select('*').eq('customer_id', currentCustomer.id).eq('status', 'active')
-    if (existingActive && existingActive.length > 0) return
+    if (existingActive && existingActive.length > 0) {
+      console.log('⚠️ Es existiert bereits ein aktiver Bonus:', existingActive)
+      alert('❌ Du hast bereits einen aktiven Bonus! Bitte verwende ihn zuerst.')
+      return
+    }
+    console.log('✅ Aktiviere Bonus...')
     await supabase.from('bonuses').update({ status: 'active' }).eq('id', bonusId)
+    console.log('✅ Bonus aktiviert!')
     loadBonuses()
-  } catch (e) { console.error('Activate error:', e) }
+  } catch (e) { 
+    console.error('❌ Activate error:', e)
+    alert('❌ Fehler beim Aktivieren: ' + e.message)
+  }
 }
 
 async function loadChallenges() {
