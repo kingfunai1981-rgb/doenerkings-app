@@ -271,6 +271,56 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
 .bonus-item button { margin-top: 8px; background: white; color: #10b981; }
 .bonus-item.active button { color: #f59e0b; }
 
+.challenge-item {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.challenge-item h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.challenge-item .challenge-desc { font-size: 13px; opacity: 0.9; margin-bottom: 12px; }
+.challenge-progress { background: rgba(255,255,255,0.2); border-radius: 8px; padding: 10px; margin: 10px 0; }
+.challenge-progress-bar { background: rgba(255,255,255,0.3); height: 8px; border-radius: 4px; overflow: hidden; margin-top: 6px; }
+.challenge-progress-fill { background: white; height: 100%; border-radius: 4px; transition: width 0.3s; }
+.challenge-date { font-size: 11px; opacity: 0.8; margin-top: 8px; }
+
+.coupon-item {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 2px solid #f59e0b;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 10px;
+}
+
+.coupon-item h3 { color: #92400e; font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.coupon-product { font-size: 15px; color: #78350f; font-weight: 600; margin-bottom: 6px; }
+.coupon-price { font-size: 20px; font-weight: 700; color: #d97706; margin: 6px 0; }
+.coupon-desc { font-size: 13px; color: #92400e; margin: 6px 0; }
+.coupon-code-display {
+  background: white;
+  border: 2px dashed #f59e0b;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  margin: 10px 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  font-family: monospace;
+  color: #92400e;
+}
+.coupon-expiry { font-size: 12px; color: #92400e; margin-top: 8px; font-weight: 600; }
+.coupon-expiry.warning { color: #dc2626; }
+.coupon-item button { background: #f59e0b; color: white; width: 100%; padding: 10px; border: none; margin-top: 10px; }
+.coupon-item button:hover { background: #d97706; }
+.coupon-item.activated { background: linear-gradient(135deg, #d1fae5, #a7f3d0); border-color: #10b981; }
+.coupon-item.activated h3, .coupon-item.activated .coupon-product, .coupon-item.activated .coupon-desc, .coupon-item.activated .coupon-expiry { color: #065f46; }
+.coupon-item.activated .coupon-price { color: #059669; }
+.coupon-item.activated .coupon-code-display { border-color: #10b981; color: #065f46; }
+.coupon-activated-badge { background: #10b981; color: white; padding: 8px; border-radius: 6px; text-align: center; font-weight: 600; font-size: 13px; margin-top: 10px; }
+
 .screen { display: none; }
 .screen.active { display: block; }
 </style>
@@ -353,11 +403,24 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
       </div>
     </div>
 
-    <!-- ✅ GLOBALE BONUSSE -->
     <div id="bonuses-section" style="display: none;">
       <div class="card">
-        <h2>🎉 Aktuelle Bonusse</h2>
+        <h2>🎉 Meine Belohnungen</h2>
         <div id="bonuses-list"></div>
+      </div>
+    </div>
+
+    <div id="challenges-section" style="display: none;">
+      <div class="card">
+        <h2>🎯 Aktuelle Challenges</h2>
+        <div id="challenges-list"></div>
+      </div>
+    </div>
+
+    <div id="coupons-section" style="display: none;">
+      <div class="card">
+        <h2>🎟️ Deal der Woche</h2>
+        <div id="coupons-list"></div>
       </div>
     </div>
 
@@ -416,6 +479,23 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 let currentCustomer = null
 let refreshInterval = null
+let rewardPattern = []
+
+async function loadRewardPattern() {
+  try {
+    const { data } = await supabase.from('reward_pattern').select('*').single()
+    if (data && data.pattern) {
+      rewardPattern = data.pattern
+      console.log('✅ Bonusmuster geladen:', rewardPattern)
+    }
+  } catch (e) { console.error('Pattern load error:', e) }
+}
+loadRewardPattern()
+
+// ✅ AUTO-RELOAD: Lade Muster alle 30 Sekunden neu
+setInterval(() => {
+  loadRewardPattern()
+}, 30000)
 
 function normalizePhone(phone) {
   let normalized = phone.replace(/[\s\-\(\)]/g, '')
@@ -476,6 +556,21 @@ async function register() {
     
     if (error) throw error
     
+    let pattern = rewardPattern
+    if (!pattern || pattern.length === 0) {
+      const { data: patternData } = await supabase.from('reward_pattern').select('pattern').single()
+      pattern = patternData?.pattern || []
+    }
+    
+    if (pattern && pattern[0]) {
+      const reward = pattern[0]
+      if (reward.type === 'double') {
+        await supabase.from('bonuses').insert({ customer_id: data.id, bonus_type: 'double_points', bonus_amount: 0, status: 'pending' })
+      } else if (reward.type === 'bonus' && reward.bonus > 0) {
+        await supabase.from('bonuses').insert({ customer_id: data.id, bonus_type: 'bonus_points', bonus_amount: reward.bonus, status: 'pending' })
+      }
+    }
+    
     showResult('reg-result', '✅ Erfolgreich registriert!', 'success')
     setTimeout(() => {
       localStorage.setItem('customerData', JSON.stringify(data))
@@ -520,6 +615,9 @@ async function loadCustomer(customer) {
   currentCustomer = customer
   await refreshCustomerData()
   
+  // ✅ AUTO-FIX: Erstelle ersten Bonus wenn Kunde keine Bestellungen und keinen Bonus hat
+  await ensureFirstBonus(customer.id)
+  
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${customer.qr_id}`
   document.getElementById('header-qr-mini').src = qrUrl
   document.getElementById('modal-qr').src = qrUrl
@@ -528,12 +626,117 @@ async function loadCustomer(customer) {
   if (refreshInterval) clearInterval(refreshInterval)
   refreshInterval = setInterval(refreshCustomerData, 5000)
   loadPendingCodes()
-  loadGlobalBonuses() // ✅ Lade globale Bonusse
+  loadBonuses()
+  loadCoupons()
+  loadChallenges()
+}
+
+async function ensureFirstBonus(customerId) {
+  try {
+    console.log('🔍 ensureFirstBonus aufgerufen für Kunde:', customerId)
+    
+    // Prüfe ob Kunde schon Bestellungen hat
+    const { data: transactions } = await supabase
+      .from('transactions')
+      .select('id')
+      .eq('customer_id', customerId)
+      .eq('type', 'earn')
+    
+    console.log(`📊 Anzahl Bestellungen: ${transactions?.length || 0}`)
+    
+    const hasOrders = transactions && transactions.length > 0
+    
+    // Wenn Bestellungen existieren, nichts tun
+    if (hasOrders) {
+      console.log('✅ Kunde hat Bestellungen - nichts zu tun')
+      return
+    }
+    
+    // Prüfe ob bereits ein pending oder active Bonus existiert
+    const { data: existingBonuses } = await supabase
+      .from('bonuses')
+      .select('*')
+      .eq('customer_id', customerId)
+      .in('status', ['pending', 'active'])
+    
+    // Lade aktuelles Muster
+    let pattern = rewardPattern
+    if (!pattern || pattern.length === 0) {
+      const { data: patternData } = await supabase.from('reward_pattern').select('pattern').single()
+      pattern = patternData?.pattern || []
+    }
+    
+    console.log('📋 Aktuelles Muster Position 1:', pattern[0])
+    
+    if (!pattern || !pattern[0]) {
+      console.log('⚠️ Kein Muster vorhanden')
+      return
+    }
+    
+    const reward = pattern[0]
+    
+    // Prüfe ob der RICHTIGE Bonus existiert
+    let correctBonusExists = false
+    if (existingBonuses && existingBonuses.length > 0) {
+      for (const bonus of existingBonuses) {
+        if (reward.type === 'double' && bonus.bonus_type === 'double_points') {
+          correctBonusExists = true
+          console.log('✅ Korrekter Bonus existiert bereits')
+          break
+        }
+        if (reward.type === 'bonus' && bonus.bonus_type === 'bonus_points' && bonus.bonus_amount === reward.bonus) {
+          correctBonusExists = true
+          console.log('✅ Korrekter Bonus existiert bereits')
+          break
+        }
+      }
+    }
+    
+    // Wenn korrekter Bonus existiert, nichts tun
+    if (correctBonusExists) return
+    
+    // Lösche nur FALSCHE pending Boni
+    if (existingBonuses && existingBonuses.length > 0) {
+      console.log('🗑️ Lösche falsche Boni')
+      await supabase
+        .from('bonuses')
+        .delete()
+        .eq('customer_id', customerId)
+        .eq('status', 'pending')
+    }
+    
+    // Erstelle den richtigen Bonus für ersten Besuch (Index 0)
+    console.log('✅ Erstelle neuen ersten Bonus:', reward)
+    if (reward.type === 'double') {
+      await supabase.from('bonuses').insert({ 
+        customer_id: customerId, 
+        bonus_type: 'double_points', 
+        bonus_amount: 0, 
+        status: 'pending' 
+      })
+      console.log('✅ Doppelte Punkte Bonus erstellt!')
+    } else if (reward.type === 'bonus' && reward.bonus > 0) {
+      await supabase.from('bonuses').insert({ 
+        customer_id: customerId, 
+        bonus_type: 'bonus_points', 
+        bonus_amount: reward.bonus, 
+        status: 'pending' 
+      })
+      console.log(`✅ +${reward.bonus}P Bonus erstellt!`)
+    } else {
+      console.log('ℹ️ Normal - kein Bonus zu erstellen')
+    }
+  } catch (e) {
+    console.error('❌ ensureFirstBonus error:', e)
+  }
 }
 
 async function refreshCustomerData() {
   if (!currentCustomer) return
   try {
+    // ✅ Lade Bonusmuster neu (falls Manager es geändert hat)
+    await loadRewardPattern()
+    
     const { data, error } = await supabase.from('customers').select('*').eq('id', currentCustomer.id).single()
     if (error) throw error
     currentCustomer = data
@@ -541,8 +744,13 @@ async function refreshCustomerData() {
     updateRewardButtons(data.points)
     localStorage.setItem('customerData', JSON.stringify(data))
     
-    loadGlobalBonuses()
+    // ✅ Prüfe ob erster Bonus fehlt und erstelle ihn wenn nötig
+    await ensureFirstBonus(currentCustomer.id)
+    
+    loadBonuses()
+    loadCoupons()
     loadPendingCodes()
+    loadChallenges()
   } catch (e) { console.error('Refresh error:', e) }
 }
 
@@ -611,8 +819,7 @@ async function cancelCode(code) {
   } catch (e) { console.error('Cancel error:', e); loadPendingCodes() }
 }
 
-// ✅ GLOBALE BONUSSE LADEN
-async function loadGlobalBonuses() {
+async function loadBonuses() {
   if (!currentCustomer) return
   try {
     console.log('🔄 Lade globale Bonusse...')
@@ -675,7 +882,7 @@ async function loadGlobalBonuses() {
         statusText = '🔥 Aktiv für nächsten Einkauf!'
       } else {
         statusText = `⏳ Bereit zum Aktivieren (noch ${daysLeft} ${daysLeft === 1 ? 'Tag' : 'Tage'})`
-        buttonHTML = `<button onclick="activateGlobalBonus(${bonus.id})">🚀 Jetzt aktivieren</button>`
+        buttonHTML = `<button onclick="activateBonus(${bonus.id})">🚀 Jetzt aktivieren</button>`
       }
       
       return `
@@ -692,7 +899,7 @@ async function loadGlobalBonuses() {
   }
 }
 
-async function activateGlobalBonus(bonusId) {
+async function activateBonus(bonusId) {
   try {
     console.log('🚀 Aktiviere globalen Bonus:', bonusId)
     
@@ -721,12 +928,151 @@ async function activateGlobalBonus(bonusId) {
     if (error) throw error
     
     console.log('✅ Globaler Bonus aktiviert!')
-    loadGlobalBonuses()
+    loadBonuses()
     
   } catch (e) {
     console.error('❌ Activate error:', e)
     alert('❌ Fehler beim Aktivieren: ' + e.message)
   }
+}
+
+async function loadChallenges() {
+  if (!currentCustomer) return
+  try {
+    const now = new Date()
+    const { data: challenges, error } = await supabase.from('challenges').select('*').eq('is_active', true).gte('end_date', now.toISOString().split('T')[0]).order('created_at', { ascending: false })
+    if (error) throw error
+    const section = document.getElementById('challenges-section')
+    const list = document.getElementById('challenges-list')
+    if (!challenges || challenges.length === 0) {
+      section.style.display = 'none'
+      return
+    }
+    const challengeHTML = []
+    for (const challenge of challenges) {
+      const { data: progress } = await supabase.from('challenge_progress').select('*').eq('customer_id', currentCustomer.id).eq('challenge_id', challenge.id).single()
+      const isActivated = progress !== null
+      const completedOrders = progress?.completed_orders || 0
+      const isCompleted = progress?.is_completed || false
+      if (isCompleted) continue
+      const progressPercent = Math.min((completedOrders / challenge.required_orders) * 100, 100)
+      const startDate = new Date(challenge.start_date).toLocaleDateString('de-DE')
+      const endDate = new Date(challenge.end_date).toLocaleDateString('de-DE')
+      const remaining = challenge.required_orders - completedOrders
+      if (!isActivated) {
+        challengeHTML.push(`
+          <div class="challenge-item">
+            <h3>🎁 ${challenge.bonus_points} Extra-Punkte für ${challenge.required_orders} Bestellungen ab ${challenge.min_order_amount} €</h3>
+            <div class="challenge-desc">Aktiviere diese Challenge um teilzunehmen!</div>
+            <div class="challenge-date">📅 Gültig: ${startDate} - ${endDate}</div>
+            <button onclick="activateChallenge(${challenge.id})" style="margin-top: 12px;">🚀 Jetzt aktivieren</button>
+          </div>
+        `)
+      } else {
+        challengeHTML.push(`
+          <div class="challenge-item" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+            <h3>🎁 ${challenge.bonus_points} Extra-Punkte für ${challenge.required_orders} Bestellungen ab ${challenge.min_order_amount} €</h3>
+            <div class="challenge-desc">${remaining} ${remaining === 1 ? 'Bestellung' : 'Bestellungen'} offen</div>
+            <div class="challenge-progress">
+              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600;">
+                <span>${completedOrders} / ${challenge.required_orders} Bestellungen</span>
+                <span>${Math.round(progressPercent)}%</span>
+              </div>
+              <div class="challenge-progress-bar">
+                <div class="challenge-progress-fill" style="width: ${progressPercent}%"></div>
+              </div>
+            </div>
+            <div class="challenge-date">📅 Gültig: ${startDate} - ${endDate}</div>
+          </div>
+        `)
+      }
+    }
+    if (challengeHTML.length === 0) {
+      section.style.display = 'none'
+      return
+    }
+    section.style.display = 'block'
+    list.innerHTML = challengeHTML.join('')
+  } catch (e) { console.error('Load challenges error:', e) }
+}
+
+async function activateChallenge(challengeId) {
+  try {
+    await supabase.from('challenge_progress').insert({ customer_id: currentCustomer.id, challenge_id: challengeId, completed_orders: 0, is_completed: false })
+    loadChallenges()
+  } catch (e) { console.error('Activate challenge error:', e) }
+}
+
+async function loadCoupons() {
+  if (!currentCustomer) return
+  try {
+    const { data: coupons, error } = await supabase.from('coupons').select('*').eq('is_active', true).order('created_at', { ascending: false })
+    if (error) throw error
+    const section = document.getElementById('coupons-section')
+    const list = document.getElementById('coupons-list')
+    if (!coupons || coupons.length === 0) {
+      section.style.display = 'none'
+      return
+    }
+    const now = new Date()
+    const activeCoupons = coupons.filter(c => new Date(c.expires_at) > now)
+    if (activeCoupons.length === 0) {
+      section.style.display = 'none'
+      return
+    }
+    const { data: activated } = await supabase.from('activated_coupons').select('coupon_id, unique_code').eq('customer_id', currentCustomer.id).eq('is_used', false)
+    const activatedMap = new Map(activated?.map(a => [a.coupon_id, a.unique_code]) || [])
+    section.style.display = 'block'
+    list.innerHTML = activeCoupons.map(coupon => {
+      const expiry = new Date(coupon.expires_at)
+      const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24))
+      const isActivated = activatedMap.has(coupon.id)
+      const uniqueCode = activatedMap.get(coupon.id)
+      let expiryText = ''
+      if (daysLeft === 0) {
+        expiryText = '<span class="coupon-expiry warning">⚠️ Läuft heute ab!</span>'
+      } else if (daysLeft <= 3) {
+        expiryText = `<span class="coupon-expiry warning">⏰ Läuft in ${daysLeft} Tagen ab</span>`
+      } else {
+        expiryText = `<span class="coupon-expiry">⏰ Läuft in ${daysLeft} Tagen ab</span>`
+      }
+      const formattedPrice = parseFloat(coupon.price || 0).toFixed(2).replace('.', ',') + ' €'
+      return `
+        <div class="coupon-item ${isActivated ? 'activated' : ''}">
+          <h3>${coupon.title}</h3>
+          <div class="coupon-product">🍴 ${coupon.product}</div>
+          <div class="coupon-price">💰 ${formattedPrice}</div>
+          ${coupon.description ? `<div class="coupon-desc">📝 ${coupon.description}</div>` : ''}
+          ${isActivated ? `<div class="coupon-code-display">${uniqueCode}</div>` : ''}
+          ${expiryText}
+          ${isActivated ? 
+            `<div class="coupon-activated-badge">✅ Aktiviert! Zeige Code beim Scannen</div>
+             <button onclick="deactivateCoupon(${coupon.id})" style="background: #ef4444; margin-top: 8px;">❌ Stornieren</button>` : 
+            `<button onclick="activateCoupon(${coupon.id})">🚀 Jetzt aktivieren</button>`
+          }
+        </div>
+      `
+    }).join('')
+  } catch (e) { console.error('Load coupons error:', e) }
+}
+
+async function activateCoupon(couponId) {
+  try {
+    const id = parseInt(couponId)
+    const { data: existing } = await supabase.from('activated_coupons').select('*').eq('customer_id', currentCustomer.id).eq('coupon_id', id).eq('is_used', false)
+    if (existing && existing.length > 0) { loadCoupons(); return }
+    const uniqueCode = Math.floor(1000 + Math.random() * 9000).toString()
+    await supabase.from('activated_coupons').insert({ customer_id: currentCustomer.id, coupon_id: id, unique_code: uniqueCode, activated_at: new Date().toISOString(), is_used: false })
+    loadCoupons()
+  } catch (e) { console.error('Fehler beim Aktivieren:', e.message); loadCoupons() }
+}
+
+async function deactivateCoupon(couponId) {
+  try {
+    const id = parseInt(couponId)
+    await supabase.from('activated_coupons').delete().eq('customer_id', currentCustomer.id).eq('coupon_id', id).eq('is_used', false)
+    loadCoupons()
+  } catch (e) { console.error('Fehler beim Stornieren:', e.message); loadCoupons() }
 }
 
 function logout() {
@@ -746,7 +1092,7 @@ window.onload = () => {
   }
 }
 
-console.log('✅ Kunden-App mit globalem Bonus-System geladen!')
+console.log('✅ Kunden-App geladen!')
 </script>
 </body>
 </html>
