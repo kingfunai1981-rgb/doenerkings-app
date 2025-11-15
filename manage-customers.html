@@ -391,30 +391,6 @@ textarea {
     <div id="result-main"></div>
   </div>
 
-  <!-- BONUSSYSTEM -->
-  <div class="card">
-    <h2>⭐ Bonussystem konfigurieren (10er-Rhythmus)</h2>
-    <p class="subtitle">Stelle ein, was bei welchem Besuch passiert (wiederholt sich automatisch)</p>
-    
-    <div class="info-box">
-      <p><strong>ℹ️ So funktioniert's:</strong> Normal = Standard-Punkte (10P/€) • Verdoppelt = Doppelte Punkte (20P/€) • Bonus = Extra Fixpunkte zusätzlich (z.B. +100P)</p>
-    </div>
-
-    <div id="result-bonus-load"></div>
-
-    <div id="bonusPatternCard" style="display: none;">
-      <div class="visit-grid" id="visitGrid"></div>
-
-      <div class="preview-box">
-        <h3 style="color: #374151; font-size: 14px; margin-bottom: 8px;">📋 Vorschau nächste 20 Besuche:</h3>
-        <div class="preview-items" id="previewItems"></div>
-      </div>
-
-      <button class="success" onclick="saveBonusPattern()">💾 Muster speichern</button>
-      <div id="result-bonus-save"></div>
-    </div>
-  </div>
-
   <!-- ✅ CHALLENGE BONUS ERSTELLEN -->
   <div class="card">
     <h2>🎯 Challenge-Bonus erstellen</h2>
@@ -726,167 +702,6 @@ async function deleteAllCustomers() {
     
   } catch (e) {
     showResult('result-main', '❌ <strong>FEHLER!</strong><br><br>' + e.message, 'error')
-  }
-}
-
-// ============================================
-// BONUSSYSTEM
-// ============================================
-let bonusPattern = []
-
-async function loadBonusPattern() {
-  showResult('result-bonus-load', '📊 Lade Muster...', 'info')
-  
-  try {
-    const { data, error } = await supabase
-      .from('reward_pattern')
-      .select('*')
-      .single()
-    
-    if (error && error.code !== 'PGRST116') throw error
-    
-    if (data && data.pattern) {
-      bonusPattern = data.pattern
-    } else {
-      bonusPattern = [
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 },
-        { type: 'normal', bonus: 0 }
-      ]
-    }
-    
-    renderBonusPattern()
-    updatePreview()
-    
-    document.getElementById('bonusPatternCard').style.display = 'block'
-    showResult('result-bonus-load', '', 'success')
-    
-  } catch (e) {
-    showResult('result-bonus-load', '❌ Fehler: ' + e.message, 'error')
-  }
-}
-
-function renderBonusPattern() {
-  const grid = document.getElementById('visitGrid')
-  grid.innerHTML = ''
-  
-  for (let i = 0; i < 10; i++) {
-    const visit = bonusPattern[i] || { type: 'normal', bonus: 0 }
-    
-    grid.innerHTML += `
-      <div class="visit-card">
-        <div class="visit-number">${i + 1}.</div>
-        <select id="type-${i}" class="${visit.type}" onchange="updateVisitType(${i})">
-          <option value="normal" ${visit.type === 'normal' ? 'selected' : ''}>😊 Normal</option>
-          <option value="double" ${visit.type === 'double' ? 'selected' : ''}>⭐ Verdoppelt</option>
-          <option value="bonus" ${visit.type === 'bonus' ? 'selected' : ''}>🎁 Bonus</option>
-        </select>
-        <div id="bonus-${i}" style="display: ${visit.type === 'bonus' ? 'block' : 'none'}">
-          <input type="number" value="${visit.bonus}" placeholder="z.B. 100" onchange="updateBonus(${i}, this.value)">
-        </div>
-      </div>
-    `
-  }
-}
-
-function updateVisitType(index) {
-  const select = document.getElementById(`type-${index}`)
-  const type = select.value
-  
-  bonusPattern[index].type = type
-  select.className = type
-  
-  const bonusDiv = document.getElementById(`bonus-${index}`)
-  if (type === 'bonus') {
-    bonusDiv.style.display = 'block'
-    if (!bonusPattern[index].bonus) {
-      bonusPattern[index].bonus = 100
-      bonusDiv.querySelector('input').value = 100
-    }
-  } else {
-    bonusDiv.style.display = 'none'
-    bonusPattern[index].bonus = 0
-  }
-  
-  updatePreview()
-}
-
-function updateBonus(index, value) {
-  bonusPattern[index].bonus = parseInt(value) || 0
-  updatePreview()
-}
-
-function updatePreview() {
-  const preview = document.getElementById('previewItems')
-  preview.innerHTML = ''
-  
-  for (let i = 1; i <= 20; i++) {
-    const patternIndex = (i - 1) % 10
-    const visit = bonusPattern[patternIndex]
-    
-    let text = `${i}.`
-    if (visit.type === 'normal') text += ' Normal'
-    if (visit.type === 'double') text += ' 2x'
-    if (visit.type === 'bonus') text += ` +${visit.bonus}P`
-    
-    preview.innerHTML += `<span class="preview-item ${visit.type}">${text}</span>`
-  }
-}
-
-async function saveBonusPattern() {
-  showResult('result-bonus-save', '💾 Speichere...', 'info')
-  
-  try {
-    // ✅ WICHTIG: Lösche ALLE pending Boni aus der bonuses Tabelle!
-    const { error: deleteBonusError } = await supabase
-      .from('bonuses')
-      .delete()
-      .eq('status', 'pending')
-    
-    if (deleteBonusError) console.warn('Pending Bonus-Löschung:', deleteBonusError.message)
-    
-    const { data: existing } = await supabase
-      .from('reward_pattern')
-      .select('id')
-      .single()
-    
-    if (existing) {
-      const { error } = await supabase
-        .from('reward_pattern')
-        .update({ 
-          pattern: bonusPattern,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', existing.id)
-      
-      if (error) throw error
-    } else {
-      const { error } = await supabase
-        .from('reward_pattern')
-        .insert({ 
-          pattern: bonusPattern,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-      
-      if (error) throw error
-    }
-    
-    showResult('result-bonus-save', '✅ Muster geladen!', 'success')
-    
-    setTimeout(() => {
-      loadBonusPattern()
-    }, 1000)
-    
-  } catch (e) {
-    showResult('result-bonus-save', '❌ Fehler: ' + e.message, 'error')
   }
 }
 
@@ -1398,7 +1213,6 @@ async function deleteGlobalBonus(id) {
 
 // ✅ AUTO-LOAD beim Seitenstart
 window.addEventListener('DOMContentLoaded', function() {
-  loadBonusPattern()
   loadCoupons()
   loadChallenges()
   loadGlobalBonuses() // ✅ Lade globale Bonusse
