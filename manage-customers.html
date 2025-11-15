@@ -490,6 +490,40 @@ textarea {
     </div>
   </div>
 
+  <!-- ✅ NEU: GLOBALE BONUSSE -->
+  <div class="card">
+    <h2>🎁 Globale Bonusse</h2>
+    <p class="subtitle">Erstelle Bonusse, die sofort bei allen Kunden erscheinen</p>
+
+    <label class="form-label">🎯 Bonus-Typ</label>
+    <select id="globalBonusType" onchange="toggleBonusAmount()">
+      <option value="bonus_points">💰 Extra-Punkte</option>
+      <option value="double_points">⭐ Doppelte Punkte</option>
+    </select>
+
+    <div id="globalBonusAmountField">
+      <label class="form-label">💵 Bonus-Punkte</label>
+      <input type="number" id="globalBonusAmount" placeholder="z.B. 100" value="100">
+    </div>
+
+    <label class="form-label">📅 Gültig bis</label>
+    <input type="date" id="globalBonusExpiry">
+
+    <label class="form-label">📝 Titel (optional)</label>
+    <input type="text" id="globalBonusTitle" placeholder="z.B. Wochenend-Special">
+
+    <label class="form-label">📄 Beschreibung (optional)</label>
+    <input type="text" id="globalBonusDesc" placeholder="z.B. Nur dieses Wochenende!">
+
+    <button class="success" onclick="createGlobalBonus()">🚀 Bonus erstellen</button>
+    <div id="result-global-bonus"></div>
+
+    <div style="margin-top: 24px;">
+      <h3>📋 Aktive Bonusse</h3>
+      <div id="globalBonusList"></div>
+    </div>
+  </div>
+
   <!-- KUNDENLISTE -->
   <div class="card" id="customerCard" style="display: none;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
@@ -1219,20 +1253,169 @@ async function deleteCoupon(id) {
   }
 }
 
+// ============================================
+// ✅ GLOBALE BONUSSE
+// ============================================
+function toggleBonusAmount() {
+  const type = document.getElementById('globalBonusType').value
+  const amountField = document.getElementById('globalBonusAmountField')
+  amountField.style.display = type === 'double_points' ? 'none' : 'block'
+}
+
+async function createGlobalBonus() {
+  const type = document.getElementById('globalBonusType').value
+  const amount = parseInt(document.getElementById('globalBonusAmount').value) || 100
+  const expiry = document.getElementById('globalBonusExpiry').value
+  const title = document.getElementById('globalBonusTitle').value.trim()
+  const desc = document.getElementById('globalBonusDesc').value.trim()
+
+  if (!expiry) {
+    showResult('result-global-bonus', '❌ Bitte Ablaufdatum wählen!', 'error')
+    return
+  }
+
+  if (new Date(expiry) <= new Date()) {
+    showResult('result-global-bonus', '❌ Ablaufdatum muss in der Zukunft liegen!', 'error')
+    return
+  }
+
+  try {
+    showResult('result-global-bonus', '⏳ Erstelle Bonus...', 'info')
+
+    const { error } = await supabase
+      .from('global_bonuses')
+      .insert({
+        bonus_type: type,
+        bonus_amount: type === 'double_points' ? 0 : amount,
+        expires_at: expiry,
+        title: title || (type === 'double_points' ? 'Doppelte Punkte' : `+${amount} Bonus-Punkte`),
+        description: desc || '',
+        is_active: true,
+        created_at: new Date().toISOString()
+      })
+
+    if (error) throw error
+
+    showResult('result-global-bonus', '✅ Bonus erstellt! Erscheint jetzt bei allen Kunden.', 'success')
+    
+    document.getElementById('globalBonusTitle').value = ''
+    document.getElementById('globalBonusDesc').value = ''
+    
+    loadGlobalBonuses()
+
+  } catch (e) {
+    showResult('result-global-bonus', '❌ Fehler: ' + e.message, 'error')
+  }
+}
+
+async function loadGlobalBonuses() {
+  try {
+    const { data: bonuses, error } = await supabase
+      .from('global_bonuses')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+
+    const list = document.getElementById('globalBonusList')
+
+    if (!bonuses || bonuses.length === 0) {
+      list.innerHTML = '<div class="result info">Keine Bonusse vorhanden</div>'
+      return
+    }
+
+    const now = new Date()
+
+    list.innerHTML = bonuses.map(bonus => {
+      const expiry = new Date(bonus.expires_at)
+      const isExpired = expiry < now
+      const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24))
+      const isActive = bonus.is_active && !isExpired
+
+      let bonusText = bonus.bonus_type === 'double_points' ? '⭐ Doppelte Punkte' : `💰 +${bonus.bonus_amount} Bonus-Punkte`
+
+      return `
+        <div style="background: ${isActive ? '#d1fae5' : '#fee2e2'}; border: 2px solid ${isActive ? '#10b981' : '#ef4444'}; border-radius: 10px; padding: 16px; margin-top: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div style="flex: 1;">
+              <h3 style="color: #111827; margin-bottom: 8px;">${bonusText}</h3>
+              ${bonus.title ? `<p style="font-size: 14px; color: #6b7280; margin: 4px 0; font-weight: 600;">${bonus.title}</p>` : ''}
+              ${bonus.description ? `<p style="font-size: 13px; color: #6b7280; margin: 4px 0;">${bonus.description}</p>` : ''}
+              <p style="font-size: 13px; color: #6b7280; margin: 4px 0;">
+                📅 Gültig bis: ${expiry.toLocaleDateString('de-DE')}
+                ${isActive ? ` (noch ${daysLeft} Tage)` : ''}
+              </p>
+              <p style="font-size: 12px; color: ${isActive ? '#059669' : '#dc2626'}; font-weight: 600; margin-top: 6px;">
+                ${isActive ? '✅ Aktiv' : isExpired ? '❌ Abgelaufen' : '⏸️ Inaktiv'}
+              </p>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              ${isActive ? 
+                `<button class="danger" style="padding: 8px 14px; font-size: 13px; width: auto;" onclick="toggleGlobalBonus(${bonus.id}, false)">⏸️ Deaktivieren</button>` :
+                !isExpired ? `<button class="success" style="padding: 8px 14px; font-size: 13px; width: auto; margin: 0;" onclick="toggleGlobalBonus(${bonus.id}, true)">✅ Aktivieren</button>` : ''
+              }
+              <button class="danger" style="padding: 8px 14px; font-size: 13px; width: auto;" onclick="deleteGlobalBonus(${bonus.id})">🗑️</button>
+            </div>
+          </div>
+        </div>
+      `
+    }).join('')
+
+  } catch (e) {
+    console.error('Load global bonuses error:', e)
+  }
+}
+
+async function toggleGlobalBonus(id, active) {
+  try {
+    const { error } = await supabase
+      .from('global_bonuses')
+      .update({ is_active: active })
+      .eq('id', id)
+
+    if (error) throw error
+    loadGlobalBonuses()
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+async function deleteGlobalBonus(id) {
+  if (!confirm('Bonus wirklich löschen?')) return
+
+  try {
+    const { error } = await supabase
+      .from('global_bonuses')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw error
+    loadGlobalBonuses()
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
 // ✅ AUTO-LOAD beim Seitenstart
 window.addEventListener('DOMContentLoaded', function() {
   loadBonusPattern()
   loadCoupons()
   loadChallenges()
+  loadGlobalBonuses() // ✅ Lade globale Bonusse
+  
+  // Setze Standard-Ablaufdatum für globale Bonusse (7 Tage)
+  const nextWeek = new Date()
+  nextWeek.setDate(nextWeek.getDate() + 7)
+  document.getElementById('globalBonusExpiry').value = nextWeek.toISOString().split('T')[0]
   
   // ✅ Setze IMMER aktuelles Datum als Start
   const today = new Date().toISOString().split('T')[0]
   document.getElementById('challengeStart').value = today
   
   // Setze 7 Tage später als Ende
-  const nextWeek = new Date()
-  nextWeek.setDate(nextWeek.getDate() + 7)
-  document.getElementById('challengeEnd').value = nextWeek.toISOString().split('T')[0]
+  const nextWeek2 = new Date()
+  nextWeek2.setDate(nextWeek2.getDate() + 7)
+  document.getElementById('challengeEnd').value = nextWeek2.toISOString().split('T')[0]
   
   // ✅ UPDATE: Bei jedem Reload das Start-Datum aktualisieren
   setInterval(() => {
