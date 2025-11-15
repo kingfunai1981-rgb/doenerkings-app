@@ -633,6 +633,8 @@ async function loadCustomer(customer) {
 
 async function ensureFirstBonus(customerId) {
   try {
+    console.log('🔍 ensureFirstBonus aufgerufen für Kunde:', customerId)
+    
     // Prüfe ob Kunde schon Bestellungen hat
     const { data: transactions } = await supabase
       .from('transactions')
@@ -640,10 +642,15 @@ async function ensureFirstBonus(customerId) {
       .eq('customer_id', customerId)
       .eq('type', 'earn')
     
+    console.log(`📊 Anzahl Bestellungen: ${transactions?.length || 0}`)
+    
     const hasOrders = transactions && transactions.length > 0
     
     // Wenn Bestellungen existieren, nichts tun
-    if (hasOrders) return
+    if (hasOrders) {
+      console.log('✅ Kunde hat Bestellungen - nichts zu tun')
+      return
+    }
     
     // ✅ Kunde hat 0 Bestellungen - lösche ALLE Boni (egal ob richtig oder falsch)
     console.log('🔄 Kunde hat 0 Bestellungen - setze Boni zurück')
@@ -659,7 +666,12 @@ async function ensureFirstBonus(customerId) {
       pattern = patternData?.pattern || []
     }
     
-    if (!pattern || !pattern[0]) return
+    console.log('📋 Aktuelles Muster Position 1:', pattern[0])
+    
+    if (!pattern || !pattern[0]) {
+      console.log('⚠️ Kein Muster vorhanden')
+      return
+    }
     
     const reward = pattern[0]
     
@@ -672,6 +684,7 @@ async function ensureFirstBonus(customerId) {
         bonus_amount: 0, 
         status: 'pending' 
       })
+      console.log('✅ Doppelte Punkte Bonus erstellt!')
     } else if (reward.type === 'bonus' && reward.bonus > 0) {
       await supabase.from('bonuses').insert({ 
         customer_id: customerId, 
@@ -679,9 +692,12 @@ async function ensureFirstBonus(customerId) {
         bonus_amount: reward.bonus, 
         status: 'pending' 
       })
+      console.log(`✅ +${reward.bonus}P Bonus erstellt!`)
+    } else {
+      console.log('ℹ️ Normal - kein Bonus zu erstellen')
     }
   } catch (e) {
-    console.error('ensureFirstBonus error:', e)
+    console.error('❌ ensureFirstBonus error:', e)
   }
 }
 
