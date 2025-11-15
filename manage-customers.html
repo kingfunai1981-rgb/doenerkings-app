@@ -810,13 +810,21 @@ async function saveBonusPattern() {
   showResult('result-bonus-save', '💾 Speichere...', 'info')
   
   try {
-    // ✅ FIX Problem 1: Lösche ALLE alten Boni in allen Kunden
+    // ✅ WICHTIG: Lösche ALLE pending Boni aus der bonuses Tabelle!
+    const { error: deleteBonusError } = await supabase
+      .from('bonuses')
+      .delete()
+      .eq('status', 'pending')
+    
+    if (deleteBonusError) console.warn('Pending Bonus-Löschung:', deleteBonusError.message)
+    
+    // ✅ Lösche auch challenge_bonus falls vorhanden
     const { error: deleteError } = await supabase
       .from('customers')
       .update({ challenge_bonus: null })
       .not('challenge_bonus', 'is', null)
     
-    if (deleteError) console.warn('Bonus-Löschung:', deleteError.message)
+    if (deleteError) console.warn('Challenge-Bonus-Löschung:', deleteError.message)
     
     const { data: existing } = await supabase
       .from('reward_pattern')
@@ -845,7 +853,7 @@ async function saveBonusPattern() {
       if (error) throw error
     }
     
-    showResult('result-bonus-save', '✅ Muster gespeichert! Alte Boni wurden zurückgesetzt.', 'success')
+    showResult('result-bonus-save', '✅ Muster gespeichert! Alle alten Boni wurden zurückgesetzt.', 'success')
     
     setTimeout(() => {
       loadBonusPattern()
