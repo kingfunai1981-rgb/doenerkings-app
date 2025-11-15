@@ -1056,7 +1056,8 @@ async function createCoupon() {
 
     showResult('result-coupon-create', 
       `✅ <strong>Coupon erstellt!</strong><br>` +
-      `Code: <strong style="font-size:20px; letter-spacing:3px;">${code}</strong><br>` +
+      `Produkt: <strong>${product}</strong><br>` +
+      `Preis: <strong>${price}</strong><br>` +
       `Läuft ab: ${formatDate(expiryDate)}`,
       'success'
     )
