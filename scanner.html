@@ -152,29 +152,6 @@ let scanning = false
 let stream = null
 let currentCustomer = null
 let currentCodeData = null
-let rewardPattern = []
-
-async function loadRewardPattern() {
-  try {
-    const { data, error } = await supabase.from('reward_pattern').select('*').single()
-    if (error && error.code !== 'PGRST116') throw error
-    if (data && data.pattern) {
-      rewardPattern = data.pattern
-      console.log('✅ Bonusmuster geladen:', rewardPattern)
-    } else {
-      rewardPattern = Array(10).fill({ type: 'normal', bonus: 0 })
-    }
-  } catch (e) {
-    console.error('Pattern load error:', e)
-    rewardPattern = Array(10).fill({ type: 'normal', bonus: 0 })
-  }
-}
-loadRewardPattern()
-
-// ✅ AUTO-RELOAD: Lade Muster alle 30 Sekunden neu
-setInterval(() => {
-  loadRewardPattern()
-}, 30000)
 
 async function checkAndUpdateChallenges(customerId, amount) {
   try {
@@ -256,20 +233,19 @@ async function addPointsByPhone() {
     const totalOrders = txData ? txData.length : 0
     console.log(`📊 ${customer.name}: Bisherige Bestellungen = ${totalOrders}`)
     
-    // ✅ CHECK GLOBALE BONUSSE ZUERST
+    // ✅ CHECK GLOBALE BONUSSE
     const { data: activeGlobalBonuses } = await supabase
       .from('activated_global_bonuses')
       .select('*, global_bonuses(*)')
       .eq('customer_id', customer.id)
       .eq('is_used', false)
     
-    const { data: activeBonuses } = await supabase.from('bonuses').select('*').eq('customer_id', customer.id).eq('status', 'active')
     const { data: activatedCoupons } = await supabase.from('activated_coupons').select('*, coupons(*)').eq('customer_id', customer.id).eq('is_used', false)
     
     let pointsToAdd = Math.round(amount * 10)
     let bonusApplied = null, bonusPointsAdded = 0, couponUsed = null
     
-    // ✅ PRIORITÄT: Globale Bonusse VOR Rhythmus-Bonussen
+    // ✅ GLOBALE BONUSSE ANWENDEN
     if (activeGlobalBonuses && activeGlobalBonuses.length > 0) {
       const globalBonus = activeGlobalBonuses[0]
       const bonus = globalBonus.global_bonuses
@@ -277,11 +253,11 @@ async function addPointsByPhone() {
       if (bonus.bonus_type === 'double_points') {
         bonusPointsAdded = pointsToAdd
         pointsToAdd *= 2
-        bonusApplied = '⭐ Doppelte Punkte! (Global)'
+        bonusApplied = '⭐ Doppelte Punkte!'
       } else if (bonus.bonus_type === 'bonus_points') {
         bonusPointsAdded = bonus.bonus_amount || 100
         pointsToAdd += bonusPointsAdded
-        bonusApplied = `💰 +${bonusPointsAdded} Bonus! (Global)`
+        bonusApplied = `💰 +${bonusPointsAdded} Bonus!`
       }
       
       // Markiere als verwendet
@@ -294,19 +270,6 @@ async function addPointsByPhone() {
         .eq('id', globalBonus.id)
       
       console.log('✅ Globaler Bonus verwendet:', bonusApplied)
-      
-    } else if (activeBonuses && activeBonuses.length > 0) {
-      const bonus = activeBonuses[0]
-      if (bonus.bonus_type === 'double_points') {
-        bonusPointsAdded = pointsToAdd
-        pointsToAdd *= 2
-        bonusApplied = '⭐ Doppelte Punkte!'
-      } else if (bonus.bonus_type === 'bonus_points') {
-        bonusPointsAdded = bonus.bonus_amount || 100
-        pointsToAdd += bonusPointsAdded
-        bonusApplied = `💰 +${bonusPointsAdded} Bonus!`
-      }
-      await supabase.from('bonuses').update({ status: 'used' }).eq('id', bonus.id)
     }
     
     if (activatedCoupons && activatedCoupons.length > 0) {
@@ -319,25 +282,6 @@ async function addPointsByPhone() {
     
     await supabase.from('transactions').insert({ customer_id: customer.id, type: 'earn', amount, points: pointsToAdd, staff: 'SCANNER' })
     await supabase.from('customers').update({ points: newTotal }).eq('id', customer.id)
-    
-    // ✅ ERSTELLE BONUS FÜR NÄCHSTEN BESUCH
-    const nextIndex = (totalOrders + 1) % 10
-    console.log(`🎯 Nächster Besuch: ${nextIndex + 1}. (Index ${nextIndex})`)
-    
-    if (rewardPattern[nextIndex]) {
-      const reward = rewardPattern[nextIndex]
-      console.log(`🎁 Bonus für nächsten Besuch:`, reward)
-      
-      if (reward.type === 'double') {
-        await supabase.from('bonuses').insert({ customer_id: customer.id, bonus_type: 'double_points', bonus_amount: 0, status: 'pending' })
-        console.log('✅ Doppelte Punkte erstellt')
-      } else if (reward.type === 'bonus' && reward.bonus > 0) {
-        await supabase.from('bonuses').insert({ customer_id: customer.id, bonus_type: 'bonus_points', bonus_amount: reward.bonus, status: 'pending' })
-        console.log(`✅ +${reward.bonus}P Bonus erstellt`)
-      } else {
-        console.log('ℹ️ Normal - kein Bonus')
-      }
-    }
     
     await checkAndUpdateChallenges(customer.id, amount)
     
@@ -423,11 +367,17 @@ async function onQRDetected(qrCode) {
     document.getElementById('custQR').textContent = currentCustomer.qr_id
     document.getElementById('custPoints').textContent = currentCustomer.points
     
-    const { data: bonuses } = await supabase.from('bonuses').select('*').eq('customer_id', currentCustomer.id).eq('status', 'active')
+    // Check for active global bonuses
+    const { data: globalBonuses } = await supabase
+      .from('activated_global_bonuses')
+      .select('*, global_bonuses(*)')
+      .eq('customer_id', currentCustomer.id)
+      .eq('is_used', false)
+    
     const badge = document.getElementById('activeBonusBadge')
-    if (bonuses && bonuses.length > 0) {
-      const b = bonuses[0]
-      badge.innerHTML = `<div class="bonus-badge">${b.bonus_type === 'double_points' ? '🔥 2x Punkte!' : '🎁 +100P Bonus!'}</div>`
+    if (globalBonuses && globalBonuses.length > 0) {
+      const b = globalBonuses[0].global_bonuses
+      badge.innerHTML = `<div class="bonus-badge">${b.bonus_type === 'double_points' ? '🔥 2x Punkte!' : `🎁 +${b.bonus_amount}P Bonus!`}</div>`
     } else {
       badge.innerHTML = ''
     }
@@ -446,16 +396,20 @@ async function addPointsFromScan() {
   if (!amount || amount <= 0) { showResult('result-scan', '❌ Betrag eingeben!', 'error'); return }
   
   try {
-    const { data: txData } = await supabase.from('transactions').select('id').eq('customer_id', currentCustomer.id).eq('type', 'earn')
-    const totalOrders = txData ? txData.length : 0
-    
-    const { data: bonuses } = await supabase.from('bonuses').select('*').eq('customer_id', currentCustomer.id).eq('status', 'active')
+    // Check for active global bonuses
+    const { data: globalBonuses } = await supabase
+      .from('activated_global_bonuses')
+      .select('*, global_bonuses(*)')
+      .eq('customer_id', currentCustomer.id)
+      .eq('is_used', false)
     
     let pointsToAdd = Math.round(amount * 10)
     let bonusApplied = null, bonusPointsAdded = 0
     
-    if (bonuses && bonuses.length > 0) {
-      const b = bonuses[0]
+    if (globalBonuses && globalBonuses.length > 0) {
+      const globalBonus = globalBonuses[0]
+      const b = globalBonus.global_bonuses
+      
       if (b.bonus_type === 'double_points') {
         bonusPointsAdded = pointsToAdd
         pointsToAdd *= 2
@@ -465,22 +419,16 @@ async function addPointsFromScan() {
         pointsToAdd += bonusPointsAdded
         bonusApplied = `💰 +${bonusPointsAdded}P!`
       }
-      await supabase.from('bonuses').update({ status: 'used' }).eq('id', b.id)
+      
+      await supabase
+        .from('activated_global_bonuses')
+        .update({ is_used: true, used_at: new Date().toISOString() })
+        .eq('id', globalBonus.id)
     }
     
     const newTotal = currentCustomer.points + pointsToAdd
     await supabase.from('transactions').insert({ customer_id: currentCustomer.id, type: 'earn', amount, points: pointsToAdd, staff: 'SCANNER' })
     await supabase.from('customers').update({ points: newTotal }).eq('id', currentCustomer.id)
-    
-    const nextIndex = (totalOrders + 1) % 10
-    if (rewardPattern[nextIndex]) {
-      const r = rewardPattern[nextIndex]
-      if (r.type === 'double') {
-        await supabase.from('bonuses').insert({ customer_id: currentCustomer.id, bonus_type: 'double_points', status: 'pending' })
-      } else if (r.type === 'bonus' && r.bonus > 0) {
-        await supabase.from('bonuses').insert({ customer_id: currentCustomer.id, bonus_type: 'bonus_points', bonus_amount: r.bonus, status: 'pending' })
-      }
-    }
     
     await checkAndUpdateChallenges(currentCustomer.id, amount)
     
@@ -708,43 +656,12 @@ async function deleteTransaction(txId, customerId, points) {
       await supabase.from('customers').update({ points: customer.points - points }).eq('id', customerId)
     }
     
-    // ✅ WICHTIG: Lösche alle pending Boni und lasse System neu berechnen
-    await supabase.from('bonuses').delete().eq('customer_id', customerId).eq('status', 'pending')
-    await recalculateBonuses(customerId)
-    
     loadHistory()
-    alert('✅ Transaktion gelöscht! Boni wurden neu berechnet.')
+    alert('✅ Transaktion gelöscht!')
   } catch (e) {
     alert('❌ Fehler: ' + e.message)
   }
 }
-
-async function recalculateBonuses(customerId) {
-  try {
-    // Zähle aktuelle Bestellungen
-    const { data: txData } = await supabase.from('transactions').select('id').eq('customer_id', customerId).eq('type', 'earn')
-    const totalOrders = txData ? txData.length : 0
-    
-    console.log(`🔄 Neuberechnung für ${totalOrders} Bestellungen`)
-    
-    // Lade Bonusmuster
-    const { data: patternData } = await supabase.from('reward_pattern').select('pattern').single()
-    const pattern = patternData?.pattern || []
-    
-    if (!pattern || pattern.length === 0) return
-    
-    // Erstelle Bonus für NÄCHSTEN Besuch
-    const nextIndex = totalOrders % 10
-    const reward = pattern[nextIndex]
-    
-    console.log(`🎁 Erstelle Bonus für Besuch ${totalOrders + 1} (Index ${nextIndex}):`, reward)
-    
-    if (reward.type === 'double') {
-      await supabase.from('bonuses').insert({ customer_id: customerId, bonus_type: 'double_points', bonus_amount: 0, status: 'pending' })
-    } else if (reward.type === 'bonus' && reward.bonus > 0) {
-      await supabase.from('bonuses').insert({ customer_id: customerId, bonus_type: 'bonus_points', bonus_amount: reward.bonus, status: 'pending' })
-    }
-  } catch (e) {
     console.error('Recalculate error:', e)
   }
 }
