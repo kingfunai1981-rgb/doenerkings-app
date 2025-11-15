@@ -653,7 +653,12 @@ async function editTransaction(txId, currentAmount, currentPoints, customerId) {
       await supabase.from('customers').update({ points: customer.points + pointsDiff }).eq('id', customerId)
     }
     
+    // ✅ WICHTIG: Lösche alle pending Boni und lasse System neu berechnen
+    await supabase.from('bonuses').delete().eq('customer_id', customerId).eq('status', 'pending')
+    await recalculateBonuses(customerId)
+    
     loadHistory()
+    alert('✅ Transaktion bearbeitet! Boni wurden neu berechnet.')
   } catch (e) {
     alert('❌ Fehler: ' + e.message)
   }
@@ -670,9 +675,44 @@ async function deleteTransaction(txId, customerId, points) {
       await supabase.from('customers').update({ points: customer.points - points }).eq('id', customerId)
     }
     
+    // ✅ WICHTIG: Lösche alle pending Boni und lasse System neu berechnen
+    await supabase.from('bonuses').delete().eq('customer_id', customerId).eq('status', 'pending')
+    await recalculateBonuses(customerId)
+    
     loadHistory()
+    alert('✅ Transaktion gelöscht! Boni wurden neu berechnet.')
   } catch (e) {
     alert('❌ Fehler: ' + e.message)
+  }
+}
+
+async function recalculateBonuses(customerId) {
+  try {
+    // Zähle aktuelle Bestellungen
+    const { data: txData } = await supabase.from('transactions').select('id').eq('customer_id', customerId).eq('type', 'earn')
+    const totalOrders = txData ? txData.length : 0
+    
+    console.log(`🔄 Neuberechnung für ${totalOrders} Bestellungen`)
+    
+    // Lade Bonusmuster
+    const { data: patternData } = await supabase.from('reward_pattern').select('pattern').single()
+    const pattern = patternData?.pattern || []
+    
+    if (!pattern || pattern.length === 0) return
+    
+    // Erstelle Bonus für NÄCHSTEN Besuch
+    const nextIndex = totalOrders % 10
+    const reward = pattern[nextIndex]
+    
+    console.log(`🎁 Erstelle Bonus für Besuch ${totalOrders + 1} (Index ${nextIndex}):`, reward)
+    
+    if (reward.type === 'double') {
+      await supabase.from('bonuses').insert({ customer_id: customerId, bonus_type: 'double_points', bonus_amount: 0, status: 'pending' })
+    } else if (reward.type === 'bonus' && reward.bonus > 0) {
+      await supabase.from('bonuses').insert({ customer_id: customerId, bonus_type: 'bonus_points', bonus_amount: reward.bonus, status: 'pending' })
+    }
+  } catch (e) {
+    console.error('Recalculate error:', e)
   }
 }
 
