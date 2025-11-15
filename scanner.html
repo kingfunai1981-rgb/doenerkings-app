@@ -382,6 +382,105 @@ async function loadRewardPattern() {
 
 loadRewardPattern()
 
+// ============================================
+// ✅ CHALLENGE SYSTEM - MUSS GANZ OBEN SEIN
+// ============================================
+async function checkAndUpdateChallenges(customerId, amount) {
+  try {
+    const now = new Date().toISOString().split('T')[0]
+    
+    const { data: activeChallenges } = await supabase
+      .from('challenges')
+      .select('*')
+      .eq('is_active', true)
+      .lte('start_date', now)
+      .gte('end_date', now)
+    
+    if (!activeChallenges || activeChallenges.length === 0) return
+    
+    for (const challenge of activeChallenges) {
+      if (amount < challenge.min_order_amount) continue
+      
+      const { data: progress } = await supabase
+        .from('challenge_progress')
+        .select('*')
+        .eq('customer_id', customerId)
+        .eq('challenge_id', challenge.id)
+        .single()
+      
+      if (progress && progress.is_completed) continue
+      
+      const currentOrders = progress ? progress.completed_orders : 0
+      const newOrders = currentOrders + 1
+      
+      if (newOrders >= challenge.required_orders) {
+        if (progress) {
+          await supabase
+            .from('challenge_progress')
+            .update({ 
+              completed_orders: newOrders,
+              is_completed: true,
+              completed_at: new Date().toISOString()
+            })
+            .eq('id', progress.id)
+        } else {
+          await supabase
+            .from('challenge_progress')
+            .insert({
+              customer_id: customerId,
+              challenge_id: challenge.id,
+              completed_orders: newOrders,
+              is_completed: true,
+              completed_at: new Date().toISOString()
+            })
+        }
+        
+        const { data: customer } = await supabase
+          .from('customers')
+          .select('points')
+          .eq('id', customerId)
+          .single()
+        
+        if (customer) {
+          await supabase
+            .from('customers')
+            .update({ points: customer.points + challenge.bonus_points })
+            .eq('id', customerId)
+          
+          await supabase
+            .from('transactions')
+            .insert({
+              customer_id: customerId,
+              type: 'earn',
+              amount: 0,
+              points: challenge.bonus_points,
+              staff: 'CHALLENGE',
+              notes: `Challenge abgeschlossen: ${challenge.bonus_points} Punkte`
+            })
+        }
+      } else {
+        if (progress) {
+          await supabase
+            .from('challenge_progress')
+            .update({ completed_orders: newOrders })
+            .eq('id', progress.id)
+        } else {
+          await supabase
+            .from('challenge_progress')
+            .insert({
+              customer_id: customerId,
+              challenge_id: challenge.id,
+              completed_orders: newOrders,
+              is_completed: false
+            })
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Challenge check error:', e)
+  }
+}
+
 function normalizePhone(phone) {
   let normalized = phone.replace(/[\s\-\(\)]/g, '')
   
@@ -604,6 +703,105 @@ async function addPointsByPhone() {
   }
 }
 
+// ============================================
+// ✅ CHALLENGE SYSTEM
+// ============================================
+async function checkAndUpdateChallenges(customerId, amount) {
+  try {
+    const now = new Date().toISOString().split('T')[0]
+    
+    const { data: activeChallenges } = await supabase
+      .from('challenges')
+      .select('*')
+      .eq('is_active', true)
+      .lte('start_date', now)
+      .gte('end_date', now)
+    
+    if (!activeChallenges || activeChallenges.length === 0) return
+    
+    for (const challenge of activeChallenges) {
+      if (amount < challenge.min_order_amount) continue
+      
+      const { data: progress } = await supabase
+        .from('challenge_progress')
+        .select('*')
+        .eq('customer_id', customerId)
+        .eq('challenge_id', challenge.id)
+        .single()
+      
+      if (progress && progress.is_completed) continue
+      
+      const currentOrders = progress ? progress.completed_orders : 0
+      const newOrders = currentOrders + 1
+      
+      if (newOrders >= challenge.required_orders) {
+        if (progress) {
+          await supabase
+            .from('challenge_progress')
+            .update({ 
+              completed_orders: newOrders,
+              is_completed: true,
+              completed_at: new Date().toISOString()
+            })
+            .eq('id', progress.id)
+        } else {
+          await supabase
+            .from('challenge_progress')
+            .insert({
+              customer_id: customerId,
+              challenge_id: challenge.id,
+              completed_orders: newOrders,
+              is_completed: true,
+              completed_at: new Date().toISOString()
+            })
+        }
+        
+        const { data: customer } = await supabase
+          .from('customers')
+          .select('points')
+          .eq('id', customerId)
+          .single()
+        
+        if (customer) {
+          await supabase
+            .from('customers')
+            .update({ points: customer.points + challenge.bonus_points })
+            .eq('id', customerId)
+          
+          await supabase
+            .from('transactions')
+            .insert({
+              customer_id: customerId,
+              type: 'earn',
+              amount: 0,
+              points: challenge.bonus_points,
+              staff: 'CHALLENGE',
+              notes: `Challenge abgeschlossen: ${challenge.bonus_points} Punkte`
+            })
+        }
+      } else {
+        if (progress) {
+          await supabase
+            .from('challenge_progress')
+            .update({ completed_orders: newOrders })
+            .eq('id', progress.id)
+        } else {
+          await supabase
+            .from('challenge_progress')
+            .insert({
+              customer_id: customerId,
+              challenge_id: challenge.id,
+              completed_orders: newOrders,
+              is_completed: false
+            })
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Challenge check error:', e)
+  }
+}
+
 async function startCamera() {
   try {
     document.getElementById('startBtn').style.display = 'none'
@@ -809,6 +1007,9 @@ async function addPointsFromScan() {
         status: 'pending'
       })
     }
+    
+    // ✅ CHALLENGE PRÜFEN
+    await checkAndUpdateChallenges(currentCustomer.id, amount)
     
     let resultHTML = `✅ <strong>ERFOLGREICH!</strong><br><br>` +
       `👤 Kunde: <strong>${currentCustomer.name}</strong><br>` +
