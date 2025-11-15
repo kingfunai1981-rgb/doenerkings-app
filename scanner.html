@@ -256,13 +256,46 @@ async function addPointsByPhone() {
     const totalOrders = txData ? txData.length : 0
     console.log(`📊 ${customer.name}: Bisherige Bestellungen = ${totalOrders}`)
     
+    // ✅ CHECK GLOBALE BONUSSE ZUERST
+    const { data: activeGlobalBonuses } = await supabase
+      .from('activated_global_bonuses')
+      .select('*, global_bonuses(*)')
+      .eq('customer_id', customer.id)
+      .eq('is_used', false)
+    
     const { data: activeBonuses } = await supabase.from('bonuses').select('*').eq('customer_id', customer.id).eq('status', 'active')
     const { data: activatedCoupons } = await supabase.from('activated_coupons').select('*, coupons(*)').eq('customer_id', customer.id).eq('is_used', false)
     
     let pointsToAdd = Math.round(amount * 10)
     let bonusApplied = null, bonusPointsAdded = 0, couponUsed = null
     
-    if (activeBonuses && activeBonuses.length > 0) {
+    // ✅ PRIORITÄT: Globale Bonusse VOR Rhythmus-Bonussen
+    if (activeGlobalBonuses && activeGlobalBonuses.length > 0) {
+      const globalBonus = activeGlobalBonuses[0]
+      const bonus = globalBonus.global_bonuses
+      
+      if (bonus.bonus_type === 'double_points') {
+        bonusPointsAdded = pointsToAdd
+        pointsToAdd *= 2
+        bonusApplied = '⭐ Doppelte Punkte! (Global)'
+      } else if (bonus.bonus_type === 'bonus_points') {
+        bonusPointsAdded = bonus.bonus_amount || 100
+        pointsToAdd += bonusPointsAdded
+        bonusApplied = `💰 +${bonusPointsAdded} Bonus! (Global)`
+      }
+      
+      // Markiere als verwendet
+      await supabase
+        .from('activated_global_bonuses')
+        .update({ 
+          is_used: true, 
+          used_at: new Date().toISOString() 
+        })
+        .eq('id', globalBonus.id)
+      
+      console.log('✅ Globaler Bonus verwendet:', bonusApplied)
+      
+    } else if (activeBonuses && activeBonuses.length > 0) {
       const bonus = activeBonuses[0]
       if (bonus.bonus_type === 'double_points') {
         bonusPointsAdded = pointsToAdd
