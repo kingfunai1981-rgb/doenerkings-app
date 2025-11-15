@@ -1364,8 +1364,6 @@ async function loadChallenges() {
       return
     }
     
-    section.style.display = 'block'
-    
     const challengeHTML = []
     
     for (const challenge of challenges) {
@@ -1379,6 +1377,10 @@ async function loadChallenges() {
       const isActivated = progress !== null
       const completedOrders = progress?.completed_orders || 0
       const isCompleted = progress?.is_completed || false
+      
+      // ✅ WENN ABGESCHLOSSEN, NICHT MEHR ANZEIGEN!
+      if (isCompleted) continue
+      
       const progressPercent = Math.min((completedOrders / challenge.required_orders) * 100, 100)
       
       const startDate = new Date(challenge.start_date).toLocaleDateString('de-DE')
@@ -1387,7 +1389,6 @@ async function loadChallenges() {
       const remaining = challenge.required_orders - completedOrders
       
       if (!isActivated) {
-        // ✅ NICHT AKTIVIERT - Zeige Aktivierungs-Button
         challengeHTML.push(`
           <div class="challenge-item">
             <h3>🎁 ${challenge.bonus_points} Extra-Punkte für ${challenge.required_orders} Bestellungen ab ${challenge.min_order_amount} €</h3>
@@ -1401,15 +1402,11 @@ async function loadChallenges() {
           </div>
         `)
       } else {
-        // ✅ AKTIVIERT - Zeige Fortschritt
         challengeHTML.push(`
           <div class="challenge-item" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
             <h3>🎁 ${challenge.bonus_points} Extra-Punkte für ${challenge.required_orders} Bestellungen ab ${challenge.min_order_amount} €</h3>
             <div class="challenge-desc">
-              ${isCompleted ? 
-                '✅ Challenge abgeschlossen! Punkte wurden gutgeschrieben.' : 
-                `${remaining} ${remaining === 1 ? 'Bestellung' : 'Bestellungen'} offen`
-              }
+              ${remaining} ${remaining === 1 ? 'Bestellung' : 'Bestellungen'} offen
             </div>
             <div class="challenge-progress">
               <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600;">
@@ -1428,6 +1425,13 @@ async function loadChallenges() {
       }
     }
     
+    // ✅ WENN KEINE SICHTBAREN CHALLENGES, SECTION AUSBLENDEN
+    if (challengeHTML.length === 0) {
+      section.style.display = 'none'
+      return
+    }
+    
+    section.style.display = 'block'
     list.innerHTML = challengeHTML.join('')
     
   } catch (e) {
