@@ -844,7 +844,7 @@ async function loadBonuses() {
         statusText = '🔥 Aktiv für nächsten Einkauf!'
       } else {
         statusText = '⏳ Bereit zum Aktivieren'
-        buttonHTML = `<button onclick="activateBonus(${bonus.id})">🚀 Jetzt aktivieren</button>`
+        buttonHTML = `<button onclick="console.log('Button geklickt! ID:', ${bonus.id}); activateBonus(${bonus.id})">🚀 Jetzt aktivieren</button>`
       }
       return `
         <div class="bonus-item ${isActive ? 'active' : ''}">
