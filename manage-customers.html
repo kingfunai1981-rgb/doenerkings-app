@@ -1213,7 +1213,7 @@ window.addEventListener('DOMContentLoaded', function() {
   loadCoupons()
   loadChallenges()
   
-  // Setze heutiges Datum als Start
+  // ✅ Setze IMMER aktuelles Datum als Start
   const today = new Date().toISOString().split('T')[0]
   document.getElementById('challengeStart').value = today
   
@@ -1221,6 +1221,16 @@ window.addEventListener('DOMContentLoaded', function() {
   const nextWeek = new Date()
   nextWeek.setDate(nextWeek.getDate() + 7)
   document.getElementById('challengeEnd').value = nextWeek.toISOString().split('T')[0]
+  
+  // ✅ UPDATE: Bei jedem Reload das Start-Datum aktualisieren
+  setInterval(() => {
+    const currentStart = document.getElementById('challengeStart').value
+    const today = new Date().toISOString().split('T')[0]
+    // Nur updaten wenn User nichts geändert hat
+    if (!currentStart || currentStart < today) {
+      document.getElementById('challengeStart').value = today
+    }
+  }, 60000) // Alle 60 Sekunden prüfen
 })
 
 console.log('✅ Kunden-Verwaltung geladen mit Challenge-Bonus!')
