@@ -171,6 +171,11 @@ async function loadRewardPattern() {
 }
 loadRewardPattern()
 
+// ✅ AUTO-RELOAD: Lade Muster alle 30 Sekunden neu
+setInterval(() => {
+  loadRewardPattern()
+}, 30000)
+
 async function checkAndUpdateChallenges(customerId, amount) {
   try {
     const now = new Date().toISOString().split('T')[0]
