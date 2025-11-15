@@ -464,7 +464,7 @@ async function addPointsFromScan() {
 
 async function loadHistory() {
   try {
-    const { data, error } = await supabase.from('transactions').select('id, customer_id, type, amount, points, created_at, customers(name, phone, qr_id)').order('created_at', { ascending: false }).limit(50)
+    const { data, error } = await supabase.from('transactions').select('id, customer_id, type, amount, points, notes, created_at, customers(name, phone, qr_id)').order('created_at', { ascending: false }).limit(50)
     if (error) throw error
     
     const list = document.getElementById('historyList')
@@ -488,7 +488,7 @@ async function loadHistory() {
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:14px;">
             <div>📱 ${c.phone}</div>
             <div>🆔 ${c.qr_id}</div>
-            ${isRedeem ? `<div style="color:#92400e;font-weight:600;">Eingelöst</div>` : `<div style="color:#059669;font-weight:600;">💰 ${tx.amount.toFixed(2)} €</div>`}
+            ${isRedeem ? `<div style="color:#92400e;font-weight:600;">🎁 ${tx.notes || 'Eingelöst'}</div>` : `<div style="color:#059669;font-weight:600;">💰 ${tx.amount.toFixed(2)} €</div>`}
             <div style="color:${isRedeem ? '#ef4444' : '#667eea'};font-weight:600;">⭐ ${isRedeem ? Math.abs(tx.points) : '+' + tx.points}P</div>
           </div>
         </div>
