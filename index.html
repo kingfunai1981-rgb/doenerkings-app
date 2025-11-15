@@ -640,8 +640,17 @@ async function ensureFirstBonus(customerId) {
       .eq('customer_id', customerId)
       .eq('type', 'earn')
     
-    // Wenn schon Bestellungen existieren, nichts tun
-    if (transactions && transactions.length > 0) return
+    const hasOrders = transactions && transactions.length > 0
+    
+    // Wenn Bestellungen existieren, nichts tun
+    if (hasOrders) return
+    
+    // ✅ Kunde hat 0 Bestellungen - lösche ALLE Boni (egal ob richtig oder falsch)
+    console.log('🔄 Kunde hat 0 Bestellungen - setze Boni zurück')
+    await supabase
+      .from('bonuses')
+      .delete()
+      .eq('customer_id', customerId)
     
     // Lade aktuelles Muster
     let pattern = rewardPattern
@@ -654,46 +663,8 @@ async function ensureFirstBonus(customerId) {
     
     const reward = pattern[0]
     
-    // ✅ NEU: Prüfe ob der RICHTIGE Bonus für das aktuelle Muster existiert
-    const { data: existingBonuses } = await supabase
-      .from('bonuses')
-      .select('*')
-      .eq('customer_id', customerId)
-      .in('status', ['pending', 'active'])
-    
-    // Prüfe ob der richtige Bonus-Typ und Betrag existiert
-    let correctBonusExists = false
-    if (existingBonuses && existingBonuses.length > 0) {
-      for (const bonus of existingBonuses) {
-        if (reward.type === 'double' && bonus.bonus_type === 'double_points') {
-          correctBonusExists = true
-          break
-        }
-        if (reward.type === 'bonus' && bonus.bonus_type === 'bonus_points' && bonus.bonus_amount === reward.bonus) {
-          correctBonusExists = true
-          break
-        }
-      }
-    }
-    
-    // Wenn der richtige Bonus existiert, nichts tun
-    if (correctBonusExists) {
-      console.log('✅ Korrekter Bonus existiert bereits')
-      return
-    }
-    
-    // ✅ Lösche FALSCHE Boni (z.B. alte Boni nach Muster-Änderung)
-    if (existingBonuses && existingBonuses.length > 0) {
-      console.log('🗑️ Lösche alte/falsche Boni')
-      await supabase
-        .from('bonuses')
-        .delete()
-        .eq('customer_id', customerId)
-        .in('status', ['pending', 'active'])
-    }
-    
     // Erstelle den richtigen Bonus für ersten Besuch (Index 0)
-    console.log('✅ Erstelle neuen Bonus:', reward)
+    console.log('✅ Erstelle neuen ersten Bonus:', reward)
     if (reward.type === 'double') {
       await supabase.from('bonuses').insert({ 
         customer_id: customerId, 
