@@ -652,13 +652,12 @@ async function ensureFirstBonus(customerId) {
       return
     }
     
-    // ✅ Kunde hat 0 Bestellungen - lösche NUR PENDING Boni (nicht active!)
-    console.log('🔄 Kunde hat 0 Bestellungen - setze pending Boni zurück')
-    await supabase
+    // Prüfe ob bereits ein pending oder active Bonus existiert
+    const { data: existingBonuses } = await supabase
       .from('bonuses')
-      .delete()
+      .select('*')
       .eq('customer_id', customerId)
-      .eq('status', 'pending')
+      .in('status', ['pending', 'active'])
     
     // Lade aktuelles Muster
     let pattern = rewardPattern
@@ -675,6 +674,36 @@ async function ensureFirstBonus(customerId) {
     }
     
     const reward = pattern[0]
+    
+    // Prüfe ob der RICHTIGE Bonus existiert
+    let correctBonusExists = false
+    if (existingBonuses && existingBonuses.length > 0) {
+      for (const bonus of existingBonuses) {
+        if (reward.type === 'double' && bonus.bonus_type === 'double_points') {
+          correctBonusExists = true
+          console.log('✅ Korrekter Bonus existiert bereits')
+          break
+        }
+        if (reward.type === 'bonus' && bonus.bonus_type === 'bonus_points' && bonus.bonus_amount === reward.bonus) {
+          correctBonusExists = true
+          console.log('✅ Korrekter Bonus existiert bereits')
+          break
+        }
+      }
+    }
+    
+    // Wenn korrekter Bonus existiert, nichts tun
+    if (correctBonusExists) return
+    
+    // Lösche nur FALSCHE pending Boni
+    if (existingBonuses && existingBonuses.length > 0) {
+      console.log('🗑️ Lösche falsche Boni')
+      await supabase
+        .from('bonuses')
+        .delete()
+        .eq('customer_id', customerId)
+        .eq('status', 'pending')
+    }
     
     // Erstelle den richtigen Bonus für ersten Besuch (Index 0)
     console.log('✅ Erstelle neuen ersten Bonus:', reward)
