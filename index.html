@@ -484,10 +484,18 @@ let rewardPattern = []
 async function loadRewardPattern() {
   try {
     const { data } = await supabase.from('reward_pattern').select('*').single()
-    if (data && data.pattern) rewardPattern = data.pattern
+    if (data && data.pattern) {
+      rewardPattern = data.pattern
+      console.log('✅ Bonusmuster geladen:', rewardPattern)
+    }
   } catch (e) { console.error('Pattern load error:', e) }
 }
 loadRewardPattern()
+
+// ✅ AUTO-RELOAD: Lade Muster alle 30 Sekunden neu
+setInterval(() => {
+  loadRewardPattern()
+}, 30000)
 
 function normalizePhone(phone) {
   let normalized = phone.replace(/[\s\-\(\)]/g, '')
