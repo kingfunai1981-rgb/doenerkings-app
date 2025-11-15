@@ -479,23 +479,6 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 let currentCustomer = null
 let refreshInterval = null
-let rewardPattern = []
-
-async function loadRewardPattern() {
-  try {
-    const { data } = await supabase.from('reward_pattern').select('*').single()
-    if (data && data.pattern) {
-      rewardPattern = data.pattern
-      console.log('✅ Bonusmuster geladen:', rewardPattern)
-    }
-  } catch (e) { console.error('Pattern load error:', e) }
-}
-loadRewardPattern()
-
-// ✅ AUTO-RELOAD: Lade Muster alle 30 Sekunden neu
-setInterval(() => {
-  loadRewardPattern()
-}, 30000)
 
 function normalizePhone(phone) {
   let normalized = phone.replace(/[\s\-\(\)]/g, '')
@@ -556,21 +539,6 @@ async function register() {
     
     if (error) throw error
     
-    let pattern = rewardPattern
-    if (!pattern || pattern.length === 0) {
-      const { data: patternData } = await supabase.from('reward_pattern').select('pattern').single()
-      pattern = patternData?.pattern || []
-    }
-    
-    if (pattern && pattern[0]) {
-      const reward = pattern[0]
-      if (reward.type === 'double') {
-        await supabase.from('bonuses').insert({ customer_id: data.id, bonus_type: 'double_points', bonus_amount: 0, status: 'pending' })
-      } else if (reward.type === 'bonus' && reward.bonus > 0) {
-        await supabase.from('bonuses').insert({ customer_id: data.id, bonus_type: 'bonus_points', bonus_amount: reward.bonus, status: 'pending' })
-      }
-    }
-    
     showResult('reg-result', '✅ Erfolgreich registriert!', 'success')
     setTimeout(() => {
       localStorage.setItem('customerData', JSON.stringify(data))
@@ -615,9 +583,6 @@ async function loadCustomer(customer) {
   currentCustomer = customer
   await refreshCustomerData()
   
-  // ✅ AUTO-FIX: Erstelle ersten Bonus wenn Kunde keine Bestellungen und keinen Bonus hat
-  await ensureFirstBonus(customer.id)
-  
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${customer.qr_id}`
   document.getElementById('header-qr-mini').src = qrUrl
   document.getElementById('modal-qr').src = qrUrl
@@ -631,121 +596,15 @@ async function loadCustomer(customer) {
   loadChallenges()
 }
 
-async function ensureFirstBonus(customerId) {
-  try {
-    console.log('🔍 ensureFirstBonus aufgerufen für Kunde:', customerId)
-    
-    // Prüfe ob Kunde schon Bestellungen hat
-    const { data: transactions } = await supabase
-      .from('transactions')
-      .select('id')
-      .eq('customer_id', customerId)
-      .eq('type', 'earn')
-    
-    console.log(`📊 Anzahl Bestellungen: ${transactions?.length || 0}`)
-    
-    const hasOrders = transactions && transactions.length > 0
-    
-    // Wenn Bestellungen existieren, nichts tun
-    if (hasOrders) {
-      console.log('✅ Kunde hat Bestellungen - nichts zu tun')
-      return
-    }
-    
-    // Prüfe ob bereits ein pending oder active Bonus existiert
-    const { data: existingBonuses } = await supabase
-      .from('bonuses')
-      .select('*')
-      .eq('customer_id', customerId)
-      .in('status', ['pending', 'active'])
-    
-    // Lade aktuelles Muster
-    let pattern = rewardPattern
-    if (!pattern || pattern.length === 0) {
-      const { data: patternData } = await supabase.from('reward_pattern').select('pattern').single()
-      pattern = patternData?.pattern || []
-    }
-    
-    console.log('📋 Aktuelles Muster Position 1:', pattern[0])
-    
-    if (!pattern || !pattern[0]) {
-      console.log('⚠️ Kein Muster vorhanden')
-      return
-    }
-    
-    const reward = pattern[0]
-    
-    // Prüfe ob der RICHTIGE Bonus existiert
-    let correctBonusExists = false
-    if (existingBonuses && existingBonuses.length > 0) {
-      for (const bonus of existingBonuses) {
-        if (reward.type === 'double' && bonus.bonus_type === 'double_points') {
-          correctBonusExists = true
-          console.log('✅ Korrekter Bonus existiert bereits')
-          break
-        }
-        if (reward.type === 'bonus' && bonus.bonus_type === 'bonus_points' && bonus.bonus_amount === reward.bonus) {
-          correctBonusExists = true
-          console.log('✅ Korrekter Bonus existiert bereits')
-          break
-        }
-      }
-    }
-    
-    // Wenn korrekter Bonus existiert, nichts tun
-    if (correctBonusExists) return
-    
-    // Lösche nur FALSCHE pending Boni
-    if (existingBonuses && existingBonuses.length > 0) {
-      console.log('🗑️ Lösche falsche Boni')
-      await supabase
-        .from('bonuses')
-        .delete()
-        .eq('customer_id', customerId)
-        .eq('status', 'pending')
-    }
-    
-    // Erstelle den richtigen Bonus für ersten Besuch (Index 0)
-    console.log('✅ Erstelle neuen ersten Bonus:', reward)
-    if (reward.type === 'double') {
-      await supabase.from('bonuses').insert({ 
-        customer_id: customerId, 
-        bonus_type: 'double_points', 
-        bonus_amount: 0, 
-        status: 'pending' 
-      })
-      console.log('✅ Doppelte Punkte Bonus erstellt!')
-    } else if (reward.type === 'bonus' && reward.bonus > 0) {
-      await supabase.from('bonuses').insert({ 
-        customer_id: customerId, 
-        bonus_type: 'bonus_points', 
-        bonus_amount: reward.bonus, 
-        status: 'pending' 
-      })
-      console.log(`✅ +${reward.bonus}P Bonus erstellt!`)
-    } else {
-      console.log('ℹ️ Normal - kein Bonus zu erstellen')
-    }
-  } catch (e) {
-    console.error('❌ ensureFirstBonus error:', e)
-  }
-}
-
 async function refreshCustomerData() {
   if (!currentCustomer) return
   try {
-    // ✅ Lade Bonusmuster neu (falls Manager es geändert hat)
-    await loadRewardPattern()
-    
     const { data, error } = await supabase.from('customers').select('*').eq('id', currentCustomer.id).single()
     if (error) throw error
     currentCustomer = data
     document.getElementById('app-points').textContent = data.points
     updateRewardButtons(data.points)
     localStorage.setItem('customerData', JSON.stringify(data))
-    
-    // ✅ Prüfe ob erster Bonus fehlt und erstelle ihn wenn nötig
-    await ensureFirstBonus(currentCustomer.id)
     
     loadBonuses()
     loadCoupons()
