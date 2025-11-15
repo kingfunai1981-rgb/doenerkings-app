@@ -853,11 +853,21 @@ async function loadBonuses() {
     
     const activatedMap = new Map(activatedBonuses?.map(a => [a.global_bonus_id, a.is_used]) || [])
     
+    // ✅ Filtere verwendete Bonusse raus
+    const availableBonuses = bonuses.filter(bonus => {
+      const isUsed = activatedMap.get(bonus.id)
+      return !isUsed // Zeige nur nicht-verwendete Bonusse
+    })
+    
+    if (availableBonuses.length === 0) {
+      section.style.display = 'none'
+      return
+    }
+    
     section.style.display = 'block'
-    list.innerHTML = bonuses.map(bonus => {
+    list.innerHTML = availableBonuses.map(bonus => {
       const bonusAmount = bonus.bonus_amount || 100
       const isActivated = activatedMap.has(bonus.id)
-      const isUsed = activatedMap.get(bonus.id)
       
       let descText = ''
       if (bonus.bonus_type === 'double_points') {
@@ -876,9 +886,7 @@ async function loadBonuses() {
       let statusText = ''
       let buttonHTML = ''
       
-      if (isUsed) {
-        statusText = '✅ Wurde bereits verwendet'
-      } else if (isActivated) {
+      if (isActivated) {
         statusText = '🔥 Aktiv für nächsten Einkauf!'
       } else {
         statusText = `⏳ Bereit zum Aktivieren (noch ${daysLeft} ${daysLeft === 1 ? 'Tag' : 'Tage'})`
@@ -886,7 +894,7 @@ async function loadBonuses() {
       }
       
       return `
-        <div class="bonus-item ${isActivated && !isUsed ? 'active' : ''}">
+        <div class="bonus-item ${isActivated ? 'active' : ''}">
           <h3>${bonus.title || (bonus.bonus_type === 'double_points' ? '⭐ Doppelte Punkte' : `💰 +${bonusAmount} Bonus-Punkte`)}</h3>
           <div class="bonus-desc">${descText}</div>
           <div class="bonus-status">${statusText}</div>
