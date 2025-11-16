@@ -617,13 +617,14 @@ async function createGlobalBonus() {
     return
   }
 
-  if (new Date(endDate) <= new Date(startDate)) {
+  if (endDate <= startDate) {
     showResult('result-global-bonus', '❌ End-Datum muss nach Start-Datum liegen!', 'error')
     return
   }
 
-  if (new Date(startDate) < new Date()) {
-    showResult('result-global-bonus', '❌ Start-Datum muss in der Zukunft oder heute liegen!', 'error')
+  const today = new Date().toISOString().split('T')[0]
+  if (startDate < today) {
+    showResult('result-global-bonus', '❌ Start-Datum darf nicht in der Vergangenheit liegen!', 'error')
     return
   }
 
@@ -758,8 +759,14 @@ async function createChallenge() {
     return
   }
   
-  if (new Date(endDate) <= new Date(startDate)) {
+  if (endDate <= startDate) {
     showResult('result-challenge', '❌ End-Datum muss nach Start-Datum liegen!', 'error')
+    return
+  }
+  
+  const today = new Date().toISOString().split('T')[0]
+  if (startDate < today) {
+    showResult('result-challenge', '❌ Start-Datum darf nicht in der Vergangenheit liegen!', 'error')
     return
   }
   
@@ -880,13 +887,14 @@ async function createCoupon() {
     return
   }
 
-  if (new Date(endDate) <= new Date(startDate)) {
+  if (endDate <= startDate) {
     showResult('result-coupon-create', '❌ End-Datum muss nach Start-Datum liegen!', 'error')
     return
   }
 
-  if (new Date(startDate) < new Date()) {
-    showResult('result-coupon-create', '❌ Start-Datum muss in der Zukunft oder heute liegen!', 'error')
+  const today = new Date().toISOString().split('T')[0]
+  if (startDate < today) {
+    showResult('result-coupon-create', '❌ Start-Datum darf nicht in der Vergangenheit liegen!', 'error')
     return
   }
 
@@ -1104,7 +1112,7 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('couponEnd').value = nextWeekStr
 })
 
-console.log('✅ Kunden-Verwaltung FINAL geladen - AUTO-LOAD & einheitliche Datumsfelder!')
+console.log('✅ Kunden-Verwaltung geladen - Datumsvergleich korrigiert!')
 </script>
 
 </body>
