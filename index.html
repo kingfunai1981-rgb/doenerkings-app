@@ -683,14 +683,65 @@ function updateRewardButtons(points) {
   document.getElementById('btn-1250').disabled = points < 1250
 }
 
+async function generateUniqueCode() {
+  // Versuche bis zu 10x einen einzigartigen Code zu generieren
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const code = Math.floor(1000 + Math.random() * 9000).toString()
+    
+    // Prüfe ob Code bereits existiert
+    const { data, error } = await supabase
+      .from('redeem_codes')
+      .select('code')
+      .eq('code', code)
+      .eq('used', false)
+    
+    if (error) {
+      console.error('Code check error:', error)
+      continue
+    }
+    
+    // Code ist frei!
+    if (!data || data.length === 0) {
+      return code
+    }
+    
+    console.log(`⚠️ Code ${code} existiert bereits, versuche neuen...`)
+  }
+  
+  // Fallback: Verwende Timestamp für Eindeutigkeit
+  const timestamp = Date.now().toString().slice(-4)
+  return timestamp
+}
+
 async function redeem(rewardName, cost) {
   if (!currentCustomer || currentCustomer.points < cost) return
+  
   try {
-    const code = Math.floor(1000 + Math.random() * 9000).toString()
+    const code = await generateUniqueCode()
     const expires = new Date(Date.now() + 24*60*60*1000)
-    await supabase.from('redeem_codes').insert({ code, customer_id: currentCustomer.id, reward_name: rewardName, points_cost: cost, valid_until: expires.toISOString(), used: false })
+    
+    const { error } = await supabase.from('redeem_codes').insert({ 
+      code, 
+      customer_id: currentCustomer.id, 
+      reward_name: rewardName, 
+      points_cost: cost, 
+      valid_until: expires.toISOString(), 
+      used: false 
+    })
+    
+    if (error) {
+      console.error('❌ Redeem error:', error)
+      alert('❌ Fehler beim Erstellen des Codes. Bitte nochmal versuchen.')
+      return
+    }
+    
+    console.log('✅ Code erfolgreich erstellt:', code)
     loadPendingCodes()
-  } catch (e) { console.error('Redeem error:', e) }
+    
+  } catch (e) { 
+    console.error('❌ Redeem error:', e)
+    alert('❌ Fehler: ' + e.message)
+  }
 }
 
 async function loadPendingCodes() {
@@ -973,10 +1024,30 @@ async function activateCoupon(couponId) {
     const id = parseInt(couponId)
     const { data: existing } = await supabase.from('activated_coupons').select('*').eq('customer_id', currentCustomer.id).eq('coupon_id', id).eq('is_used', false)
     if (existing && existing.length > 0) { loadCoupons(); return }
-    const uniqueCode = Math.floor(1000 + Math.random() * 9000).toString()
-    await supabase.from('activated_coupons').insert({ customer_id: currentCustomer.id, coupon_id: id, unique_code: uniqueCode, activated_at: new Date().toISOString(), is_used: false })
+    
+    const uniqueCode = await generateUniqueCode()
+    
+    const { error } = await supabase.from('activated_coupons').insert({ 
+      customer_id: currentCustomer.id, 
+      coupon_id: id, 
+      unique_code: uniqueCode, 
+      activated_at: new Date().toISOString(), 
+      is_used: false 
+    })
+    
+    if (error) {
+      console.error('❌ Activate coupon error:', error)
+      alert('❌ Fehler beim Aktivieren. Bitte nochmal versuchen.')
+      return
+    }
+    
     loadCoupons()
-  } catch (e) { console.error('Fehler beim Aktivieren:', e.message); loadCoupons() }
+  } catch (e) { 
+    console.error('❌ Fehler beim Aktivieren:', e.message)
+    alert('❌ Fehler: ' + e.message)
+    loadCoupons() 
+  }
+}
 }
 
 async function deactivateCoupon(couponId) {
