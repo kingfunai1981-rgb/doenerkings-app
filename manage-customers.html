@@ -303,28 +303,34 @@ textarea {
     <h2>🎁 Globale Bonusse</h2>
     <p class="subtitle">Erstelle Bonusse, die sofort bei allen Kunden erscheinen</p>
 
-    <label class="form-label">🎯 Bonus-Typ</label>
-    <select id="globalBonusType" onchange="toggleBonusAmount()">
-      <option value="bonus_points">💰 Extra-Punkte</option>
-      <option value="double_points">⭐ Doppelte Punkte</option>
-    </select>
+    <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px;">
+      <h3 style="color: #92400e; margin-bottom: 12px;">Neuen Bonus erstellen</h3>
+      
+      <label class="form-label">🎯 Bonus-Typ</label>
+      <select id="globalBonusType" onchange="toggleBonusAmount()">
+        <option value="bonus_points">💰 Extra-Punkte</option>
+        <option value="double_points">⭐ Doppelte Punkte</option>
+      </select>
 
-    <div id="globalBonusAmountField">
-      <label class="form-label">💵 Bonus-Punkte</label>
-      <input type="number" id="globalBonusAmount" placeholder="z.B. 100" value="100">
+      <div id="globalBonusAmountField">
+        <label class="form-label">💵 Bonus-Punkte</label>
+        <input type="number" id="globalBonusAmount" placeholder="z.B. 100" value="100">
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label class="form-label">📅 Start-Datum</label>
+          <input type="date" id="globalBonusStart">
+        </div>
+        <div>
+          <label class="form-label">📅 End-Datum</label>
+          <input type="date" id="globalBonusEnd">
+        </div>
+      </div>
+
+      <button class="success" onclick="createGlobalBonus()">🚀 Bonus erstellen</button>
+      <div id="result-global-bonus"></div>
     </div>
-
-    <label class="form-label">📅 Gültig bis</label>
-    <input type="date" id="globalBonusExpiry">
-
-    <label class="form-label">📝 Titel (optional)</label>
-    <input type="text" id="globalBonusTitle" placeholder="z.B. Wochenend-Special">
-
-    <label class="form-label">📄 Beschreibung (optional)</label>
-    <input type="text" id="globalBonusDesc" placeholder="z.B. Nur dieses Wochenende!">
-
-    <button class="success" onclick="createGlobalBonus()">🚀 Bonus erstellen</button>
-    <div id="result-global-bonus"></div>
 
     <div style="margin-top: 24px;">
       <h3>Aktive Bonusse</h3>
@@ -393,9 +399,6 @@ textarea {
           <input type="text" id="couponPrice" placeholder="z.B. 7,50 €">
         </div>
       </div>
-
-      <label class="form-label">📝 Beschreibung (optional)</label>
-      <textarea id="couponDesc" placeholder="z.B. Mit extra Käse und Getränk"></textarea>
 
       <label class="form-label">⏰ Läuft ab in ... Tagen</label>
       <input type="number" id="couponDays" value="7" min="1" max="365">
@@ -617,31 +620,40 @@ function toggleBonusAmount() {
 async function createGlobalBonus() {
   const type = document.getElementById('globalBonusType').value
   const amount = parseInt(document.getElementById('globalBonusAmount').value) || 100
-  const expiry = document.getElementById('globalBonusExpiry').value
-  const title = document.getElementById('globalBonusTitle').value.trim()
-  const desc = document.getElementById('globalBonusDesc').value.trim()
+  const startDate = document.getElementById('globalBonusStart').value
+  const endDate = document.getElementById('globalBonusEnd').value
 
-  if (!expiry) {
-    showResult('result-global-bonus', '❌ Bitte Ablaufdatum wählen!', 'error')
+  if (!startDate || !endDate) {
+    showResult('result-global-bonus', '❌ Bitte Start- und End-Datum wählen!', 'error')
     return
   }
 
-  if (new Date(expiry) <= new Date()) {
-    showResult('result-global-bonus', '❌ Ablaufdatum muss in der Zukunft liegen!', 'error')
+  if (new Date(endDate) <= new Date(startDate)) {
+    showResult('result-global-bonus', '❌ End-Datum muss nach Start-Datum liegen!', 'error')
+    return
+  }
+
+  if (new Date(startDate) < new Date()) {
+    showResult('result-global-bonus', '❌ Start-Datum muss in der Zukunft oder heute liegen!', 'error')
     return
   }
 
   try {
     showResult('result-global-bonus', '⏳ Erstelle Bonus...', 'info')
 
+    // Auto-generiere Titel basierend auf Typ
+    const autoTitle = type === 'double_points' ? 'Doppelte Punkte' : `+${amount} Bonus-Punkte`
+
     const { error } = await supabase
       .from('global_bonuses')
       .insert({
         bonus_type: type,
         bonus_amount: type === 'double_points' ? 0 : amount,
-        expires_at: expiry,
-        title: title || (type === 'double_points' ? 'Doppelte Punkte' : `+${amount} Bonus-Punkte`),
-        description: desc || '',
+        start_date: startDate,
+        end_date: endDate,
+        expires_at: endDate, // Für Kompatibilität
+        title: autoTitle,
+        description: '',
         is_active: true,
         created_at: new Date().toISOString()
       })
@@ -649,9 +661,6 @@ async function createGlobalBonus() {
     if (error) throw error
 
     showResult('result-global-bonus', '✅ Bonus erstellt! Erscheint jetzt bei allen Kunden.', 'success')
-    
-    document.getElementById('globalBonusTitle').value = ''
-    document.getElementById('globalBonusDesc').value = ''
     
     loadGlobalBonuses()
 
@@ -679,26 +688,34 @@ async function loadGlobalBonuses() {
     const now = new Date()
 
     list.innerHTML = bonuses.map(bonus => {
-      const expiry = new Date(bonus.expires_at)
-      const isExpired = expiry < now
-      const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24))
-      const isActive = bonus.is_active && !isExpired
+      // Verwende start_date/end_date falls vorhanden, sonst Fallback auf created_at/expires_at
+      const startDate = bonus.start_date ? new Date(bonus.start_date) : new Date(bonus.created_at)
+      const endDate = bonus.end_date ? new Date(bonus.end_date) : new Date(bonus.expires_at)
+      
+      const isExpired = endDate < now
+      const isNotStarted = startDate > now
+      const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
+      const isActive = bonus.is_active && !isExpired && !isNotStarted
 
       let bonusText = bonus.bonus_type === 'double_points' ? '⭐ Doppelte Punkte' : `💰 +${bonus.bonus_amount} Bonus-Punkte`
+
+      // Zeige alte title/description falls vorhanden
+      let titleHTML = bonus.title ? `<p style="font-size: 14px; color: #6b7280; margin: 4px 0; font-weight: 600;">${bonus.title}</p>` : ''
+      let descHTML = bonus.description ? `<p style="font-size: 13px; color: #6b7280; margin: 4px 0;">${bonus.description}</p>` : ''
 
       return `
         <div style="background: ${isActive ? '#d1fae5' : '#fee2e2'}; border: 2px solid ${isActive ? '#10b981' : '#ef4444'}; border-radius: 10px; padding: 16px; margin-top: 12px;">
           <div style="display: flex; justify-content: space-between; align-items: start;">
             <div style="flex: 1;">
               <h3 style="color: #111827; margin-bottom: 8px;">${bonusText}</h3>
-              ${bonus.title ? `<p style="font-size: 14px; color: #6b7280; margin: 4px 0; font-weight: 600;">${bonus.title}</p>` : ''}
-              ${bonus.description ? `<p style="font-size: 13px; color: #6b7280; margin: 4px 0;">${bonus.description}</p>` : ''}
+              ${titleHTML}
+              ${descHTML}
               <p style="font-size: 13px; color: #6b7280; margin: 4px 0;">
-                📅 Gültig bis: ${expiry.toLocaleDateString('de-DE')}
+                📅 Gültig: ${startDate.toLocaleDateString('de-DE')} - ${endDate.toLocaleDateString('de-DE')}
                 ${isActive ? ` (noch ${daysLeft} Tage)` : ''}
               </p>
               <p style="font-size: 12px; color: ${isActive ? '#059669' : '#dc2626'}; font-weight: 600; margin-top: 6px;">
-                ${isActive ? '✅ Aktiv' : isExpired ? '❌ Abgelaufen' : '⏸️ Inaktiv'}
+                ${isActive ? '✅ Aktiv' : isExpired ? '❌ Abgelaufen' : isNotStarted ? '⏰ Startet bald' : '⏸️ Inaktiv'}
               </p>
             </div>
             <div style="display: flex; gap: 6px;">
@@ -861,7 +878,6 @@ async function deleteChallenge(id) {
 async function createCoupon() {
   const product = document.getElementById('couponProduct').value.trim()
   const price = document.getElementById('couponPrice').value.trim()
-  const description = document.getElementById('couponDesc').value.trim()
   const days = parseInt(document.getElementById('couponDays').value)
 
   if (!product || !price) {
@@ -883,7 +899,7 @@ async function createCoupon() {
         title: 'Deal der Woche',
         product: product,
         price: price,
-        description: description,
+        description: '', // Immer leer für neue Coupons
         expires_at: expiryDate.toISOString(),
         is_active: true,
         created_at: new Date().toISOString()
@@ -898,7 +914,6 @@ async function createCoupon() {
 
     document.getElementById('couponProduct').value = ''
     document.getElementById('couponPrice').value = ''
-    document.getElementById('couponDesc').value = ''
 
     loadCoupons()
 
@@ -1032,12 +1047,16 @@ window.addEventListener('DOMContentLoaded', function() {
   loadCoupons()
   
   // Setze Standard-Datumsfelder
+  const today = new Date()
   const nextWeek = new Date()
   nextWeek.setDate(nextWeek.getDate() + 7)
-  document.getElementById('globalBonusExpiry').value = nextWeek.toISOString().split('T')[0]
   
-  const today = new Date().toISOString().split('T')[0]
-  document.getElementById('challengeStart').value = today
+  // Globale Bonusse: Start = heute, Ende = +7 Tage
+  document.getElementById('globalBonusStart').value = today.toISOString().split('T')[0]
+  document.getElementById('globalBonusEnd').value = nextWeek.toISOString().split('T')[0]
+  
+  // Challenge: Start = heute, Ende = +7 Tage
+  document.getElementById('challengeStart').value = today.toISOString().split('T')[0]
   document.getElementById('challengeEnd').value = nextWeek.toISOString().split('T')[0]
 })
 
