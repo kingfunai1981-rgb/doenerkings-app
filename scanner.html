@@ -190,6 +190,11 @@ function normalizePhone(phone) {
 
 function showResult(id, msg, type) {
   const el = document.getElementById(id)
+  if (!msg) {
+    el.className = ''
+    el.innerHTML = ''
+    return
+  }
   el.className = `result ${type}`
   el.innerHTML = msg
 }
@@ -228,12 +233,6 @@ async function addPointsByPhone() {
     
     if (!customer) throw new Error('Kunde nicht gefunden')
     
-    // ✅ ZÄHLE VOR DEM EINFÜGEN!
-    const { data: txData } = await supabase.from('transactions').select('id').eq('customer_id', customer.id).eq('type', 'earn')
-    const totalOrders = txData ? txData.length : 0
-    console.log(`📊 ${customer.name}: Bisherige Bestellungen = ${totalOrders}`)
-    
-    // ✅ CHECK GLOBALE BONUSSE
     const { data: activeGlobalBonuses } = await supabase
       .from('activated_global_bonuses')
       .select('*, global_bonuses(*)')
@@ -245,7 +244,6 @@ async function addPointsByPhone() {
     let pointsToAdd = Math.round(amount * 10)
     let bonusApplied = null, bonusPointsAdded = 0, couponUsed = null
     
-    // ✅ GLOBALE BONUSSE ANWENDEN
     if (activeGlobalBonuses && activeGlobalBonuses.length > 0) {
       const globalBonus = activeGlobalBonuses[0]
       const bonus = globalBonus.global_bonuses
@@ -260,7 +258,6 @@ async function addPointsByPhone() {
         bonusApplied = `💰 +${bonusPointsAdded} Bonus!`
       }
       
-      // Markiere als verwendet
       await supabase
         .from('activated_global_bonuses')
         .update({ 
@@ -296,6 +293,7 @@ async function addPointsByPhone() {
     
   } catch (e) {
     showResult('result-phone', `❌ ${e.message}`, 'error')
+    console.error('Add points error:', e)
   }
 }
 
@@ -318,6 +316,7 @@ async function startCamera() {
     showResult('result-qr', '❌ Kamera-Fehler: ' + e.message, 'error')
     document.getElementById('startBtn').style.display = 'block'
     document.getElementById('stopBtn').style.display = 'none'
+    console.error('Camera error:', e)
   }
 }
 
@@ -367,7 +366,6 @@ async function onQRDetected(qrCode) {
     document.getElementById('custQR').textContent = currentCustomer.qr_id
     document.getElementById('custPoints').textContent = currentCustomer.points
     
-    // Check for active global bonuses
     const { data: globalBonuses } = await supabase
       .from('activated_global_bonuses')
       .select('*, global_bonuses(*)')
@@ -387,7 +385,8 @@ async function onQRDetected(qrCode) {
     document.getElementById('scannedAmount').focus()
   } catch (e) {
     showResult('result-qr', '❌ ' + e.message, 'error')
-    setTimeout(() => { document.getElementById('result-qr').innerHTML = ''; startCamera() }, 2000)
+    console.error('QR detection error:', e)
+    setTimeout(() => { showResult('result-qr', '', 'info'); startCamera() }, 2000)
   }
 }
 
@@ -396,7 +395,6 @@ async function addPointsFromScan() {
   if (!amount || amount <= 0) { showResult('result-scan', '❌ Betrag eingeben!', 'error'); return }
   
   try {
-    // Check for active global bonuses
     const { data: globalBonuses } = await supabase
       .from('activated_global_bonuses')
       .select('*, global_bonuses(*)')
@@ -439,12 +437,13 @@ async function addPointsFromScan() {
     showResult('result-scan', msg, 'success')
     setTimeout(() => {
       document.getElementById('customerCard').style.display = 'none'
-      document.getElementById('result-qr').innerHTML = ''
+      showResult('result-qr', '', 'info')
       document.getElementById('scannedAmount').value = ''
-      document.getElementById('result-scan').innerHTML = ''
+      showResult('result-scan', '', 'info')
     }, 3000)
   } catch (e) {
     showResult('result-scan', '❌ ' + e.message, 'error')
+    console.error('Scan points error:', e)
   }
 }
 
@@ -485,6 +484,7 @@ async function loadHistory() {
       `
     }).join('')
   } catch (e) {
+    console.error('Load history error:', e)
     document.getElementById('historyList').innerHTML = `<div class="result error">${e.message}</div>`
   }
 }
@@ -501,21 +501,19 @@ async function verifyAnyCode() {
       .select('*')
       .eq('unique_code', code)
       .eq('is_used', false)
-      .limit(1)              // ✅ Kein .single() mehr!
+      .limit(1)
     
     if (error) throw error
     
     const activation = data && data[0]
     
     if (activation) {
-      // Lade Coupon separat
       const { data: coupon } = await supabase
         .from('coupons')
         .select('*')
         .eq('id', activation.coupon_id)
         .single()
       
-      // Lade Kundendaten separat
       const { data: customer } = await supabase
         .from('customers')
         .select('name, phone, qr_id, points')
@@ -527,14 +525,15 @@ async function verifyAnyCode() {
       await handleCouponCode(activation, code)
       return
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error('Coupon check error:', e)
+  }
   
   try {
     const { data, error } = await supabase.from('redeem_codes').select('*').eq('code', code).limit(1)
     if (error) throw error
     if (!data || data.length === 0) throw new Error('Code nicht gefunden')
     
-    // Lade Kundendaten separat
     const { data: customer } = await supabase
       .from('customers')
       .select('name, phone, qr_id, points')
@@ -545,6 +544,7 @@ async function verifyAnyCode() {
     await handleRedeemCode(data[0], code)
   } catch (e) {
     showResult('result-code', '❌ ' + e.message, 'error')
+    console.error('Code verification error:', e)
   }
 }
 
@@ -578,6 +578,7 @@ async function handleCouponCode(activation, code) {
   } catch (e) {
     showResult('result-code', '❌ ' + e.message, 'error')
     document.getElementById('code-details').style.display = 'none'
+    console.error('Handle coupon error:', e)
   }
 }
 
@@ -610,6 +611,7 @@ async function handleRedeemCode(codeData, code) {
     `
   } catch (e) {
     showResult('result-code', '❌ ' + e.message, 'error')
+    console.error('Handle redeem error:', e)
   }
 }
 
@@ -620,7 +622,6 @@ async function confirmRedeemCode() {
     
     const newPoints = currentCodeData.customers.points - currentCodeData.points_cost
     
-    // ✅ Speichere BEIDES: Reward-Name UND Code
     await supabase.from('transactions').insert({ customer_id: currentCodeData.customer_id, type: 'redeem', amount: 0, points: -currentCodeData.points_cost, staff: 'Scanner', notes: `${currentCodeData.reward_name} (Code: ${currentCodeData.code})` })
     await supabase.from('customers').update({ points: newPoints }).eq('id', currentCodeData.customer_id)
     await supabase.from('redeem_codes').update({ used: true, used_at: new Date().toISOString() }).eq('code', currentCodeData.code)
@@ -631,6 +632,7 @@ async function confirmRedeemCode() {
     currentCodeData = null
   } catch (e) {
     showResult('result-code', '❌ Fehler: ' + e.message, 'error')
+    console.error('Confirm redeem error:', e)
   }
 }
 
@@ -643,6 +645,7 @@ async function useCoupon(activationId) {
     document.getElementById('code-details').style.display = 'none'
   } catch (e) {
     showResult('result-code', '❌ Fehler: ' + e.message, 'error')
+    console.error('Use coupon error:', e)
   }
 }
 
@@ -668,14 +671,11 @@ async function editTransaction(txId, currentAmount, currentPoints, customerId) {
       await supabase.from('customers').update({ points: customer.points + pointsDiff }).eq('id', customerId)
     }
     
-    // ✅ WICHTIG: Lösche alle pending Boni und lasse System neu berechnen
-    await supabase.from('bonuses').delete().eq('customer_id', customerId).eq('status', 'pending')
-    await recalculateBonuses(customerId)
-    
     loadHistory()
-    alert('✅ Transaktion bearbeitet! Boni wurden neu berechnet.')
+    alert('✅ Transaktion bearbeitet!')
   } catch (e) {
     alert('❌ Fehler: ' + e.message)
+    console.error('Edit transaction error:', e)
   }
 }
 
@@ -694,10 +694,11 @@ async function deleteTransaction(txId, customerId, points) {
     alert('✅ Transaktion gelöscht!')
   } catch (e) {
     alert('❌ Fehler: ' + e.message)
+    console.error('Delete transaction error:', e)
   }
 }
 
-console.log('✅ Scanner PRO geladen - FIXED Bonus Logic!')
+console.log('✅ Scanner PRO geladen - FIXED VERSION!')
 </script>
 </body>
 </html>
