@@ -496,12 +496,16 @@ async function verifyAnyCode() {
   showResult('result-code', '🔍 Suche Code...', 'info')
   
   try {
-    const { data: activation } = await supabase
+    const { data, error } = await supabase
       .from('activated_coupons')
       .select('*')
       .eq('unique_code', code)
       .eq('is_used', false)
-      .single()
+      .limit(1)              // ✅ Kein .single() mehr!
+    
+    if (error) throw error
+    
+    const activation = data && data[0]
     
     if (activation) {
       // Lade Coupon separat
