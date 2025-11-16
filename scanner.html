@@ -161,8 +161,25 @@ async function checkAndUpdateChallenges(customerId, amount) {
     
     for (const challenge of activeChallenges) {
       if (amount < challenge.min_order_amount) continue
-      const { data: progress } = await supabase.from('challenge_progress').select('*').eq('customer_id', customerId).eq('challenge_id', challenge.id).single()
-      if (!progress || progress.is_completed) continue
+      
+      // ✅ FIX: Verwende limit(1) statt single()
+      const { data: progressRows, error: progressError } = await supabase
+        .from('challenge_progress')
+        .select('*')
+        .eq('customer_id', customerId)
+        .eq('challenge_id', challenge.id)
+        .limit(1)
+      
+      if (progressError) {
+        console.error('Challenge progress error:', progressError)
+        continue
+      }
+      
+      const progress = (progressRows && progressRows.length > 0) ? progressRows[0] : null
+      
+      // Wenn Kunde Challenge nicht aktiviert hat, ignorieren
+      if (!progress) continue
+      if (progress.is_completed) continue
       
       const newOrders = progress.completed_orders + 1
       if (newOrders >= challenge.required_orders) {
