@@ -40,19 +40,24 @@ body {
 }
 
 .header-logo {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   margin: 0 auto 16px;
   background: white;
   border-radius: 50%;
-  padding: 10px;
+  padding: 15px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .header-logo img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  border-radius: 50%;
 }
 
 .header-image h1 {
@@ -358,7 +363,7 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
     
     <div class="card">
       <h2>Neu hier?</h2>
-      <p class="subtitle">Registriere dich jetzt und sammle Punkte bei jeder Bestellung!</p>
+      <p class="subtitle">Registriere dich jetzt und sammle Punkte bei jedem Einkauf!</p>
       <button onclick="showScreen('register')">✨ Jetzt registrieren</button>
       <button class="secondary" onclick="showScreen('login')">🔓 Ich habe schon einen Account</button>
     </div>
@@ -721,13 +726,13 @@ async function loadBonuses() {
       const bonusAmount = bonus.bonus_amount || 100
       const isActivated = activatedMap.has(bonus.id)
       let descText = ''
-      if (bonus.bonus_type === 'double_points') { descText = 'Bei der nächsten Bestellung bekommst du doppelte Punkte!' }
-      else { descText = `Bei der nächsten Bestellung erhältst du ${bonusAmount} Extra-Punkte!` }
+      if (bonus.bonus_type === 'double_points') { descText = 'Beim nächsten Einkauf bekommst du doppelte Punkte!' }
+      else { descText = `Beim nächsten Einkauf erhältst du ${bonusAmount} Extra-Punkte!` }
       if (bonus.description) { descText += `<br><small>${bonus.description}</small>` }
       const expiry = new Date(bonus.expires_at)
       const daysLeft = Math.ceil((expiry - new Date()) / (1000 * 60 * 60 * 24))
       let statusText = '', buttonHTML = ''
-      if (isActivated) { statusText = '🔥 Aktiv für nächste Bestellung!' }
+      if (isActivated) { statusText = '🔥 Aktiv für nächsten Einkauf!' }
       else { statusText = `⏳ Bereit zum Aktivieren (noch ${daysLeft} ${daysLeft === 1 ? 'Tag' : 'Tage'})`; buttonHTML = `<button onclick="activateBonus(${bonus.id})">🚀 Jetzt aktivieren</button>` }
       return `<div class="bonus-item ${isActivated ? 'active' : ''}"><h3>${bonus.title || (bonus.bonus_type === 'double_points' ? '⭐ Doppelte Punkte' : `💰 +${bonusAmount} Bonus-Punkte`)}</h3><div class="bonus-desc">${descText}</div><div class="bonus-status">${statusText}</div>${buttonHTML}</div>`
     }).join('')
