@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Döner Boxx Scanner PRO</title>
+<title>Scanner - Döner Boxx</title>
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
 @font-face {
   font-family: 'Flame';
@@ -15,44 +17,62 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { 
   font-family: 'Flame', system-ui, -apple-system, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #E31E24 0%, #F9A825 100%);
   min-height: 100vh;
   padding: 20px;
 }
 .container { max-width: 1200px; margin: 0 auto; }
 .card { background: white; border-radius: 20px; padding: 24px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-h1 { color: #667eea; margin-bottom: 10px; font-size: 28px; }
+.header-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.header-logo {
+  width: 70px;
+  height: 70px;
+  flex-shrink: 0;
+}
+.header-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.header-text {
+  flex: 1;
+}
+h1 { color: #E31E24; margin-bottom: 10px; font-size: 28px; }
 h2 { font-size: 18px; margin-bottom: 12px; color: #374151; }
 
 .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .tab { flex: 1; min-width: 120px; padding: 12px; background: #f3f4f6; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; color: #6b7280; font-size: 14px; }
-.tab.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+.tab.active { background: linear-gradient(135deg, #E31E24, #F9A825); color: white; }
 
 input { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 16px; margin-bottom: 10px; }
-button { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+button { width: 100%; padding: 14px; background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; }
 button:hover { opacity: 0.9; }
 button.secondary { background: #6b7280; }
-button.danger { background: #ef4444; }
-button.success { background: #10b981; }
+button.danger { background: #dc2626; }
+button.success { background: #F9A825; }
 button.small { width: auto; padding: 8px 16px; font-size: 14px; display: inline-block; margin: 4px; }
 
 .result { padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 14px; }
-.success { background: #d1fae5; color: #065f46; }
+.success { background: #fef3c7; color: #92400e; }
 .error { background: #fee2e2; color: #991b1b; }
 .info { background: #dbeafe; color: #1e40af; }
 
 .video-container { position: relative; width: 100%; max-width: 500px; margin: 16px auto; background: #000; border-radius: 10px; overflow: hidden; display: none; }
 .video-container.active { display: block; }
 #video { width: 100%; display: block; }
-.scan-line { position: absolute; width: 80%; height: 2px; background: #10b981; left: 10%; top: 50%; box-shadow: 0 0 10px #10b981; animation: scan 2s ease-in-out infinite; }
+.scan-line { position: absolute; width: 80%; height: 2px; background: #F9A825; left: 10%; top: 50%; box-shadow: 0 0 10px #F9A825; animation: scan 2s ease-in-out infinite; }
 @keyframes scan { 0%, 100% { top: 20%; } 50% { top: 80%; } }
-.scan-corners { position: absolute; inset: 10%; border: 2px solid #10b981; border-radius: 10px; }
+.scan-corners { position: absolute; inset: 10%; border: 2px solid #F9A825; border-radius: 10px; }
 canvas { display: none; }
 
 .customer-info { background: #f9fafb; padding: 16px; border-radius: 10px; margin-top: 12px; }
-.customer-info h3 { font-size: 18px; margin-bottom: 8px; color: #667eea; }
+.customer-info h3 { font-size: 18px; margin-bottom: 8px; color: #E31E24; }
 .customer-info p { margin: 4px 0; color: #374151; }
-.bonus-badge { display: inline-block; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; margin-top: 8px; }
+.bonus-badge { display: inline-block; background: linear-gradient(135deg, #F9A825, #f59e0b); color: white; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; margin-top: 8px; }
 
 .history-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
 .history-item.redeem { background: #fef3c7; border-color: #fbbf24; }
@@ -68,9 +88,14 @@ canvas { display: none; }
 <body>
 
 <div class="container">
-  <div class="card">
-    <h1>🌯 Döner Boxx Scanner PRO</h1>
-    <div style="color: #666; font-size: 14px;">Status: <span id="status">Bereit ✅</span></div>
+  <div class="card header-card">
+    <div class="header-logo">
+      <img src="/logo.png" alt="Döner Boxx">
+    </div>
+    <div class="header-text">
+      <h1>Scanner PRO</h1>
+      <div style="color: #666; font-size: 14px;">Status: <span id="status">Bereit ✅</span></div>
+    </div>
   </div>
 
   <div class="card">
@@ -162,7 +187,6 @@ async function checkAndUpdateChallenges(customerId, amount) {
     for (const challenge of activeChallenges) {
       if (amount < challenge.min_order_amount) continue
       
-      // ✅ FIX: Verwende limit(1) statt single()
       const { data: progressRows, error: progressError } = await supabase
         .from('challenge_progress')
         .select('*')
@@ -177,7 +201,6 @@ async function checkAndUpdateChallenges(customerId, amount) {
       
       const progress = (progressRows && progressRows.length > 0) ? progressRows[0] : null
       
-      // Wenn Kunde Challenge nicht aktiviert hat, ignorieren
       if (!progress) continue
       if (progress.is_completed) continue
       
@@ -491,7 +514,7 @@ async function loadHistory() {
             <div>📱 ${c.phone}</div>
             <div>🆔 ${c.qr_id}</div>
             ${isRedeem ? `<div style="color:#92400e;font-weight:600;">🎁 ${tx.notes || 'Eingelöst'}</div>` : `<div style="color:#059669;font-weight:600;">💰 ${tx.amount.toFixed(2)} €</div>`}
-            <div style="color:${isRedeem ? '#ef4444' : '#667eea'};font-weight:600;">⭐ ${isRedeem ? Math.abs(tx.points) : '+' + tx.points}P</div>
+            <div style="color:${isRedeem ? '#ef4444' : '#E31E24'};font-weight:600;">⭐ ${isRedeem ? Math.abs(tx.points) : '+' + tx.points}P</div>
           </div>
           <div style="display:flex;gap:6px;margin-top:10px;">
             <button class="small secondary" onclick="editTransaction(${tx.id}, ${tx.amount}, ${tx.points}, ${tx.customer_id})">✏️ Bearbeiten</button>
@@ -715,7 +738,7 @@ async function deleteTransaction(txId, customerId, points) {
   }
 }
 
-console.log('✅ Scanner PRO geladen - FIXED VERSION!')
+console.log('✅ Döner Boxx Scanner PRO geladen!')
 </script>
 </body>
 </html>
