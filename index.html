@@ -505,6 +505,31 @@ function showResult(elementId, message, type) {
   el.innerHTML = message
 }
 
+async function generateUniqueCode(table, column) {
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const code = Math.floor(1000 + Math.random() * 9000).toString()
+    
+    const { data, error } = await supabase
+      .from(table)
+      .select(column)
+      .eq(column, code)
+      .limit(1)
+    
+    if (error) {
+      console.error('Code check error:', error)
+      continue
+    }
+    
+    if (!data || data.length === 0) {
+      return code
+    }
+    
+    console.log(`⚠️ Code ${code} existiert bereits, versuche neuen...`)
+  }
+  
+  return Date.now().toString().slice(-4)
+}
+
 async function register() {
   const name = document.getElementById('reg-name').value.trim()
   const phoneRaw = document.getElementById('reg-phone').value.trim()
@@ -655,7 +680,6 @@ async function refreshCustomerData() {
     
   } catch (e) { 
     console.error('❌ Refresh error:', e.message, e)
-    // Bei Fehler: Interval stoppen
     if (refreshInterval) {
       clearInterval(refreshInterval)
       refreshInterval = null
@@ -683,41 +707,11 @@ function updateRewardButtons(points) {
   document.getElementById('btn-1250').disabled = points < 1250
 }
 
-async function generateUniqueCode() {
-  // Versuche bis zu 10x einen einzigartigen Code zu generieren
-  for (let attempt = 0; attempt < 10; attempt++) {
-    const code = Math.floor(1000 + Math.random() * 9000).toString()
-    
-    // Prüfe ob Code bereits existiert
-    const { data, error } = await supabase
-      .from('redeem_codes')
-      .select('code')
-      .eq('code', code)
-      .eq('used', false)
-    
-    if (error) {
-      console.error('Code check error:', error)
-      continue
-    }
-    
-    // Code ist frei!
-    if (!data || data.length === 0) {
-      return code
-    }
-    
-    console.log(`⚠️ Code ${code} existiert bereits, versuche neuen...`)
-  }
-  
-  // Fallback: Verwende Timestamp für Eindeutigkeit
-  const timestamp = Date.now().toString().slice(-4)
-  return timestamp
-}
-
 async function redeem(rewardName, cost) {
   if (!currentCustomer || currentCustomer.points < cost) return
   
   try {
-    const code = await generateUniqueCode()
+    const code = await generateUniqueCode('redeem_codes', 'code')
     const expires = new Date(Date.now() + 24*60*60*1000)
     
     const { error } = await supabase.from('redeem_codes').insert({ 
@@ -782,7 +776,6 @@ async function cancelCode(code) {
 async function loadBonuses() {
   if (!currentCustomer) return
   try {
-    console.log('🔄 Lade globale Bonusse...')
     const now = new Date().toISOString().split('T')[0]
     
     const { data: bonuses, error } = await supabase
@@ -793,8 +786,6 @@ async function loadBonuses() {
       .order('created_at', { ascending: false })
     
     if (error) throw error
-    
-    console.log('✅ Globale Bonusse geladen:', bonuses?.length || 0)
     
     const section = document.getElementById('bonuses-section')
     const list = document.getElementById('bonuses-list')
@@ -866,8 +857,6 @@ async function loadBonuses() {
 
 async function activateBonus(bonusId) {
   try {
-    console.log('🚀 Aktiviere globalen Bonus:', bonusId)
-    
     const { data: existingActive } = await supabase
       .from('activated_global_bonuses')
       .select('*')
@@ -890,7 +879,6 @@ async function activateBonus(bonusId) {
     
     if (error) throw error
     
-    console.log('✅ Globaler Bonus aktiviert!')
     loadBonuses()
     
   } catch (e) {
@@ -1023,9 +1011,12 @@ async function activateCoupon(couponId) {
   try {
     const id = parseInt(couponId)
     const { data: existing } = await supabase.from('activated_coupons').select('*').eq('customer_id', currentCustomer.id).eq('coupon_id', id).eq('is_used', false)
-    if (existing && existing.length > 0) { loadCoupons(); return }
+    if (existing && existing.length > 0) { 
+      loadCoupons()
+      return 
+    }
     
-    const uniqueCode = await generateUniqueCode()
+    const uniqueCode = await generateUniqueCode('activated_coupons', 'unique_code')
     
     const { error } = await supabase.from('activated_coupons').insert({ 
       customer_id: currentCustomer.id, 
@@ -1043,11 +1034,10 @@ async function activateCoupon(couponId) {
     
     loadCoupons()
   } catch (e) { 
-    console.error('❌ Fehler beim Aktivieren:', e.message)
+    console.error('❌ Fehler beim Aktivieren:', e)
     alert('❌ Fehler: ' + e.message)
     loadCoupons() 
   }
-}
 }
 
 async function deactivateCoupon(couponId) {
@@ -1085,7 +1075,7 @@ window.onload = () => {
   }
 }
 
-console.log('✅ Kunden-App geladen - FIXED VERSION!')
+console.log('✅ Kunden-App geladen - COMPLETELY FIXED VERSION!')
 </script>
 </body>
 </html>
