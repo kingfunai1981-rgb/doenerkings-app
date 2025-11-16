@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🗂️ Kunden verwalten - Dönerkings</title>
+<title>🗂️ Kunden verwalten - Döner Boxx</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { 
@@ -133,82 +133,11 @@ textarea {
   margin-bottom: 6px;
   font-size: 14px;
 }
-.visit-grid {
+.form-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  margin: 16px 0;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
-.visit-card {
-  background: #f9fafb;
-  border: 2px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 12px;
-  text-align: center;
-}
-.visit-number {
-  font-size: 20px;
-  font-weight: 700;
-  color: #667eea;
-  margin-bottom: 8px;
-}
-.visit-card select {
-  padding: 8px;
-  font-size: 13px;
-  margin-bottom: 6px;
-}
-.visit-card select.normal {
-  background: #f3f4f6;
-}
-.visit-card select.double {
-  background: #fef3c7;
-  border-color: #f59e0b;
-}
-.visit-card select.bonus {
-  background: #d1fae5;
-  border-color: #10b981;
-}
-.visit-card input {
-  padding: 6px;
-  font-size: 14px;
-  text-align: center;
-  margin: 0;
-}
-
-/* ✅ FIXE VORSCHAU - immer 10 pro Reihe */
-.preview-box {
-  background: #f9fafb;
-  border: 2px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 16px;
-  margin-top: 16px;
-}
-.preview-items {
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  gap: 6px;
-  margin-top: 10px;
-}
-.preview-item {
-  padding: 6px 4px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  text-align: center;
-}
-.preview-item.normal {
-  background: #f3f4f6;
-  color: #374151;
-}
-.preview-item.double {
-  background: #fef3c7;
-  color: #92400e;
-}
-.preview-item.bonus {
-  background: #d1fae5;
-  color: #065f46;
-}
-
 .warning {
   background: #fef3c7;
   border: 2px solid #f59e0b;
@@ -343,61 +272,73 @@ textarea {
   line-height: 1.5;
   margin: 0;
 }
-
-/* ✅ CHALLENGE BONUS */
-.challenge-form {
-  background: #fef3c7;
-  border: 2px solid #f59e0b;
-  border-radius: 10px;
-  padding: 16px;
-  margin-top: 16px;
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+  font-size: 16px;
 }
-.challenge-form h3 {
-  color: #92400e;
-  margin-bottom: 12px;
-}
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+  font-size: 15px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 2px dashed #e5e7eb;
 }
 </style>
 </head>
 <body>
 
 <div class="container">
+  <!-- HEADER -->
   <div class="card">
-    <h1>💥 Kunden verwalten</h1>
-    <p class="subtitle">Lade alle Kunden und lösche einzelne oder alle auf einmal</p>
+    <h1>🗂️ Kunden verwalten</h1>
+    <p class="subtitle">Verwalte alle Kunden, Transaktionen und Punkte</p>
   </div>
 
+  <!-- 1️⃣ GLOBALE BONUSSE -->
   <div class="card">
-    <h2>📊 Übersicht</h2>
-    <div class="stats">
-      <div class="stat-item">
-        <div class="stat-value" id="totalCustomers">-</div>
-        <div class="stat-label">Kunden</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value" id="totalTransactions">-</div>
-        <div class="stat-label">Transaktionen</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value" id="totalCodes">-</div>
-        <div class="stat-label">Codes</div>
-      </div>
+    <h2>🎁 Globale Bonusse</h2>
+    <p class="subtitle">Erstelle Bonusse, die sofort bei allen Kunden erscheinen</p>
+
+    <label class="form-label">🎯 Bonus-Typ</label>
+    <select id="globalBonusType" onchange="toggleBonusAmount()">
+      <option value="bonus_points">💰 Extra-Punkte</option>
+      <option value="double_points">⭐ Doppelte Punkte</option>
+    </select>
+
+    <div id="globalBonusAmountField">
+      <label class="form-label">💵 Bonus-Punkte</label>
+      <input type="number" id="globalBonusAmount" placeholder="z.B. 100" value="100">
     </div>
-    <button class="primary" onclick="loadAllData()">🔄 Alle Kunden laden</button>
-    <div id="result-main"></div>
+
+    <label class="form-label">📅 Gültig bis</label>
+    <input type="date" id="globalBonusExpiry">
+
+    <label class="form-label">📝 Titel (optional)</label>
+    <input type="text" id="globalBonusTitle" placeholder="z.B. Wochenend-Special">
+
+    <label class="form-label">📄 Beschreibung (optional)</label>
+    <input type="text" id="globalBonusDesc" placeholder="z.B. Nur dieses Wochenende!">
+
+    <button class="success" onclick="createGlobalBonus()">🚀 Bonus erstellen</button>
+    <div id="result-global-bonus"></div>
+
+    <div style="margin-top: 24px;">
+      <h3>Aktive Bonusse</h3>
+      <div id="globalBonusList"></div>
+    </div>
   </div>
 
-  <!-- ✅ CHALLENGE BONUS ERSTELLEN -->
+  <!-- 2️⃣ CHALLENGE BONUS -->
   <div class="card">
-    <h2>🎯 Challenge-Bonus erstellen</h2>
+    <h2>🎯 Challenge-Bonus</h2>
     <p class="subtitle">Erstelle zeitlich begrenzte Herausforderungen mit Mindestbestellwert</p>
 
-    <div class="challenge-form">
-      <h3>Neue Challenge</h3>
+    <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px;">
+      <h3 style="color: #92400e; margin-bottom: 12px;">Neue Challenge</h3>
       
       <div class="form-grid">
         <div>
@@ -429,89 +370,85 @@ textarea {
     </div>
 
     <div style="margin-top: 20px;">
-      <h3>📋 Aktive Challenges</h3>
+      <h3>Aktive Challenges</h3>
       <div id="challengeList"></div>
     </div>
   </div>
 
-  <!-- COUPONS -->
+  <!-- 3️⃣ COUPON SYSTEM -->
   <div class="card">
     <h2>🎟️ Coupon-System (Deal der Woche)</h2>
     <p class="subtitle">Erstelle Angebote mit Ablaufdatum und 4-stelligem Code</p>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-      <div>
-        <label class="form-label">🍴 Produktname</label>
-        <input type="text" id="couponProduct" placeholder="z.B. Lahmacun Spezial">
+    <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #92400e; margin-bottom: 12px;">Neuen Coupon erstellen</h3>
+      
+      <div class="form-grid">
+        <div>
+          <label class="form-label">🍴 Produktname</label>
+          <input type="text" id="couponProduct" placeholder="z.B. Lahmacun Spezial">
+        </div>
+        <div>
+          <label class="form-label">💰 Preis</label>
+          <input type="text" id="couponPrice" placeholder="z.B. 7,50 €">
+        </div>
       </div>
-      <div>
-        <label class="form-label">💰 Preis</label>
-        <input type="text" id="couponPrice" placeholder="z.B. 7,50 €">
-      </div>
+
+      <label class="form-label">📝 Beschreibung (optional)</label>
+      <textarea id="couponDesc" placeholder="z.B. Mit extra Käse und Getränk"></textarea>
+
+      <label class="form-label">⏰ Läuft ab in ... Tagen</label>
+      <input type="number" id="couponDays" value="7" min="1" max="365">
+
+      <button class="success" onclick="createCoupon()">🎁 Coupon erstellen</button>
+      <div id="result-coupon-create"></div>
     </div>
 
-    <label class="form-label">📝 Beschreibung (optional)</label>
-    <textarea id="couponDesc" placeholder="z.B. Mit extra Käse und Getränk"></textarea>
-
-    <label class="form-label">⏰ Läuft ab in ... Tagen</label>
-    <input type="number" id="couponDays" value="7" min="1" max="365">
-
-    <button class="success" onclick="createCoupon()">🎁 Coupon erstellen</button>
-    <div id="result-coupon-create"></div>
-
-    <div style="margin-top: 24px;">
-      <h2>📋 Aktuelle Coupons</h2>
+    <div>
+      <h3>Aktuelle Coupons</h3>
       <div id="result-coupon-load"></div>
       <div id="couponList" style="margin-top: 12px;"></div>
     </div>
   </div>
 
-  <!-- ✅ NEU: GLOBALE BONUSSE -->
+  <!-- 4️⃣ KUNDEN VERWALTEN -->
   <div class="card">
-    <h2>🎁 Globale Bonusse</h2>
-    <p class="subtitle">Erstelle Bonusse, die sofort bei allen Kunden erscheinen</p>
+    <h2>📋 Kunden verwalten</h2>
+    <p class="subtitle">Verwalte alle Kunden, Transaktionen und Punkte</p>
 
-    <label class="form-label">🎯 Bonus-Typ</label>
-    <select id="globalBonusType" onchange="toggleBonusAmount()">
-      <option value="bonus_points">💰 Extra-Punkte</option>
-      <option value="double_points">⭐ Doppelte Punkte</option>
-    </select>
-
-    <div id="globalBonusAmountField">
-      <label class="form-label">💵 Bonus-Punkte</label>
-      <input type="number" id="globalBonusAmount" placeholder="z.B. 100" value="100">
+    <!-- STATISTIKEN -->
+    <div class="stats">
+      <div class="stat-item">
+        <div class="stat-value" id="totalCustomers">0</div>
+        <div class="stat-label">Kunden</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="totalTransactions">0</div>
+        <div class="stat-label">Transaktionen</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="totalCodes">0</div>
+        <div class="stat-label">Codes</div>
+      </div>
     </div>
 
-    <label class="form-label">📅 Gültig bis</label>
-    <input type="date" id="globalBonusExpiry">
-
-    <label class="form-label">📝 Titel (optional)</label>
-    <input type="text" id="globalBonusTitle" placeholder="z.B. Wochenend-Special">
-
-    <label class="form-label">📄 Beschreibung (optional)</label>
-    <input type="text" id="globalBonusDesc" placeholder="z.B. Nur dieses Wochenende!">
-
-    <button class="success" onclick="createGlobalBonus()">🚀 Bonus erstellen</button>
-    <div id="result-global-bonus"></div>
-
+    <!-- KUNDENLISTE -->
     <div style="margin-top: 24px;">
-      <h3>📋 Aktive Bonusse</h3>
-      <div id="globalBonusList"></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="margin: 0;">Kundenliste</h3>
+        <button class="danger-all" onclick="deleteAllCustomers()" id="deleteAllBtn" style="display: none;">🗑️ ALLE löschen</button>
+      </div>
+      
+      <div class="warning" id="warningBox" style="display: none;">
+        ⚠️ <strong>Hinweis:</strong> Beim Löschen eines Kunden werden auch alle zugehörigen Transaktionen und Codes gelöscht!
+      </div>
+      
+      <div id="customerListContainer">
+        <div class="loading">
+          <p>⏳ Lade Kundendaten...</p>
+        </div>
+      </div>
     </div>
-  </div>
-
-  <!-- KUNDENLISTE -->
-  <div class="card" id="customerCard" style="display: none;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-      <h2 style="margin: 0;">📋 Kundenliste</h2>
-      <button class="danger-all" onclick="deleteAllCustomers()">🗑️ ALLE löschen</button>
-    </div>
-    
-    <div class="warning">
-      ⚠️ <strong>Hinweis:</strong> Beim Löschen eines Kunden werden auch alle zugehörigen Transaktionen und Codes gelöscht!
-    </div>
-    
-    <div class="customer-list" id="customerList"></div>
   </div>
 </div>
 
@@ -525,12 +462,20 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 function showResult(elementId, message, type) {
   const el = document.getElementById(elementId)
+  if (!message) {
+    el.className = ''
+    el.innerHTML = ''
+    return
+  }
   el.className = `result ${type}`
   el.innerHTML = message
 }
 
-async function loadAllData() {
-  showResult('result-main', '📊 Lade Daten...', 'info')
+// ============================================
+// ✅ AUTO-LOAD KUNDEN BEIM START
+// ============================================
+async function loadAllCustomers() {
+  const container = document.getElementById('customerListContainer')
   
   try {
     const { data: customers, error: custError } = await supabase
@@ -557,13 +502,16 @@ async function loadAllData() {
     document.getElementById('totalCodes').textContent = codeCount || 0
     
     if (!customers || customers.length === 0) {
-      document.getElementById('customerCard').style.display = 'none'
-      showResult('result-main', '✅ Keine Kunden vorhanden - Datenbank ist leer!', 'success')
+      container.innerHTML = '<div class="empty-state">📭 Noch keine Kunden vorhanden</div>'
+      document.getElementById('deleteAllBtn').style.display = 'none'
+      document.getElementById('warningBox').style.display = 'none'
       return
     }
     
-    document.getElementById('customerCard').style.display = 'block'
+    document.getElementById('deleteAllBtn').style.display = 'block'
+    document.getElementById('warningBox').style.display = 'block'
     
+    container.innerHTML = '<div class="customer-list" id="customerList"></div>'
     const customerList = document.getElementById('customerList')
     customerList.innerHTML = ''
     
@@ -602,10 +550,8 @@ async function loadAllData() {
       `
     }
     
-    showResult('result-main', '✅ Daten geladen!', 'success')
-    
   } catch (e) {
-    showResult('result-main', '❌ Fehler: ' + e.message, 'error')
+    container.innerHTML = `<div class="result error">❌ Fehler beim Laden: ${e.message}</div>`
   }
 }
 
@@ -615,29 +561,12 @@ async function deleteSingleCustomer(customerId, customerName) {
   }
   
   try {
-    const { error: codeError } = await supabase
-      .from('redeem_codes')
-      .delete()
-      .eq('customer_id', customerId)
-    
-    if (codeError) throw new Error('Codes: ' + codeError.message)
-    
-    const { error: txError } = await supabase
-      .from('transactions')
-      .delete()
-      .eq('customer_id', customerId)
-    
-    if (txError) throw new Error('Transaktionen: ' + txError.message)
-    
-    const { error: custError } = await supabase
-      .from('customers')
-      .delete()
-      .eq('id', customerId)
-    
-    if (custError) throw new Error('Kunde: ' + custError.message)
+    await supabase.from('redeem_codes').delete().eq('customer_id', customerId)
+    await supabase.from('transactions').delete().eq('customer_id', customerId)
+    await supabase.from('customers').delete().eq('id', customerId)
     
     alert(`✅ Kunde "${customerName}" wurde erfolgreich gelöscht!`)
-    loadAllData()
+    loadAllCustomers()
     
   } catch (e) {
     alert('❌ Fehler beim Löschen: ' + e.message)
@@ -664,412 +593,20 @@ async function deleteAllCustomers() {
   }
   
   try {
-    showResult('result-main', '🗑️ Lösche alle Daten...', 'info')
+    await supabase.from('redeem_codes').delete().gte('id', 0)
+    await supabase.from('transactions').delete().gte('id', 0)
+    await supabase.from('customers').delete().gte('id', 0)
     
-    const { error: codeError } = await supabase
-      .from('redeem_codes')
-      .delete()
-      .gte('id', 0)
+    alert('✅ ALLE DATEN GELÖSCHT!')
+    loadAllCustomers()
     
-    if (codeError) throw new Error('Codes: ' + codeError.message)
-    
-    const { error: txError } = await supabase
-      .from('transactions')
-      .delete()
-      .gte('id', 0)
-    
-    if (txError) throw new Error('Transaktionen: ' + txError.message)
-    
-    const { error: custError } = await supabase
-      .from('customers')
-      .delete()
-      .gte('id', 0)
-    
-    if (custError) throw new Error('Kunden: ' + custError.message)
-    
-    showResult('result-main', 
-      '✅ <strong>ALLE DATEN GELÖSCHT!</strong><br><br>' +
-      '✔️ Alle Kunden gelöscht<br>' +
-      '✔️ Alle Transaktionen gelöscht<br>' +
-      '✔️ Alle Codes gelöscht',
-      'success'
-    )
-    
-    document.getElementById('customerCard').style.display = 'none'
-    document.getElementById('totalCustomers').textContent = '0'
-    document.getElementById('totalTransactions').textContent = '0'
-    document.getElementById('totalCodes').textContent = '0'
-    
-  } catch (e) {
-    showResult('result-main', '❌ <strong>FEHLER!</strong><br><br>' + e.message, 'error')
-  }
-}
-
-// ============================================
-// ✅ CHALLENGE BONUS
-// ============================================
-async function createChallenge() {
-  const points = parseInt(document.getElementById('challengePoints').value)
-  const orders = parseInt(document.getElementById('challengeOrders').value)
-  const minAmount = parseFloat(document.getElementById('challengeMinAmount').value)
-  const startDate = document.getElementById('challengeStart').value
-  const endDate = document.getElementById('challengeEnd').value
-  
-  if (!points || !orders || !minAmount || !startDate || !endDate) {
-    showResult('result-challenge', '❌ Bitte alle Felder ausfüllen!', 'error')
-    return
-  }
-  
-  if (new Date(endDate) <= new Date(startDate)) {
-    showResult('result-challenge', '❌ End-Datum muss nach Start-Datum liegen!', 'error')
-    return
-  }
-  
-  try {
-    showResult('result-challenge', '⏳ Erstelle Challenge...', 'info')
-    
-    const { error } = await supabase
-      .from('challenges')
-      .insert({
-        bonus_points: points,
-        required_orders: orders,
-        min_order_amount: minAmount,
-        start_date: startDate,
-        end_date: endDate,
-        is_active: true,
-        created_at: new Date().toISOString()
-      })
-    
-    if (error) throw error
-    
-    showResult('result-challenge', '✅ Challenge erstellt!', 'success')
-    loadChallenges()
-    
-  } catch (e) {
-    showResult('result-challenge', '❌ Fehler: ' + e.message, 'error')
-  }
-}
-
-async function loadChallenges() {
-  try {
-    const { data: challenges, error } = await supabase
-      .from('challenges')
-      .select('*')
-      .order('created_at', { ascending: false })
-    
-    if (error) throw error
-    
-    const list = document.getElementById('challengeList')
-    
-    if (!challenges || challenges.length === 0) {
-      list.innerHTML = '<div class="result info">Keine Challenges vorhanden</div>'
-      return
-    }
-    
-    list.innerHTML = challenges.map(c => {
-      const start = new Date(c.start_date).toLocaleDateString('de-DE')
-      const end = new Date(c.end_date).toLocaleDateString('de-DE')
-      const now = new Date()
-      const isExpired = new Date(c.end_date) < now
-      const isActive = c.is_active && !isExpired
-      
-      return `
-        <div style="background: ${isActive ? '#d1fae5' : '#fee2e2'}; border: 2px solid ${isActive ? '#10b981' : '#ef4444'}; border-radius: 10px; padding: 16px; margin-top: 12px;">
-          <div style="display: flex; justify-content: space-between; align-items: start;">
-            <div style="flex: 1;">
-              <h3 style="color: #111827; margin-bottom: 8px;">
-                🎁 ${c.bonus_points} Punkte für ${c.required_orders} Bestellungen ab ${c.min_order_amount} €
-              </h3>
-              <p style="font-size: 13px; color: #6b7280; margin: 4px 0;">
-                📅 Gültig: ${start} - ${end}
-              </p>
-              <p style="font-size: 12px; color: ${isActive ? '#059669' : '#dc2626'}; font-weight: 600; margin-top: 6px;">
-                ${isActive ? '✅ Aktiv' : isExpired ? '❌ Abgelaufen' : '⏸️ Inaktiv'}
-              </p>
-            </div>
-            <div style="display: flex; gap: 6px;">
-              ${isActive ? 
-                `<button class="danger" style="padding: 8px 14px; font-size: 13px; width: auto;" onclick="toggleChallenge(${c.id}, false)">⏸️ Deaktivieren</button>` :
-                `<button class="success" style="padding: 8px 14px; font-size: 13px; width: auto; margin: 0;" onclick="toggleChallenge(${c.id}, true)">✅ Aktivieren</button>`
-              }
-              <button class="danger" style="padding: 8px 14px; font-size: 13px; width: auto;" onclick="deleteChallenge(${c.id})">🗑️</button>
-            </div>
-          </div>
-        </div>
-      `
-    }).join('')
-    
-  } catch (e) {
-    console.error('Load challenges error:', e)
-  }
-}
-
-async function toggleChallenge(id, active) {
-  try {
-    const { error } = await supabase
-      .from('challenges')
-      .update({ is_active: active })
-      .eq('id', id)
-    
-    if (error) throw error
-    loadChallenges()
-  } catch (e) {
-    alert('❌ Fehler: ' + e.message)
-  }
-}
-
-async function deleteChallenge(id) {
-  if (!confirm('Challenge wirklich löschen?')) return
-  
-  try {
-    const { error } = await supabase
-      .from('challenges')
-      .delete()
-      .eq('id', id)
-    
-    if (error) throw error
-    loadChallenges()
   } catch (e) {
     alert('❌ Fehler: ' + e.message)
   }
 }
 
 // ============================================
-// COUPON SYSTEM
-// ============================================
-function generateCouponCode() {
-  return Math.floor(1000 + Math.random() * 9000).toString()
-}
-
-function calculateExpiryDate(days) {
-  const date = new Date()
-  date.setDate(date.getDate() + days)
-  return date.toISOString()
-}
-
-function formatDate(dateString) {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('de-DE', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  })
-}
-
-function formatPrice(price) {
-  // Konvertiere zu Zahl und formatiere mit 2 Dezimalstellen
-  const numPrice = parseFloat(price)
-  if (isNaN(numPrice)) return price
-  return numPrice.toFixed(2) + ' €'
-}
-
-function getDaysUntil(dateString) {
-  const now = new Date()
-  const expiry = new Date(dateString)
-  const diff = expiry - now
-  const days = Math.ceil(diff / (1000 * 60 * 60 * 24))
-  return days
-}
-
-async function createCoupon() {
-  const product = document.getElementById('couponProduct').value.trim()
-  const price = document.getElementById('couponPrice').value.trim()
-  const description = document.getElementById('couponDesc').value.trim()
-  const days = parseInt(document.getElementById('couponDays').value)
-
-  if (!product || !price) {
-    showResult('result-coupon-create', '❌ Bitte Produktname und Preis ausfüllen!', 'error')
-    return
-  }
-
-  showResult('result-coupon-create', '🎁 Erstelle Coupon...', 'info')
-
-  try {
-    const code = generateCouponCode()
-    const expiryDate = calculateExpiryDate(days)
-
-    const { error } = await supabase
-      .from('coupons')
-      .insert({
-        code: code,
-        title: 'Deal der Woche',
-        product: product,
-        price: price,
-        description: description,
-        expires_at: expiryDate,
-        is_active: true,
-        created_at: new Date().toISOString()
-      })
-
-    if (error) throw error
-
-    showResult('result-coupon-create', 
-      `✅ <strong>Coupon erstellt!</strong><br>` +
-      `Produkt: <strong>${product}</strong><br>` +
-      `Läuft ab: ${formatDate(expiryDate)}`,
-      'success'
-    )
-
-    document.getElementById('couponProduct').value = ''
-    document.getElementById('couponPrice').value = ''
-    document.getElementById('couponDesc').value = ''
-
-    loadCoupons()
-
-  } catch (e) {
-    showResult('result-coupon-create', '❌ Fehler: ' + e.message, 'error')
-  }
-}
-
-async function loadCoupons() {
-  showResult('result-coupon-load', '📊 Lade Coupons...', 'info')
-
-  try {
-    const { data: coupons, error } = await supabase
-      .from('coupons')
-      .select('*')
-      .order('created_at', { ascending: false })
-
-    if (error) throw error
-
-    const list = document.getElementById('couponList')
-
-    if (!coupons || coupons.length === 0) {
-      list.innerHTML = '<div class="result info">Keine Coupons vorhanden</div>'
-      showResult('result-coupon-load', '', 'info')
-      return
-    }
-
-    list.innerHTML = ''
-
-    for (const coupon of coupons) {
-      const daysLeft = getDaysUntil(coupon.expires_at)
-      const isExpired = daysLeft < 0
-      const isSoon = daysLeft <= 3 && daysLeft >= 0
-
-      if (isExpired && coupon.is_active) {
-        await supabase
-          .from('coupons')
-          .update({ is_active: false })
-          .eq('id', coupon.id)
-        coupon.is_active = false
-      }
-
-      const { data: activations } = await supabase
-        .from('activated_coupons')
-        .select('unique_code, is_used, activated_at, customers(name, phone)')
-        .eq('coupon_id', coupon.id)
-        .order('activated_at', { ascending: false })
-      
-      let activationsHTML = ''
-      if (activations && activations.length > 0) {
-        activationsHTML = `
-          <div style="margin-top: 12px; padding: 8px; background: #f3f4f6; border-radius: 6px;">
-            <strong>👥 Aktiviert von ${activations.length} Kunde(n):</strong>
-            <div style="margin-top: 6px; max-height: 150px; overflow-y: auto;">
-              ${activations.map(a => `
-                <div style="font-size: 12px; padding: 4px 0; border-bottom: 1px solid #e5e7eb;">
-                  <strong>${a.customers?.name || 'Unbekannt'}</strong> (${a.customers?.phone || '?'})
-                  → Code: <span style="font-family: monospace; font-weight: bold; color: #059669;">${a.unique_code}</span>
-                  ${a.is_used ? '<span style="color: #dc2626;">✓ Eingelöst</span>' : '<span style="color: #059669;">⏳ Offen</span>'}
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        `
-      }
-
-      let expiryText = ''
-      if (isExpired) {
-        expiryText = `<span style="background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">❌ Abgelaufen</span>`
-      } else if (daysLeft === 0) {
-        expiryText = `<span style="background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">⚠️ Läuft heute ab!</span>`
-      } else if (isSoon) {
-        expiryText = `<span style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">⏰ ${daysLeft} Tage</span>`
-      } else {
-        expiryText = `<span style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">⏰ ${daysLeft} Tage</span>`
-      }
-
-      list.innerHTML += `
-        <div style="background: #f9fafb; border: 2px solid ${isExpired ? '#ef4444' : '#e5e7eb'}; border-radius: 12px; padding: 16px; margin-bottom: 12px; ${isExpired ? 'opacity: 0.6;' : ''}">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; background: ${coupon.is_active ? '#d1fae5' : '#fee2e2'}; color: ${coupon.is_active ? '#065f46' : '#991b1b'};">
-              ${coupon.is_active ? '✅ Aktiv' : '❌ Inaktiv'}
-            </span>
-          </div>
-          <div>
-            <h3 style="color: #111827; font-size: 16px; margin-bottom: 6px;">🍴 ${coupon.product}</h3>
-            <div style="font-size: 18px; font-weight: 700; color: #10b981; margin: 6px 0;">💰 ${formatPrice(coupon.price)}</div>
-            ${coupon.description ? `<p style="color: #6b7280; font-size: 13px; margin: 3px 0;">📝 ${coupon.description}</p>` : ''}
-            ${expiryText}
-            <p style="margin-top:6px; font-size:12px; color:#9ca3af;">Erstellt: ${formatDate(coupon.created_at)}</p>
-            ${activationsHTML}
-          </div>
-          <div style="display: flex; gap: 6px; margin-top: 10px;">
-            ${coupon.is_active && !isExpired ? 
-              `<button class="danger" style="width: auto; padding: 8px 14px; font-size: 13px;" onclick="deactivateCoupon(${coupon.id})">❌ Deaktivieren</button>` :
-              `<button class="success" style="width: auto; padding: 8px 14px; font-size: 13px; margin: 0;" onclick="activateCoupon(${coupon.id})">✅ Aktivieren</button>`
-            }
-            <button class="danger" style="width: auto; padding: 8px 14px; font-size: 13px;" onclick="deleteCoupon(${coupon.id})">🗑️ Löschen</button>
-          </div>
-        </div>
-      `
-    }
-
-    showResult('result-coupon-load', '', 'success')
-
-  } catch (e) {
-    showResult('result-coupon-load', '❌ Fehler: ' + e.message, 'error')
-  }
-}
-
-async function deactivateCoupon(id) {
-  try {
-    const { error } = await supabase
-      .from('coupons')
-      .update({ is_active: false })
-      .eq('id', parseInt(id))
-
-    if (error) throw error
-    loadCoupons()
-  } catch (e) {
-    console.error('Deactivate error:', e.message)
-    loadCoupons()
-  }
-}
-
-async function activateCoupon(id) {
-  try {
-    const { error } = await supabase
-      .from('coupons')
-      .update({ is_active: true })
-      .eq('id', parseInt(id))
-
-    if (error) throw error
-    loadCoupons()
-  } catch (e) {
-    console.error('Activate error:', e.message)
-    loadCoupons()
-  }
-}
-
-async function deleteCoupon(id) {
-  try {
-    const { error } = await supabase
-      .from('coupons')
-      .delete()
-      .eq('id', parseInt(id))
-
-    if (error) throw error
-    loadCoupons()
-  } catch (e) {
-    console.error('Delete error:', e.message)
-    loadCoupons()
-  }
-}
-
-// ============================================
-// ✅ GLOBALE BONUSSE
+// GLOBALE BONUSSE
 // ============================================
 function toggleBonusAmount() {
   const type = document.getElementById('globalBonusType').value
@@ -1135,7 +672,7 @@ async function loadGlobalBonuses() {
     const list = document.getElementById('globalBonusList')
 
     if (!bonuses || bonuses.length === 0) {
-      list.innerHTML = '<div class="result info">Keine Bonusse vorhanden</div>'
+      list.innerHTML = '<div class="empty-state">Noch keine Bonusse vorhanden</div>'
       return
     }
 
@@ -1183,12 +720,7 @@ async function loadGlobalBonuses() {
 
 async function toggleGlobalBonus(id, active) {
   try {
-    const { error } = await supabase
-      .from('global_bonuses')
-      .update({ is_active: active })
-      .eq('id', id)
-
-    if (error) throw error
+    await supabase.from('global_bonuses').update({ is_active: active }).eq('id', id)
     loadGlobalBonuses()
   } catch (e) {
     alert('❌ Fehler: ' + e.message)
@@ -1197,52 +729,319 @@ async function toggleGlobalBonus(id, active) {
 
 async function deleteGlobalBonus(id) {
   if (!confirm('Bonus wirklich löschen?')) return
-
   try {
-    const { error } = await supabase
-      .from('global_bonuses')
-      .delete()
-      .eq('id', id)
-
-    if (error) throw error
+    await supabase.from('global_bonuses').delete().eq('id', id)
     loadGlobalBonuses()
   } catch (e) {
     alert('❌ Fehler: ' + e.message)
   }
 }
 
-// ✅ AUTO-LOAD beim Seitenstart
-window.addEventListener('DOMContentLoaded', function() {
-  loadCoupons()
-  loadChallenges()
-  loadGlobalBonuses() // ✅ Lade globale Bonusse
+// ============================================
+// CHALLENGE BONUS
+// ============================================
+async function createChallenge() {
+  const points = parseInt(document.getElementById('challengePoints').value)
+  const orders = parseInt(document.getElementById('challengeOrders').value)
+  const minAmount = parseFloat(document.getElementById('challengeMinAmount').value)
+  const startDate = document.getElementById('challengeStart').value
+  const endDate = document.getElementById('challengeEnd').value
   
-  // Setze Standard-Ablaufdatum für globale Bonusse (7 Tage)
+  if (!points || !orders || !minAmount || !startDate || !endDate) {
+    showResult('result-challenge', '❌ Bitte alle Felder ausfüllen!', 'error')
+    return
+  }
+  
+  if (new Date(endDate) <= new Date(startDate)) {
+    showResult('result-challenge', '❌ End-Datum muss nach Start-Datum liegen!', 'error')
+    return
+  }
+  
+  try {
+    showResult('result-challenge', '⏳ Erstelle Challenge...', 'info')
+    
+    const { error } = await supabase
+      .from('challenges')
+      .insert({
+        bonus_points: points,
+        required_orders: orders,
+        min_order_amount: minAmount,
+        start_date: startDate,
+        end_date: endDate,
+        is_active: true,
+        created_at: new Date().toISOString()
+      })
+    
+    if (error) throw error
+    
+    showResult('result-challenge', '✅ Challenge erstellt!', 'success')
+    loadChallenges()
+    
+  } catch (e) {
+    showResult('result-challenge', '❌ Fehler: ' + e.message, 'error')
+  }
+}
+
+async function loadChallenges() {
+  try {
+    const { data: challenges, error } = await supabase
+      .from('challenges')
+      .select('*')
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    
+    const list = document.getElementById('challengeList')
+    
+    if (!challenges || challenges.length === 0) {
+      list.innerHTML = '<div class="empty-state">Keine Challenges vorhanden</div>'
+      return
+    }
+    
+    list.innerHTML = challenges.map(c => {
+      const start = new Date(c.start_date).toLocaleDateString('de-DE')
+      const end = new Date(c.end_date).toLocaleDateString('de-DE')
+      const now = new Date()
+      const isExpired = new Date(c.end_date) < now
+      const isActive = c.is_active && !isExpired
+      
+      return `
+        <div style="background: ${isActive ? '#d1fae5' : '#fee2e2'}; border: 2px solid ${isActive ? '#10b981' : '#ef4444'}; border-radius: 10px; padding: 16px; margin-top: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div style="flex: 1;">
+              <h3 style="color: #111827; margin-bottom: 8px;">
+                🎁 ${c.bonus_points} Punkte für ${c.required_orders} Bestellungen ab ${c.min_order_amount} €
+              </h3>
+              <p style="font-size: 13px; color: #6b7280; margin: 4px 0;">
+                📅 Gültig: ${start} - ${end}
+              </p>
+              <p style="font-size: 12px; color: ${isActive ? '#059669' : '#dc2626'}; font-weight: 600; margin-top: 6px;">
+                ${isActive ? '✅ Aktiv' : isExpired ? '❌ Abgelaufen' : '⏸️ Inaktiv'}
+              </p>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              ${isActive ? 
+                `<button class="danger" style="padding: 8px 14px; font-size: 13px; width: auto;" onclick="toggleChallenge(${c.id}, false)">⏸️ Deaktivieren</button>` :
+                `<button class="success" style="padding: 8px 14px; font-size: 13px; width: auto; margin: 0;" onclick="toggleChallenge(${c.id}, true)">✅ Aktivieren</button>`
+              }
+              <button class="danger" style="padding: 8px 14px; font-size: 13px; width: auto;" onclick="deleteChallenge(${c.id})">🗑️</button>
+            </div>
+          </div>
+        </div>
+      `
+    }).join('')
+    
+  } catch (e) {
+    console.error('Load challenges error:', e)
+  }
+}
+
+async function toggleChallenge(id, active) {
+  try {
+    await supabase.from('challenges').update({ is_active: active }).eq('id', id)
+    loadChallenges()
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+async function deleteChallenge(id) {
+  if (!confirm('Challenge wirklich löschen?')) return
+  try {
+    await supabase.from('challenges').delete().eq('id', id)
+    loadChallenges()
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+// ============================================
+// COUPON SYSTEM
+// ============================================
+async function createCoupon() {
+  const product = document.getElementById('couponProduct').value.trim()
+  const price = document.getElementById('couponPrice').value.trim()
+  const description = document.getElementById('couponDesc').value.trim()
+  const days = parseInt(document.getElementById('couponDays').value)
+
+  if (!product || !price) {
+    showResult('result-coupon-create', '❌ Bitte Produktname und Preis ausfüllen!', 'error')
+    return
+  }
+
+  showResult('result-coupon-create', '🎁 Erstelle Coupon...', 'info')
+
+  try {
+    const code = Math.floor(1000 + Math.random() * 9000).toString()
+    const expiryDate = new Date()
+    expiryDate.setDate(expiryDate.getDate() + days)
+
+    const { error } = await supabase
+      .from('coupons')
+      .insert({
+        code: code,
+        title: 'Deal der Woche',
+        product: product,
+        price: price,
+        description: description,
+        expires_at: expiryDate.toISOString(),
+        is_active: true,
+        created_at: new Date().toISOString()
+      })
+
+    if (error) throw error
+
+    showResult('result-coupon-create', 
+      `✅ Coupon erstellt!<br>Produkt: <strong>${product}</strong><br>Läuft ab: ${expiryDate.toLocaleDateString('de-DE')}`,
+      'success'
+    )
+
+    document.getElementById('couponProduct').value = ''
+    document.getElementById('couponPrice').value = ''
+    document.getElementById('couponDesc').value = ''
+
+    loadCoupons()
+
+  } catch (e) {
+    showResult('result-coupon-create', '❌ Fehler: ' + e.message, 'error')
+  }
+}
+
+async function loadCoupons() {
+  try {
+    const { data: coupons, error } = await supabase
+      .from('coupons')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+
+    const list = document.getElementById('couponList')
+
+    if (!coupons || coupons.length === 0) {
+      list.innerHTML = '<div class="empty-state">Noch keine Coupons vorhanden</div>'
+      showResult('result-coupon-load', '', 'info')
+      return
+    }
+
+    list.innerHTML = ''
+
+    for (const coupon of coupons) {
+      const expiry = new Date(coupon.expires_at)
+      const now = new Date()
+      const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24))
+      const isExpired = daysLeft < 0
+
+      if (isExpired && coupon.is_active) {
+        await supabase.from('coupons').update({ is_active: false }).eq('id', coupon.id)
+        coupon.is_active = false
+      }
+
+      const { data: activations } = await supabase
+        .from('activated_coupons')
+        .select('unique_code, is_used, activated_at, customers(name, phone)')
+        .eq('coupon_id', coupon.id)
+        .order('activated_at', { ascending: false })
+      
+      let activationsHTML = ''
+      if (activations && activations.length > 0) {
+        activationsHTML = `
+          <div style="margin-top: 12px; padding: 8px; background: #f3f4f6; border-radius: 6px;">
+            <strong>👥 Aktiviert von ${activations.length} Kunde(n)</strong>
+          </div>
+        `
+      }
+
+      let expiryText = ''
+      if (isExpired) {
+        expiryText = `<span style="background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">❌ Abgelaufen</span>`
+      } else if (daysLeft === 0) {
+        expiryText = `<span style="background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">⚠️ Läuft heute ab!</span>`
+      } else {
+        expiryText = `<span style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">⏰ ${daysLeft} Tage</span>`
+      }
+
+      list.innerHTML += `
+        <div style="background: #f9fafb; border: 2px solid ${isExpired ? '#ef4444' : '#e5e7eb'}; border-radius: 12px; padding: 16px; margin-bottom: 12px; ${isExpired ? 'opacity: 0.6;' : ''}">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span style="padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; background: ${coupon.is_active ? '#d1fae5' : '#fee2e2'}; color: ${coupon.is_active ? '#065f46' : '#991b1b'};">
+              ${coupon.is_active ? '✅ Aktiv' : '❌ Inaktiv'}
+            </span>
+          </div>
+          <div>
+            <h3 style="color: #111827; font-size: 16px; margin-bottom: 6px;">🍴 ${coupon.product}</h3>
+            <div style="font-size: 18px; font-weight: 700; color: #10b981; margin: 6px 0;">💰 ${coupon.price}</div>
+            ${coupon.description ? `<p style="color: #6b7280; font-size: 13px; margin: 3px 0;">📝 ${coupon.description}</p>` : ''}
+            ${expiryText}
+            ${activationsHTML}
+          </div>
+          <div style="display: flex; gap: 6px; margin-top: 10px;">
+            ${coupon.is_active && !isExpired ? 
+              `<button class="danger" style="width: auto; padding: 8px 14px; font-size: 13px;" onclick="deactivateCoupon(${coupon.id})">❌ Deaktivieren</button>` :
+              `<button class="success" style="width: auto; padding: 8px 14px; font-size: 13px; margin: 0;" onclick="activateCoupon(${coupon.id})">✅ Aktivieren</button>`
+            }
+            <button class="danger" style="width: auto; padding: 8px 14px; font-size: 13px;" onclick="deleteCoupon(${coupon.id})">🗑️ Löschen</button>
+          </div>
+        </div>
+      `
+    }
+
+    showResult('result-coupon-load', '', 'success')
+
+  } catch (e) {
+    showResult('result-coupon-load', '❌ Fehler: ' + e.message, 'error')
+  }
+}
+
+async function deactivateCoupon(id) {
+  try {
+    await supabase.from('coupons').update({ is_active: false }).eq('id', id)
+    loadCoupons()
+  } catch (e) {
+    loadCoupons()
+  }
+}
+
+async function activateCoupon(id) {
+  try {
+    await supabase.from('coupons').update({ is_active: true }).eq('id', id)
+    loadCoupons()
+  } catch (e) {
+    loadCoupons()
+  }
+}
+
+async function deleteCoupon(id) {
+  if (!confirm('Coupon wirklich löschen?')) return
+  try {
+    await supabase.from('coupons').delete().eq('id', id)
+    loadCoupons()
+  } catch (e) {
+    loadCoupons()
+  }
+}
+
+// ============================================
+// ✅ AUTO-LOAD BEIM START
+// ============================================
+window.addEventListener('DOMContentLoaded', function() {
+  // Lade ALLES automatisch
+  loadAllCustomers()  // ✅ KUNDEN AUTO-LOAD!
+  loadGlobalBonuses()
+  loadChallenges()
+  loadCoupons()
+  
+  // Setze Standard-Datumsfelder
   const nextWeek = new Date()
   nextWeek.setDate(nextWeek.getDate() + 7)
   document.getElementById('globalBonusExpiry').value = nextWeek.toISOString().split('T')[0]
   
-  // ✅ Setze IMMER aktuelles Datum als Start
   const today = new Date().toISOString().split('T')[0]
   document.getElementById('challengeStart').value = today
-  
-  // Setze 7 Tage später als Ende
-  const nextWeek2 = new Date()
-  nextWeek2.setDate(nextWeek2.getDate() + 7)
-  document.getElementById('challengeEnd').value = nextWeek2.toISOString().split('T')[0]
-  
-  // ✅ UPDATE: Bei jedem Reload das Start-Datum aktualisieren
-  setInterval(() => {
-    const currentStart = document.getElementById('challengeStart').value
-    const today = new Date().toISOString().split('T')[0]
-    // Nur updaten wenn User nichts geändert hat
-    if (!currentStart || currentStart < today) {
-      document.getElementById('challengeStart').value = today
-    }
-  }, 60000) // Alle 60 Sekunden prüfen
+  document.getElementById('challengeEnd').value = nextWeek.toISOString().split('T')[0]
 })
 
-console.log('✅ Kunden-Verwaltung geladen mit Challenge-Bonus!')
+console.log('✅ Kunden-Verwaltung NEU geladen - AUTO-LOAD aktiviert!')
 </script>
 
 </body>
