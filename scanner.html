@@ -496,18 +496,40 @@ async function verifyAnyCode() {
   showResult('result-code', '🔍 Suche Code...', 'info')
   
   try {
-    const { data: activation } = await supabase.from('activated_coupons').select('*, coupons(*), customers(name, phone, qr_id, points)').eq('unique_code', code).eq('is_used', false).single()
+    const { data: activation } = await supabase
+      .from('activated_coupons')
+      .select('*, coupons(*)')
+      .eq('unique_code', code)
+      .eq('is_used', false)
+      .single()
     
     if (activation && activation.coupons) {
+      // Lade Kundendaten separat
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('name, phone, qr_id, points')
+        .eq('id', activation.customer_id)
+        .single()
+      
+      activation.customers = customer
       await handleCouponCode(activation, code)
       return
     }
   } catch (e) {}
   
   try {
-    const { data, error } = await supabase.from('redeem_codes').select('*, customers(name, phone, qr_id, points)').eq('code', code).limit(1)
+    const { data, error } = await supabase.from('redeem_codes').select('*').eq('code', code).limit(1)
     if (error) throw error
     if (!data || data.length === 0) throw new Error('Code nicht gefunden')
+    
+    // Lade Kundendaten separat
+    const { data: customer } = await supabase
+      .from('customers')
+      .select('name, phone, qr_id, points')
+      .eq('id', data[0].customer_id)
+      .single()
+    
+    data[0].customers = customer
     await handleRedeemCode(data[0], code)
   } catch (e) {
     showResult('result-code', '❌ ' + e.message, 'error')
