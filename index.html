@@ -496,6 +496,11 @@ function showScreen(screenName) {
 
 function showResult(elementId, message, type) {
   const el = document.getElementById(elementId)
+  if (!message) {
+    el.className = ''
+    el.innerHTML = ''
+    return
+  }
   el.className = `result ${type}`
   el.innerHTML = message
 }
@@ -547,6 +552,7 @@ async function register() {
     
   } catch (e) {
     showResult('reg-result', '❌ Fehler: ' + e.message, 'error')
+    console.error('Registration error:', e)
   }
 }
 
@@ -576,31 +582,67 @@ async function login() {
     
   } catch (e) {
     showResult('login-result', '❌ Fehler: ' + e.message, 'error')
+    console.error('Login error:', e)
   }
 }
 
 async function loadCustomer(customer) {
-  currentCustomer = customer
-  await refreshCustomerData()
+  if (!customer || !customer.id) {
+    console.error('❌ Ungültiger Kunde übergeben')
+    logout()
+    return
+  }
   
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${customer.qr_id}`
-  document.getElementById('header-qr-mini').src = qrUrl
-  document.getElementById('modal-qr').src = qrUrl
-  document.getElementById('modal-qr-id').textContent = customer.qr_id
-  showScreen('app')
-  if (refreshInterval) clearInterval(refreshInterval)
-  refreshInterval = setInterval(refreshCustomerData, 5000)
-  loadPendingCodes()
-  loadBonuses()
-  loadCoupons()
-  loadChallenges()
+  currentCustomer = customer
+  
+  try {
+    await refreshCustomerData()
+    
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${customer.qr_id}`
+    document.getElementById('header-qr-mini').src = qrUrl
+    document.getElementById('modal-qr').src = qrUrl
+    document.getElementById('modal-qr-id').textContent = customer.qr_id
+    
+    showScreen('app')
+    
+    if (refreshInterval) clearInterval(refreshInterval)
+    refreshInterval = setInterval(refreshCustomerData, 5000)
+    
+    loadPendingCodes()
+    loadBonuses()
+    loadCoupons()
+    loadChallenges()
+    
+  } catch (e) {
+    console.error('❌ Fehler beim Laden des Kunden:', e)
+    alert('❌ Fehler beim Laden. Bitte neu anmelden.')
+    logout()
+  }
 }
 
 async function refreshCustomerData() {
-  if (!currentCustomer) return
+  if (!currentCustomer || !currentCustomer.id) {
+    console.error('❌ Kein currentCustomer oder ID fehlt')
+    return
+  }
+  
   try {
-    const { data, error } = await supabase.from('customers').select('*').eq('id', currentCustomer.id).single()
-    if (error) throw error
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('id', currentCustomer.id)
+      .single()
+    
+    if (error) {
+      console.error('❌ Supabase error:', error)
+      throw error
+    }
+    
+    if (!data) {
+      console.error('❌ Kunde nicht gefunden')
+      return
+    }
+    
     currentCustomer = data
     document.getElementById('app-points').textContent = data.points
     updateRewardButtons(data.points)
@@ -610,7 +652,15 @@ async function refreshCustomerData() {
     loadCoupons()
     loadPendingCodes()
     loadChallenges()
-  } catch (e) { console.error('Refresh error:', e) }
+    
+  } catch (e) { 
+    console.error('❌ Refresh error:', e.message, e)
+    // Bei Fehler: Interval stoppen
+    if (refreshInterval) {
+      clearInterval(refreshInterval)
+      refreshInterval = null
+    }
+  }
 }
 
 function openQRModal() {
@@ -684,7 +734,6 @@ async function loadBonuses() {
     console.log('🔄 Lade globale Bonusse...')
     const now = new Date().toISOString().split('T')[0]
     
-    // Lade aktive globale Bonusse
     const { data: bonuses, error } = await supabase
       .from('global_bonuses')
       .select('*')
@@ -704,7 +753,6 @@ async function loadBonuses() {
       return
     }
     
-    // Prüfe welche Bonusse der Kunde bereits aktiviert hat
     const { data: activatedBonuses } = await supabase
       .from('activated_global_bonuses')
       .select('global_bonus_id, is_used')
@@ -712,10 +760,9 @@ async function loadBonuses() {
     
     const activatedMap = new Map(activatedBonuses?.map(a => [a.global_bonus_id, a.is_used]) || [])
     
-    // ✅ Filtere verwendete Bonusse raus
     const availableBonuses = bonuses.filter(bonus => {
       const isUsed = activatedMap.get(bonus.id)
-      return !isUsed // Zeige nur nicht-verwendete Bonusse
+      return !isUsed
     })
     
     if (availableBonuses.length === 0) {
@@ -770,7 +817,6 @@ async function activateBonus(bonusId) {
   try {
     console.log('🚀 Aktiviere globalen Bonus:', bonusId)
     
-    // Prüfe ob bereits ein aktiver globaler Bonus existiert
     const { data: existingActive } = await supabase
       .from('activated_global_bonuses')
       .select('*')
@@ -782,7 +828,6 @@ async function activateBonus(bonusId) {
       return
     }
     
-    // Aktiviere den Bonus
     const { error } = await supabase
       .from('activated_global_bonuses')
       .insert({
@@ -954,12 +999,22 @@ window.onload = () => {
   if (stored) {
     try {
       const customer = JSON.parse(stored)
+      
+      if (!customer || !customer.id || !customer.qr_id) {
+        console.error('❌ Ungültige Kundendaten im localStorage')
+        localStorage.removeItem('customerData')
+        return
+      }
+      
       loadCustomer(customer)
-    } catch (e) { localStorage.removeItem('customerData') }
+    } catch (e) { 
+      console.error('❌ Fehler beim Laden:', e)
+      localStorage.removeItem('customerData') 
+    }
   }
 }
 
-console.log('✅ Kunden-App geladen!')
+console.log('✅ Kunden-App geladen - FIXED VERSION!')
 </script>
 </body>
 </html>
