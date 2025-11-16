@@ -498,12 +498,19 @@ async function verifyAnyCode() {
   try {
     const { data: activation } = await supabase
       .from('activated_coupons')
-      .select('*, coupons(*)')
+      .select('*')
       .eq('unique_code', code)
       .eq('is_used', false)
       .single()
     
-    if (activation && activation.coupons) {
+    if (activation) {
+      // Lade Coupon separat
+      const { data: coupon } = await supabase
+        .from('coupons')
+        .select('*')
+        .eq('id', activation.coupon_id)
+        .single()
+      
       // Lade Kundendaten separat
       const { data: customer } = await supabase
         .from('customers')
@@ -511,6 +518,7 @@ async function verifyAnyCode() {
         .eq('id', activation.customer_id)
         .single()
       
+      activation.coupons = coupon
       activation.customers = customer
       await handleCouponCode(activation, code)
       return
