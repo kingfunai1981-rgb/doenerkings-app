@@ -44,9 +44,6 @@ body {
   height: 120px;
   margin: 0 auto 16px;
   background: transparent;
-  border-radius: 50%;
-  padding: 0;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -346,6 +343,40 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
 
 .screen { display: none; }
 .screen.active { display: block; }
+
+/* 🎡 WHEEL BADGE */
+.wheel-unlock-badge {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.wheel-unlock-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.wheel-unlock-badge h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.wheel-unlock-badge p {
+  font-size: 14px;
+  opacity: 0.9;
+}
 </style>
 </head>
 <body>
@@ -437,6 +468,13 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
       </div>
     </div>
 
+    <div id="wheel-unlock-section" style="display: none; padding: 0 16px;">
+      <div class="wheel-unlock-badge" onclick="showScreen('wheel')">
+        <h3>🎡 GLÜCKSRAD VERFÜGBAR!</h3>
+        <p>Drehe jetzt und gewinne tolle Preise! 🎁</p>
+      </div>
+    </div>
+
     <div id="bonuses-section" style="display: none;">
       <div class="card">
         <h2>🎉 Meine Belohnungen</h2>
@@ -462,6 +500,13 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
       <div class="card">
         <h2>⏳ Wartet auf Bestätigung</h2>
         <div id="pending-list"></div>
+      </div>
+    </div>
+
+    <div id="wheel-codes-section" style="display: none;">
+      <div class="card">
+        <h2>🎡 Meine Glücksrad-Gewinne</h2>
+        <div id="wheel-codes-list"></div>
       </div>
     </div>
     
@@ -504,6 +549,52 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
       </div>
     </div>
   </div>
+
+  <!-- 🎡 WHEEL SCREEN -->
+  <div id="screen-wheel" class="screen">
+    <div class="header-image">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <button onclick="showScreen('app')" class="small secondary" style="margin: 0;">← Zurück</button>
+        <h1 style="margin: 0; font-size: 24px;">🎡 Glücksrad</h1>
+        <div style="width: 80px;"></div>
+      </div>
+    </div>
+
+    <div class="card" style="text-align: center;">
+      <h2>Drehe am Glücksrad!</h2>
+      <p class="subtitle">Gewinne tolle Preise! 🎁</p>
+
+      <div style="position: relative; width: 100%; max-width: 350px; margin: 20px auto;">
+        <div style="position: relative; width: 100%; padding-bottom: 100%;">
+          <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #E31E24; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); z-index: 10;"></div>
+          <canvas id="wheelCanvas" width="350" height="350" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; box-shadow: 0 4px 16px rgba(0,0,0,0.2); cursor: pointer;"></canvas>
+        </div>
+      </div>
+
+      <button id="spin-button" onclick="spinWheelCustomer()" style="margin-top: 20px;">🎰 Jetzt drehen!</button>
+      <div id="wheel-result" style="margin-top: 16px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 🎡 WHEEL RESULT MODAL -->
+<div id="wheel-result-modal" class="qr-modal">
+  <div class="qr-modal-content" onclick="event.stopPropagation()">
+    <div id="wheel-result-icon" style="font-size: 80px; margin-bottom: 20px;">🎉</div>
+    <div id="wheel-result-title" style="font-size: 28px; font-weight: 700; color: #E31E24; margin-bottom: 12px;">Gewonnen!</div>
+    <div id="wheel-result-prize" style="font-size: 22px; color: #333; margin-bottom: 24px;">100 Punkte</div>
+    
+    <div id="wheel-result-code-section" style="background: #fffbeb; border: 2px solid #f59e0b; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+      <div style="font-size: 14px; color: #92400e; margin-bottom: 12px;">Dein Gewinn-Code:</div>
+      <div id="wheel-result-code" style="font-size: 32px; font-weight: 700; color: #f59e0b; letter-spacing: 8px; font-family: monospace;">----</div>
+      <div style="font-size: 12px; color: #92400e; margin-top: 12px;">Gültig bis: <span id="wheel-result-expiry">--</span></div>
+      <div style="font-size: 13px; color: #92400e; margin-top: 8px; line-height: 1.5;">Zeige diesen Code beim nächsten Besuch!</div>
+    </div>
+
+    <img id="wheel-result-qr" style="width: 180px; height: 180px; margin: 0 auto 16px; border: 3px solid #E31E24; border-radius: 12px;" alt="QR Code">
+    
+    <button onclick="closeWheelResult()" style="width: 100%;">Weiter</button>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -513,6 +604,277 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 let currentCustomer = null
 let refreshInterval = null
+let wheelPrizes = []
+let wheelCanvas = null
+let wheelCtx = null
+let wheelRotation = 0
+let wheelSpinning = false
+let wheelUnlockData = null
+
+// ==========================================
+// CRYPTO HELPER
+// ==========================================
+
+function generateSecureCode() {
+  const array = new Uint32Array(1);
+  crypto.getRandomValues(array);
+  return (1000 + (array[0] % 9000)).toString();
+}
+
+function getSecureRandomFloat() {
+  const array = new Uint32Array(1);
+  crypto.getRandomValues(array);
+  return array[0] / (0xFFFFFFFF + 1);
+}
+
+// ==========================================
+// WHEEL FUNCTIONS
+// ==========================================
+
+async function hasUnusedWheelUnlock(customerId) {
+  try {
+    const { data, error } = await supabase.from('wheel_unlocks').select('*').eq('customer_id', customerId).eq('is_used', false).gt('expires_at', new Date().toISOString()).limit(1);
+    if (error) throw error;
+    return data && data.length > 0 ? data[0] : null;
+  } catch (e) {
+    console.error('❌ Check unlock error:', e);
+    return null;
+  }
+}
+
+async function loadWheelPrizes() {
+  try {
+    const { data, error } = await supabase.from('wheel_prizes').select('*').order('position');
+    if (error) throw error;
+    return data || [];
+  } catch (e) {
+    console.error('❌ Load prizes error:', e);
+    return [];
+  }
+}
+
+function drawWheel() {
+  if (!wheelCtx || !wheelPrizes || wheelPrizes.length === 0) return;
+  
+  const centerX = wheelCanvas.width / 2;
+  const centerY = wheelCanvas.height / 2;
+  const radius = wheelCanvas.width / 2 - 5;
+
+  wheelCtx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
+  wheelCtx.save();
+  wheelCtx.translate(centerX, centerY);
+  wheelCtx.rotate(wheelRotation);
+
+  const totalSegments = wheelPrizes.length;
+  const anglePerSegment = (2 * Math.PI) / totalSegments;
+
+  wheelPrizes.forEach((prize, i) => {
+    const startAngle = i * anglePerSegment;
+    const endAngle = startAngle + anglePerSegment;
+
+    wheelCtx.beginPath();
+    wheelCtx.moveTo(0, 0);
+    wheelCtx.arc(0, 0, radius, startAngle, endAngle);
+    wheelCtx.closePath();
+    wheelCtx.fillStyle = prize.color;
+    wheelCtx.fill();
+
+    wheelCtx.save();
+    wheelCtx.rotate(startAngle + anglePerSegment / 2);
+    wheelCtx.textAlign = 'center';
+    wheelCtx.textBaseline = 'middle';
+    wheelCtx.fillStyle = prize.text_color || '#FFFFFF';
+    
+    const words = prize.label.split(' ');
+    if (words.length === 1) {
+      wheelCtx.font = 'bold 14px Flame, Arial';
+      wheelCtx.fillText(prize.label, radius * 0.7, 0);
+    } else {
+      wheelCtx.font = 'bold 12px Flame, Arial';
+      wheelCtx.fillText(words[0], radius * 0.7, -6);
+      wheelCtx.fillText(words[1], radius * 0.7, 6);
+    }
+    wheelCtx.restore();
+  });
+
+  // Logo in center
+  const centerRadius = 48;
+  const logoRadius = 47.8;
+  
+  wheelCtx.beginPath();
+  wheelCtx.arc(0, 0, centerRadius, 0, 2 * Math.PI);
+  wheelCtx.fillStyle = 'white';
+  wheelCtx.fill();
+
+  const logoImg = document.getElementById('header-qr-mini');
+  if (logoImg && logoImg.complete) {
+    wheelCtx.save();
+    wheelCtx.beginPath();
+    wheelCtx.arc(0, 0, logoRadius, 0, 2 * Math.PI);
+    wheelCtx.clip();
+    wheelCtx.drawImage(logoImg, -logoRadius, -logoRadius, logoRadius * 2, logoRadius * 2);
+    wheelCtx.restore();
+  }
+
+  wheelCtx.restore();
+}
+
+function getRandomPrize() {
+  const randomIndex = Math.floor(getSecureRandomFloat() * wheelPrizes.length);
+  return wheelPrizes[randomIndex];
+}
+
+async function spinWheelCustomer() {
+  if (wheelSpinning || !wheelUnlockData) return;
+  
+  wheelSpinning = true;
+  document.getElementById('spin-button').disabled = true;
+  
+  const winningPrize = getRandomPrize();
+  const winningIndex = wheelPrizes.indexOf(winningPrize);
+  const anglePerSegment = (2 * Math.PI) / wheelPrizes.length;
+  
+  const randomOffset = ((getSecureRandomFloat() - 0.5) * 0.6) * anglePerSegment;
+  const targetAngle = winningIndex * anglePerSegment + anglePerSegment / 2 + randomOffset;
+  const spins = 5 + Math.floor(getSecureRandomFloat() * 3);
+  const totalRotation = spins * 2 * Math.PI + (2 * Math.PI - targetAngle);
+
+  const startRotation = wheelRotation;
+  const startTime = Date.now();
+  const duration = 4000 + Math.floor(getSecureRandomFloat() * 1000);
+
+  function animate() {
+    const elapsed = Date.now() - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const easeOut = 1 - Math.pow(1 - progress, 4);
+    
+    wheelRotation = startRotation + (easeOut * totalRotation);
+    drawWheel();
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      wheelSpinning = false;
+      showWheelResult(winningPrize);
+    }
+  }
+
+  animate();
+}
+
+async function showWheelResult(prize) {
+  try {
+    // Save spin with code
+    let code;
+    let attempts = 0;
+    
+    while (attempts < 10) {
+      code = generateSecureCode();
+      const { data } = await supabase.from('wheel_spins').select('id').eq('prize_code', code).limit(1);
+      if (!data || data.length === 0) break;
+      attempts++;
+    }
+    
+    if (!code) throw new Error('Code generation failed');
+    
+    const { data: spin, error } = await supabase.from('wheel_spins').insert({
+      customer_id: currentCustomer.id,
+      unlock_id: wheelUnlockData.id,
+      prize_label: prize.label,
+      prize_type: prize.prize_type,
+      prize_value: prize.prize_value,
+      prize_code: code,
+      is_redeemed: false,
+      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+    }).select().single();
+    
+    if (error) throw error;
+    
+    // Mark unlock as used
+    await supabase.from('wheel_unlocks').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', wheelUnlockData.id);
+    
+    // Show result modal
+    const modal = document.getElementById('wheel-result-modal');
+    const icon = document.getElementById('wheel-result-icon');
+    const title = document.getElementById('wheel-result-title');
+    const prizeText = document.getElementById('wheel-result-prize');
+    const codeText = document.getElementById('wheel-result-code');
+    const expiryText = document.getElementById('wheel-result-expiry');
+    const qrImg = document.getElementById('wheel-result-qr');
+    
+    if (prize.prize_type === 'points') icon.textContent = '⭐';
+    else if (prize.label.includes('DÖNER')) icon.textContent = '🍔';
+    else if (prize.label.includes('AYRAN')) icon.textContent = '🥤';
+    else if (prize.label.includes('COLA')) icon.textContent = '🥤';
+    else if (prize.label.includes('POMMES')) icon.textContent = '🍟';
+    else icon.textContent = '🎁';
+    
+    title.textContent = 'Glückwunsch! 🎉';
+    prizeText.textContent = prize.label;
+    codeText.textContent = code;
+    
+    const expiry = new Date(spin.expires_at);
+    expiryText.textContent = expiry.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${code}`;
+    
+    modal.classList.add('active');
+    
+    // Refresh data
+    wheelUnlockData = null;
+    await refreshCustomerData();
+    
+  } catch (e) {
+    console.error('❌ Show result error:', e);
+    alert('❌ Fehler beim Speichern des Gewinns. Bitte kontaktiere uns.');
+  }
+}
+
+function closeWheelResult() {
+  document.getElementById('wheel-result-modal').classList.remove('active');
+  showScreen('app');
+}
+
+async function loadWheelCodes() {
+  if (!currentCustomer) return;
+  try {
+    const { data, error } = await supabase.from('wheel_spins').select('*').eq('customer_id', currentCustomer.id).eq('is_redeemed', false).order('created_at', { ascending: false });
+    if (error) throw error;
+    
+    const section = document.getElementById('wheel-codes-section');
+    const list = document.getElementById('wheel-codes-list');
+    
+    if (!data || data.length === 0) {
+      section.style.display = 'none';
+      return;
+    }
+    
+    section.style.display = 'block';
+    list.innerHTML = data.map(item => {
+      const expiry = new Date(item.expires_at);
+      const now = new Date();
+      const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+      const isExpired = expiry < now;
+      
+      let expiryText = '';
+      if (isExpired) {
+        expiryText = '<span style="color:#dc2626;font-weight:600;">⚠️ Abgelaufen</span>';
+      } else if (daysLeft <= 3) {
+        expiryText = `<span style="color:#dc2626;font-weight:600;">⏰ Läuft in ${daysLeft} ${daysLeft === 1 ? 'Tag' : 'Tagen'} ab</span>`;
+      } else {
+        expiryText = `<span style="color:#92400e;">Gültig bis: ${expiry.toLocaleDateString('de-DE')}</span>`;
+      }
+      
+      return `<div class="pending-code"><h3>🎁 ${item.prize_label}</h3><div class="code">${item.prize_code}</div><div class="code-info">${expiryText}<br>Zeige diesen Code beim nächsten Besuch!</div></div>`;
+    }).join('');
+  } catch (e) {
+    console.error('❌ Load wheel codes error:', e);
+  }
+}
+
+// ==========================================
+// ORIGINAL FUNCTIONS (unchanged)
+// ==========================================
 
 function normalizePhone(phone) {
   let normalized = phone.replace(/[\s\-\(\)]/g, '')
@@ -526,6 +888,18 @@ function normalizePhone(phone) {
 function showScreen(screenName) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
   document.getElementById(`screen-${screenName}`).classList.add('active')
+  
+  if (screenName === 'wheel') {
+    setTimeout(() => {
+      wheelCanvas = document.getElementById('wheelCanvas');
+      if (wheelCanvas) {
+        wheelCtx = wheelCanvas.getContext('2d');
+        const anglePerSegment = (2 * Math.PI) / 18;
+        wheelRotation = -anglePerSegment / 2;
+        drawWheel();
+      }
+    }, 100);
+  }
 }
 
 function showResult(elementId, message, type) {
@@ -533,17 +907,6 @@ function showResult(elementId, message, type) {
   if (!message) { el.className = ''; el.innerHTML = ''; return }
   el.className = `result ${type}`
   el.innerHTML = message
-}
-
-async function generateUniqueCode(table, column) {
-  for (let attempt = 0; attempt < 10; attempt++) {
-    const code = Math.floor(1000 + Math.random() * 9000).toString()
-    const { data, error } = await supabase.from(table).select(column).eq(column, code).limit(1)
-    if (error) { console.error('Code check error:', error); continue }
-    if (!data || data.length === 0) return code
-    console.log(`⚠️ Code ${code} existiert bereits, versuche neuen...`)
-  }
-  return Date.now().toString().slice(-4)
 }
 
 async function register() {
@@ -564,7 +927,7 @@ async function register() {
     
     if (existing && existing.length > 0) { showResult('reg-result', '❌ Diese Nummer ist bereits registriert!', 'error'); return }
     
-    const qrId = Math.floor(1000 + Math.random() * 9000).toString()
+    const qrId = generateSecureCode()
     
     const { data, error } = await supabase.from('customers').insert({ qr_id: qrId, name: name, phone: phone, points: 0 }).select().single()
     
@@ -628,6 +991,10 @@ async function loadCustomer(customer) {
     loadBonuses()
     loadCoupons()
     loadChallenges()
+    loadWheelCodes()
+    
+    // Load wheel prizes
+    wheelPrizes = await loadWheelPrizes();
     
   } catch (e) {
     console.error('❌ Fehler beim Laden des Kunden:', e)
@@ -663,6 +1030,17 @@ async function refreshCustomerData() {
     loadCoupons()
     loadPendingCodes()
     loadChallenges()
+    loadWheelCodes()
+    
+    // Check wheel unlock
+    wheelUnlockData = await hasUnusedWheelUnlock(currentCustomer.id);
+    const wheelSection = document.getElementById('wheel-unlock-section');
+    if (wheelUnlockData) {
+      wheelSection.style.display = 'block';
+    } else {
+      wheelSection.style.display = 'none';
+    }
+    
   } catch (e) { 
     console.error('❌ Refresh error:', e.message, e)
     if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null }
@@ -694,7 +1072,7 @@ function updateRewardButtons(points) {
 async function redeem(rewardName, cost) {
   if (!currentCustomer || currentCustomer.points < cost) return
   try {
-    const code = await generateUniqueCode('redeem_codes', 'code')
+    const code = generateSecureCode()
     const expires = new Date(Date.now() + 24*60*60*1000)
     const { error } = await supabase.from('redeem_codes').insert({ code, customer_id: currentCustomer.id, reward_name: rewardName, points_cost: cost, valid_until: expires.toISOString(), used: false })
     if (error) { console.error('❌ Redeem error:', error); alert('❌ Fehler beim Erstellen des Codes. Bitte nochmal versuchen.'); return }
@@ -836,7 +1214,7 @@ async function activateCoupon(couponId) {
     const id = parseInt(couponId)
     const { data: existing } = await supabase.from('activated_coupons').select('*').eq('customer_id', currentCustomer.id).eq('coupon_id', id).eq('is_used', false)
     if (existing && existing.length > 0) { loadCoupons(); return }
-    const uniqueCode = await generateUniqueCode('activated_coupons', 'unique_code')
+    const uniqueCode = generateSecureCode()
     const { error } = await supabase.from('activated_coupons').insert({ customer_id: currentCustomer.id, coupon_id: id, unique_code: uniqueCode, activated_at: new Date().toISOString(), is_used: false })
     if (error) { console.error('❌ Activate coupon error:', error); alert('❌ Fehler beim Aktivieren. Bitte nochmal versuchen.'); return }
     loadCoupons()
@@ -865,7 +1243,8 @@ window.onload = () => {
   }
 }
 
-console.log('✅ Döner Boxx Kunden-App geladen!')
+console.log('✅ Döner Boxx Kunden-App geladen (mit Wheel Integration)')
+console.log('🔒 Verwendet crypto.getRandomValues() für sichere Zufallszahlen')
 </script>
 </body>
 </html>
