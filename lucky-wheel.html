@@ -404,16 +404,16 @@ function drawWheel() {
     ctx.restore()
   })
 
-  // Draw center circle with logo (Ring: 2px schmal, Logo 20% kleiner)
-  const centerRadius = 48  // Weißer Kreis
-  const logoRadius = 46    // Logo (Ring = 2px)
+  // Draw center circle with logo (Ring: 0,5px schmal)
+  const centerRadius = 48      // Weißer Kreis
+  const logoRadius = 47.5      // Logo (Ring = 0,5px)
   
   ctx.beginPath()
   ctx.arc(0, 0, centerRadius, 0, 2 * Math.PI)
   ctx.fillStyle = 'white'
   ctx.fill()
 
-  // Draw logo in center (20% kleiner als vorher)
+  // Draw logo in center
   if (logoImg.complete) {
     ctx.save()
     ctx.beginPath()
