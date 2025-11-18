@@ -111,24 +111,18 @@ canvas {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   background: white;
-  border: 4px solid #E31E24;
+  border: 5px solid #333;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  z-index: 10;
-  cursor: pointer;
-  transition: all 0.2s;
-  overflow: hidden;
-  padding: 8px;
-}
-
-.wheel-center:hover {
-  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 5;
+  pointer-events: none;
+  padding: 12px;
 }
 
 .wheel-center img {
@@ -295,9 +289,6 @@ canvas {
     <div class="wheel-wrapper">
       <div class="wheel-pointer"></div>
       <canvas id="wheel" width="400" height="400"></canvas>
-      <div class="wheel-center" onclick="spinWheel()">
-        <img src="/logo-round.png" alt="SPIN">
-      </div>
     </div>
   </div>
 
@@ -341,17 +332,30 @@ let rotation = 0
 let isSpinning = false
 let testCustomerId = 1
 
-// Wheel-Segmente (Preise)
+// Wheel-Segmente (18 Felder wie auf dem echten Rad)
 const prizes = [
-  { label: '50 Punkte', color: '#FF6B6B', chance: 30, icon: '⭐', type: 'points', value: 50 },
-  { label: '100 Punkte', color: '#4ECDC4', chance: 20, icon: '💎', type: 'points', value: 100 },
-  { label: 'Leider verloren', color: '#95A5A6', chance: 15, icon: '❌', type: 'nothing', value: 0 },
-  { label: '250 Punkte', color: '#F9A825', chance: 15, icon: '🎁', type: 'points', value: 250 },
-  { label: 'Ayran gratis', color: '#9B59B6', chance: 10, icon: '🥤', type: 'reward', value: 'Ayran (0.25 l)' },
-  { label: '20% Rabatt', color: '#E74C3C', chance: 5, icon: '🎟️', type: 'coupon', value: 20 },
-  { label: 'Doppelte Punkte', color: '#3498DB', chance: 4, icon: '🔥', type: 'bonus', value: 'double_points' },
-  { label: '500 JACKPOT!', color: '#F39C12', chance: 1, icon: '💰', type: 'points', value: 500 }
+  { label: 'AYRAN', color: '#000000', textColor: '#FFFFFF', type: 'reward', value: 'Ayran (0.25 l)' },
+  { label: '50 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },
+  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', type: 'reward', value: 'Döner' },
+  { label: '100 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },
+  { label: 'POMMES', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Pommes' },
+  { label: '75 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },
+  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Ayran (0.25 l)' },
+  { label: '150 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 150 },
+  { label: 'COLA', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Cola (0.33 l)' },
+  { label: '200 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 200 },
+  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', type: 'reward', value: 'Döner' },
+  { label: '50 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },
+  { label: 'AYRAN', color: '#000000', textColor: '#FFFFFF', type: 'reward', value: 'Ayran (0.25 l)' },
+  { label: '100 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },
+  { label: 'POMMES', color: '#000000', textColor: '#FFFFFF', type: 'reward', value: 'Pommes' },
+  { label: '75 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 75 },
+  { label: 'COLA', color: '#000000', textColor: '#FFFFFF', type: 'reward', value: 'Cola (0.33 l)' },
+  { label: '250 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 250 }
 ]
+
+const logoImg = new Image()
+logoImg.src = '/logo-round.png'
 
 function drawWheel() {
   const centerX = canvas.width / 2
@@ -377,39 +381,59 @@ function drawWheel() {
     ctx.closePath()
     ctx.fillStyle = prize.color
     ctx.fill()
-    ctx.strokeStyle = '#fff'
-    ctx.lineWidth = 3
+    ctx.strokeStyle = '#333'
+    ctx.lineWidth = 2
     ctx.stroke()
 
-    // Draw text
+    // Draw text (rotated)
     ctx.save()
     ctx.rotate(startAngle + anglePerSegment / 2)
     ctx.textAlign = 'center'
-    ctx.fillStyle = '#fff'
-    ctx.font = 'bold 20px Flame, Arial'
-    ctx.fillText(prize.icon, radius * 0.7, 8)
-    ctx.font = 'bold 14px Flame, Arial'
-    ctx.fillText(prize.label, radius * 0.7, 28)
+    ctx.textBaseline = 'middle'
+    ctx.fillStyle = prize.textColor
+    
+    // Split text into words for better layout
+    const words = prize.label.split(' ')
+    if (words.length === 1) {
+      ctx.font = 'bold 16px Flame, Arial'
+      ctx.fillText(prize.label, radius * 0.65, 0)
+    } else {
+      ctx.font = 'bold 14px Flame, Arial'
+      ctx.fillText(words[0], radius * 0.65, -8)
+      ctx.fillText(words[1], radius * 0.65, 8)
+    }
+    
     ctx.restore()
   })
+
+  // Draw center circle with logo (rotates with wheel)
+  ctx.beginPath()
+  ctx.arc(0, 0, 50, 0, 2 * Math.PI)
+  ctx.fillStyle = 'white'
+  ctx.fill()
+  ctx.strokeStyle = '#333'
+  ctx.lineWidth = 5
+  ctx.stroke()
+
+  // Draw logo in center
+  if (logoImg.complete) {
+    ctx.save()
+    ctx.beginPath()
+    ctx.arc(0, 0, 40, 0, 2 * Math.PI)
+    ctx.clip()
+    ctx.drawImage(logoImg, -40, -40, 80, 80)
+    ctx.restore()
+  }
 
   ctx.restore()
 }
 
 function getRandomPrize() {
-  // Crypto-secure random number
+  // Crypto-secure random number (alle Felder gleich wahrscheinlich)
   const array = new Uint32Array(1)
   crypto.getRandomValues(array)
-  const random = array[0] / (0xFFFFFFFF + 1) * 100
-
-  let cumulative = 0
-  for (const prize of prizes) {
-    cumulative += prize.chance
-    if (random <= cumulative) {
-      return prize
-    }
-  }
-  return prizes[0]
+  const randomIndex = Math.floor((array[0] / (0xFFFFFFFF + 1)) * prizes.length)
+  return prizes[randomIndex]
 }
 
 async function canSpin() {
@@ -487,15 +511,21 @@ function showResult(prize) {
   const title = document.getElementById('resultTitle')
   const prizeText = document.getElementById('resultPrize')
 
-  if (prize.type === 'nothing') {
-    icon.textContent = '😢'
-    title.textContent = 'Leider verloren!'
-    prizeText.textContent = 'Beim nächsten Mal klappt es!'
+  // Icon basierend auf Preis-Typ
+  if (prize.type === 'points') {
+    icon.textContent = '⭐'
+  } else if (prize.type === 'reward') {
+    if (prize.label.includes('DÖNER')) icon.textContent = '🍔'
+    else if (prize.label.includes('AYRAN')) icon.textContent = '🥤'
+    else if (prize.label.includes('COLA')) icon.textContent = '🥤'
+    else if (prize.label.includes('POMMES')) icon.textContent = '🍟'
+    else icon.textContent = '🎁'
   } else {
-    icon.textContent = prize.icon
-    title.textContent = 'Glückwunsch! 🎉'
-    prizeText.textContent = prize.label
+    icon.textContent = '🎉'
   }
+
+  title.textContent = 'Glückwunsch! 🎉'
+  prizeText.textContent = prize.label
 
   modal.classList.add('active')
 }
@@ -555,16 +585,19 @@ async function resetSpin() {
 }
 
 function loadTestPrizes() {
-  alert('🎁 Test-Preise sind bereits geladen:\n\n' + 
-    prizes.map(p => `${p.icon} ${p.label} (${p.chance}%)`).join('\n'))
+  const prizeList = prizes.map(p => `${p.label} (${p.color === '#E31E24' ? 'ROT' : p.color === '#000000' ? 'SCHWARZ' : 'WEISS'})`).join('\n')
+  alert('🎁 18 Felder geladen:\n\n' + prizeList + '\n\n2x DÖNER in ROT!')
 }
 
 // Initialize
+logoImg.onload = () => {
+  drawWheel()
+}
 drawWheel()
 updateSpinInfo()
 
 console.log('✅ Lucky Wheel geladen!')
-console.log('🎡 Preise:', prizes)
+console.log('🎡 18 Felder:', prizes.map(p => p.label))
 </script>
 
 </body>
