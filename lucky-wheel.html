@@ -272,7 +272,7 @@ canvas {
   <div class="test-controls">
     <h3>🛠️ Test-Steuerung</h3>
     <input type="number" id="testCustomerId" placeholder="Kunden-ID" value="1">
-    <button onclick="resetSpin()">🔄 Spin zurücksetzen</button>
+    <button onclick="resetSpin()">🔄 Spin zurückgesetzt</button>
     <button onclick="loadTestPrizes()">📋 Alle Preise anzeigen</button>
   </div>
 </div>
@@ -297,11 +297,11 @@ const ctx = canvas.getContext('2d')
 
 const anglePerSegment = (2 * Math.PI) / 18
 
-// 🔴 RICHTIG: Zeiger zeigt nach OBEN (12 Uhr Position = 0° nach mathematischer Rotation)
-// Canvas dreht im Uhrzeigersinn, aber 0° ist RECHTS, also brauchen wir -90° (= 270° = 3π/2)
-// ABER: Wir wollen dass das ERSTE Feld (DÖNER) GENAU unter dem Zeiger ist
-// Das bedeutet: Wir rotieren das Rad so, dass die MITTE vom ersten Feld nach OBEN zeigt
-let rotation = -Math.PI / 2  // -90° = Zeiger nach oben
+// 🔴 FIX: Startposition = DÖNER-Feld (rot) GENAU in Mitte oben
+// Zeiger zeigt nach oben bei -90° im Canvas-Koordinatensystem
+// Das erste Feld (Index 0 = DÖNER) soll genau unter dem Zeiger sein
+// Das bedeutet: rotation = -90° = -π/2
+let rotation = -Math.PI / 2
 let isSpinning = false
 let testCustomerId = 1
 
@@ -443,13 +443,16 @@ async function spinWheel() {
   crypto.getRandomValues(array)
   const randomOffset = ((array[0] / 0xFFFFFFFF) - 0.5) * 0.6 * anglePerSegment
   
-  // 🔴 KORREKTE BERECHNUNG:
-  // Zeiger ist bei -90° (oben)
-  // Gewonnenes Feld soll unter dem Zeiger landen
-  // Das bedeutet: Das Feld muss bei -90° sein
-  const targetAngle = -(winningIndex * anglePerSegment + anglePerSegment / 2 + randomOffset)
-  const spins = 5 + Math.floor((array[0] / 0xFFFFFFFF) * 3)
-  const totalRotation = spins * 2 * Math.PI + (targetAngle - rotation)
+  // 🔴 FIX: VOLLE Drehungen (5-7 Runden) + Ziel
+  const spins = 5 + Math.floor((array[0] / 0xFFFFFFFF) * 3)  // 5-7 volle Drehungen
+  const baseRotation = spins * 2 * Math.PI  // Volle Umdrehungen
+  
+  // Zeiger ist bei -90° (oben), gewonnenes Feld soll dort landen
+  // Berechne wie viel wir drehen müssen, damit das gewonnene Feld bei -90° ist
+  const targetFieldAngle = winningIndex * anglePerSegment + anglePerSegment / 2 + randomOffset
+  const targetRotation = -targetFieldAngle - Math.PI / 2
+  
+  const totalRotation = baseRotation + (targetRotation - rotation)
 
   const startRotation = rotation
   const startTime = Date.now()
@@ -468,24 +471,20 @@ async function spinWheel() {
     } else {
       isSpinning = false
       
-      // 🔴 WICHTIG: Berechne welches Feld WIRKLICH unter dem Zeiger ist
-      // Zeiger ist bei -90° (= 270° = 3π/2)
-      // Normalisiere Rotation auf 0-2π
+      // Ermittle welches Feld unter dem Zeiger ist
       let normalizedRotation = rotation % (2 * Math.PI)
       if (normalizedRotation < 0) normalizedRotation += 2 * Math.PI
       
-      // Zeiger ist bei 270° (= -90° + 360°)
-      // Welches Feld ist bei dieser Position?
-      const pointerAngle = 3 * Math.PI / 2  // 270° = -90°
+      const pointerAngle = 3 * Math.PI / 2
       let relativeAngle = pointerAngle - normalizedRotation
       if (relativeAngle < 0) relativeAngle += 2 * Math.PI
       
       const fieldIndex = Math.floor(relativeAngle / anglePerSegment) % prizes.length
       const actualPrize = prizes[fieldIndex]
       
-      console.log('🎯 Sollte gewinnen:', winningPrize.label, '(Index:', winningIndex, ')')
-      console.log('🎯 Hat gewonnen:', actualPrize.label, '(Index:', fieldIndex, ')')
-      console.log('📐 Rotation:', normalizedRotation.toFixed(3), 'Relative:', relativeAngle.toFixed(3))
+      console.log('🎯 Geplant:', winningPrize.label, 'Index:', winningIndex)
+      console.log('🎯 Gewonnen:', actualPrize.label, 'Index:', fieldIndex)
+      console.log('📐 Drehungen:', (totalRotation / (2 * Math.PI)).toFixed(1))
       
       showResult(actualPrize)
       saveSpin(actualPrize)
@@ -515,8 +514,6 @@ function showResult(prize) {
 
   title.textContent = 'Glückwunsch! 🎉'
   prizeText.textContent = prize.label
-  
-  console.log('✅ POPUP ZEIGT:', prize.label)
 
   modal.classList.add('active')
 }
@@ -585,10 +582,11 @@ drawWheel()
 updateSpinInfo()
 canvas.addEventListener('click', spinWheel)
 
-console.log('✅ ENDLICH RICHTIG!')
-console.log('🔴 Zeiger zeigt EXAKT in die Mitte von DÖNER (rot)')
-console.log('🔧 Logo bleibt WAAGRECHT')
-console.log('🎯 Popup zeigt das KORREKTE Feld wo der Zeiger stoppt')
+console.log('✅ Lucky Wheel FERTIG!')
+console.log('🔴 Zeiger zeigt EXAKT in Mitte von DÖNER')
+console.log('🔧 Logo bleibt waagrecht')
+console.log('🎯 5-7 volle Drehungen')
+console.log('✅ Korrekter Gewinn im Popup')
 </script>
 
 </body>
