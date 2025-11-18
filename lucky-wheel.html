@@ -330,8 +330,9 @@ const canvas = document.getElementById('wheel')
 const ctx = canvas.getContext('2d')
 const anglePerSegment = (2 * Math.PI) / 18
 
-// 🔴 FIX: Startposition auf DÖNER (rotes Feld oben)
-let rotation = Math.PI / 2  // 90° = erstes Feld (DÖNER) oben
+// 🔴 FIX 1: Startposition = DÖNER-Feld (rot) GENAU in der Mitte oben
+// Wir starten bei 0° und das erste Feld (DÖNER) ist zentriert beim Zeiger
+let rotation = 0  
 let isSpinning = false
 let testCustomerId = 1
 
@@ -374,7 +375,8 @@ function drawWheel() {
   const anglePerSegment = (2 * Math.PI) / totalSegments
 
   prizes.forEach((prize, i) => {
-    const startAngle = i * anglePerSegment
+    // 🔴 FIX: Offset damit erstes Feld (DÖNER) genau oben zentriert ist
+    const startAngle = i * anglePerSegment - anglePerSegment / 2
     const endAngle = startAngle + anglePerSegment
 
     // Draw segment (ohne Striche)
@@ -406,18 +408,19 @@ function drawWheel() {
     ctx.restore()
   })
 
-  // Draw center circle with logo (Ring: 0.2px schmal)
-  const centerRadius = 48      // Weißer Kreis
-  const logoRadius = 47.8      // Logo (Ring = 0.2px)
+  // Draw center circle with logo
+  const centerRadius = 48
+  const logoRadius = 47.8
   
   ctx.beginPath()
   ctx.arc(0, 0, centerRadius, 0, 2 * Math.PI)
   ctx.fillStyle = 'white'
   ctx.fill()
 
-  // Draw logo in center
+  // 🔴 FIX 2: Logo waagrecht (nicht rotiert)
   if (logoImg.complete) {
     ctx.save()
+    // KEIN rotate() hier - Logo bleibt horizontal
     ctx.beginPath()
     ctx.arc(0, 0, logoRadius, 0, 2 * Math.PI)
     ctx.clip()
@@ -480,11 +483,13 @@ async function spinWheel() {
   crypto.getRandomValues(array)
   const randomOffset = ((array[0] / 0xFFFFFFFF) - 0.5) * 0.6 * anglePerSegment
   
-  // 🔴 FIX: Calculate target rotation mit korrektem Offset für Startposition bei DÖNER
-  const offsetToTop = Math.PI / 2  // 90° offset weil wir bei DÖNER starten
-  const targetAngle = winningIndex * anglePerSegment + anglePerSegment / 2 + randomOffset
+  // 🔴 FIX 3: Korrekte Berechnung damit der Zeiger auf dem gewonnenen Feld stoppt
+  // Der Zeiger zeigt nach oben (0°), das gewonnene Feld soll dort stoppen
+  const targetAngle = winningIndex * anglePerSegment + randomOffset
   const spins = 5 + Math.floor((array[0] / 0xFFFFFFFF) * 3) // 5-7 spins random
-  const totalRotation = spins * 2 * Math.PI + (2 * Math.PI - targetAngle) + offsetToTop
+  
+  // Wir rotieren das Rad so, dass das gewonnene Feld unter dem Zeiger landet
+  const totalRotation = spins * 2 * Math.PI + (2 * Math.PI - targetAngle)
 
   const startRotation = rotation
   const startTime = Date.now()
@@ -504,8 +509,19 @@ async function spinWheel() {
       requestAnimationFrame(animate)
     } else {
       isSpinning = false
-      showResult(winningPrize)
-      saveSpin(winningPrize)
+      
+      // 🔴 FIX 3: Ermittle welches Feld TATSÄCHLICH unter dem Zeiger ist
+      const normalizedRotation = rotation % (2 * Math.PI)
+      const adjustedRotation = (2 * Math.PI - normalizedRotation) % (2 * Math.PI)
+      const actualWinningIndex = Math.floor(adjustedRotation / anglePerSegment) % prizes.length
+      const actualWinningPrize = prizes[actualWinningIndex]
+      
+      console.log('🎯 Geplanter Gewinn:', winningPrize.label)
+      console.log('🎯 Tatsächlicher Gewinn:', actualWinningPrize.label)
+      console.log('🎯 Index:', actualWinningIndex, 'Rotation:', normalizedRotation)
+      
+      showResult(actualWinningPrize)
+      saveSpin(actualWinningPrize)
     }
   }
 
@@ -532,12 +548,10 @@ function showResult(prize) {
   }
 
   title.textContent = 'Glückwunsch! 🎉'
-  
-  // 🔴 FIX: Zeige den richtigen Gewinn aus dem prize-Objekt
   prizeText.textContent = prize.label
   
   // Debug-Ausgabe in Konsole
-  console.log('🎯 Gewonnen:', prize.label, '-', prize.type, '-', prize.value)
+  console.log('✅ POPUP zeigt:', prize.label, '-', prize.type, '-', prize.value)
 
   modal.classList.add('active')
 }
@@ -611,11 +625,11 @@ updateSpinInfo()
 // Canvas Click-Event
 canvas.addEventListener('click', spinWheel)
 
-console.log('✅ Lucky Wheel geladen!')
-console.log('🔴 Startposition: DÖNER (rotes Feld oben)')
+console.log('✅ Lucky Wheel geladen - ALLE FIXES AKTIV!')
+console.log('🔴 FIX 1: Zeiger startet GENAU in Mitte von DÖNER (rot)')
+console.log('🔧 FIX 2: Logo bleibt WAAGRECHT (nicht rotiert)')
+console.log('🎯 FIX 3: Popup zeigt KORREKTES Feld wo Zeiger stoppt')
 console.log('🎡 18 Felder:', prizes.map(p => p.label))
-console.log('🔒 Verwendet crypto.getRandomValues() für echte Zufälligkeit')
-console.log('✅ Popup zeigt jetzt korrekt den gewonnenen Preis')
 </script>
 
 </body>
