@@ -329,7 +329,8 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 const canvas = document.getElementById('wheel')
 const ctx = canvas.getContext('2d')
-let rotation = 0
+const anglePerSegment = (2 * Math.PI) / 18
+let rotation = -anglePerSegment / 2  // Start mit erstem Feld zentriert oben
 let isSpinning = false
 let testCustomerId = 1
 
@@ -473,11 +474,13 @@ async function spinWheel() {
   const winningIndex = prizes.indexOf(winningPrize)
   const anglePerSegment = (2 * Math.PI) / prizes.length
   
-  // Calculate target rotation (pointer at top)
+  // Calculate target rotation (pointer at top, centered on winning segment)
+  // Subtract half segment to center the field under pointer
   const targetAngle = winningIndex * anglePerSegment + anglePerSegment / 2
   const spins = 5 // Number of full rotations
   const totalRotation = spins * 2 * Math.PI + (2 * Math.PI - targetAngle)
 
+  const startRotation = rotation
   const startTime = Date.now()
   const duration = 4000 // 4 seconds
 
@@ -488,7 +491,7 @@ async function spinWheel() {
     // Easing function (ease out cubic)
     const easeOut = 1 - Math.pow(1 - progress, 3)
     
-    rotation = easeOut * totalRotation
+    rotation = startRotation + (easeOut * totalRotation)
     drawWheel()
 
     if (progress < 1) {
