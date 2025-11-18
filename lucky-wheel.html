@@ -272,7 +272,7 @@ canvas {
   <div class="test-controls">
     <h3>🛠️ Test-Steuerung</h3>
     <input type="number" id="testCustomerId" placeholder="Kunden-ID" value="1">
-    <button onclick="resetSpin()">🔄 Spin zurückgesetzt</button>
+    <button onclick="resetSpin()">🔄 Spin zurücksetzen</button>
     <button onclick="loadTestPrizes()">📋 Alle Preise anzeigen</button>
   </div>
 </div>
@@ -297,11 +297,14 @@ const ctx = canvas.getContext('2d')
 
 const anglePerSegment = (2 * Math.PI) / 18
 
-// 🔴 FIX: Startposition = DÖNER-Feld (rot) GENAU in Mitte oben
-// Zeiger zeigt nach oben bei -90° im Canvas-Koordinatensystem
-// Das erste Feld (Index 0 = DÖNER) soll genau unter dem Zeiger sein
-// Das bedeutet: rotation = -90° = -π/2
-let rotation = -Math.PI / 2
+// 🔴 WICHTIG: FIXE Startrotation
+// Canvas-Koordinaten: 0° = rechts (3 Uhr), -90° = oben (12 Uhr)
+// Das erste Segment (Index 0 = DÖNER) beginnt bei 0° und geht bis anglePerSegment
+// Um die MITTE vom ersten Segment nach oben (12 Uhr = -90°) zu bringen:
+// rotation = -90° - halbes Segment = -π/2 - anglePerSegment/2
+const INITIAL_ROTATION = -Math.PI / 2 - anglePerSegment / 2
+
+let rotation = INITIAL_ROTATION  // Immer diese fixe Startposition!
 let isSpinning = false
 let testCustomerId = 1
 
@@ -339,6 +342,7 @@ function drawWheel() {
   ctx.translate(centerX, centerY)
   ctx.rotate(rotation)
 
+  // Zeichne Segmente (beginnen bei 0° und gehen im Uhrzeigersinn)
   prizes.forEach((prize, i) => {
     const startAngle = i * anglePerSegment
     const endAngle = startAngle + anglePerSegment
@@ -370,7 +374,7 @@ function drawWheel() {
 
   ctx.restore()
   
-  // Logo SEPARAT zeichnen - OHNE Rotation
+  // Logo SEPARAT zeichnen - OHNE Rotation (bleibt horizontal)
   ctx.save()
   ctx.translate(centerX, centerY)
   
@@ -443,16 +447,23 @@ async function spinWheel() {
   crypto.getRandomValues(array)
   const randomOffset = ((array[0] / 0xFFFFFFFF) - 0.5) * 0.6 * anglePerSegment
   
-  // 🔴 FIX: VOLLE Drehungen (5-7 Runden) + Ziel
-  const spins = 5 + Math.floor((array[0] / 0xFFFFFFFF) * 3)  // 5-7 volle Drehungen
-  const baseRotation = spins * 2 * Math.PI  // Volle Umdrehungen
+  // 5-7 volle Drehungen
+  const spins = 5 + Math.floor((array[0] / 0xFFFFFFFF) * 3)
+  const baseRotation = spins * 2 * Math.PI
   
-  // Zeiger ist bei -90° (oben), gewonnenes Feld soll dort landen
-  // Berechne wie viel wir drehen müssen, damit das gewonnene Feld bei -90° ist
+  // Zielwinkel: Das gewonnene Feld soll bei -90° (oben) landen
+  // Feld i hat Mitte bei: i * anglePerSegment + anglePerSegment/2 (in rotiertem System)
+  // Wir wollen dass diese Mitte bei -90° - anglePerSegment/2 landet (weil INITIAL_ROTATION das ist)
   const targetFieldAngle = winningIndex * anglePerSegment + anglePerSegment / 2 + randomOffset
-  const targetRotation = -targetFieldAngle - Math.PI / 2
+  const targetRotation = INITIAL_ROTATION - targetFieldAngle
   
-  const totalRotation = baseRotation + (targetRotation - rotation)
+  // Normalisiere targetRotation auf den Bereich der aktuellen Rotation
+  let normalizedTarget = targetRotation
+  while (normalizedTarget > rotation) {
+    normalizedTarget -= 2 * Math.PI
+  }
+  
+  const totalRotation = baseRotation + (normalizedTarget - rotation)
 
   const startRotation = rotation
   const startTime = Date.now()
@@ -475,16 +486,19 @@ async function spinWheel() {
       let normalizedRotation = rotation % (2 * Math.PI)
       if (normalizedRotation < 0) normalizedRotation += 2 * Math.PI
       
-      const pointerAngle = 3 * Math.PI / 2
-      let relativeAngle = pointerAngle - normalizedRotation
+      // INITIAL_ROTATION normalisiert
+      let normalizedInitial = INITIAL_ROTATION % (2 * Math.PI)
+      if (normalizedInitial < 0) normalizedInitial += 2 * Math.PI
+      
+      let relativeAngle = normalizedInitial - normalizedRotation
       if (relativeAngle < 0) relativeAngle += 2 * Math.PI
       
       const fieldIndex = Math.floor(relativeAngle / anglePerSegment) % prizes.length
       const actualPrize = prizes[fieldIndex]
       
-      console.log('🎯 Geplant:', winningPrize.label, 'Index:', winningIndex)
-      console.log('🎯 Gewonnen:', actualPrize.label, 'Index:', fieldIndex)
-      console.log('📐 Drehungen:', (totalRotation / (2 * Math.PI)).toFixed(1))
+      console.log('🎯 Sollte gewinnen:', winningPrize.label, '(Index:', winningIndex, ')')
+      console.log('🎯 Hat gewonnen:', actualPrize.label, '(Index:', fieldIndex, ')')
+      console.log('📐 Volle Drehungen:', spins)
       
       showResult(actualPrize)
       saveSpin(actualPrize)
@@ -582,11 +596,11 @@ drawWheel()
 updateSpinInfo()
 canvas.addEventListener('click', spinWheel)
 
-console.log('✅ Lucky Wheel FERTIG!')
-console.log('🔴 Zeiger zeigt EXAKT in Mitte von DÖNER')
-console.log('🔧 Logo bleibt waagrecht')
+console.log('✅ Lucky Wheel mit FIXER Startposition!')
+console.log('🔴 INITIAL_ROTATION =', INITIAL_ROTATION, '(fixiert)')
+console.log('🔴 DÖNER (rot) steht IMMER exakt mittig oben')
+console.log('🔧 Logo bleibt horizontal')
 console.log('🎯 5-7 volle Drehungen')
-console.log('✅ Korrekter Gewinn im Popup')
 </script>
 
 </body>
