@@ -361,7 +361,7 @@ logoImg.src = '/logo-round.png'
 function drawWheel() {
   const centerX = canvas.width / 2
   const centerY = canvas.height / 2
-  const radius = canvas.width / 2 - 10
+  const radius = canvas.width / 2 - 5  // Größere Felder - näher am Rand
 
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   ctx.save()
@@ -394,29 +394,32 @@ function drawWheel() {
     const words = prize.label.split(' ')
     if (words.length === 1) {
       ctx.font = 'bold 16px Flame, Arial'
-      ctx.fillText(prize.label, radius * 0.65, 0)
+      ctx.fillText(prize.label, radius * 0.7, 0)
     } else {
       ctx.font = 'bold 14px Flame, Arial'
-      ctx.fillText(words[0], radius * 0.65, -8)
-      ctx.fillText(words[1], radius * 0.65, 8)
+      ctx.fillText(words[0], radius * 0.7, -8)
+      ctx.fillText(words[1], radius * 0.7, 8)
     }
     
     ctx.restore()
   })
 
-  // Draw center circle with logo (schmaler weißer Ring)
+  // Draw center circle with logo (Ring: 2px schmal, Logo 20% kleiner)
+  const centerRadius = 48  // Weißer Kreis
+  const logoRadius = 46    // Logo (Ring = 2px)
+  
   ctx.beginPath()
-  ctx.arc(0, 0, 65, 0, 2 * Math.PI)
+  ctx.arc(0, 0, centerRadius, 0, 2 * Math.PI)
   ctx.fillStyle = 'white'
   ctx.fill()
 
-  // Draw logo in center (größer)
+  // Draw logo in center (20% kleiner als vorher)
   if (logoImg.complete) {
     ctx.save()
     ctx.beginPath()
-    ctx.arc(0, 0, 58, 0, 2 * Math.PI)
+    ctx.arc(0, 0, logoRadius, 0, 2 * Math.PI)
     ctx.clip()
-    ctx.drawImage(logoImg, -58, -58, 116, 116)
+    ctx.drawImage(logoImg, -logoRadius, -logoRadius, logoRadius * 2, logoRadius * 2)
     ctx.restore()
   }
 
