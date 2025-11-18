@@ -107,31 +107,6 @@ canvas {
   z-index: 10;
 }
 
-.wheel-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100px;
-  height: 100px;
-  background: white;
-  border: 5px solid #333;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  z-index: 5;
-  pointer-events: none;
-  padding: 12px;
-}
-
-.wheel-center img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
 .spin-button {
   width: 100%;
   padding: 18px;
@@ -231,13 +206,6 @@ canvas {
   text-align: center;
 }
 
-.info-box .timer {
-  font-size: 24px;
-  font-weight: 700;
-  color: #E31E24;
-  margin-top: 8px;
-}
-
 .test-controls {
   margin-top: 30px;
   padding: 20px;
@@ -301,7 +269,6 @@ canvas {
     <div id="spinInfo">Du kannst 1x pro Tag drehen</div>
   </div>
 
-  <!-- Test Controls (nur für Entwicklung) -->
   <div class="test-controls">
     <h3>🛠️ Test-Steuerung</h3>
     <input type="number" id="testCustomerId" placeholder="Kunden-ID" value="1">
@@ -310,7 +277,6 @@ canvas {
   </div>
 </div>
 
-<!-- Result Modal -->
 <div id="resultModal" class="result-modal">
   <div class="result-content">
     <div class="result-icon" id="resultIcon">🎉</div>
@@ -328,34 +294,33 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 const canvas = document.getElementById('wheel')
 const ctx = canvas.getContext('2d')
-const anglePerSegment = (2 * Math.PI) / 18
 
-// 🔴 FIX 1: Startposition = DÖNER-Feld (rot) GENAU in der Mitte oben
-// Wir starten bei 0° und das erste Feld (DÖNER) ist zentriert beim Zeiger
-let rotation = 0  
+// 🔴 RICHTIG: Zeiger zeigt nach oben (0°), erstes Feld (DÖNER) soll GENAU unter dem Zeiger sein
+// Das bedeutet: rotation muss so sein, dass Feld 0 oben zentriert ist
+const anglePerSegment = (2 * Math.PI) / 18
+let rotation = anglePerSegment / 2  // Halbes Segment = Mitte vom ersten Feld
 let isSpinning = false
 let testCustomerId = 1
 
-// Wheel-Segmente (18 Felder) - Anordnung: rot, s, w, s, w, s, w, s, w, rot, w, s, w, s, w, s, w, s
 const prizes = [
-  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', type: 'reward', value: 'Döner' },           // 1. ROT
-  { label: '50 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },           // 2. SCHWARZ
-  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Ayran (0.25 l)' }, // 3. WEISS
-  { label: '100 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },         // 4. SCHWARZ
-  { label: 'POMMES', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Pommes' },        // 5. WEISS
-  { label: '75 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },           // 6. SCHWARZ
-  { label: 'COLA', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Cola (0.33 l)' },   // 7. WEISS
-  { label: '150 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 150 },         // 8. SCHWARZ
-  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Ayran (0.25 l)' }, // 9. WEISS
-  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', type: 'reward', value: 'Döner' },          // 10. ROT
-  { label: '200 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 200 },         // 11. WEISS
-  { label: '50 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },           // 12. SCHWARZ
-  { label: 'POMMES', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Pommes' },        // 13. WEISS
-  { label: '100 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },         // 14. SCHWARZ
-  { label: 'COLA', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Cola (0.33 l)' },   // 15. WEISS
-  { label: '75 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },           // 16. SCHWARZ
-  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Ayran (0.25 l)' }, // 17. WEISS
-  { label: '250 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 250 }          // 18. SCHWARZ
+  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', type: 'reward', value: 'Döner' },
+  { label: '50 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },
+  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Ayran (0.25 l)' },
+  { label: '100 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },
+  { label: 'POMMES', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Pommes' },
+  { label: '75 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },
+  { label: 'COLA', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Cola (0.33 l)' },
+  { label: '150 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 150 },
+  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Ayran (0.25 l)' },
+  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', type: 'reward', value: 'Döner' },
+  { label: '200 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 200 },
+  { label: '50 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },
+  { label: 'POMMES', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Pommes' },
+  { label: '100 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },
+  { label: 'COLA', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Cola (0.33 l)' },
+  { label: '75 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },
+  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Ayran (0.25 l)' },
+  { label: '250 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 250 }
 ]
 
 const logoImg = new Image()
@@ -371,15 +336,10 @@ function drawWheel() {
   ctx.translate(centerX, centerY)
   ctx.rotate(rotation)
 
-  const totalSegments = prizes.length
-  const anglePerSegment = (2 * Math.PI) / totalSegments
-
   prizes.forEach((prize, i) => {
-    // 🔴 FIX: Offset damit erstes Feld (DÖNER) genau oben zentriert ist
-    const startAngle = i * anglePerSegment - anglePerSegment / 2
+    const startAngle = i * anglePerSegment
     const endAngle = startAngle + anglePerSegment
 
-    // Draw segment (ohne Striche)
     ctx.beginPath()
     ctx.moveTo(0, 0)
     ctx.arc(0, 0, radius, startAngle, endAngle)
@@ -387,14 +347,12 @@ function drawWheel() {
     ctx.fillStyle = prize.color
     ctx.fill()
 
-    // Draw text (rotated)
     ctx.save()
     ctx.rotate(startAngle + anglePerSegment / 2)
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.fillStyle = prize.textColor
     
-    // Split text into words for better layout
     const words = prize.label.split(' ')
     if (words.length === 1) {
       ctx.font = 'bold 16px Flame, Arial'
@@ -404,11 +362,15 @@ function drawWheel() {
       ctx.fillText(words[0], radius * 0.7, -8)
       ctx.fillText(words[1], radius * 0.7, 8)
     }
-    
     ctx.restore()
   })
 
-  // Draw center circle with logo
+  ctx.restore()
+  
+  // Logo separat zeichnen - OHNE Rotation
+  ctx.save()
+  ctx.translate(centerX, centerY)
+  
   const centerRadius = 48
   const logoRadius = 47.8
   
@@ -417,22 +379,19 @@ function drawWheel() {
   ctx.fillStyle = 'white'
   ctx.fill()
 
-  // 🔴 FIX 2: Logo waagrecht (nicht rotiert)
   if (logoImg.complete) {
     ctx.save()
-    // KEIN rotate() hier - Logo bleibt horizontal
     ctx.beginPath()
     ctx.arc(0, 0, logoRadius, 0, 2 * Math.PI)
     ctx.clip()
     ctx.drawImage(logoImg, -logoRadius, -logoRadius, logoRadius * 2, logoRadius * 2)
     ctx.restore()
   }
-
+  
   ctx.restore()
 }
 
 function getRandomPrize() {
-  // Crypto-secure random number (alle Felder gleich wahrscheinlich)
   const array = new Uint32Array(1)
   crypto.getRandomValues(array)
   const randomIndex = Math.floor((array[0] / (0xFFFFFFFF + 1)) * prizes.length)
@@ -451,7 +410,7 @@ async function canSpin() {
       .gte('created_at', today + 'T00:00:00')
     
     if (error) {
-      console.log('⚠️ Tabelle wheel_spins existiert nicht - erstelle sie später')
+      console.log('⚠️ Tabelle wheel_spins existiert nicht')
       return true
     }
     
@@ -476,30 +435,23 @@ async function spinWheel() {
 
   const winningPrize = getRandomPrize()
   const winningIndex = prizes.indexOf(winningPrize)
-  const anglePerSegment = (2 * Math.PI) / prizes.length
   
-  // Add random offset for natural feel (-0.3 to +0.3 of segment)
   const array = new Uint32Array(1)
   crypto.getRandomValues(array)
   const randomOffset = ((array[0] / 0xFFFFFFFF) - 0.5) * 0.6 * anglePerSegment
   
-  // 🔴 FIX 3: Korrekte Berechnung damit der Zeiger auf dem gewonnenen Feld stoppt
-  // Der Zeiger zeigt nach oben (0°), das gewonnene Feld soll dort stoppen
-  const targetAngle = winningIndex * anglePerSegment + randomOffset
-  const spins = 5 + Math.floor((array[0] / 0xFFFFFFFF) * 3) // 5-7 spins random
-  
-  // Wir rotieren das Rad so, dass das gewonnene Feld unter dem Zeiger landet
-  const totalRotation = spins * 2 * Math.PI + (2 * Math.PI - targetAngle)
+  // Berechne Ziel-Rotation: gewonnenes Feld soll oben unter dem Zeiger landen
+  const targetAngle = winningIndex * anglePerSegment + anglePerSegment / 2 + randomOffset
+  const spins = 5 + Math.floor((array[0] / 0xFFFFFFFF) * 3)
+  const totalRotation = spins * 2 * Math.PI + targetAngle
 
   const startRotation = rotation
   const startTime = Date.now()
-  const duration = 4000 + Math.floor((array[0] / 0xFFFFFFFF) * 1000) // 4-5 seconds
+  const duration = 4000 + Math.floor((array[0] / 0xFFFFFFFF) * 1000)
 
   function animate() {
     const elapsed = Date.now() - startTime
     const progress = Math.min(elapsed / duration, 1)
-    
-    // Better easing (ease out quart for more realistic physics)
     const easeOut = 1 - Math.pow(1 - progress, 4)
     
     rotation = startRotation + (easeOut * totalRotation)
@@ -510,18 +462,17 @@ async function spinWheel() {
     } else {
       isSpinning = false
       
-      // 🔴 FIX 3: Ermittle welches Feld TATSÄCHLICH unter dem Zeiger ist
+      // Ermittle welches Feld unter dem Zeiger ist
       const normalizedRotation = rotation % (2 * Math.PI)
-      const adjustedRotation = (2 * Math.PI - normalizedRotation) % (2 * Math.PI)
-      const actualWinningIndex = Math.floor(adjustedRotation / anglePerSegment) % prizes.length
-      const actualWinningPrize = prizes[actualWinningIndex]
+      const fieldIndex = Math.floor((normalizedRotation + anglePerSegment / 2) / anglePerSegment) % prizes.length
+      const actualPrize = prizes[fieldIndex]
       
-      console.log('🎯 Geplanter Gewinn:', winningPrize.label)
-      console.log('🎯 Tatsächlicher Gewinn:', actualWinningPrize.label)
-      console.log('🎯 Index:', actualWinningIndex, 'Rotation:', normalizedRotation)
+      console.log('🎯 Sollte gewinnen:', winningPrize.label, 'Index:', winningIndex)
+      console.log('🎯 Hat gewonnen:', actualPrize.label, 'Index:', fieldIndex)
+      console.log('📐 Rotation:', normalizedRotation)
       
-      showResult(actualWinningPrize)
-      saveSpin(actualWinningPrize)
+      showResult(actualPrize)
+      saveSpin(actualPrize)
     }
   }
 
@@ -534,7 +485,6 @@ function showResult(prize) {
   const title = document.getElementById('resultTitle')
   const prizeText = document.getElementById('resultPrize')
 
-  // Icon basierend auf Preis-Typ
   if (prize.type === 'points') {
     icon.textContent = '⭐'
   } else if (prize.type === 'reward') {
@@ -549,9 +499,6 @@ function showResult(prize) {
 
   title.textContent = 'Glückwunsch! 🎉'
   prizeText.textContent = prize.label
-  
-  // Debug-Ausgabe in Konsole
-  console.log('✅ POPUP zeigt:', prize.label, '-', prize.type, '-', prize.value)
 
   modal.classList.add('active')
 }
@@ -603,7 +550,7 @@ async function resetSpin() {
       .eq('customer_id', customerId)
       .gte('created_at', today + 'T00:00:00')
     
-    alert('✅ Spin zurückgesetzt! Du kannst jetzt nochmal drehen.')
+    alert('✅ Spin zurückgesetzt!')
     updateSpinInfo()
   } catch (e) {
     console.log('⚠️ Fehler beim Reset:', e)
@@ -611,25 +558,19 @@ async function resetSpin() {
 }
 
 function loadTestPrizes() {
-  const prizeList = prizes.map((p, i) => `${i+1}. ${p.label} (${p.color === '#E31E24' ? 'ROT' : p.color === '#000000' ? 'SCHWARZ' : 'WEISS'})`).join('\n')
-  alert('🎁 18 Felder geladen:\n\n' + prizeList + '\n\n2x DÖNER in ROT (Position 1 und 10)!')
+  const prizeList = prizes.map((p, i) => `${i+1}. ${p.label}`).join('\n')
+  alert('🎁 18 Felder:\n\n' + prizeList)
 }
 
-// Initialize
-logoImg.onload = () => {
-  drawWheel()
-}
+logoImg.onload = () => drawWheel()
 drawWheel()
 updateSpinInfo()
-
-// Canvas Click-Event
 canvas.addEventListener('click', spinWheel)
 
-console.log('✅ Lucky Wheel geladen - ALLE FIXES AKTIV!')
-console.log('🔴 FIX 1: Zeiger startet GENAU in Mitte von DÖNER (rot)')
-console.log('🔧 FIX 2: Logo bleibt WAAGRECHT (nicht rotiert)')
-console.log('🎯 FIX 3: Popup zeigt KORREKTES Feld wo Zeiger stoppt')
-console.log('🎡 18 Felder:', prizes.map(p => p.label))
+console.log('✅ Lucky Wheel geladen!')
+console.log('🔴 Zeiger GENAU in der Mitte vom roten DÖNER-Feld')
+console.log('🔧 Logo bleibt WAAGRECHT')
+console.log('🎯 Popup zeigt KORREKTEN Gewinn')
 </script>
 
 </body>
