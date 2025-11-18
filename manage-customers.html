@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kunden verwalten - Döner Boxx</title>
+<title>🗂️ Kunden verwalten - Döner Boxx</title>
 <link rel="icon" href="/favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
@@ -21,16 +21,25 @@ body {
   min-height: 100vh;
   padding: 20px;
 }
-.container { max-width: 1200px; margin: 0 auto; }
-.card { background: white; border-radius: 20px; padding: 24px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.container { 
+  max-width: 1200px; 
+  margin: 0 auto;
+}
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 .header-card {
   display: flex;
   align-items: center;
   gap: 20px;
 }
 .header-logo {
-  width: 70px;
-  height: 70px;
+  width: 80px;
+  height: 80px;
   flex-shrink: 0;
 }
 .header-logo img {
@@ -41,40 +50,246 @@ body {
 .header-text {
   flex: 1;
 }
-h1 { color: #E31E24; margin-bottom: 10px; font-size: 28px; }
-h2 { font-size: 18px; margin-bottom: 12px; color: #374151; }
-
-.tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-.tab { flex: 1; min-width: 100px; padding: 12px; background: #f3f4f6; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; color: #6b7280; font-size: 13px; }
-.tab.active { background: linear-gradient(135deg, #E31E24, #F9A825); color: white; }
-
-input, select { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 16px; margin-bottom: 10px; font-family: 'Flame', system-ui, sans-serif; }
-button { width: 100%; padding: 14px; background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; font-family: 'Flame', system-ui, sans-serif; }
-button:hover { opacity: 0.9; }
-button.secondary { background: #6b7280; }
-button.danger { background: #dc2626; }
-button.small { width: auto; padding: 8px 16px; font-size: 14px; display: inline-block; margin: 4px; }
-
-.result { padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 14px; }
-.success { background: #fef3c7; color: #92400e; }
-.error { background: #fee2e2; color: #991b1b; }
-.info { background: #dbeafe; color: #1e40af; }
-
-.customer-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
-.customer-item h3 { font-size: 16px; margin-bottom: 8px; color: #E31E24; }
-
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-
-.wheel-config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-@media (max-width: 768px) { .wheel-config-grid { grid-template-columns: 1fr; } }
-
-.prize-item { background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 10px; padding: 14px; margin-bottom: 10px; display: grid; grid-template-columns: 50px 1fr auto; gap: 12px; align-items: center; }
-.prize-color { width: 40px; height: 40px; border-radius: 8px; border: 2px solid #ddd; }
-
-.stat-card { background: linear-gradient(135deg, #F9A825, #f59e0b); color: white; border-radius: 12px; padding: 20px; text-align: center; }
-.stat-card h3 { font-size: 14px; opacity: 0.9; margin-bottom: 8px; }
-.stat-card .stat-number { font-size: 32px; font-weight: 700; }
+h1 {
+  color: #E31E24;
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+h2 {
+  color: #374151;
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+.subtitle {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+.stats {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+.stat-item {
+  text-align: center;
+  padding: 12px;
+}
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #E31E24;
+}
+.stat-label {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+button.primary {
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  color: white;
+  width: 100%;
+  margin-bottom: 10px;
+}
+button.primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+button.danger {
+  background: #dc2626;
+  color: white;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+button.danger:hover {
+  background: #b91c1c;
+}
+button.success {
+  background: #F9A825;
+  color: white;
+  width: 100%;
+  margin-bottom: 10px;
+}
+button.success:hover {
+  background: #f59e0b;
+}
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 15px;
+  margin-bottom: 10px;
+  transition: all 0.2s;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #E31E24;
+}
+textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+.form-label {
+  display: block;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.warning {
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
+  color: #92400e;
+  padding: 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.customer-list {
+  max-height: 600px;
+  overflow-y: auto;
+  margin-top: 16px;
+}
+.customer-item {
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+.customer-item:hover {
+  border-color: #E31E24;
+  background: #f3f4f6;
+}
+.customer-info {
+  flex: 1;
+}
+.customer-info h3 {
+  color: #111827;
+  font-size: 18px;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+.customer-info p {
+  color: #6b7280;
+  font-size: 13px;
+  margin: 3px 0;
+}
+.customer-info .qr-id {
+  display: inline-block;
+  background: #E31E24;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 6px;
+  font-family: monospace;
+  letter-spacing: 2px;
+}
+.customer-stats {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-right: 16px;
+}
+.customer-points {
+  text-align: center;
+}
+.customer-points .value {
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 20px;
+  display: block;
+  margin-bottom: 4px;
+}
+.customer-points .label {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 600;
+}
+.customer-txs {
+  text-align: center;
+}
+.customer-txs .value {
+  background: #F9A825;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 20px;
+  display: block;
+  margin-bottom: 4px;
+}
+.customer-txs .label {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 600;
+}
+.result {
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 12px;
+  font-size: 14px;
+  text-align: center;
+  font-weight: 600;
+}
+.success { 
+  background: #fef3c7; 
+  color: #92400e;
+  border: 2px solid #F9A825;
+}
+.error { 
+  background: #fee2e2; 
+  color: #991b1b;
+  border: 2px solid #ef4444;
+}
+.info { 
+  background: #dbeafe; 
+  color: #1e40af;
+  border: 2px solid #3b82f6;
+}
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+  font-size: 16px;
+}
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+  font-size: 15px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 2px dashed #e5e7eb;
+}
 </style>
 </head>
 <body>
@@ -85,134 +300,166 @@ button.small { width: auto; padding: 8px 16px; font-size: 14px; display: inline-
       <img src="/logo-round.png" alt="Döner Boxx">
     </div>
     <div class="header-text">
-      <h1>Döner Boxx Verwaltung</h1>
-      <div style="color: #666; font-size: 14px;">geladen!</div>
+      <h1>Kunden verwalten</h1>
+      <p class="subtitle">Verwalte alle Kunden, Transaktionen und Punkte</p>
     </div>
   </div>
 
   <div class="card">
-    <div class="tabs">
-      <button class="tab active" onclick="showTab('customers')">👥 Kunden</button>
-      <button class="tab" onclick="showTab('bonuses')">🎉 Bonuses</button>
-      <button class="tab" onclick="showTab('challenges')">🎯 Challenges</button>
-      <button class="tab" onclick="showTab('coupons')">🎟️ Coupons</button>
-      <button class="tab" onclick="showTab('wheel')">🎡 Wheel</button>
+    <h2>🎁 Globale Bonusse</h2>
+    <p class="subtitle">Erstelle Bonusse, die sofort bei allen Kunden erscheinen</p>
+
+    <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px;">
+      <h3 style="color: #92400e; margin-bottom: 12px;">Neuen Bonus erstellen</h3>
+      
+      <label class="form-label">🎯 Bonus-Typ</label>
+      <select id="globalBonusType" onchange="toggleBonusAmount()">
+        <option value="bonus_points">💰 Extra-Punkte</option>
+        <option value="double_points">⭐ Doppelte Punkte</option>
+      </select>
+
+      <div id="globalBonusAmountField">
+        <label class="form-label">💵 Bonus-Punkte</label>
+        <input type="number" id="globalBonusAmount" placeholder="z.B. 100" value="100">
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label class="form-label">📅 Start-Datum</label>
+          <input type="date" id="globalBonusStart">
+        </div>
+        <div>
+          <label class="form-label">📅 End-Datum</label>
+          <input type="date" id="globalBonusEnd">
+        </div>
+      </div>
+
+      <button class="success" onclick="createGlobalBonus()">🚀 Bonus erstellen</button>
+      <div id="result-global-bonus"></div>
+    </div>
+
+    <div style="margin-top: 24px;">
+      <h3>Aktive Bonusse</h3>
+      <div id="globalBonusList"></div>
     </div>
   </div>
 
-  <!-- CUSTOMERS TAB -->
-  <div id="tab-customers" class="card tab-content active">
-    <h2>👥 Kunden verwalten</h2>
-    <button onclick="loadCustomers()">🔄 Aktualisieren</button>
-    <div id="customers-list" style="margin-top: 16px;"></div>
-  </div>
+  <div class="card">
+    <h2>🎯 Challenge-Bonus</h2>
+    <p class="subtitle">Erstelle zeitlich begrenzte Herausforderungen mit Mindestbestellwert</p>
 
-  <!-- BONUSES TAB -->
-  <div id="tab-bonuses" class="card tab-content">
-    <h2>🎉 Globale Bonuses</h2>
-    <input id="bonus-title" placeholder="Titel (z.B. 'Weekend Special')">
-    <select id="bonus-type">
-      <option value="double_points">Doppelte Punkte</option>
-      <option value="bonus_points">Bonus Punkte</option>
-    </select>
-    <input id="bonus-amount" type="number" placeholder="Bonus-Punkte (nur bei 'Bonus Punkte')" value="100">
-    <input id="bonus-expires" type="date" placeholder="Ablaufdatum">
-    <button onclick="createBonus()">🎁 Bonus erstellen</button>
-    <div id="result-bonus"></div>
-    <h3 style="margin-top: 24px;">Aktive Bonuses:</h3>
-    <div id="bonuses-list" style="margin-top: 16px;"></div>
-  </div>
-
-  <!-- CHALLENGES TAB -->
-  <div id="tab-challenges" class="card tab-content">
-    <h2>🎯 Challenges</h2>
-    <input id="challenge-orders" type="number" placeholder="Anzahl Bestellungen (z.B. 5)">
-    <input id="challenge-min-amount" type="number" step="0.01" placeholder="Mindestbestellwert (z.B. 10.00)">
-    <input id="challenge-points" type="number" placeholder="Bonus-Punkte (z.B. 500)">
-    <input id="challenge-start" type="date" placeholder="Startdatum">
-    <input id="challenge-end" type="date" placeholder="Enddatum">
-    <button onclick="createChallenge()">🎯 Challenge erstellen</button>
-    <div id="result-challenge"></div>
-    <h3 style="margin-top: 24px;">Aktive Challenges:</h3>
-    <div id="challenges-list" style="margin-top: 16px;"></div>
-  </div>
-
-  <!-- COUPONS TAB -->
-  <div id="tab-coupons" class="card tab-content">
-    <h2>🎟️ Coupons</h2>
-    <input id="coupon-title" placeholder="Titel (z.B. 'Deal der Woche')">
-    <input id="coupon-product" placeholder="Produkt (z.B. 'Döner + Cola')">
-    <input id="coupon-price" type="number" step="0.01" placeholder="Preis (z.B. 7.50)">
-    <input id="coupon-desc" placeholder="Beschreibung (optional)">
-    <input id="coupon-expires" type="date" placeholder="Ablaufdatum">
-    <button onclick="createCoupon()">🎟️ Coupon erstellen</button>
-    <div id="result-coupon"></div>
-    <h3 style="margin-top: 24px;">Aktive Coupons:</h3>
-    <div id="coupons-list" style="margin-top: 16px;"></div>
-  </div>
-
-  <!-- 🎡 WHEEL TAB -->
-  <div id="tab-wheel" class="card tab-content">
-    <h2>🎡 Glücksrad Verwaltung</h2>
-    
-    <!-- Config Section -->
-    <div style="background: #f9fafb; padding: 20px; border-radius: 12px; margin-bottom: 24px;">
-      <h3 style="margin-bottom: 16px;">⚙️ Einstellungen</h3>
-      <div class="wheel-config-grid">
+    <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px;">
+      <h3 style="color: #92400e; margin-bottom: 12px;">Neue Challenge</h3>
+      
+      <div class="form-grid">
         <div>
-          <label style="display: block; margin-bottom: 8px; font-weight: 600;">Status</label>
-          <select id="wheel-active">
-            <option value="true">✅ Aktiv</option>
-            <option value="false">❌ Inaktiv</option>
-          </select>
+          <label class="form-label">🎁 Extra-Punkte</label>
+          <input type="number" id="challengePoints" placeholder="z.B. 300" value="300">
         </div>
         <div>
-          <label style="display: block; margin-bottom: 8px; font-weight: 600;">Mindestbestellwert (€)</label>
-          <input id="wheel-min-amount" type="number" step="0.01" value="10.00">
-        </div>
-        <div>
-          <label style="display: block; margin-bottom: 8px; font-weight: 600;">Startdatum</label>
-          <input id="wheel-start-date" type="datetime-local">
-        </div>
-        <div>
-          <label style="display: block; margin-bottom: 8px; font-weight: 600;">Enddatum</label>
-          <input id="wheel-end-date" type="datetime-local">
+          <label class="form-label">🔢 Anzahl Bestellungen</label>
+          <input type="number" id="challengeOrders" placeholder="z.B. 2" value="2" min="1">
         </div>
       </div>
-      <button onclick="saveWheelConfig()" style="margin-top: 16px;">💾 Einstellungen speichern</button>
-      <div id="result-wheel-config"></div>
+
+      <label class="form-label">💰 Mindestbestellwert pro Bestellung (€)</label>
+      <input type="number" id="challengeMinAmount" placeholder="z.B. 10" value="10" step="0.01">
+
+      <div class="form-grid">
+        <div>
+          <label class="form-label">📅 Start-Datum</label>
+          <input type="date" id="challengeStart">
+        </div>
+        <div>
+          <label class="form-label">📅 End-Datum</label>
+          <input type="date" id="challengeEnd">
+        </div>
+      </div>
+
+      <button class="success" onclick="createChallenge()">🚀 Challenge erstellen</button>
+      <div id="result-challenge"></div>
     </div>
 
-    <!-- Stats Section -->
-    <h3 style="margin-bottom: 16px;">📊 Statistiken</h3>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
-      <div class="stat-card">
-        <h3>Heute gedreht</h3>
-        <div class="stat-number" id="wheel-stat-today">0</div>
+    <div style="margin-top: 20px;">
+      <h3>Aktive Challenges</h3>
+      <div id="challengeList"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎟️ Coupon-System (Deal der Woche)</h2>
+    <p class="subtitle">Erstelle Angebote mit Start- und End-Datum</p>
+
+    <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #92400e; margin-bottom: 12px;">Neuen Coupon erstellen</h3>
+      
+      <div class="form-grid">
+        <div>
+          <label class="form-label">🍴 Produktname</label>
+          <input type="text" id="couponProduct" placeholder="z.B. Lahmacun Spezial">
+        </div>
+        <div>
+          <label class="form-label">💰 Preis</label>
+          <input type="text" id="couponPrice" placeholder="z.B. 7,50 €">
+        </div>
       </div>
-      <div class="stat-card" style="background: linear-gradient(135deg, #E31E24, #dc2626);">
-        <h3>Döner gewonnen</h3>
-        <div class="stat-number" id="wheel-stat-doener">0</div>
+
+      <div class="form-grid">
+        <div>
+          <label class="form-label">📅 Start-Datum</label>
+          <input type="date" id="couponStart">
+        </div>
+        <div>
+          <label class="form-label">📅 End-Datum</label>
+          <input type="date" id="couponEnd">
+        </div>
       </div>
-      <div class="stat-card" style="background: linear-gradient(135deg, #2E86C1, #1a5490);">
-        <h3>Punkte verteilt</h3>
-        <div class="stat-number" id="wheel-stat-points">0</div>
+
+      <button class="success" onclick="createCoupon()">🎁 Coupon erstellen</button>
+      <div id="result-coupon-create"></div>
+    </div>
+
+    <div>
+      <h3>Aktuelle Coupons</h3>
+      <div id="result-coupon-load"></div>
+      <div id="couponList" style="margin-top: 12px;"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Kunden verwalten</h2>
+    <p class="subtitle">Verwalte alle Kunden, Transaktionen und Punkte</p>
+
+    <div class="stats">
+      <div class="stat-item">
+        <div class="stat-value" id="totalCustomers">0</div>
+        <div class="stat-label">Kunden</div>
       </div>
-      <div class="stat-card" style="background: linear-gradient(135deg, #10b981, #059669);">
-        <h3>Eingelöst</h3>
-        <div class="stat-number" id="wheel-stat-redeemed">0</div>
+      <div class="stat-item">
+        <div class="stat-value" id="totalTransactions">0</div>
+        <div class="stat-label">Transaktionen</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="totalCodes">0</div>
+        <div class="stat-label">Codes</div>
       </div>
     </div>
 
-    <!-- Prizes Section -->
-    <h3 style="margin-bottom: 16px;">🎁 Preise bearbeiten (18 Felder)</h3>
-    <div id="prizes-list"></div>
-    <div id="result-prizes"></div>
-
-    <!-- Recent Spins -->
-    <h3 style="margin-top: 24px; margin-bottom: 16px;">🎰 Letzte Spins</h3>
-    <button onclick="loadWheelSpins()" class="secondary">🔄 Aktualisieren</button>
-    <div id="wheel-spins-list" style="margin-top: 16px;"></div>
+    <div style="margin-top: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="margin: 0;">Kundenliste</h3>
+      </div>
+      
+      <div class="warning" id="warningBox" style="display: none;">
+        ⚠️ <strong>Hinweis:</strong> Beim Löschen eines Kunden werden auch alle zugehörigen Transaktionen und Codes gelöscht!
+      </div>
+      
+      <div id="customerListContainer">
+        <div class="loading">
+          <p>⏳ Lade Kundendaten...</p>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -222,586 +469,244 @@ const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
-// ==========================================
-// CRYPTO HELPER
-// ==========================================
-
-function generateSecureCode() {
-  const array = new Uint32Array(1);
-  crypto.getRandomValues(array);
-  return (1000 + (array[0] % 9000)).toString();
-}
-
-// ==========================================
-// HELPER FUNCTIONS
-// ==========================================
-
-function showResult(id, msg, type) {
-  const el = document.getElementById(id)
-  if (!msg) { el.className = ''; el.innerHTML = ''; return }
+function showResult(elementId, message, type) {
+  const el = document.getElementById(elementId)
+  if (!message) { el.className = ''; el.innerHTML = ''; return }
   el.className = `result ${type}`
-  el.innerHTML = msg
+  el.innerHTML = message
 }
 
-function showTab(name) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'))
-  const tabs = ['customers', 'bonuses', 'challenges', 'coupons', 'wheel']
-  document.querySelectorAll('.tab')[tabs.indexOf(name)].classList.add('active')
-  document.getElementById(`tab-${name}`).classList.add('active')
-  
-  if (name === 'customers') loadCustomers()
-  if (name === 'bonuses') loadBonuses()
-  if (name === 'challenges') loadChallenges()
-  if (name === 'coupons') loadCoupons()
-  if (name === 'wheel') loadWheelTab()
-}
-
-// ==========================================
-// 🎡 WHEEL FUNCTIONS
-// ==========================================
-
-async function loadWheelTab() {
-  await loadWheelConfig()
-  await loadWheelPrizes()
-  await loadWheelStats()
-  await loadWheelSpins()
-}
-
-async function loadWheelConfig() {
+async function loadAllCustomers() {
+  const container = document.getElementById('customerListContainer')
   try {
-    const { data, error } = await supabase.from('wheel_config').select('*').single()
-    if (error) throw error
-    
-    if (data) {
-      document.getElementById('wheel-active').value = data.is_active ? 'true' : 'false'
-      document.getElementById('wheel-min-amount').value = data.min_order_amount
-      
-      if (data.start_date) {
-        const start = new Date(data.start_date)
-        document.getElementById('wheel-start-date').value = start.toISOString().slice(0, 16)
-      }
-      
-      if (data.end_date) {
-        const end = new Date(data.end_date)
-        document.getElementById('wheel-end-date').value = end.toISOString().slice(0, 16)
-      }
-    }
-  } catch (e) {
-    console.error('❌ Load config error:', e)
-  }
-}
-
-async function saveWheelConfig() {
-  try {
-    showResult('result-wheel-config', '⏳ Speichere...', 'info')
-    
-    const isActive = document.getElementById('wheel-active').value === 'true'
-    const minAmount = parseFloat(document.getElementById('wheel-min-amount').value)
-    const startDate = document.getElementById('wheel-start-date').value
-    const endDate = document.getElementById('wheel-end-date').value
-    
-    if (!startDate || !endDate) {
-      showResult('result-wheel-config', '❌ Bitte Start- und Enddatum angeben!', 'error')
+    const { data: customers, error: custError } = await supabase.from('customers').select('*').order('created_at', { ascending: false })
+    if (custError) throw custError
+    const { count: txCount, error: txError } = await supabase.from('transactions').select('*', { count: 'exact', head: true })
+    if (txError) throw txError
+    const { count: codeCount, error: codeError } = await supabase.from('redeem_codes').select('*', { count: 'exact', head: true })
+    if (codeError) throw codeError
+    document.getElementById('totalCustomers').textContent = customers?.length || 0
+    document.getElementById('totalTransactions').textContent = txCount || 0
+    document.getElementById('totalCodes').textContent = codeCount || 0
+    if (!customers || customers.length === 0) {
+      container.innerHTML = '<div class="empty-state">📭 Noch keine Kunden vorhanden</div>'
+      document.getElementById('warningBox').style.display = 'none'
       return
     }
-    
-    const { error } = await supabase.from('wheel_config').update({
-      is_active: isActive,
-      min_order_amount: minAmount,
-      start_date: new Date(startDate).toISOString(),
-      end_date: new Date(endDate).toISOString(),
-      updated_at: new Date().toISOString()
-    }).eq('id', 1)
-    
-    if (error) throw error
-    
-    showResult('result-wheel-config', '✅ Einstellungen gespeichert!', 'success')
-  } catch (e) {
-    showResult('result-wheel-config', '❌ Fehler: ' + e.message, 'error')
-    console.error('Save config error:', e)
-  }
-}
-
-async function loadWheelPrizes() {
-  try {
-    const { data, error } = await supabase.from('wheel_prizes').select('*').order('position')
-    if (error) throw error
-    
-    const list = document.getElementById('prizes-list')
-    if (!data || data.length === 0) {
-      list.innerHTML = '<div class="result info">Keine Preise gefunden</div>'
-      return
-    }
-    
-    list.innerHTML = data.map(prize => `
-      <div class="prize-item">
-        <div style="text-align: center; font-weight: 700; color: #666;">${prize.position}</div>
-        <div>
-          <div style="font-weight: 600; margin-bottom: 4px;">${prize.label}</div>
-          <div style="font-size: 13px; color: #666;">
-            Typ: ${prize.prize_type} | Wert: ${prize.prize_value || '-'}
+    document.getElementById('warningBox').style.display = 'block'
+    container.innerHTML = '<div class="customer-list" id="customerList"></div>'
+    const customerList = document.getElementById('customerList')
+    customerList.innerHTML = ''
+    for (const customer of customers) {
+      const { count: customerTxCount } = await supabase.from('transactions').select('*', { count: 'exact', head: true }).eq('customer_id', customer.id)
+      const created = new Date(customer.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      customerList.innerHTML += `
+        <div class="customer-item">
+          <div class="customer-info">
+            <h3>${customer.name}</h3>
+            <p>📱 ${customer.phone}</p>
+            <p>📅 Registriert: ${created}</p>
+            <span class="qr-id">QR: ${customer.qr_id}</span>
           </div>
-        </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <div class="prize-color" style="background: ${prize.color};"></div>
-          <button class="small secondary" onclick="editPrize(${prize.id})">✏️</button>
-        </div>
-      </div>
-    `).join('')
-  } catch (e) {
-    console.error('❌ Load prizes error:', e)
-  }
-}
-
-async function editPrize(prizeId) {
-  try {
-    const { data: prize, error } = await supabase.from('wheel_prizes').select('*').eq('id', prizeId).single()
-    if (error) throw error
-    
-    const newLabel = prompt('Label:', prize.label)
-    if (!newLabel) return
-    
-    const newType = prompt('Typ (reward/points/discount/spin_again):', prize.prize_type)
-    if (!newType) return
-    
-    const newValue = prompt('Wert:', prize.prize_value)
-    if (newValue === null) return
-    
-    const newColor = prompt('Farbe (#RRGGBB):', prize.color)
-    if (!newColor) return
-    
-    const { error: updateError } = await supabase.from('wheel_prizes').update({
-      label: newLabel,
-      prize_type: newType,
-      prize_value: newValue,
-      color: newColor
-    }).eq('id', prizeId)
-    
-    if (updateError) throw updateError
-    
-    showResult('result-prizes', '✅ Preis aktualisiert!', 'success')
-    loadWheelPrizes()
-  } catch (e) {
-    showResult('result-prizes', '❌ Fehler: ' + e.message, 'error')
-  }
-}
-
-async function loadWheelStats() {
-  try {
-    const today = new Date().toISOString().split('T')[0]
-    
-    // Today spins
-    const { data: todaySpins } = await supabase.from('wheel_spins').select('id', { count: 'exact' }).gte('created_at', today + 'T00:00:00')
-    document.getElementById('wheel-stat-today').textContent = todaySpins?.length || 0
-    
-    // Döner wins (all time)
-    const { data: doenerWins } = await supabase.from('wheel_spins').select('id', { count: 'exact' }).ilike('prize_label', '%DÖNER%')
-    document.getElementById('wheel-stat-doener').textContent = doenerWins?.length || 0
-    
-    // Points distributed (all time)
-    const { data: pointsSpins } = await supabase.from('wheel_spins').select('prize_value').eq('prize_type', 'points')
-    const totalPoints = pointsSpins?.reduce((sum, spin) => sum + parseInt(spin.prize_value || 0), 0) || 0
-    document.getElementById('wheel-stat-points').textContent = totalPoints
-    
-    // Redeemed
-    const { data: redeemed } = await supabase.from('wheel_spins').select('id', { count: 'exact' }).eq('is_redeemed', true)
-    document.getElementById('wheel-stat-redeemed').textContent = redeemed?.length || 0
-    
-  } catch (e) {
-    console.error('❌ Load stats error:', e)
-  }
-}
-
-async function loadWheelSpins() {
-  try {
-    const { data, error } = await supabase.from('wheel_spins').select('*, customers(name, phone)').order('created_at', { ascending: false }).limit(20)
-    if (error) throw error
-    
-    const list = document.getElementById('wheel-spins-list')
-    if (!data || data.length === 0) {
-      list.innerHTML = '<div class="result info">Noch keine Spins</div>'
-      return
-    }
-    
-    list.innerHTML = data.map(spin => {
-      const date = new Date(spin.created_at)
-      const dateStr = date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
-      const timeStr = date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-      const isRedeemed = spin.is_redeemed
-      
-      return `
-        <div class="customer-item" style="${isRedeemed ? 'background: #fef3c7; border-color: #fbbf24;' : ''}">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-            <div style="font-weight: 700;">${spin.customers?.name || 'Unbekannt'}</div>
-            <div style="font-size: 12px; color: #666;">${dateStr} ${timeStr}</div>
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px;">
-            <div>🎁 ${spin.prize_label}</div>
-            <div>📱 ${spin.customers?.phone || '-'}</div>
-            <div style="font-weight: 600; color: #f59e0b;">Code: ${spin.prize_code}</div>
-            <div style="color: ${isRedeemed ? '#059669' : '#dc2626'}; font-weight: 600;">
-              ${isRedeemed ? '✅ Eingelöst' : '⏳ Wartet'}
+          <div class="customer-stats">
+            <div class="customer-points">
+              <span class="value">${customer.points}</span>
+              <span class="label">Punkte</span>
+            </div>
+            <div class="customer-txs">
+              <span class="value">${customerTxCount || 0}</span>
+              <span class="label">Transaktionen</span>
             </div>
           </div>
+          <button class="danger" onclick="deleteSingleCustomer('${customer.id}', '${customer.name}')">🗑️ Löschen</button>
         </div>
       `
-    }).join('')
-  } catch (e) {
-    console.error('❌ Load spins error:', e)
-  }
-}
-
-// ==========================================
-// CUSTOMERS FUNCTIONS
-// ==========================================
-
-async function loadCustomers() {
-  try {
-    const { data, error } = await supabase.from('customers').select('*').order('created_at', { ascending: false })
-    if (error) throw error
-    
-    const list = document.getElementById('customers-list')
-    if (!data || data.length === 0) {
-      list.innerHTML = '<div class="result info">Keine Kunden gefunden</div>'
-      return
     }
-    
-    list.innerHTML = data.map(customer => `
-      <div class="customer-item">
-        <h3>${customer.name}</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px;">
-          <div>📱 ${customer.phone}</div>
-          <div>🆔 ${customer.qr_id}</div>
-          <div>⭐ ${customer.points} Punkte</div>
-          <div>📅 ${new Date(customer.created_at).toLocaleDateString('de-DE')}</div>
-        </div>
-        <div style="margin-top: 10px;">
-          <button class="small secondary" onclick="editCustomer(${customer.id}, '${customer.name}', '${customer.phone}', ${customer.points})">✏️ Bearbeiten</button>
-          <button class="small danger" onclick="deleteCustomer(${customer.id}, '${customer.name}')">🗑️ Löschen</button>
-        </div>
-      </div>
-    `).join('')
-  } catch (e) {
-    console.error('❌ Load customers error:', e)
-  }
+  } catch (e) { container.innerHTML = `<div class="result error">❌ Fehler beim Laden: ${e.message}</div>` }
 }
 
-async function editCustomer(id, currentName, currentPhone, currentPoints) {
-  const newName = prompt('Name:', currentName)
-  if (!newName) return
-  
-  const newPhone = prompt('Telefon:', currentPhone)
-  if (!newPhone) return
-  
-  const newPoints = prompt('Punkte:', currentPoints)
-  if (newPoints === null) return
-  
+async function deleteSingleCustomer(customerId, customerName) {
+  const confirmed = confirm(`⚠️ KUNDE "${customerName.toUpperCase()}" LÖSCHEN?\n\nDiese Aktion löscht:\n✖️ Den Kunden\n✖️ Alle Transaktionen\n✖️ Alle Codes\n\nWirklich fortfahren?`)
+  if (!confirmed) return
+  const doubleCheck = prompt(`Tippe "${customerName}" ein, um zu bestätigen:`)
+  if (doubleCheck !== customerName) { alert('❌ Abgebrochen - falsche Eingabe'); return }
   try {
-    const { error } = await supabase.from('customers').update({
-      name: newName,
-      phone: newPhone,
-      points: parseInt(newPoints)
-    }).eq('id', id)
-    
-    if (error) throw error
-    alert('✅ Kunde aktualisiert!')
-    loadCustomers()
-  } catch (e) {
-    alert('❌ Fehler: ' + e.message)
-  }
+    await supabase.from('redeem_codes').delete().eq('customer_id', customerId)
+    await supabase.from('transactions').delete().eq('customer_id', customerId)
+    await supabase.from('customers').delete().eq('id', customerId)
+    alert(`✅ Kunde "${customerName}" wurde erfolgreich gelöscht!`)
+    loadAllCustomers()
+  } catch (e) { alert('❌ Fehler beim Löschen: ' + e.message) }
 }
 
-async function deleteCustomer(id, name) {
-  if (!confirm(`Kunde "${name}" wirklich löschen?`)) return
-  
-  try {
-    const { error } = await supabase.from('customers').delete().eq('id', id)
-    if (error) throw error
-    alert('✅ Kunde gelöscht!')
-    loadCustomers()
-  } catch (e) {
-    alert('❌ Fehler: ' + e.message)
-  }
+function toggleBonusAmount() {
+  const type = document.getElementById('globalBonusType').value
+  document.getElementById('globalBonusAmountField').style.display = type === 'double_points' ? 'none' : 'block'
 }
 
-// ==========================================
-// BONUSES FUNCTIONS
-// ==========================================
-
-async function createBonus() {
-  const title = document.getElementById('bonus-title').value.trim()
-  const type = document.getElementById('bonus-type').value
-  const amount = parseInt(document.getElementById('bonus-amount').value)
-  const expires = document.getElementById('bonus-expires').value
-  
-  if (!title || !expires) {
-    showResult('result-bonus', '❌ Bitte alle Felder ausfüllen!', 'error')
-    return
-  }
-  
+async function createGlobalBonus() {
+  const type = document.getElementById('globalBonusType').value
+  const amount = parseInt(document.getElementById('globalBonusAmount').value) || 100
+  const startDate = document.getElementById('globalBonusStart').value
+  const endDate = document.getElementById('globalBonusEnd').value
+  if (!startDate || !endDate) { showResult('result-global-bonus', '❌ Bitte Start- und End-Datum wählen!', 'error'); return }
+  if (endDate <= startDate) { showResult('result-global-bonus', '❌ End-Datum muss nach Start-Datum liegen!', 'error'); return }
+  const today = new Date().toISOString().split('T')[0]
+  if (startDate < today) { showResult('result-global-bonus', '❌ Start-Datum darf nicht in der Vergangenheit liegen!', 'error'); return }
   try {
-    showResult('result-bonus', '⏳ Erstelle Bonus...', 'info')
-    
-    const { error } = await supabase.from('global_bonuses').insert({
-      title: title,
-      bonus_type: type,
-      bonus_amount: type === 'bonus_points' ? amount : null,
-      expires_at: new Date(expires).toISOString(),
-      is_active: true
-    })
-    
+    showResult('result-global-bonus', '⏳ Erstelle Bonus...', 'info')
+    const autoTitle = type === 'double_points' ? 'Doppelte Punkte' : `+${amount} Bonus-Punkte`
+    const { error } = await supabase.from('global_bonuses').insert({ bonus_type: type, bonus_amount: type === 'double_points' ? 0 : amount, start_date: startDate, end_date: endDate, expires_at: endDate, title: autoTitle, description: '', is_active: true, created_at: new Date().toISOString() })
     if (error) throw error
-    
-    showResult('result-bonus', '✅ Bonus erstellt!', 'success')
-    document.getElementById('bonus-title').value = ''
-    document.getElementById('bonus-expires').value = ''
-    loadBonuses()
-  } catch (e) {
-    showResult('result-bonus', '❌ Fehler: ' + e.message, 'error')
-  }
+    showResult('result-global-bonus', '✅ Bonus erstellt! Erscheint jetzt bei allen Kunden.', 'success')
+    loadGlobalBonuses()
+  } catch (e) { showResult('result-global-bonus', '❌ Fehler: ' + e.message, 'error') }
 }
 
-async function loadBonuses() {
+async function loadGlobalBonuses() {
   try {
-    const { data, error } = await supabase.from('global_bonuses').select('*').order('created_at', { ascending: false })
+    const { data: bonuses, error } = await supabase.from('global_bonuses').select('*').order('created_at', { ascending: false })
     if (error) throw error
-    
-    const list = document.getElementById('bonuses-list')
-    if (!data || data.length === 0) {
-      list.innerHTML = '<div class="result info">Keine Bonuses</div>'
-      return
-    }
-    
-    list.innerHTML = data.map(bonus => {
-      const isActive = bonus.is_active && new Date(bonus.expires_at) > new Date()
-      return `
-        <div class="customer-item">
-          <h3>${bonus.title}</h3>
-          <div style="font-size: 14px; color: #666; margin-top: 4px;">
-            ${bonus.bonus_type === 'double_points' ? '⭐ Doppelte Punkte' : `💰 +${bonus.bonus_amount} Punkte`}
-          </div>
-          <div style="font-size: 13px; color: #666; margin-top: 4px;">
-            Läuft ab: ${new Date(bonus.expires_at).toLocaleDateString('de-DE')}
-          </div>
-          <div style="margin-top: 8px;">
-            <span style="padding: 4px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; background: ${isActive ? '#fef3c7' : '#fee2e2'}; color: ${isActive ? '#92400e' : '#991b1b'};">
-              ${isActive ? '✅ Aktiv' : '❌ Inaktiv'}
-            </span>
-          </div>
-          <button class="small danger" onclick="deleteBonus(${bonus.id})" style="margin-top: 8px;">🗑️ Löschen</button>
-        </div>
-      `
+    const list = document.getElementById('globalBonusList')
+    if (!bonuses || bonuses.length === 0) { list.innerHTML = '<div class="empty-state">Noch keine Bonusse vorhanden</div>'; return }
+    const now = new Date()
+    list.innerHTML = bonuses.map(bonus => {
+      const startDate = bonus.start_date ? new Date(bonus.start_date) : new Date(bonus.created_at)
+      const endDate = bonus.end_date ? new Date(bonus.end_date) : new Date(bonus.expires_at)
+      const isExpired = endDate < now
+      const isNotStarted = startDate > now
+      const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
+      const isActive = bonus.is_active && !isExpired && !isNotStarted
+      let bonusText = bonus.bonus_type === 'double_points' ? '⭐ Doppelte Punkte' : `💰 +${bonus.bonus_amount} Bonus-Punkte`
+      let titleHTML = bonus.title ? `<p style="font-size: 14px; color: #6b7280; margin: 4px 0; font-weight: 600;">${bonus.title}</p>` : ''
+      let descHTML = bonus.description ? `<p style="font-size: 13px; color: #6b7280; margin: 4px 0;">${bonus.description}</p>` : ''
+      return `<div style="background: ${isActive ? '#fef3c7' : '#fee2e2'}; border: 2px solid ${isActive ? '#F9A825' : '#ef4444'}; border-radius: 10px; padding: 16px; margin-top: 12px;"><div style="display: flex; justify-content: space-between; align-items: start;"><div style="flex: 1;"><h3 style="color: #111827; margin-bottom: 8px;">${bonusText}</h3>${titleHTML}${descHTML}<p style="font-size: 13px; color: #6b7280; margin: 4px 0;">📅 Gültig: ${startDate.toLocaleDateString('de-DE')} - ${endDate.toLocaleDateString('de-DE')}${isActive ? ` (noch ${daysLeft} Tage)` : ''}</p><p style="font-size: 12px; color: ${isActive ? '#92400e' : '#dc2626'}; font-weight: 600; margin-top: 6px;">${isActive ? '✅ Aktiv' : isExpired ? '❌ Abgelaufen' : isNotStarted ? '⏰ Startet bald' : '⏸️ Inaktiv'}</p></div><div style="display: flex; gap: 6px;">${isActive ? `<button class="danger" style="padding: 8px 14px; font-size: 13px; width: auto;" onclick="toggleGlobalBonus(${bonus.id}, false)">⏸️ Deaktivieren</button>` : !isExpired ? `<button class="success" style="padding: 8px 14px; font-size: 13px; width: auto; margin: 0;" onclick="toggleGlobalBonus(${bonus.id}, true)">✅ Aktivieren</button>` : ''}<button class="danger" style="padding: 8px 14px; font-size: 13px; width: auto;" onclick="deleteGlobalBonus(${bonus.id})">🗑️</button></div></div></div>`
     }).join('')
-  } catch (e) {
-    console.error('❌ Load bonuses error:', e)
-  }
+  } catch (e) { console.error('Load global bonuses error:', e) }
 }
 
-async function deleteBonus(id) {
+async function toggleGlobalBonus(id, active) {
+  try { await supabase.from('global_bonuses').update({ is_active: active }).eq('id', id); loadGlobalBonuses() } catch (e) { alert('❌ Fehler: ' + e.message) }
+}
+
+async function deleteGlobalBonus(id) {
   if (!confirm('Bonus wirklich löschen?')) return
-  try {
-    await supabase.from('global_bonuses').delete().eq('id', id)
-    loadBonuses()
-  } catch (e) {
-    alert('❌ Fehler: ' + e.message)
-  }
+  try { await supabase.from('global_bonuses').delete().eq('id', id); loadGlobalBonuses() } catch (e) { alert('❌ Fehler: ' + e.message) }
 }
-
-// ==========================================
-// CHALLENGES FUNCTIONS
-// ==========================================
 
 async function createChallenge() {
-  const orders = parseInt(document.getElementById('challenge-orders').value)
-  const minAmount = parseFloat(document.getElementById('challenge-min-amount').value)
-  const points = parseInt(document.getElementById('challenge-points').value)
-  const startDate = document.getElementById('challenge-start').value
-  const endDate = document.getElementById('challenge-end').value
-  
-  if (!orders || !minAmount || !points || !startDate || !endDate) {
-    showResult('result-challenge', '❌ Bitte alle Felder ausfüllen!', 'error')
-    return
-  }
-  
+  const points = parseInt(document.getElementById('challengePoints').value)
+  const orders = parseInt(document.getElementById('challengeOrders').value)
+  const minAmount = parseFloat(document.getElementById('challengeMinAmount').value)
+  const startDate = document.getElementById('challengeStart').value
+  const endDate = document.getElementById('challengeEnd').value
+  if (!points || !orders || !minAmount || !startDate || !endDate) { showResult('result-challenge', '❌ Bitte alle Felder ausfüllen!', 'error'); return }
+  if (endDate <= startDate) { showResult('result-challenge', '❌ End-Datum muss nach Start-Datum liegen!', 'error'); return }
+  const today = new Date().toISOString().split('T')[0]
+  if (startDate < today) { showResult('result-challenge', '❌ Start-Datum darf nicht in der Vergangenheit liegen!', 'error'); return }
   try {
     showResult('result-challenge', '⏳ Erstelle Challenge...', 'info')
-    
-    const { error } = await supabase.from('challenges').insert({
-      required_orders: orders,
-      min_order_amount: minAmount,
-      bonus_points: points,
-      start_date: startDate,
-      end_date: endDate,
-      is_active: true
-    })
-    
+    const { error } = await supabase.from('challenges').insert({ bonus_points: points, required_orders: orders, min_order_amount: minAmount, start_date: startDate, end_date: endDate, is_active: true, created_at: new Date().toISOString() })
     if (error) throw error
-    
     showResult('result-challenge', '✅ Challenge erstellt!', 'success')
-    document.getElementById('challenge-orders').value = ''
-    document.getElementById('challenge-min-amount').value = ''
-    document.getElementById('challenge-points').value = ''
-    document.getElementById('challenge-start').value = ''
-    document.getElementById('challenge-end').value = ''
     loadChallenges()
-  } catch (e) {
-    showResult('result-challenge', '❌ Fehler: ' + e.message, 'error')
-  }
+  } catch (e) { showResult('result-challenge', '❌ Fehler: ' + e.message, 'error') }
 }
 
 async function loadChallenges() {
   try {
-    const { data, error } = await supabase.from('challenges').select('*').order('created_at', { ascending: false })
+    const { data: challenges, error } = await supabase.from('challenges').select('*').order('created_at', { ascending: false })
     if (error) throw error
-    
-    const list = document.getElementById('challenges-list')
-    if (!data || data.length === 0) {
-      list.innerHTML = '<div class="result info">Keine Challenges</div>'
-      return
-    }
-    
-    list.innerHTML = data.map(challenge => {
-      const isActive = challenge.is_active && new Date(challenge.end_date) >= new Date()
-      return `
-        <div class="customer-item">
-          <h3>🎁 ${challenge.bonus_points} Punkte</h3>
-          <div style="font-size: 14px; color: #666; margin-top: 4px;">
-            ${challenge.required_orders} Bestellungen ab ${challenge.min_order_amount} €
-          </div>
-          <div style="font-size: 13px; color: #666; margin-top: 4px;">
-            ${new Date(challenge.start_date).toLocaleDateString('de-DE')} - ${new Date(challenge.end_date).toLocaleDateString('de-DE')}
-          </div>
-          <div style="margin-top: 8px;">
-            <span style="padding: 4px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; background: ${isActive ? '#fef3c7' : '#fee2e2'}; color: ${isActive ? '#92400e' : '#991b1b'};">
-              ${isActive ? '✅ Aktiv' : '❌ Inaktiv'}
-            </span>
-          </div>
-          <button class="small danger" onclick="deleteChallenge(${challenge.id})" style="margin-top: 8px;">🗑️ Löschen</button>
-        </div>
-      `
+    const list = document.getElementById('challengeList')
+    if (!challenges || challenges.length === 0) { list.innerHTML = '<div class="empty-state">Keine Challenges vorhanden</div>'; return }
+    list.innerHTML = challenges.map(c => {
+      const start = new Date(c.start_date).toLocaleDateString('de-DE')
+      const end = new Date(c.end_date).toLocaleDateString('de-DE')
+      const now = new Date()
+      const isExpired = new Date(c.end_date) < now
+      const isActive = c.is_active && !isExpired
+      return `<div style="background: ${isActive ? '#fef3c7' : '#fee2e2'}; border: 2px solid ${isActive ? '#F9A825' : '#ef4444'}; border-radius: 10px; padding: 16px; margin-top: 12px;"><div style="display: flex; justify-content: space-between; align-items: start;"><div style="flex: 1;"><h3 style="color: #111827; margin-bottom: 8px;">🎁 ${c.bonus_points} Punkte für ${c.required_orders} Bestellungen ab ${c.min_order_amount} €</h3><p style="font-size: 13px; color: #6b7280; margin: 4px 0;">📅 Gültig: ${start} - ${end}</p><p style="font-size: 12px; color: ${isActive ? '#92400e' : '#dc2626'}; font-weight: 600; margin-top: 6px;">${isActive ? '✅ Aktiv' : isExpired ? '❌ Abgelaufen' : '⏸️ Inaktiv'}</p></div><div style="display: flex; gap: 6px;">${isActive ? `<button class="danger" style="padding: 8px 14px; font-size: 13px; width: auto;" onclick="toggleChallenge(${c.id}, false)">⏸️ Deaktivieren</button>` : `<button class="success" style="padding: 8px 14px; font-size: 13px; width: auto; margin: 0;" onclick="toggleChallenge(${c.id}, true)">✅ Aktivieren</button>`}<button class="danger" style="padding: 8px 14px; font-size: 13px; width: auto;" onclick="deleteChallenge(${c.id})">🗑️</button></div></div></div>`
     }).join('')
-  } catch (e) {
-    console.error('❌ Load challenges error:', e)
-  }
+  } catch (e) { console.error('Load challenges error:', e) }
+}
+
+async function toggleChallenge(id, active) {
+  try { await supabase.from('challenges').update({ is_active: active }).eq('id', id); loadChallenges() } catch (e) { alert('❌ Fehler: ' + e.message) }
 }
 
 async function deleteChallenge(id) {
   if (!confirm('Challenge wirklich löschen?')) return
-  try {
-    await supabase.from('challenges').delete().eq('id', id)
-    loadChallenges()
-  } catch (e) {
-    alert('❌ Fehler: ' + e.message)
-  }
+  try { await supabase.from('challenges').delete().eq('id', id); loadChallenges() } catch (e) { alert('❌ Fehler: ' + e.message) }
 }
 
-// ==========================================
-// COUPONS FUNCTIONS
-// ==========================================
-
 async function createCoupon() {
-  const title = document.getElementById('coupon-title').value.trim()
-  const product = document.getElementById('coupon-product').value.trim()
-  const price = parseFloat(document.getElementById('coupon-price').value)
-  const description = document.getElementById('coupon-desc').value.trim()
-  const expires = document.getElementById('coupon-expires').value
-  
-  if (!title || !product || !price || !expires) {
-    showResult('result-coupon', '❌ Bitte Pflichtfelder ausfüllen!', 'error')
-    return
-  }
-  
+  const product = document.getElementById('couponProduct').value.trim()
+  const price = document.getElementById('couponPrice').value.trim()
+  const startDate = document.getElementById('couponStart').value
+  const endDate = document.getElementById('couponEnd').value
+  if (!product || !price) { showResult('result-coupon-create', '❌ Bitte Produktname und Preis ausfüllen!', 'error'); return }
+  if (!startDate || !endDate) { showResult('result-coupon-create', '❌ Bitte Start- und End-Datum wählen!', 'error'); return }
+  if (endDate <= startDate) { showResult('result-coupon-create', '❌ End-Datum muss nach Start-Datum liegen!', 'error'); return }
+  const today = new Date().toISOString().split('T')[0]
+  if (startDate < today) { showResult('result-coupon-create', '❌ Start-Datum darf nicht in der Vergangenheit liegen!', 'error'); return }
+  showResult('result-coupon-create', '🎁 Erstelle Coupon...', 'info')
   try {
-    showResult('result-coupon', '⏳ Erstelle Coupon...', 'info')
-    
-    const { error } = await supabase.from('coupons').insert({
-      title: title,
-      product: product,
-      price: price,
-      description: description || null,
-      expires_at: new Date(expires).toISOString(),
-      is_active: true
-    })
-    
+    const code = Math.floor(1000 + Math.random() * 9000).toString()
+    const { error } = await supabase.from('coupons').insert({ code: code, title: 'Deal der Woche', product: product, price: price, description: '', start_date: startDate, end_date: endDate, expires_at: endDate, is_active: true, created_at: new Date().toISOString() })
     if (error) throw error
-    
-    showResult('result-coupon', '✅ Coupon erstellt!', 'success')
-    document.getElementById('coupon-title').value = ''
-    document.getElementById('coupon-product').value = ''
-    document.getElementById('coupon-price').value = ''
-    document.getElementById('coupon-desc').value = ''
-    document.getElementById('coupon-expires').value = ''
+    const start = new Date(startDate).toLocaleDateString('de-DE')
+    const end = new Date(endDate).toLocaleDateString('de-DE')
+    showResult('result-coupon-create', `✅ Coupon erstellt!<br>Produkt: <strong>${product}</strong><br>📅 Gültig: ${start} - ${end}`, 'success')
+    document.getElementById('couponProduct').value = ''
+    document.getElementById('couponPrice').value = ''
     loadCoupons()
-  } catch (e) {
-    showResult('result-coupon', '❌ Fehler: ' + e.message, 'error')
-  }
+  } catch (e) { showResult('result-coupon-create', '❌ Fehler: ' + e.message, 'error') }
 }
 
 async function loadCoupons() {
   try {
-    const { data, error } = await supabase.from('coupons').select('*').order('created_at', { ascending: false })
+    const { data: coupons, error } = await supabase.from('coupons').select('*').order('created_at', { ascending: false })
     if (error) throw error
-    
-    const list = document.getElementById('coupons-list')
-    if (!data || data.length === 0) {
-      list.innerHTML = '<div class="result info">Keine Coupons</div>'
-      return
+    const list = document.getElementById('couponList')
+    if (!coupons || coupons.length === 0) { list.innerHTML = '<div class="empty-state">Noch keine Coupons vorhanden</div>'; showResult('result-coupon-load', '', 'info'); return }
+    list.innerHTML = ''
+    for (const coupon of coupons) {
+      const startDate = coupon.start_date ? new Date(coupon.start_date) : new Date(coupon.created_at)
+      const endDate = coupon.end_date ? new Date(coupon.end_date) : new Date(coupon.expires_at)
+      const now = new Date()
+      const isExpired = endDate < now
+      const isNotStarted = startDate > now
+      const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
+      if (isExpired && coupon.is_active) { await supabase.from('coupons').update({ is_active: false }).eq('id', coupon.id); coupon.is_active = false }
+      const { data: activations } = await supabase.from('activated_coupons').select('unique_code, is_used, activated_at, customers(name, phone)').eq('coupon_id', coupon.id).order('activated_at', { ascending: false })
+      let activationsHTML = ''
+      if (activations && activations.length > 0) { activationsHTML = `<div style="margin-top: 12px; padding: 8px; background: #f3f4f6; border-radius: 6px;"><strong>👥 Aktiviert von ${activations.length} Kunde(n)</strong></div>` }
+      let statusText = '', statusColor = '', statusBg = ''
+      if (isExpired) { statusText = '❌ Abgelaufen'; statusColor = '#991b1b'; statusBg = '#fee2e2' }
+      else if (isNotStarted) { statusText = '⏰ Startet bald'; statusColor = '#92400e'; statusBg = '#fef3c7' }
+      else if (daysLeft === 0) { statusText = '⚠️ Läuft heute ab!'; statusColor = '#991b1b'; statusBg = '#fee2e2' }
+      else if (daysLeft <= 3) { statusText = `⏰ ${daysLeft} Tage`; statusColor = '#92400e'; statusBg = '#fef3c7' }
+      else { statusText = `⏰ ${daysLeft} Tage`; statusColor = '#92400e'; statusBg = '#fef3c7' }
+      let descHTML = coupon.description ? `<p style="color: #6b7280; font-size: 13px; margin: 3px 0;">📝 ${coupon.description}</p>` : ''
+      list.innerHTML += `<div style="background: #f9fafb; border: 2px solid ${isExpired ? '#ef4444' : '#e5e7eb'}; border-radius: 12px; padding: 16px; margin-bottom: 12px; ${isExpired ? 'opacity: 0.6;' : ''}"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;"><span style="padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; background: ${coupon.is_active ? '#fef3c7' : '#fee2e2'}; color: ${coupon.is_active ? '#92400e' : '#991b1b'};">${coupon.is_active ? '✅ Aktiv' : '❌ Inaktiv'}</span></div><div><h3 style="color: #111827; font-size: 16px; margin-bottom: 6px;">🍴 ${coupon.product}</h3><div style="font-size: 18px; font-weight: 700; color: #F9A825; margin: 6px 0;">💰 ${coupon.price}</div>${descHTML}<p style="font-size: 13px; color: #6b7280; margin: 4px 0;">📅 Gültig: ${startDate.toLocaleDateString('de-DE')} - ${endDate.toLocaleDateString('de-DE')}</p><span style="background: ${statusBg}; color: ${statusColor}; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; display: inline-block; margin-top: 4px;">${statusText}</span>${activationsHTML}</div><div style="display: flex; gap: 6px; margin-top: 10px;">${coupon.is_active && !isExpired ? `<button class="danger" style="width: auto; padding: 8px 14px; font-size: 13px;" onclick="deactivateCoupon(${coupon.id})">❌ Deaktivieren</button>` : `<button class="success" style="width: auto; padding: 8px 14px; font-size: 13px; margin: 0;" onclick="activateCoupon(${coupon.id})">✅ Aktivieren</button>`}<button class="danger" style="width: auto; padding: 8px 14px; font-size: 13px;" onclick="deleteCoupon(${coupon.id})">🗑️ Löschen</button></div></div>`
     }
-    
-    list.innerHTML = data.map(coupon => {
-      const isActive = coupon.is_active && new Date(coupon.expires_at) > new Date()
-      return `
-        <div class="customer-item">
-          <h3>${coupon.title}</h3>
-          <div style="font-size: 14px; color: #666; margin-top: 4px;">
-            🍴 ${coupon.product} - ${coupon.price.toFixed(2)} €
-          </div>
-          ${coupon.description ? `<div style="font-size: 13px; color: #666; margin-top: 4px;">${coupon.description}</div>` : ''}
-          <div style="font-size: 13px; color: #666; margin-top: 4px;">
-            Läuft ab: ${new Date(coupon.expires_at).toLocaleDateString('de-DE')}
-          </div>
-          <div style="margin-top: 8px;">
-            <span style="padding: 4px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; background: ${isActive ? '#fef3c7' : '#fee2e2'}; color: ${isActive ? '#92400e' : '#991b1b'};">
-              ${isActive ? '✅ Aktiv' : '❌ Inaktiv'}
-            </span>
-          </div>
-          <button class="small danger" onclick="deleteCoupon(${coupon.id})" style="margin-top: 8px;">🗑️ Löschen</button>
-        </div>
-      `
-    }).join('')
-  } catch (e) {
-    console.error('❌ Load coupons error:', e)
-  }
+    showResult('result-coupon-load', '', 'success')
+  } catch (e) { showResult('result-coupon-load', '❌ Fehler: ' + e.message, 'error') }
 }
 
-async function deleteCoupon(id) {
-  if (!confirm('Coupon wirklich löschen?')) return
-  try {
-    await supabase.from('coupons').delete().eq('id', id)
-    loadCoupons()
-  } catch (e) {
-    alert('❌ Fehler: ' + e.message)
-  }
-}
+async function deactivateCoupon(id) { try { await supabase.from('coupons').update({ is_active: false }).eq('id', id); loadCoupons() } catch (e) { loadCoupons() } }
+async function activateCoupon(id) { try { await supabase.from('coupons').update({ is_active: true }).eq('id', id); loadCoupons() } catch (e) { loadCoupons() } }
+async function deleteCoupon(id) { if (!confirm('Coupon wirklich löschen?')) return; try { await supabase.from('coupons').delete().eq('id', id); loadCoupons() } catch (e) { loadCoupons() } }
 
-// ==========================================
-// INIT
-// ==========================================
-
-window.onload = () => {
-  loadCustomers()
-  
-  // Set default dates for wheel
-  const now = new Date()
-  const oneMonthLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
-  document.getElementById('wheel-start-date').value = now.toISOString().slice(0, 16)
-  document.getElementById('wheel-end-date').value = oneMonthLater.toISOString().slice(0, 16)
-}
-
-console.log('✅ Döner Boxx Verwaltung geladen (mit Wheel Integration)')
-console.log('🔒 Verwendet crypto.getRandomValues() für sichere Zufallszahlen')
+window.addEventListener('DOMContentLoaded', function() {
+  loadAllCustomers(); loadGlobalBonuses(); loadChallenges(); loadCoupons()
+  const today = new Date(), nextWeek = new Date(); nextWeek.setDate(nextWeek.getDate() + 7)
+  const todayStr = today.toISOString().split('T')[0], nextWeekStr = nextWeek.toISOString().split('T')[0]
+  document.getElementById('globalBonusStart').value = todayStr; document.getElementById('globalBonusEnd').value = nextWeekStr
+  document.getElementById('challengeStart').value = todayStr; document.getElementById('challengeEnd').value = nextWeekStr
+  document.getElementById('couponStart').value = todayStr; document.getElementById('couponEnd').value = nextWeekStr
+})
+console.log('✅ Döner Boxx Verwaltung geladen!')
 </script>
-
 </body>
 </html>
