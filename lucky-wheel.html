@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucky Wheel - Döner Boxx</title>
+<link rel="icon" href="/favicon.png" type="image/png">
+<style>
+@font-face {
+  font-family: 'Flame';
+  src: url('Flame-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body { 
+  font-family: 'Flame', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, #E31E24 0%, #F9A825 100%);
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  max-width: 600px;
+  width: 100%;
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.header-logo {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 16px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  clip-path: circle(50%);
+}
+
+.header-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+h1 {
+  color: #E31E24;
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: #666;
+  font-size: 16px;
+}
+
+.wheel-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 30px;
+}
+
+.wheel-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.wheel-pointer {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-top: 40px solid #E31E24;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  z-index: 10;
+}
+
+.wheel-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  background: white;
+  border: 4px solid #E31E24;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 10;
+  cursor: pointer;
+  transition: all 0.2s;
+  overflow: hidden;
+  padding: 8px;
+}
+
+.wheel-center:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.wheel-center img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.spin-button {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: 'Flame', sans-serif;
+  box-shadow: 0 4px 12px rgba(227, 30, 36, 0.3);
+}
+
+.spin-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(227, 30, 36, 0.4);
+}
+
+.spin-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.result-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.result-modal.active {
+  display: flex;
+}
+
+.result-content {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.result-icon {
+  font-size: 80px;
+  margin-bottom: 20px;
+}
+
+.result-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #E31E24;
+  margin-bottom: 12px;
+}
+
+.result-prize {
+  font-size: 22px;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+.result-button {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Flame', sans-serif;
+}
+
+.info-box {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.info-box .timer {
+  font-size: 24px;
+  font-weight: 700;
+  color: #E31E24;
+  margin-top: 8px;
+}
+
+.test-controls {
+  margin-top: 30px;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 2px dashed #ccc;
+}
+
+.test-controls h3 {
+  color: #666;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.test-controls input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-family: 'Flame', sans-serif;
+}
+
+.test-controls button {
+  width: 100%;
+  padding: 12px;
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 4px;
+  font-family: 'Flame', sans-serif;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="header-logo">
+      <img src="/logo-round.png" alt="Döner Boxx">
+    </div>
+    <h1>🎡 Lucky Wheel</h1>
+    <p class="subtitle">Drehe am Glücksrad und gewinne tolle Preise!</p>
+  </div>
+
+  <div class="wheel-container">
+    <div class="wheel-wrapper">
+      <div class="wheel-pointer"></div>
+      <canvas id="wheel" width="400" height="400"></canvas>
+      <div class="wheel-center" onclick="spinWheel()">
+        <img src="/logo-round.png" alt="SPIN">
+      </div>
+    </div>
+  </div>
+
+  <button id="spinButton" class="spin-button" onclick="spinWheel()">
+    🎰 Jetzt drehen!
+  </button>
+
+  <div class="info-box">
+    <div id="spinInfo">Du kannst 1x pro Tag drehen</div>
+    <div id="timer" class="timer" style="display: none;"></div>
+  </div>
+
+  <!-- Test Controls -->
+  <div class="test-controls">
+    <h3>🧪 Test-Steuerung (nur für Demo)</h3>
+    <input id="testCustomerId" type="text" placeholder="Test Kunden-ID (z.B. 1)" value="1">
+    <button onclick="resetSpin()">🔄 Spin zurücksetzen (nochmal drehen)</button>
+    <button onclick="loadTestPrizes()">🎁 Test-Preise laden</button>
+  </div>
+</div>
+
+<!-- Result Modal -->
+<div id="resultModal" class="result-modal">
+  <div class="result-content">
+    <div class="result-icon" id="resultIcon">🎉</div>
+    <div class="result-title" id="resultTitle">Gewonnen!</div>
+    <div class="result-prize" id="resultPrize">100 Punkte</div>
+    <button class="result-button" onclick="closeResult()">Weiter</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+const canvas = document.getElementById('wheel')
+const ctx = canvas.getContext('2d')
+let rotation = 0
+let isSpinning = false
+let testCustomerId = 1
+
+// Wheel-Segmente (Preise)
+const prizes = [
+  { label: '50 Punkte', color: '#FF6B6B', chance: 30, icon: '⭐', type: 'points', value: 50 },
+  { label: '100 Punkte', color: '#4ECDC4', chance: 20, icon: '💎', type: 'points', value: 100 },
+  { label: 'Leider verloren', color: '#95A5A6', chance: 15, icon: '❌', type: 'nothing', value: 0 },
+  { label: '250 Punkte', color: '#F9A825', chance: 15, icon: '🎁', type: 'points', value: 250 },
+  { label: 'Ayran gratis', color: '#9B59B6', chance: 10, icon: '🥤', type: 'reward', value: 'Ayran (0.25 l)' },
+  { label: '20% Rabatt', color: '#E74C3C', chance: 5, icon: '🎟️', type: 'coupon', value: 20 },
+  { label: 'Doppelte Punkte', color: '#3498DB', chance: 4, icon: '🔥', type: 'bonus', value: 'double_points' },
+  { label: '500 JACKPOT!', color: '#F39C12', chance: 1, icon: '💰', type: 'points', value: 500 }
+]
+
+function drawWheel() {
+  const centerX = canvas.width / 2
+  const centerY = canvas.height / 2
+  const radius = canvas.width / 2 - 10
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  ctx.save()
+  ctx.translate(centerX, centerY)
+  ctx.rotate(rotation)
+
+  const totalSegments = prizes.length
+  const anglePerSegment = (2 * Math.PI) / totalSegments
+
+  prizes.forEach((prize, i) => {
+    const startAngle = i * anglePerSegment
+    const endAngle = startAngle + anglePerSegment
+
+    // Draw segment
+    ctx.beginPath()
+    ctx.moveTo(0, 0)
+    ctx.arc(0, 0, radius, startAngle, endAngle)
+    ctx.closePath()
+    ctx.fillStyle = prize.color
+    ctx.fill()
+    ctx.strokeStyle = '#fff'
+    ctx.lineWidth = 3
+    ctx.stroke()
+
+    // Draw text
+    ctx.save()
+    ctx.rotate(startAngle + anglePerSegment / 2)
+    ctx.textAlign = 'center'
+    ctx.fillStyle = '#fff'
+    ctx.font = 'bold 20px Flame, Arial'
+    ctx.fillText(prize.icon, radius * 0.7, 8)
+    ctx.font = 'bold 14px Flame, Arial'
+    ctx.fillText(prize.label, radius * 0.7, 28)
+    ctx.restore()
+  })
+
+  ctx.restore()
+}
+
+function getRandomPrize() {
+  // Crypto-secure random number
+  const array = new Uint32Array(1)
+  crypto.getRandomValues(array)
+  const random = array[0] / (0xFFFFFFFF + 1) * 100
+
+  let cumulative = 0
+  for (const prize of prizes) {
+    cumulative += prize.chance
+    if (random <= cumulative) {
+      return prize
+    }
+  }
+  return prizes[0]
+}
+
+async function canSpin() {
+  try {
+    const customerId = parseInt(document.getElementById('testCustomerId').value) || testCustomerId
+    const today = new Date().toISOString().split('T')[0]
+    
+    const { data, error } = await supabase
+      .from('wheel_spins')
+      .select('*')
+      .eq('customer_id', customerId)
+      .gte('created_at', today + 'T00:00:00')
+    
+    if (error) {
+      console.log('⚠️ Tabelle wheel_spins existiert nicht - erstelle sie später')
+      return true
+    }
+    
+    return !data || data.length === 0
+  } catch (e) {
+    console.log('⚠️ Fehler bei canSpin:', e)
+    return true
+  }
+}
+
+async function spinWheel() {
+  if (isSpinning) return
+  
+  const canSpinNow = await canSpin()
+  if (!canSpinNow) {
+    alert('❌ Du hast heute bereits gedreht! Komm morgen wieder.')
+    return
+  }
+
+  isSpinning = true
+  document.getElementById('spinButton').disabled = true
+
+  const winningPrize = getRandomPrize()
+  const winningIndex = prizes.indexOf(winningPrize)
+  const anglePerSegment = (2 * Math.PI) / prizes.length
+  
+  // Calculate target rotation (pointer at top)
+  const targetAngle = winningIndex * anglePerSegment + anglePerSegment / 2
+  const spins = 5 // Number of full rotations
+  const totalRotation = spins * 2 * Math.PI + (2 * Math.PI - targetAngle)
+
+  const startTime = Date.now()
+  const duration = 4000 // 4 seconds
+
+  function animate() {
+    const elapsed = Date.now() - startTime
+    const progress = Math.min(elapsed / duration, 1)
+    
+    // Easing function (ease out cubic)
+    const easeOut = 1 - Math.pow(1 - progress, 3)
+    
+    rotation = easeOut * totalRotation
+    drawWheel()
+
+    if (progress < 1) {
+      requestAnimationFrame(animate)
+    } else {
+      isSpinning = false
+      showResult(winningPrize)
+      saveSpin(winningPrize)
+    }
+  }
+
+  animate()
+}
+
+function showResult(prize) {
+  const modal = document.getElementById('resultModal')
+  const icon = document.getElementById('resultIcon')
+  const title = document.getElementById('resultTitle')
+  const prizeText = document.getElementById('resultPrize')
+
+  if (prize.type === 'nothing') {
+    icon.textContent = '😢'
+    title.textContent = 'Leider verloren!'
+    prizeText.textContent = 'Beim nächsten Mal klappt es!'
+  } else {
+    icon.textContent = prize.icon
+    title.textContent = 'Glückwunsch! 🎉'
+    prizeText.textContent = prize.label
+  }
+
+  modal.classList.add('active')
+}
+
+function closeResult() {
+  document.getElementById('resultModal').classList.remove('active')
+  updateSpinInfo()
+}
+
+async function saveSpin(prize) {
+  try {
+    const customerId = parseInt(document.getElementById('testCustomerId').value) || testCustomerId
+    
+    await supabase.from('wheel_spins').insert({
+      customer_id: customerId,
+      prize_type: prize.type,
+      prize_value: prize.value.toString(),
+      prize_label: prize.label
+    })
+    
+    console.log('✅ Spin gespeichert:', prize.label)
+  } catch (e) {
+    console.log('⚠️ Fehler beim Speichern:', e)
+  }
+}
+
+async function updateSpinInfo() {
+  const canSpinNow = await canSpin()
+  const button = document.getElementById('spinButton')
+  const info = document.getElementById('spinInfo')
+  
+  if (canSpinNow) {
+    button.disabled = false
+    info.textContent = 'Du kannst 1x pro Tag drehen'
+  } else {
+    button.disabled = true
+    info.textContent = 'Heute bereits gedreht! Komm morgen wieder 🎡'
+  }
+}
+
+async function resetSpin() {
+  const customerId = parseInt(document.getElementById('testCustomerId').value) || testCustomerId
+  const today = new Date().toISOString().split('T')[0]
+  
+  try {
+    await supabase
+      .from('wheel_spins')
+      .delete()
+      .eq('customer_id', customerId)
+      .gte('created_at', today + 'T00:00:00')
+    
+    alert('✅ Spin zurückgesetzt! Du kannst jetzt nochmal drehen.')
+    updateSpinInfo()
+  } catch (e) {
+    console.log('⚠️ Fehler beim Reset:', e)
+  }
+}
+
+function loadTestPrizes() {
+  alert('🎁 Test-Preise sind bereits geladen:\n\n' + 
+    prizes.map(p => `${p.icon} ${p.label} (${p.chance}%)`).join('\n'))
+}
+
+// Initialize
+drawWheel()
+updateSpinInfo()
+
+console.log('✅ Lucky Wheel geladen!')
+console.log('🎡 Preise:', prizes)
+</script>
+
+</body>
+</html>
