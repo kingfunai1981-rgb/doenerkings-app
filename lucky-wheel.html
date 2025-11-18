@@ -90,6 +90,7 @@ canvas {
   height: 100%;
   border-radius: 50%;
   box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  cursor: pointer;
 }
 
 .wheel-pointer {
@@ -332,26 +333,26 @@ let rotation = 0
 let isSpinning = false
 let testCustomerId = 1
 
-// Wheel-Segmente (18 Felder wie auf dem echten Rad)
+// Wheel-Segmente (18 Felder) - Anordnung: rot, s, w, s, w, s, w, s, w, rot, w, s, w, s, w, s, w, s
 const prizes = [
-  { label: 'AYRAN', color: '#000000', textColor: '#FFFFFF', type: 'reward', value: 'Ayran (0.25 l)' },
-  { label: '50 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },
-  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', type: 'reward', value: 'Döner' },
-  { label: '100 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },
-  { label: 'POMMES', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Pommes' },
-  { label: '75 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },
-  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Ayran (0.25 l)' },
-  { label: '150 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 150 },
-  { label: 'COLA', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Cola (0.33 l)' },
-  { label: '200 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 200 },
-  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', type: 'reward', value: 'Döner' },
-  { label: '50 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },
-  { label: 'AYRAN', color: '#000000', textColor: '#FFFFFF', type: 'reward', value: 'Ayran (0.25 l)' },
-  { label: '100 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },
-  { label: 'POMMES', color: '#000000', textColor: '#FFFFFF', type: 'reward', value: 'Pommes' },
-  { label: '75 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 75 },
-  { label: 'COLA', color: '#000000', textColor: '#FFFFFF', type: 'reward', value: 'Cola (0.33 l)' },
-  { label: '250 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 250 }
+  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', type: 'reward', value: 'Döner' },           // 1. ROT
+  { label: '50 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },           // 2. SCHWARZ
+  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Ayran (0.25 l)' }, // 3. WEISS
+  { label: '100 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },         // 4. SCHWARZ
+  { label: 'POMMES', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Pommes' },        // 5. WEISS
+  { label: '75 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },           // 6. SCHWARZ
+  { label: 'COLA', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Cola (0.33 l)' },   // 7. WEISS
+  { label: '150 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 150 },         // 8. SCHWARZ
+  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Ayran (0.25 l)' }, // 9. WEISS
+  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', type: 'reward', value: 'Döner' },          // 10. ROT
+  { label: '200 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 200 },         // 11. WEISS
+  { label: '50 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },           // 12. SCHWARZ
+  { label: 'POMMES', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Pommes' },        // 13. WEISS
+  { label: '100 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },         // 14. SCHWARZ
+  { label: 'COLA', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Cola (0.33 l)' },   // 15. WEISS
+  { label: '75 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },           // 16. SCHWARZ
+  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Ayran (0.25 l)' }, // 17. WEISS
+  { label: '250 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 250 }          // 18. SCHWARZ
 ]
 
 const logoImg = new Image()
@@ -374,16 +375,13 @@ function drawWheel() {
     const startAngle = i * anglePerSegment
     const endAngle = startAngle + anglePerSegment
 
-    // Draw segment
+    // Draw segment (ohne Striche)
     ctx.beginPath()
     ctx.moveTo(0, 0)
     ctx.arc(0, 0, radius, startAngle, endAngle)
     ctx.closePath()
     ctx.fillStyle = prize.color
     ctx.fill()
-    ctx.strokeStyle = '#333'
-    ctx.lineWidth = 2
-    ctx.stroke()
 
     // Draw text (rotated)
     ctx.save()
@@ -406,14 +404,11 @@ function drawWheel() {
     ctx.restore()
   })
 
-  // Draw center circle with logo (rotates with wheel)
+  // Draw center circle with logo (ohne schwarzen Ring)
   ctx.beginPath()
   ctx.arc(0, 0, 50, 0, 2 * Math.PI)
   ctx.fillStyle = 'white'
   ctx.fill()
-  ctx.strokeStyle = '#333'
-  ctx.lineWidth = 5
-  ctx.stroke()
 
   // Draw logo in center
   if (logoImg.complete) {
@@ -595,6 +590,9 @@ logoImg.onload = () => {
 }
 drawWheel()
 updateSpinInfo()
+
+// Canvas Click-Event
+canvas.addEventListener('click', spinWheel)
 
 console.log('✅ Lucky Wheel geladen!')
 console.log('🎡 18 Felder:', prizes.map(p => p.label))
