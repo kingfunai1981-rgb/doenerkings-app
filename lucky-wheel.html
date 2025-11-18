@@ -404,19 +404,19 @@ function drawWheel() {
     ctx.restore()
   })
 
-  // Draw center circle with logo (ohne schwarzen Ring)
+  // Draw center circle with logo (schmaler weißer Ring)
   ctx.beginPath()
-  ctx.arc(0, 0, 50, 0, 2 * Math.PI)
+  ctx.arc(0, 0, 65, 0, 2 * Math.PI)
   ctx.fillStyle = 'white'
   ctx.fill()
 
-  // Draw logo in center
+  // Draw logo in center (größer)
   if (logoImg.complete) {
     ctx.save()
     ctx.beginPath()
-    ctx.arc(0, 0, 40, 0, 2 * Math.PI)
+    ctx.arc(0, 0, 58, 0, 2 * Math.PI)
     ctx.clip()
-    ctx.drawImage(logoImg, -40, -40, 80, 80)
+    ctx.drawImage(logoImg, -58, -58, 116, 116)
     ctx.restore()
   }
 
