@@ -262,27 +262,27 @@ const OFFSET = -Math.PI / 2 - anglePerSegment / 2
 let rotation = 0
 let isSpinning = false
 
-// 🎨 FESTE 18 FELDER - NICHT MEHR BEARBEITBAR
-// Empfohlene Verteilung (im Uhrzeigersinn)
+// 🎨 FESTE 18 FELDER - Korrekte Reihenfolge im Uhrzeigersinn
+// Beginnend oben beim roten Pfeil
 const prizes = [
-  { label: 'DÖNER 500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },      // 1
-  { label: '50 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },       // 2
-  { label: '100 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },     // 3
-  { label: '25 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25 },       // 4
-  { label: '75 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 75 },       // 5
-  { label: 'SPIN AGAIN', color: '#000000', textColor: '#FFFFFF', type: 'spin_again', value: 0 },   // 6
-  { label: '50 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },       // 7
-  { label: '100 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },     // 8
-  { label: '25 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 25 },       // 9
-  { label: 'DÖNER 500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },      // 10
-  { label: '75 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },       // 11
-  { label: '50 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },       // 12
-  { label: 'SPIN AGAIN', color: '#000000', textColor: '#FFFFFF', type: 'spin_again', value: 0 },   // 13
-  { label: '100 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },     // 14
-  { label: '25 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25 },       // 15
-  { label: '75 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 75 },       // 16
-  { label: '50 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },       // 17
-  { label: '100 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 }      // 18
+  { label: '500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },          // 1 - ROT
+  { label: '50', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },            // 2 - WEIß
+  { label: '100', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },          // 3 - SCHWARZ
+  { label: '25', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 25 },            // 4 - WEIß
+  { label: '75', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },            // 5 - SCHWARZ
+  { label: 'DREHE NOCHMAL!', color: '#FFFFFF', textColor: '#000000', type: 'spin_again', value: 0 }, // 6 - WEIß
+  { label: '50', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },            // 7 - SCHWARZ
+  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },          // 8 - WEIß
+  { label: '25', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25 },            // 9 - SCHWARZ
+  { label: '500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },          // 10 - ROT
+  { label: '75', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },            // 11 - SCHWARZ
+  { label: '50', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },            // 12 - WEIß
+  { label: 'DREHE NOCHMAL!', color: '#000000', textColor: '#FFFFFF', type: 'spin_again', value: 0 }, // 13 - SCHWARZ
+  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },          // 14 - WEIß
+  { label: '25', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25 },            // 15 - SCHWARZ
+  { label: '75', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 75 },            // 16 - WEIß
+  { label: '50', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },            // 17 - SCHWARZ
+  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 }           // 18 - WEIß
 ]
 
 const logoImg = new Image()
@@ -315,14 +315,16 @@ function drawWheel() {
     ctx.textBaseline = 'middle'
     ctx.fillStyle = prize.textColor
     
-    const words = prize.label.split(' ')
-    if (words.length === 1) {
-      ctx.font = 'bold 16px Flame, Arial'
-      ctx.fillText(prize.label, radius * 0.7, 0)
+    // Unterscheide zwischen Zahlen und "DREHE NOCHMAL!"
+    if (prize.label === 'DREHE NOCHMAL!') {
+      // Text in 2 Zeilen aufteilen
+      ctx.font = 'bold 11px Flame, Arial'
+      ctx.fillText('DREHE', radius * 0.68, -8)
+      ctx.fillText('NOCHMAL!', radius * 0.68, 8)
     } else {
-      ctx.font = 'bold 14px Flame, Arial'
-      ctx.fillText(words[0], radius * 0.7, -8)
-      ctx.fillText(words[1], radius * 0.7, 8)
+      // Nur Zahl anzeigen - größer
+      ctx.font = 'bold 28px Flame, Arial'
+      ctx.fillText(prize.label, radius * 0.7, 0)
     }
     ctx.restore()
   })
@@ -482,7 +484,7 @@ function showSpinAgain(customerId) {
   const prizeText = document.getElementById('resultPrize')
 
   icon.textContent = '🔄'
-  title.textContent = 'Spin Again!'
+  title.textContent = 'Drehe nochmal!'
   prizeText.textContent = 'Du darfst nochmal drehen! 🎉'
 
   modal.classList.add('active')
