@@ -465,6 +465,21 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
       </div>
     </div>
     
+    <div id="wheel-section" style="display: none;">
+      <div class="card">
+        <h2>🎡 Lucky Wheel</h2>
+        <div id="wheel-available-badge" style="display: none; background: linear-gradient(135deg, #F9A825, #f59e0b); color: white; padding: 16px; border-radius: 12px; margin: 16px 0; font-size: 18px; font-weight: 700; text-align: center; box-shadow: 0 4px 12px rgba(249, 168, 37, 0.4);">
+          🎉 Du hast <span id="wheel-count">0</span> freie Drehung(en)!
+        </div>
+        <button onclick="openWheel()" style="background: linear-gradient(135deg, #E31E24, #F9A825); font-size: 18px; padding: 18px;">
+          🎰 Jetzt drehen!
+        </button>
+        <div id="wheel-info" style="background: #f9fafb; padding: 16px; border-radius: 12px; margin-top: 16px; text-align: center; font-size: 14px; color: #666;">
+          🕒 Happy Hour: 15-18 Uhr<br>Bei Bestellung ≥10€ darfst du drehen!
+        </div>
+      </div>
+    </div>
+    
     <div class="card">
       <h2>🎁 Prämien einlösen</h2>
       <div class="reward">
@@ -663,6 +678,7 @@ async function refreshCustomerData() {
     loadCoupons()
     loadPendingCodes()
     loadChallenges()
+    loadWheel() // NEU: Wheel laden
   } catch (e) { 
     console.error('❌ Refresh error:', e.message, e)
     if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null }
@@ -845,6 +861,44 @@ async function activateCoupon(couponId) {
 
 async function deactivateCoupon(couponId) {
   try { const id = parseInt(couponId); await supabase.from('activated_coupons').delete().eq('customer_id', currentCustomer.id).eq('coupon_id', id).eq('is_used', false); loadCoupons() } catch (e) { console.error('Fehler beim Stornieren:', e.message); loadCoupons() }
+}
+
+// 🎡 WHEEL FUNKTIONEN
+async function loadWheel() {
+  if (!currentCustomer) return
+  try {
+    const { data: unlocks, error } = await supabase
+      .from('wheel_unlocks')
+      .select('*')
+      .eq('customer_id', currentCustomer.id)
+      .eq('is_used', false)
+      .gt('expires_at', new Date().toISOString())
+    
+    if (error) {
+      console.log('ℹ️ Wheel_unlocks Tabelle nicht gefunden')
+      return
+    }
+    
+    const section = document.getElementById('wheel-section')
+    const badge = document.getElementById('wheel-available-badge')
+    const countSpan = document.getElementById('wheel-count')
+    
+    if (unlocks && unlocks.length > 0) {
+      section.style.display = 'block'
+      badge.style.display = 'block'
+      countSpan.textContent = unlocks.length
+    } else {
+      section.style.display = 'block'
+      badge.style.display = 'none'
+    }
+  } catch (e) {
+    console.log('Wheel error:', e)
+  }
+}
+
+function openWheel() {
+  if (!currentCustomer) return
+  window.location.href = `/lucky-wheel.html?customer_id=${currentCustomer.id}`
 }
 
 function logout() {
