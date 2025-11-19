@@ -476,14 +476,6 @@ textarea {
       </div>
       <p style="font-size: 13px; color: #6b7280; margin-top: -8px; margin-bottom: 16px;">Wenn keine Tage ausgewählt sind, ist das Wheel jeden Tag verfügbar.</p>
 
-      <label class="form-label">🕐 Happy Hour Startzeit</label>
-      <input type="time" id="wheel-start-time" placeholder="z.B. 15:00">
-      <p style="font-size: 13px; color: #6b7280; margin-top: 4px; margin-bottom: 16px;">Leer lassen = ganztägig verfügbar</p>
-
-      <label class="form-label">🕐 Happy Hour Endzeit</label>
-      <input type="time" id="wheel-end-time" placeholder="z.B. 18:00">
-      <p style="font-size: 13px; color: #6b7280; margin-top: 4px; margin-bottom: 16px;">Leer lassen = ganztägig verfügbar</p>
-
       <label class="form-label">💰 Mindestbestellwert (€)</label>
       <input type="number" step="0.01" id="wheel-min-amount" value="10.00" placeholder="z.B. 10.00">
 
@@ -822,14 +814,6 @@ async function loadWheelConfig() {
     document.getElementById('wheel-active').value = config.is_active.toString()
     document.getElementById('wheel-min-amount').value = parseFloat(config.min_order_amount).toFixed(2)
     
-    // Happy Hour Zeiten setzen
-    if (config.start_time) {
-      document.getElementById('wheel-start-time').value = config.start_time
-    }
-    if (config.end_time) {
-      document.getElementById('wheel-end-time').value = config.end_time
-    }
-    
     // Wochentags-Checkboxen setzen
     if (config.active_days && Array.isArray(config.active_days)) {
       config.active_days.forEach(day => {
@@ -845,8 +829,6 @@ async function loadWheelConfig() {
 async function saveWheelConfig() {
   const isActive = document.getElementById('wheel-active').value === 'true'
   const minAmount = parseFloat(document.getElementById('wheel-min-amount').value)
-  const startTime = document.getElementById('wheel-start-time').value || null
-  const endTime = document.getElementById('wheel-end-time').value || null
   
   if (!minAmount || minAmount <= 0) {
     showResult('result-wheel-config', '❌ Bitte gültigen Mindestbestellwert eingeben!', 'error')
@@ -865,9 +847,7 @@ async function saveWheelConfig() {
     const configData = {
       is_active: isActive,
       min_order_amount: minAmount,
-      active_days: activeDays.length > 0 ? activeDays : null,
-      start_time: startTime,
-      end_time: endTime
+      active_days: activeDays.length > 0 ? activeDays : null
     }
     
     const { data: existing } = await supabase.from('wheel_config').select('id').limit(1)
