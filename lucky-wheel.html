@@ -262,26 +262,27 @@ const OFFSET = -Math.PI / 2 - anglePerSegment / 2
 let rotation = 0
 let isSpinning = false
 
-// 🎨 KLASSISCHE FARBEN: Rot, Schwarz, Weiß
+// 🎨 FESTE 18 FELDER - NICHT MEHR BEARBEITBAR
+// Empfohlene Verteilung (im Uhrzeigersinn)
 const prizes = [
-  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },
-  { label: '50 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },
-  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 150 },
-  { label: '100 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },
-  { label: 'POMMES', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 200 },
-  { label: '75 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },
-  { label: 'COLA', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 150 },
-  { label: '150 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 150 },
-  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 150 },
-  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },
-  { label: '200 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 200 },
-  { label: '50 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },
-  { label: 'POMMES', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 200 },
-  { label: '100 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },
-  { label: 'COLA', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 150 },
-  { label: '75 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },
-  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 150 },
-  { label: '250 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 250 }
+  { label: 'DÖNER 500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },      // 1
+  { label: '50 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },       // 2
+  { label: '100 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },     // 3
+  { label: '25 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25 },       // 4
+  { label: '75 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 75 },       // 5
+  { label: 'SPIN AGAIN', color: '#000000', textColor: '#FFFFFF', type: 'spin_again', value: 0 },   // 6
+  { label: '50 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },       // 7
+  { label: '100 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },     // 8
+  { label: '25 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 25 },       // 9
+  { label: 'DÖNER 500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },      // 10
+  { label: '75 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },       // 11
+  { label: '50 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },       // 12
+  { label: 'SPIN AGAIN', color: '#000000', textColor: '#FFFFFF', type: 'spin_again', value: 0 },   // 13
+  { label: '100 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },     // 14
+  { label: '25 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25 },       // 15
+  { label: '75 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 75 },       // 16
+  { label: '50 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },       // 17
+  { label: '100 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 }      // 18
 ]
 
 const logoImg = new Image()
@@ -381,6 +382,8 @@ async function canSpin(customerId) {
   }
 }
 
+let currentUnlockId = null // Speichern der aktuellen unlock ID für Spin Again
+
 async function spinWheel() {
   if (isSpinning) return
   
@@ -393,10 +396,14 @@ async function spinWheel() {
     return
   }
   
-  const unlock = await canSpin(customerId)
-  if (!unlock) {
-    alert('❌ Du hast derzeit keine freie Drehung!')
-    return
+  // Nur beim ersten Spin prüfen, ob unlock vorhanden ist
+  if (!currentUnlockId) {
+    const unlock = await canSpin(customerId)
+    if (!unlock) {
+      alert('❌ Du hast derzeit keine freie Drehung!')
+      return
+    }
+    currentUnlockId = unlock.id
   }
 
   isSpinning = true
@@ -451,14 +458,52 @@ async function spinWheel() {
       const fieldIndex = Math.floor(fieldAngle / anglePerSegment) % prizes.length
       const actualPrize = prizes[fieldIndex]
       
-      console.log('🎯 Gewonnen:', actualPrize.label, actualPrize.value, 'Punkte')
+      console.log('🎯 Gewonnen:', actualPrize.label, actualPrize.type, actualPrize.value)
       
-      showResult(actualPrize)
-      saveSpin(customerId, unlock.id, actualPrize)
+      // Prüfe ob "Spin Again"
+      if (actualPrize.type === 'spin_again') {
+        showSpinAgain(customerId)
+      } else {
+        // Echte Punkte gewonnen
+        showResult(actualPrize)
+        saveSpin(customerId, currentUnlockId, actualPrize)
+        currentUnlockId = null // Reset für nächstes Mal
+      }
     }
   }
 
   animate()
+}
+
+function showSpinAgain(customerId) {
+  const modal = document.getElementById('resultModal')
+  const icon = document.getElementById('resultIcon')
+  const title = document.getElementById('resultTitle')
+  const prizeText = document.getElementById('resultPrize')
+
+  icon.textContent = '🔄'
+  title.textContent = 'Spin Again!'
+  prizeText.textContent = 'Du darfst nochmal drehen! 🎉'
+
+  modal.classList.add('active')
+  
+  // Button wird zu "Nochmal drehen"
+  const button = document.querySelector('.result-button')
+  button.textContent = '🎰 Nochmal drehen!'
+  button.onclick = () => {
+    closeSpinAgainResult()
+  }
+}
+
+function closeSpinAgainResult() {
+  document.getElementById('resultModal').classList.remove('active')
+  document.getElementById('spinButton').disabled = false
+  document.getElementById('spinButton').textContent = '🎰 Jetzt drehen!'
+  
+  // Button zurücksetzen
+  const button = document.querySelector('.result-button')
+  button.textContent = 'Weiter'
+  button.onclick = closeResult
 }
 
 function showResult(prize) {
