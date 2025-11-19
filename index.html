@@ -1428,14 +1428,17 @@ async function saveWheelSpin(unlockId, prize) {
       throw unlockError
     }
     
-    // Speichere Spin - mit Ihrem AKTUELLEN Schema (ohne prize_label, unlock_id)!
+    // Speichere Spin - mit Ihrem AKTUELLEN Schema (kurze Codes für varchar(4))
     // Generiere einen eindeutigen Code für diesen Spin
     const prizeCode = `WHEEL-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
     
+    // Prize Type als kurzer Code (max 4 Zeichen für varchar(4))
+    const prizeTypeCode = prize.type === 'points' ? 'pts' : 'spin'
+    
     const { error: spinError } = await supabase.from('wheel_spins').insert({
       customer_id: currentCustomer.id,       // bigint ID
-      prize_type: prize.type,                // "points" oder "spin_again"
-      prize_value: String(prize.value),      // "50" als String (varchar)
+      prize_type: prizeTypeCode,             // "pts" oder "spin" (max 4 Zeichen)
+      prize_value: String(prize.value),      // "50" als String
       prize_code: prizeCode,                 // eindeutiger Code
       prize_points: prize.value,             // 50 als Integer
       is_redeemed: false                     // noch nicht eingelöst
