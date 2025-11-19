@@ -1221,7 +1221,6 @@ function showWheel(count) {
   section.classList.add('active')  // Macht Sektion sichtbar
   badge.style.display = 'block'
   countSpan.textContent = count
-  spinButton.disabled = false
   wheelInfo.style.display = 'none'
   
   // Initialisiere Wheel Canvas
@@ -1340,7 +1339,6 @@ async function spinWheel() {
   } catch (e) {
     console.error('❌ Spin error:', e)
     isSpinning = false
-    // Spin button entfernt - Logo ist jetzt klickbar
   }
 }
 
