@@ -480,7 +480,7 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
   <div id="screen-start" class="screen active">
     <div class="header-image">
       <div class="header-logo">
-        <img src="/logo-round.png" alt="Döner Boxx">
+        <img src="/Döner_Boxx_Logo.png" alt="Döner Boxx">
       </div>
       <h1>Döner Boxx</h1>
       <p>Treue wird belohnt!</p>
@@ -498,7 +498,7 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
   <div id="screen-register" class="screen">
     <div class="header-image">
       <div class="header-logo">
-        <img src="/logo-round.png" alt="Döner Boxx">
+        <img src="/Döner_Boxx_Logo.png" alt="Döner Boxx">
       </div>
       <h1>Döner Boxx</h1>
     </div>
@@ -516,7 +516,7 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
   <div id="screen-login" class="screen">
     <div class="header-image">
       <div class="header-logo">
-        <img src="/logo-round.png" alt="Döner Boxx">
+        <img src="/Döner_Boxx_Logo.png" alt="Döner Boxx">
       </div>
       <h1>Döner Boxx</h1>
     </div>
@@ -534,7 +534,7 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
     <div class="header-image">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <div class="header-logo" style="width: 60px; height: 60px; margin: 0;">
-          <img src="/logo-round.png" alt="Döner Boxx">
+          <img src="/Döner_Boxx_Logo.png" alt="Döner Boxx">
         </div>
         <button onclick="logout()" class="small secondary" style="margin: 0;">Abmelden</button>
       </div>
@@ -1070,7 +1070,7 @@ function initWheel() {
   if (!canvas) return
   
   logoImg = new Image()
-  logoImg.src = '/logo-round.png'
+  logoImg.src = '/Döner_Boxx_Logo.png'
   logoImg.onload = () => drawWheel()
   
   // ✅ Event-Handler nur EINMAL registrieren
@@ -1185,10 +1185,73 @@ function drawWheel() {
 }
 
 // 🎯 WICHTIG: Prüft ob Wheel freigeschaltet ist und zeigt/versteckt es
+// 🕐 Happy Hour Prüfung
+async function isHappyHourActive() {
+  try {
+    // Lade Wheel-Konfiguration aus Supabase
+    const { data: config, error } = await supabase
+      .from('wheel_config')
+      .select('*')
+      .eq('is_active', true)
+      .single()
+    
+    if (error || !config) {
+      console.log('⚠️ Keine aktive Wheel-Config gefunden')
+      return false
+    }
+    
+    // Prüfe ob heute ein aktiver Wochentag ist
+    const today = new Date()
+    const dayOfWeek = today.getDay() // 0 = Sonntag, 1 = Montag, ...
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+    const todayName = dayNames[dayOfWeek]
+    
+    // Prüfe ob der heutige Tag aktiv ist
+    const activeDays = config.active_days || {}
+    if (!activeDays[todayName]) {
+      console.log(`🔒 Wheel nicht aktiv am ${todayName}`)
+      return false
+    }
+    
+    // Prüfe Happy Hour Zeitfenster (falls konfiguriert)
+    if (config.start_time && config.end_time) {
+      const now = today.getHours() * 60 + today.getMinutes() // Minuten seit Mitternacht
+      
+      // Parse Start-Zeit (Format: "15:00")
+      const [startHour, startMin] = config.start_time.split(':').map(Number)
+      const startMinutes = startHour * 60 + startMin
+      
+      // Parse End-Zeit (Format: "18:00")
+      const [endHour, endMin] = config.end_time.split(':').map(Number)
+      const endMinutes = endHour * 60 + endMin
+      
+      // Prüfe ob aktuelle Zeit im Zeitfenster liegt
+      if (now < startMinutes || now > endMinutes) {
+        console.log(`🕐 Wheel nur verfügbar von ${config.start_time} bis ${config.end_time} Uhr`)
+        return false
+      }
+    }
+    
+    console.log('✅ Happy Hour ist aktiv!')
+    return true
+  } catch (e) {
+    console.log('⚠️ Happy Hour Check Error:', e)
+    return false
+  }
+}
+
 async function checkWheelAvailability() {
   if (!currentCustomer) return
   
   try {
+    // 1. Prüfe Happy Hour Zeitfenster
+    const isHappyHour = await isHappyHourActive()
+    if (!isHappyHour) {
+      hideWheel()
+      return
+    }
+    
+    // 2. Prüfe ob Kunde Freischaltungen hat
     const { data: unlocks, error } = await supabase
       .from('wheel_unlocks')
       .select('*')
