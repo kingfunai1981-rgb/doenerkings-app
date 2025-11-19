@@ -476,36 +476,11 @@ textarea {
       </div>
       <p style="font-size: 13px; color: #6b7280; margin-top: -8px; margin-bottom: 16px;">Wenn keine Tage ausgewählt sind, ist das Wheel jeden Tag verfügbar.</p>
 
-      <div class="form-grid">
-        <div>
-          <label class="form-label">🕐 Happy Hour Start (optional)</label>
-          <input type="time" id="wheel-start-time" value="" placeholder="z.B. 15:00">
-        </div>
-        <div>
-          <label class="form-label">🕔 Happy Hour Ende (optional)</label>
-          <input type="time" id="wheel-end-time" value="" placeholder="z.B. 18:00">
-        </div>
-      </div>
-      <p style="font-size: 13px; color: #6b7280; margin-top: -8px; margin-bottom: 16px;">Leer lassen für 24/7 Verfügbarkeit</p>
-
       <label class="form-label">💰 Mindestbestellwert (€)</label>
       <input type="number" step="0.01" id="wheel-min-amount" value="10.00" placeholder="z.B. 10.00">
 
       <button class="success" onclick="saveWheelConfig()">💾 Einstellungen speichern</button>
       <div id="result-wheel-config"></div>
-    </div>
-
-    <div style="background: #dbeafe; border-radius: 10px; padding: 16px; margin-bottom: 20px;">
-      <h3 style="color: #1e40af; margin-bottom: 8px;">📋 Feste Wheel-Felder (18 Felder)</h3>
-      <p style="font-size: 14px; color: #1e3a8a; margin-bottom: 12px;">Die 18 Felder sind fest definiert und können nicht bearbeitet werden:</p>
-      <div style="font-size: 13px; color: #1e40af; line-height: 1.8;">
-        • 2x <strong>DÖNER 500</strong> (Rot)<br>
-        • 2x <strong>SPIN AGAIN</strong> (Drehe nochmal!)<br>
-        • 4x <strong>50 Punkte</strong><br>
-        • 4x <strong>100 Punkte</strong><br>
-        • 4x <strong>25 Punkte</strong><br>
-        • 2x <strong>75 Punkte</strong>
-      </div>
     </div>
 
     <div style="margin-top: 24px;">
@@ -837,15 +812,6 @@ async function loadWheelConfig() {
     
     const config = data[0]
     document.getElementById('wheel-active').value = config.is_active.toString()
-    
-    // Start/End Time - optional
-    if (config.start_time) {
-      document.getElementById('wheel-start-time').value = config.start_time.substring(0, 5)
-    }
-    if (config.end_time) {
-      document.getElementById('wheel-end-time').value = config.end_time.substring(0, 5)
-    }
-    
     document.getElementById('wheel-min-amount').value = parseFloat(config.min_order_amount).toFixed(2)
     
     // Wochentags-Checkboxen setzen
@@ -862,8 +828,6 @@ async function loadWheelConfig() {
 
 async function saveWheelConfig() {
   const isActive = document.getElementById('wheel-active').value === 'true'
-  const startTimeValue = document.getElementById('wheel-start-time').value
-  const endTimeValue = document.getElementById('wheel-end-time').value
   const minAmount = parseFloat(document.getElementById('wheel-min-amount').value)
   
   if (!minAmount || minAmount <= 0) {
@@ -883,17 +847,7 @@ async function saveWheelConfig() {
     const configData = {
       is_active: isActive,
       min_order_amount: minAmount,
-      active_days: activeDays.length > 0 ? activeDays : null,
-      updated_at: new Date().toISOString()
-    }
-    
-    // Nur setzen wenn beide Felder ausgefüllt sind
-    if (startTimeValue && endTimeValue) {
-      configData.start_time = startTimeValue + ':00'
-      configData.end_time = endTimeValue + ':00'
-    } else {
-      configData.start_time = null
-      configData.end_time = null
+      active_days: activeDays.length > 0 ? activeDays : null
     }
     
     const { data: existing } = await supabase.from('wheel_config').select('id').limit(1)
