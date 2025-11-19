@@ -1063,6 +1063,7 @@ const wheelPrizes = [
 ]
 
 let logoImg = null
+let wheelHandlersAttached = false  // ✅ Flag um mehrfache Handler zu verhindern
 
 function initWheel() {
   const canvas = document.getElementById('wheelCanvas')
@@ -1072,36 +1073,42 @@ function initWheel() {
   logoImg.src = '/logo-round.png'
   logoImg.onload = () => drawWheel()
   
-  // Click-Handler: Nur Logo-Bereich ist klickbar
-  canvas.addEventListener('click', (event) => {
-    const rect = canvas.getBoundingClientRect()
-    const x = event.clientX - rect.left
-    const y = event.clientY - rect.top
+  // ✅ Event-Handler nur EINMAL registrieren
+  if (!wheelHandlersAttached) {
+    // Click-Handler: Nur Logo-Bereich ist klickbar
+    canvas.addEventListener('click', (event) => {
+      const rect = canvas.getBoundingClientRect()
+      const x = event.clientX - rect.left
+      const y = event.clientY - rect.top
+      
+      const centerX = canvas.width / 2
+      const centerY = canvas.height / 2
+      
+      // Berechne Distanz vom Zentrum
+      const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
+      
+      // Nur wenn innerhalb des Logo-Bereichs (Radius 48)
+      if (distance <= 48) {
+        spinWheel()
+      }
+    })
     
-    const centerX = canvas.width / 2
-    const centerY = canvas.height / 2
+    // Cursor ändern wenn über Logo
+    canvas.addEventListener('mousemove', (event) => {
+      const rect = canvas.getBoundingClientRect()
+      const x = event.clientX - rect.left
+      const y = event.clientY - rect.top
+      
+      const centerX = canvas.width / 2
+      const centerY = canvas.height / 2
+      const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
+      
+      canvas.style.cursor = distance <= 48 ? 'pointer' : 'default'
+    })
     
-    // Berechne Distanz vom Zentrum
-    const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
-    
-    // Nur wenn innerhalb des Logo-Bereichs (Radius 48)
-    if (distance <= 48) {
-      spinWheel()
-    }
-  })
-  
-  // Cursor ändern wenn über Logo
-  canvas.addEventListener('mousemove', (event) => {
-    const rect = canvas.getBoundingClientRect()
-    const x = event.clientX - rect.left
-    const y = event.clientY - rect.top
-    
-    const centerX = canvas.width / 2
-    const centerY = canvas.height / 2
-    const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
-    
-    canvas.style.cursor = distance <= 48 ? 'pointer' : 'default'
-  })
+    wheelHandlersAttached = true
+    console.log('✅ Wheel Event-Handler registriert (einmalig)')
+  }
   
   drawWheel()
 }
@@ -1411,26 +1418,41 @@ function closeWheelResult() {
 async function saveWheelSpin(unlockId, prize) {
   try {
     // Markiere unlock als verwendet
-    await supabase
+    const { error: unlockError } = await supabase
       .from('wheel_unlocks')
       .update({ is_used: true })
       .eq('id', unlockId)
     
+    if (unlockError) {
+      console.error('❌ Fehler beim Markieren des Unlocks:', unlockError)
+      throw unlockError
+    }
+    
     // Speichere Spin
-    await supabase.from('wheel_spins').insert({
+    const { error: spinError } = await supabase.from('wheel_spins').insert({
       customer_id: currentCustomer.id,
       unlock_id: unlockId,
       prize_label: prize.label,
       prize_points: prize.value
     })
     
-    // Schreibe Punkte gut
+    if (spinError) {
+      console.error('❌ Fehler beim Speichern des Spins:', spinError)
+      throw spinError
+    }
+    
+    // ✅ NUR bei Erfolg: Punkte gutschreiben
     const newPoints = currentCustomer.points + prize.value
     
-    await supabase
+    const { error: pointsError } = await supabase
       .from('customers')
       .update({ points: newPoints })
       .eq('id', currentCustomer.id)
+    
+    if (pointsError) {
+      console.error('❌ Fehler beim Gutschreiben der Punkte:', pointsError)
+      throw pointsError
+    }
     
     // Update local customer object
     currentCustomer.points = newPoints
@@ -1438,7 +1460,9 @@ async function saveWheelSpin(unlockId, prize) {
     
     console.log('✅ Spin gespeichert und Punkte gutgeschrieben!')
   } catch (e) {
-    console.error('⚠️ Fehler beim Speichern:', e)
+    console.error('❌ Fehler beim Speichern des Wheel Spins:', e)
+    alert('⚠️ Es gab einen Fehler beim Speichern deines Gewinns. Bitte kontaktiere den Support.')
+    throw e  // Fehler weitergeben
   }
 }
 
