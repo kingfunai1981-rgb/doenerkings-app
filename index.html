@@ -3,48 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lucky Wheel - Döner Boxx</title>
+<title>Döner Boxx Loyalty</title>
 <link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
 @font-face {
   font-family: 'Flame';
   src: url('Flame-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body { 
-  font-family: 'Flame', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: linear-gradient(135deg, #E31E24 0%, #F9A825 100%);
+  font-family: 'Flame', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #f5f5f5;
   min-height: 100vh;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  padding: 0;
+  margin: 0;
 }
 
-.container {
-  max-width: 600px;
-  width: 100%;
+.container { 
+  max-width: 500px; 
+  margin: 0 auto;
   background: white;
-  border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  min-height: 100vh;
 }
 
-.header {
+.header-image {
+  background: linear-gradient(135deg, #E31E24 0%, #F9A825 100%);
+  padding: 20px 20px 24px;
   text-align: center;
-  margin-bottom: 30px;
+  position: relative;
 }
 
 .header-logo {
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 120px;
   margin: 0 auto 16px;
   background: transparent;
+  border-radius: 50%;
+  padding: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -58,22 +60,325 @@ body {
   object-fit: cover;
 }
 
-h1 {
-  color: #E31E24;
-  font-size: 32px;
-  margin-bottom: 8px;
+.header-image h1 {
+  color: white;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
-.subtitle {
-  color: #666;
+.header-image p {
+  color: white;
   font-size: 16px;
+  opacity: 0.95;
+  margin-bottom: 4px;
+}
+
+.header-image p.small {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.header-qr-mini {
+  width: 60px;
+  height: 60px;
+  background: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+
+.header-qr-mini:hover { transform: scale(1.05); }
+.header-qr-mini img { width: 50px; height: 50px; border-radius: 6px; }
+
+.qr-modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.qr-modal.active { display: flex; }
+
+.qr-modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-50px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.qr-modal-close {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: #f5f5f5;
+  border: none;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.qr-modal-close:hover {
+  background: #e5e5e5;
+  transform: rotate(90deg);
+}
+
+.qr-modal-img {
+  width: 260px; height: 260px;
+  margin: 20px auto;
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  border: 3px solid #E31E24;
+}
+
+.qr-modal-id {
+  font-size: 42px;
+  font-weight: 700;
+  color: #E31E24;
+  letter-spacing: 5px;
+  margin: 16px 0;
+  font-family: 'Courier New', monospace;
+}
+
+.qr-modal-label { font-size: 14px; color: #666; margin-bottom: 8px; }
+
+.card {
+  background: white;
+  border-radius: 0;
+  padding: 24px 16px;
+  margin-bottom: 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+h2 { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #232122; }
+.subtitle { color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+
+input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  margin-bottom: 10px;
+  background: #fafafa;
+  transition: all 0.2s;
+  font-family: 'Flame', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+input:focus { outline: none; border-color: #E31E24; background: white; }
+
+button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: all 0.2s;
+  font-family: 'Flame', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+button:hover { opacity: 0.9; transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+button.secondary { background: #f5f5f5; color: #E31E24; border: 1px solid #e0e0e0; }
+button.secondary:hover { background: #ebebeb; }
+button.small { width: auto; padding: 8px 16px; font-size: 13px; margin: 4px; display: inline-block; }
+button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; transform: none; }
+
+.result {
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-top: 10px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.success { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
+.error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.info { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+
+.points-circle {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 4px 16px rgba(227, 30, 36, 0.25);
+  flex-shrink: 0;
+}
+
+.points-num { font-size: 36px; font-weight: 700; line-height: 1; }
+.points-label { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+
+.reward {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #f0f0f0;
+  transition: all 0.2s;
+}
+
+.reward:hover { background: #f5f5f5; border-color: #e0e0e0; }
+.reward-info h3 { font-size: 15px; font-weight: 600; margin: 0 0 4px 0; color: #232122; }
+.reward-info .pts { font-size: 13px; color: #E31E24; font-weight: 600; }
+.reward button { width: 100px !important; padding: 10px 12px !important; font-size: 13px !important; }
+
+.pending-code {
+  background: #fffbeb;
+  border: 2px solid #fbbf24;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 10px;
+}
+
+.pending-code h3 { color: #92400e; font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+.pending-code .code { font-size: 28px; font-weight: 700; color: #f59e0b; letter-spacing: 5px; margin: 10px 0; font-family: 'Courier New', monospace; }
+.pending-code .code-info { font-size: 12px; color: #92400e; margin-bottom: 10px; line-height: 1.5; }
+
+.bonus-item {
+  background: linear-gradient(135deg, #F9A825, #f59e0b);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.bonus-item h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.bonus-item .bonus-desc { font-size: 13px; opacity: 0.9; margin-bottom: 12px; }
+.bonus-item .bonus-status { font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 6px; display: inline-block; background: rgba(255,255,255,0.2); margin-bottom: 8px; }
+.bonus-item.active { background: linear-gradient(135deg, #E31E24, #dc2626); }
+.bonus-item button { margin-top: 8px; background: white; color: #F9A825; }
+.bonus-item.active button { color: #E31E24; }
+
+.challenge-item {
+  background: linear-gradient(135deg, #2E86C1, #1a5490);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.challenge-item h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.challenge-item .challenge-desc { font-size: 13px; opacity: 0.9; margin-bottom: 12px; }
+.challenge-progress { background: rgba(255,255,255,0.2); border-radius: 8px; padding: 10px; margin: 10px 0; }
+.challenge-progress-bar { background: rgba(255,255,255,0.3); height: 8px; border-radius: 4px; overflow: hidden; margin-top: 6px; }
+.challenge-progress-fill { background: white; height: 100%; border-radius: 4px; transition: width 0.3s; }
+.challenge-date { font-size: 11px; opacity: 0.8; margin-top: 8px; }
+
+.coupon-item {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 2px solid #f59e0b;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 10px;
+}
+
+.coupon-item h3 { color: #92400e; font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.coupon-product { font-size: 15px; color: #78350f; font-weight: 600; margin-bottom: 6px; }
+.coupon-price { font-size: 20px; font-weight: 700; color: #d97706; margin: 6px 0; }
+.coupon-desc { font-size: 13px; color: #92400e; margin: 6px 0; }
+.coupon-code-display {
+  background: white;
+  border: 2px dashed #f59e0b;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  margin: 10px 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  font-family: monospace;
+  color: #92400e;
+}
+.coupon-expiry { font-size: 12px; color: #92400e; margin-top: 8px; font-weight: 600; }
+.coupon-expiry.warning { color: #dc2626; }
+.coupon-item button { background: #f59e0b; color: white; width: 100%; padding: 10px; border: none; margin-top: 10px; }
+.coupon-item button:hover { background: #d97706; }
+.coupon-item.activated { background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #F9A825; }
+.coupon-item.activated h3, .coupon-item.activated .coupon-product, .coupon-item.activated .coupon-desc, .coupon-item.activated .coupon-expiry { color: #92400e; }
+.coupon-item.activated .coupon-price { color: #E31E24; }
+.coupon-item.activated .coupon-code-display { border-color: #F9A825; color: #92400e; }
+.coupon-activated-badge { background: #F9A825; color: white; padding: 8px; border-radius: 6px; text-align: center; font-weight: 600; font-size: 13px; margin-top: 10px; }
+
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* 🎡 NEU: Lucky Wheel Styles */
+.wheel-section {
+  display: none; /* Standard: versteckt */
+}
+
+.wheel-section.active {
+  display: block;
+}
+
+.wheel-badge {
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(227, 30, 36, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
 }
 
 .wheel-container {
   position: relative;
   width: 100%;
-  max-width: 400px;
-  margin: 0 auto 30px;
+  max-width: 350px;
+  margin: 0 auto 20px;
 }
 
 .wheel-wrapper {
@@ -82,7 +387,7 @@ h1 {
   padding-bottom: 100%;
 }
 
-canvas {
+#wheelCanvas {
   position: absolute;
   top: 0;
   left: 0;
@@ -90,51 +395,33 @@ canvas {
   height: 100%;
   border-radius: 50%;
   box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-  cursor: pointer;
 }
 
 .wheel-pointer {
   position: absolute;
-  top: -20px;
+  top: -15px;
   left: 50%;
   transform: translateX(-50%);
   width: 0;
   height: 0;
-  border-left: 20px solid transparent;
-  border-right: 20px solid transparent;
-  border-top: 40px solid #E31E24;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-top: 30px solid #E31E24;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
   z-index: 10;
 }
 
-.spin-button {
-  width: 100%;
-  padding: 18px;
-  background: linear-gradient(135deg, #E31E24, #F9A825);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s;
-  font-family: 'Flame', sans-serif;
-  box-shadow: 0 4px 12px rgba(227, 30, 36, 0.3);
+.wheel-info-box {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  margin-top: 20px;
 }
 
-.spin-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(227, 30, 36, 0.4);
-}
-
-.spin-button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.result-modal {
+.wheel-result-modal {
   display: none;
   position: fixed;
   top: 0;
@@ -142,21 +429,21 @@ canvas {
   right: 0;
   bottom: 0;
   background: rgba(0,0,0,0.8);
-  z-index: 1000;
+  z-index: 10000;
   align-items: center;
   justify-content: center;
   padding: 20px;
 }
 
-.result-modal.active {
+.wheel-result-modal.active {
   display: flex;
 }
 
-.result-content {
+.wheel-result-content {
   background: white;
   border-radius: 20px;
   padding: 40px;
-  max-width: 400px;
+  max-width: 350px;
   width: 100%;
   text-align: center;
   animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -167,77 +454,218 @@ canvas {
   100% { transform: scale(1); opacity: 1; }
 }
 
-.result-icon {
+.wheel-result-icon {
   font-size: 80px;
   margin-bottom: 20px;
 }
 
-.result-title {
-  font-size: 28px;
+.wheel-result-title {
+  font-size: 24px;
   font-weight: 700;
   color: #E31E24;
   margin-bottom: 12px;
 }
 
-.result-prize {
-  font-size: 22px;
+.wheel-result-prize {
+  font-size: 20px;
   color: #333;
   margin-bottom: 24px;
 }
 
-.result-button {
-  width: 100%;
-  padding: 16px;
-  background: linear-gradient(135deg, #E31E24, #F9A825);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: 'Flame', sans-serif;
-}
-
-.info-box {
-  background: #f9fafb;
-  border-radius: 12px;
-  padding: 16px;
-  margin-top: 20px;
-  text-align: center;
-  font-size: 14px;
-  color: #666;
-}
 </style>
 </head>
 <body>
 
 <div class="container">
-  <div class="header">
-    <div class="header-logo">
-      <img src="/logo-round.png" alt="Döner Boxx">
+  <div id="screen-start" class="screen active">
+    <div class="header-image">
+      <div class="header-logo">
+        <img src="/logo-round.png" alt="Döner Boxx">
+      </div>
+      <h1>Döner Boxx</h1>
+      <p>Treue wird belohnt!</p>
+      <p class="small">1 € = 10 Punkte</p>
     </div>
-    <h1>🎡 Lucky Wheel</h1>
-    <p class="subtitle">Drehe am Glücksrad und gewinne tolle Preise!</p>
-  </div>
-
-  <div class="wheel-container">
-    <div class="wheel-wrapper">
-      <div class="wheel-pointer"></div>
-      <canvas id="wheel" width="400" height="400"></canvas>
+    
+    <div class="card">
+      <h2>Neu hier?</h2>
+      <p class="subtitle">Registriere dich jetzt und sammle Punkte bei jeder Bestellung!</p>
+      <button onclick="showScreen('register')">✨ Jetzt registrieren</button>
+      <button class="secondary" onclick="showScreen('login')">🔓 Ich habe schon einen Account</button>
     </div>
   </div>
 
-  <div class="info-box">
-    <div id="spinInfo">🕒 Klicke auf das Logo zum Drehen!</div>
+  <div id="screen-register" class="screen">
+    <div class="header-image">
+      <div class="header-logo">
+        <img src="/logo-round.png" alt="Döner Boxx">
+      </div>
+      <h1>Döner Boxx</h1>
+    </div>
+    
+    <div class="card">
+      <h2>Jetzt registrieren</h2>
+      <input id="reg-name" type="text" placeholder="Dein Name">
+      <input id="reg-phone" type="tel" placeholder="Handynummer">
+      <button onclick="register()">✅ Registrieren</button>
+      <button class="secondary" onclick="showScreen('start')">↩️ Zurück</button>
+      <div id="reg-result"></div>
+    </div>
   </div>
-</div>
 
-<div id="resultModal" class="result-modal">
-  <div class="result-content">
-    <div class="result-icon" id="resultIcon">🎉</div>
-    <div class="result-title" id="resultTitle">Glückwunsch!</div>
-    <div class="result-prize" id="resultPrize">100 Punkte</div>
-    <button class="result-button" onclick="closeResult()">Weiter</button>
+  <div id="screen-login" class="screen">
+    <div class="header-image">
+      <div class="header-logo">
+        <img src="/logo-round.png" alt="Döner Boxx">
+      </div>
+      <h1>Döner Boxx</h1>
+    </div>
+    
+    <div class="card">
+      <h2>Anmelden</h2>
+      <input id="login-phone" type="tel" placeholder="Handynummer">
+      <button onclick="login()">🔓 Anmelden</button>
+      <button class="secondary" onclick="showScreen('start')">↩️ Zurück</button>
+      <div id="login-result"></div>
+    </div>
+  </div>
+
+  <div id="screen-app" class="screen">
+    <div class="header-image">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div class="header-logo" style="width: 60px; height: 60px; margin: 0;">
+          <img src="/logo-round.png" alt="Döner Boxx">
+        </div>
+        <button onclick="logout()" class="small secondary" style="margin: 0;">Abmelden</button>
+      </div>
+      
+      <div class="header-content">
+        <div class="points-circle">
+          <div class="points-num" id="app-points">0</div>
+          <div class="points-label">Punkte</div>
+        </div>
+        
+        <div class="header-qr-mini" onclick="openQRModal()">
+          <img id="header-qr-mini" alt="QR">
+        </div>
+      </div>
+      
+      <p style="font-size: 11px; margin-top: 10px; opacity: 0.9;">Tippe auf QR zum Vergrößern</p>
+    </div>
+
+    <div id="qr-modal" class="qr-modal" onclick="closeQRModal(event)">
+      <div class="qr-modal-content" onclick="event.stopPropagation()">
+        <button class="qr-modal-close" onclick="closeQRModal()">×</button>
+        <div class="qr-modal-label">Zeige diesen Code beim Bezahlen</div>
+        <img id="modal-qr" class="qr-modal-img" alt="QR">
+        <div class="qr-modal-label">Oder nenne diese ID:</div>
+        <div class="qr-modal-id" id="modal-qr-id">------</div>
+      </div>
+    </div>
+
+    <div id="bonuses-section" style="display: none;">
+      <div class="card">
+        <h2>🎉 Meine Belohnungen</h2>
+        <div id="bonuses-list"></div>
+      </div>
+    </div>
+
+    <div id="challenges-section" style="display: none;">
+      <div class="card">
+        <h2>🎯 Aktuelle Challenges</h2>
+        <div id="challenges-list"></div>
+      </div>
+    </div>
+
+    <div id="coupons-section" style="display: none;">
+      <div class="card">
+        <h2>🎟️ Deal der Woche</h2>
+        <div id="coupons-list"></div>
+      </div>
+    </div>
+
+    <!-- 🎡 NEU: Lucky Wheel Section (nur bei Freischaltung sichtbar) -->
+    <div id="wheel-section" class="wheel-section">
+      <div class="card">
+        <h2>🎡 Lucky Wheel</h2>
+        
+        <!-- Badge wenn verfügbar -->
+        <div id="wheel-available-badge" style="display: none;">
+          <div class="wheel-badge">
+            🎡 Du hast <span id="wheel-count">0</span> freie Drehung(en)!
+          </div>
+        </div>
+        
+        <!-- Wheel Canvas -->
+        <div class="wheel-container">
+          <div class="wheel-wrapper">
+            <div class="wheel-pointer"></div>
+            <canvas id="wheelCanvas" width="400" height="400"></canvas>
+          </div>
+        </div>
+        
+        <!-- Info wenn nicht verfügbar -->
+        <div id="wheel-info" class="wheel-info-box">
+          🎉 Klicke auf das Logo zum Drehen!
+        </div>
+      </div>
+    </div>
+
+    <!-- Wheel Result Modal -->
+    <div id="wheel-result-modal" class="wheel-result-modal">
+      <div class="wheel-result-content">
+        <div class="wheel-result-icon" id="wheel-result-icon">⭐</div>
+        <div class="wheel-result-title" id="wheel-result-title">Glückwunsch!</div>
+        <div class="wheel-result-prize" id="wheel-result-prize">+100 Punkte</div>
+        <button onclick="closeWheelResult()">Weiter</button>
+      </div>
+    </div>
+
+    <div id="pending-section" style="display: none;">
+      <div class="card">
+        <h2>⏳ Wartet auf Bestätigung</h2>
+        <div id="pending-list"></div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>🎁 Prämien einlösen</h2>
+      <div class="reward">
+        <div class="reward-info">
+          <h3>Ayran (0.25 l)</h3>
+          <div class="pts">250 Punkte</div>
+        </div>
+        <button onclick="redeem('Ayran (0.25 l)', 250)" id="btn-250">Einlösen</button>
+      </div>
+      <div class="reward">
+        <div class="reward-info">
+          <h3>Pommes</h3>
+          <div class="pts">500 Punkte</div>
+        </div>
+        <button onclick="redeem('Pommes', 500)" id="btn-500">Einlösen</button>
+      </div>
+      <div class="reward">
+        <div class="reward-info">
+          <h3>Döner Box</h3>
+          <div class="pts">750 Punkte</div>
+        </div>
+        <button onclick="redeem('Döner Box', 750)" id="btn-750">Einlösen</button>
+      </div>
+      <div class="reward">
+        <div class="reward-info">
+          <h3>Döner XL</h3>
+          <div class="pts">1000 Punkte</div>
+        </div>
+        <button onclick="redeem('Döner XL', 1000)" id="btn-1000">Einlösen</button>
+      </div>
+      <div class="reward">
+        <div class="reward-info">
+          <h3>Döner Teller</h3>
+          <div class="pts">1250 Punkte</div>
+        </div>
+        <button onclick="redeem('Döner Teller', 1250)" id="btn-1250">Einlösen</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -246,21 +674,374 @@ canvas {
 const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+let currentCustomer = null
+let refreshInterval = null
 
-const canvas = document.getElementById('wheel')
-const ctx = canvas.getContext('2d')
+function normalizePhone(phone) {
+  let normalized = phone.replace(/[\s\-\(\)]/g, '')
+  if (normalized.startsWith('+')) normalized = normalized.substring(1)
+  if (normalized.startsWith('00')) normalized = normalized.substring(2)
+  if (normalized.startsWith('49') && normalized.length > 10) normalized = '0' + normalized.substring(2)
+  if (!normalized.startsWith('0') && normalized.length >= 10) normalized = '0' + normalized
+  return normalized
+}
+
+function showScreen(screenName) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
+  document.getElementById(`screen-${screenName}`).classList.add('active')
+}
+
+function showResult(elementId, message, type) {
+  const el = document.getElementById(elementId)
+  if (!message) { el.className = ''; el.innerHTML = ''; return }
+  el.className = `result ${type}`
+  el.innerHTML = message
+}
+
+async function generateUniqueCode(table, column) {
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const code = Math.floor(1000 + Math.random() * 9000).toString()
+    const { data, error } = await supabase.from(table).select(column).eq(column, code).limit(1)
+    if (error) { console.error('Code check error:', error); continue }
+    if (!data || data.length === 0) return code
+    console.log(`⚠️ Code ${code} existiert bereits, versuche neuen...`)
+  }
+  return Date.now().toString().slice(-4)
+}
+
+async function register() {
+  const name = document.getElementById('reg-name').value.trim()
+  const phoneRaw = document.getElementById('reg-phone').value.trim()
+  
+  if (!name || !phoneRaw) { showResult('reg-result', '❌ Bitte Name und Handynummer eingeben!', 'error'); return }
+  
+  const phone = normalizePhone(phoneRaw)
+  
+  if (!/^\d+$/.test(phone)) { showResult('reg-result', '❌ Ungültige Handynummer!', 'error'); return }
+  if (phone.length < 10 || phone.length > 17) { showResult('reg-result', '❌ Telefonnummer muss 10-17 Ziffern haben!', 'error'); return }
+  
+  try {
+    showResult('reg-result', '⏳ Wird registriert...', 'info')
+    
+    const { data: existing } = await supabase.from('customers').select('*').eq('phone', phone).limit(1)
+    
+    if (existing && existing.length > 0) { showResult('reg-result', '❌ Diese Nummer ist bereits registriert!', 'error'); return }
+    
+    const qrId = Math.floor(1000 + Math.random() * 9000).toString()
+    
+    const { data, error } = await supabase.from('customers').insert({ qr_id: qrId, name: name, phone: phone, points: 0 }).select().single()
+    
+    if (error) throw error
+    
+    showResult('reg-result', '✅ Erfolgreich registriert!', 'success')
+    setTimeout(() => {
+      localStorage.setItem('customerData', JSON.stringify(data))
+      loadCustomer(data)
+    }, 1000)
+    
+  } catch (e) {
+    showResult('reg-result', '❌ Fehler: ' + e.message, 'error')
+    console.error('Registration error:', e)
+  }
+}
+
+async function login() {
+  const phoneRaw = document.getElementById('login-phone').value.trim()
+  if (!phoneRaw) { showResult('login-result', '❌ Bitte Handynummer eingeben!', 'error'); return }
+  
+  const phone = normalizePhone(phoneRaw)
+  
+  try {
+    showResult('login-result', '⏳ Suche Konto...', 'info')
+    const { data: customers, error } = await supabase.from('customers').select('*').eq('phone', phone).limit(1)
+    if (error) throw error
+    if (!customers || customers.length === 0) { showResult('login-result', '❌ Handynummer nicht gefunden!', 'error'); return }
+    
+    showResult('login-result', '✅ Erfolgreich angemeldet!', 'success')
+    setTimeout(() => {
+      localStorage.setItem('customerData', JSON.stringify(customers[0]))
+      loadCustomer(customers[0])
+    }, 500)
+    
+  } catch (e) {
+    showResult('login-result', '❌ Fehler: ' + e.message, 'error')
+    console.error('Login error:', e)
+  }
+}
+
+async function loadCustomer(customer) {
+  if (!customer || !customer.id) { console.error('❌ Ungültiger Kunde übergeben'); logout(); return }
+  
+  currentCustomer = customer
+  
+  try {
+    await refreshCustomerData()
+    
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${customer.qr_id}`
+    document.getElementById('header-qr-mini').src = qrUrl
+    document.getElementById('modal-qr').src = qrUrl
+    document.getElementById('modal-qr-id').textContent = customer.qr_id
+    
+    showScreen('app')
+    
+    if (refreshInterval) clearInterval(refreshInterval)
+    refreshInterval = setInterval(refreshCustomerData, 5000)
+    
+    loadPendingCodes()
+    loadBonuses()
+    loadCoupons()
+    loadChallenges()
+    
+    // 🎡 NEU: Prüfe Wheel-Verfügbarkeit
+    checkWheelAvailability()
+    
+  } catch (e) {
+    console.error('❌ Fehler beim Laden des Kunden:', e)
+    alert('❌ Fehler beim Laden. Bitte neu anmelden.')
+    logout()
+  }
+}
+
+async function refreshCustomerData() {
+  if (!currentCustomer || !currentCustomer.id) { console.error('❌ Kein currentCustomer oder ID fehlt'); return }
+  try {
+    const { data, error } = await supabase.from('customers').select('*').eq('id', currentCustomer.id).maybeSingle()
+    
+    if (error) { 
+      console.error('❌ Supabase error:', error)
+      alert('❌ Fehler beim Laden der Daten. Bitte neu anmelden.')
+      logout()
+      return
+    }
+    
+    if (!data) { 
+      console.error('❌ Kunde nicht mehr in Datenbank - wurde gelöscht')
+      alert('⚠️ Dein Account wurde gelöscht. Bitte neu registrieren.')
+      logout()
+      return
+    }
+    
+    currentCustomer = data
+    document.getElementById('app-points').textContent = data.points
+    updateRewardButtons(data.points)
+    localStorage.setItem('customerData', JSON.stringify(data))
+    loadBonuses()
+    loadCoupons()
+    loadPendingCodes()
+    loadChallenges()
+    // 🎡 NEU: Prüfe Wheel-Verfügbarkeit
+    checkWheelAvailability()
+  } catch (e) { 
+    console.error('❌ Refresh error:', e.message, e)
+    if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null }
+    alert('❌ Fehler beim Laden. Bitte neu anmelden.')
+    logout()
+  }
+}
+
+function openQRModal() {
+  document.getElementById('qr-modal').classList.add('active')
+  document.body.style.overflow = 'hidden'
+}
+
+function closeQRModal(event) {
+  if (!event || event.target.id === 'qr-modal') {
+    document.getElementById('qr-modal').classList.remove('active')
+    document.body.style.overflow = 'auto'
+  }
+}
+
+function updateRewardButtons(points) {
+  document.getElementById('btn-250').disabled = points < 250
+  document.getElementById('btn-500').disabled = points < 500
+  document.getElementById('btn-750').disabled = points < 750
+  document.getElementById('btn-1000').disabled = points < 1000
+  document.getElementById('btn-1250').disabled = points < 1250
+}
+
+async function redeem(rewardName, cost) {
+  if (!currentCustomer || currentCustomer.points < cost) return
+  try {
+    const code = await generateUniqueCode('redeem_codes', 'code')
+    const expires = new Date(Date.now() + 24*60*60*1000)
+    const { error } = await supabase.from('redeem_codes').insert({ code, customer_id: currentCustomer.id, reward_name: rewardName, points_cost: cost, valid_until: expires.toISOString(), used: false })
+    if (error) { console.error('❌ Redeem error:', error); alert('❌ Fehler beim Erstellen des Codes. Bitte nochmal versuchen.'); return }
+    loadPendingCodes()
+  } catch (e) { console.error('❌ Redeem error:', e); alert('❌ Fehler: ' + e.message) }
+}
+
+async function loadPendingCodes() {
+  if (!currentCustomer) return
+  try {
+    const { data, error } = await supabase.from('redeem_codes').select('*').eq('customer_id', currentCustomer.id).eq('used', false).order('created_at', { ascending: false })
+    if (error) throw error
+    const section = document.getElementById('pending-section')
+    const list = document.getElementById('pending-list')
+    if (!data || data.length === 0) { section.style.display = 'none'; list.innerHTML = ''; return }
+    section.style.display = 'block'
+    list.innerHTML = data.map(item => {
+      const expires = new Date(item.valid_until).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+      return `<div class="pending-code"><h3>🎁 ${item.reward_name}</h3><div class="code">${item.code}</div><div class="code-info">Gültig bis: ${expires}<br>Kosten: ${item.points_cost} Punkte</div><button class="small" style="background: #ef4444;" onclick="cancelCode('${item.code}')">🗑️ Stornieren</button></div>`
+    }).join('')
+  } catch (e) { console.error('Load pending error:', e) }
+}
+
+async function cancelCode(code) {
+  if (!confirm('Code wirklich stornieren?')) return
+  try { await supabase.from('redeem_codes').delete().eq('code', code).eq('used', false); loadPendingCodes() } catch (e) { console.error('Cancel error:', e); loadPendingCodes() }
+}
+
+async function loadBonuses() {
+  if (!currentCustomer) return
+  try {
+    const now = new Date().toISOString().split('T')[0]
+    const { data: bonuses, error } = await supabase.from('global_bonuses').select('*').eq('is_active', true).gte('expires_at', now).order('created_at', { ascending: false })
+    if (error) throw error
+    const section = document.getElementById('bonuses-section')
+    const list = document.getElementById('bonuses-list')
+    if (!bonuses || bonuses.length === 0) { section.style.display = 'none'; return }
+    const { data: activatedBonuses } = await supabase.from('activated_global_bonuses').select('global_bonus_id, is_used').eq('customer_id', currentCustomer.id)
+    const activatedMap = new Map(activatedBonuses?.map(a => [a.global_bonus_id, a.is_used]) || [])
+    const availableBonuses = bonuses.filter(bonus => { const isUsed = activatedMap.get(bonus.id); return !isUsed })
+    if (availableBonuses.length === 0) { section.style.display = 'none'; return }
+    section.style.display = 'block'
+    list.innerHTML = availableBonuses.map(bonus => {
+      const bonusAmount = bonus.bonus_amount || 100
+      const isActivated = activatedMap.has(bonus.id)
+      let descText = ''
+      if (bonus.bonus_type === 'double_points') { descText = 'Bei der nächsten Bestellung bekommst du doppelte Punkte!' }
+      else { descText = `Bei der nächsten Bestellung erhältst du ${bonusAmount} Extra-Punkte!` }
+      if (bonus.description) { descText += `<br><small>${bonus.description}</small>` }
+      const expiry = new Date(bonus.expires_at)
+      const daysLeft = Math.ceil((expiry - new Date()) / (1000 * 60 * 60 * 24))
+      let statusText = '', buttonHTML = ''
+      if (isActivated) { statusText = '🔥 Aktiv für nächste Bestellung!' }
+      else { statusText = `⏳ Bereit zum Aktivieren (noch ${daysLeft} ${daysLeft === 1 ? 'Tag' : 'Tage'})`; buttonHTML = `<button onclick="activateBonus(${bonus.id})">🚀 Jetzt aktivieren</button>` }
+      return `<div class="bonus-item ${isActivated ? 'active' : ''}"><h3>${bonus.title || (bonus.bonus_type === 'double_points' ? '⭐ Doppelte Punkte' : `💰 +${bonusAmount} Bonus-Punkte`)}</h3><div class="bonus-desc">${descText}</div><div class="bonus-status">${statusText}</div>${buttonHTML}</div>`
+    }).join('')
+  } catch (e) { console.error('❌ Load bonuses error:', e) }
+}
+
+async function activateBonus(bonusId) {
+  try {
+    const { data: existingActive } = await supabase.from('activated_global_bonuses').select('*').eq('customer_id', currentCustomer.id).eq('is_used', false)
+    if (existingActive && existingActive.length > 0) { alert('❌ Du hast bereits einen aktiven Bonus! Bitte verwende ihn zuerst.'); return }
+    const { error } = await supabase.from('activated_global_bonuses').insert({ customer_id: currentCustomer.id, global_bonus_id: bonusId, activated_at: new Date().toISOString(), is_used: false })
+    if (error) throw error
+    loadBonuses()
+  } catch (e) { console.error('❌ Activate error:', e); alert('❌ Fehler beim Aktivieren: ' + e.message) }
+}
+
+async function loadChallenges() {
+  if (!currentCustomer) return
+  try {
+    const now = new Date()
+    const { data: challenges, error } = await supabase.from('challenges').select('*').eq('is_active', true).gte('end_date', now.toISOString().split('T')[0]).order('created_at', { ascending: false })
+    if (error) throw error
+    const section = document.getElementById('challenges-section')
+    const list = document.getElementById('challenges-list')
+    if (!challenges || challenges.length === 0) { section.style.display = 'none'; return }
+    const challengeHTML = []
+    for (const challenge of challenges) {
+      const { data: progressRows, error: progressError } = await supabase.from('challenge_progress').select('*').eq('customer_id', currentCustomer.id).eq('challenge_id', challenge.id).limit(1)
+      if (progressError) { console.error('Progress load error:', progressError); continue }
+      const progress = (progressRows && progressRows.length > 0) ? progressRows[0] : null
+      const isActivated = progress !== null
+      const completedOrders = progress?.completed_orders || 0
+      const isCompleted = progress?.is_completed || false
+      if (isCompleted) continue
+      const progressPercent = Math.min((completedOrders / challenge.required_orders) * 100, 100)
+      const startDate = new Date(challenge.start_date).toLocaleDateString('de-DE')
+      const endDate = new Date(challenge.end_date).toLocaleDateString('de-DE')
+      const remaining = challenge.required_orders - completedOrders
+      if (!isActivated) {
+        challengeHTML.push(`<div class="challenge-item"><h3>🎁 ${challenge.bonus_points} Extra-Punkte für ${challenge.required_orders} Bestellungen ab ${challenge.min_order_amount} €</h3><div class="challenge-desc">Aktiviere diese Challenge um teilzunehmen!</div><div class="challenge-date">📅 Gültig: ${startDate} - ${endDate}</div><button onclick="activateChallenge(${challenge.id})" style="margin-top: 12px;">🚀 Jetzt aktivieren</button></div>`)
+      } else {
+        challengeHTML.push(`<div class="challenge-item" style="background: linear-gradient(135deg, #F9A825, #f59e0b);"><h3>🎁 ${challenge.bonus_points} Extra-Punkte für ${challenge.required_orders} Bestellungen ab ${challenge.min_order_amount} €</h3><div class="challenge-desc">${remaining} ${remaining === 1 ? 'Bestellung' : 'Bestellungen'} offen</div><div class="challenge-progress"><div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600;"><span>${completedOrders} / ${challenge.required_orders} Bestellungen</span><span>${Math.round(progressPercent)}%</span></div><div class="challenge-progress-bar"><div class="challenge-progress-fill" style="width: ${progressPercent}%"></div></div></div><div class="challenge-date">📅 Gültig: ${startDate} - ${endDate}</div></div>`)
+      }
+    }
+    if (challengeHTML.length === 0) { section.style.display = 'none'; return }
+    section.style.display = 'block'
+    list.innerHTML = challengeHTML.join('')
+  } catch (e) { console.error('Load challenges error:', e) }
+}
+
+async function activateChallenge(challengeId) {
+  try { await supabase.from('challenge_progress').insert({ customer_id: currentCustomer.id, challenge_id: challengeId, completed_orders: 0, is_completed: false }); loadChallenges() } catch (e) { console.error('Activate challenge error:', e) }
+}
+
+async function loadCoupons() {
+  if (!currentCustomer) return
+  try {
+    const { data: coupons, error } = await supabase.from('coupons').select('*').eq('is_active', true).order('created_at', { ascending: false })
+    if (error) throw error
+    const section = document.getElementById('coupons-section')
+    const list = document.getElementById('coupons-list')
+    if (!coupons || coupons.length === 0) { section.style.display = 'none'; return }
+    const now = new Date()
+    const activeCoupons = coupons.filter(c => new Date(c.expires_at) > now)
+    if (activeCoupons.length === 0) { section.style.display = 'none'; return }
+    const { data: activated } = await supabase.from('activated_coupons').select('coupon_id, unique_code').eq('customer_id', currentCustomer.id).eq('is_used', false)
+    const activatedMap = new Map(activated?.map(a => [a.coupon_id, a.unique_code]) || [])
+    section.style.display = 'block'
+    list.innerHTML = activeCoupons.map(coupon => {
+      const expiry = new Date(coupon.expires_at)
+      const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24))
+      const isActivated = activatedMap.has(coupon.id)
+      const uniqueCode = activatedMap.get(coupon.id)
+      let expiryText = ''
+      if (daysLeft === 0) { expiryText = '<span class="coupon-expiry warning">⚠️ Läuft heute ab!</span>' }
+      else if (daysLeft <= 3) { expiryText = `<span class="coupon-expiry warning">⏰ Läuft in ${daysLeft} Tagen ab</span>` }
+      else { expiryText = `<span class="coupon-expiry">⏰ Läuft in ${daysLeft} Tagen ab</span>` }
+      const formattedPrice = parseFloat(coupon.price || 0).toFixed(2).replace('.', ',') + ' €'
+      return `<div class="coupon-item ${isActivated ? 'activated' : ''}"><h3>${coupon.title}</h3><div class="coupon-product">🍴 ${coupon.product}</div><div class="coupon-price">💰 ${formattedPrice}</div>${coupon.description ? `<div class="coupon-desc">📝 ${coupon.description}</div>` : ''}${isActivated ? `<div class="coupon-code-display">${uniqueCode}</div>` : ''}${expiryText}${isActivated ? `<div class="coupon-activated-badge">✅ Aktiviert! Zeige Code beim Scannen</div><button onclick="deactivateCoupon(${coupon.id})" style="background: #ef4444; margin-top: 8px;">❌ Stornieren</button>` : `<button onclick="activateCoupon(${coupon.id})">🚀 Jetzt aktivieren</button>`}</div>`
+    }).join('')
+  } catch (e) { console.error('Load coupons error:', e) }
+}
+
+async function activateCoupon(couponId) {
+  try {
+    const id = parseInt(couponId)
+    const { data: existing } = await supabase.from('activated_coupons').select('*').eq('customer_id', currentCustomer.id).eq('coupon_id', id).eq('is_used', false)
+    if (existing && existing.length > 0) { loadCoupons(); return }
+    const uniqueCode = await generateUniqueCode('activated_coupons', 'unique_code')
+    const { error } = await supabase.from('activated_coupons').insert({ customer_id: currentCustomer.id, coupon_id: id, unique_code: uniqueCode, activated_at: new Date().toISOString(), is_used: false })
+    if (error) { console.error('❌ Activate coupon error:', error); alert('❌ Fehler beim Aktivieren. Bitte nochmal versuchen.'); return }
+    loadCoupons()
+  } catch (e) { console.error('❌ Fehler beim Aktivieren:', e); alert('❌ Fehler: ' + e.message); loadCoupons() }
+}
+
+async function deactivateCoupon(couponId) {
+  try { const id = parseInt(couponId); await supabase.from('activated_coupons').delete().eq('customer_id', currentCustomer.id).eq('coupon_id', id).eq('is_used', false); loadCoupons() } catch (e) { console.error('Fehler beim Stornieren:', e.message); loadCoupons() }
+}
+
+function logout() {
+  if (refreshInterval) clearInterval(refreshInterval)
+  currentCustomer = null
+  localStorage.removeItem('customerData')
+  showScreen('start')
+}
+
+window.onload = () => {
+  const stored = localStorage.getItem('customerData')
+  if (stored) {
+    try {
+      const customer = JSON.parse(stored)
+      if (!customer || !customer.id || !customer.qr_id) { console.error('❌ Ungültige Kundendaten im localStorage'); localStorage.removeItem('customerData'); return }
+      loadCustomer(customer)
+    } catch (e) { console.error('❌ Fehler beim Laden:', e); localStorage.removeItem('customerData') }
+  }
+}
+
+// 🎡 NEU: Lucky Wheel Functions
+let wheelRotation = 0
+let isSpinning = false
+let currentWheelUnlockId = null // Für Spin Again
 
 const anglePerSegment = (2 * Math.PI) / 18
+const WHEEL_OFFSET = -Math.PI / 2 - anglePerSegment / 2
 
-// 🔴 Fester Offset-Winkel: DÖNER (rot) exakt mittig oben
-const OFFSET = -Math.PI / 2 - anglePerSegment / 2
-
-let rotation = 0
-let isSpinning = false
-
-// 🎨 FESTE 18 FELDER - Korrekte Reihenfolge im Uhrzeigersinn
-// Beginnend oben beim roten Pfeil
-const prizes = [
+const wheelPrizes = [
   { label: '500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },          // 1 - ROT
   { label: '50', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },            // 2 - WEIß
   { label: '100', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },          // 3 - SCHWARZ
@@ -281,10 +1062,62 @@ const prizes = [
   { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 }           // 18 - WEIß
 ]
 
-const logoImg = new Image()
-logoImg.src = '/logo-round.png'
+let logoImg = null
+let wheelHandlersAttached = false  // ✅ Flag um mehrfache Handler zu verhindern
+
+function initWheel() {
+  const canvas = document.getElementById('wheelCanvas')
+  if (!canvas) return
+  
+  logoImg = new Image()
+  logoImg.src = '/logo-round.png'
+  logoImg.onload = () => drawWheel()
+  
+  // ✅ Event-Handler nur EINMAL registrieren
+  if (!wheelHandlersAttached) {
+    // Click-Handler: Nur Logo-Bereich ist klickbar
+    canvas.addEventListener('click', (event) => {
+      const rect = canvas.getBoundingClientRect()
+      const x = event.clientX - rect.left
+      const y = event.clientY - rect.top
+      
+      const centerX = canvas.width / 2
+      const centerY = canvas.height / 2
+      
+      // Berechne Distanz vom Zentrum
+      const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
+      
+      // Nur wenn innerhalb des Logo-Bereichs (Radius 48)
+      if (distance <= 48) {
+        spinWheel()
+      }
+    })
+    
+    // Cursor ändern wenn über Logo
+    canvas.addEventListener('mousemove', (event) => {
+      const rect = canvas.getBoundingClientRect()
+      const x = event.clientX - rect.left
+      const y = event.clientY - rect.top
+      
+      const centerX = canvas.width / 2
+      const centerY = canvas.height / 2
+      const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
+      
+      canvas.style.cursor = distance <= 48 ? 'pointer' : 'default'
+    })
+    
+    wheelHandlersAttached = true
+    console.log('✅ Wheel Event-Handler registriert (einmalig)')
+  }
+  
+  drawWheel()
+}
 
 function drawWheel() {
+  const canvas = document.getElementById('wheelCanvas')
+  if (!canvas) return
+  
+  const ctx = canvas.getContext('2d')
   const centerX = canvas.width / 2
   const centerY = canvas.height / 2
   const radius = canvas.width / 2 - 5
@@ -292,9 +1125,9 @@ function drawWheel() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   ctx.save()
   ctx.translate(centerX, centerY)
-  ctx.rotate(rotation + OFFSET)
+  ctx.rotate(wheelRotation + WHEEL_OFFSET)
 
-  prizes.forEach((prize, i) => {
+  wheelPrizes.forEach((prize, i) => {
     const startAngle = i * anglePerSegment
     const endAngle = startAngle + anglePerSegment
 
@@ -327,7 +1160,7 @@ function drawWheel() {
 
   ctx.restore()
   
-  // Logo SEPARAT zeichnen - OHNE Rotation (bleibt horizontal)
+  // Logo mittig
   ctx.save()
   ctx.translate(centerX, centerY)
   
@@ -339,7 +1172,7 @@ function drawWheel() {
   ctx.fillStyle = 'white'
   ctx.fill()
 
-  if (logoImg.complete) {
+  if (logoImg && logoImg.complete) {
     ctx.save()
     ctx.beginPath()
     ctx.arc(0, 0, logoRadius, 0, 2 * Math.PI)
@@ -351,173 +1184,176 @@ function drawWheel() {
   ctx.restore()
 }
 
+// 🎯 WICHTIG: Prüft ob Wheel freigeschaltet ist und zeigt/versteckt es
+async function checkWheelAvailability() {
+  if (!currentCustomer) return
+  
+  try {
+    const { data: unlocks, error } = await supabase
+      .from('wheel_unlocks')
+      .select('*')
+      .eq('customer_id', currentCustomer.id)
+      .eq('is_used', false)
+      .gt('expires_at', new Date().toISOString())
+    
+    if (error) {
+      console.log('⚠️ Wheel check error:', error)
+      // Bei Fehler: Wheel ausblenden
+      hideWheel()
+      return
+    }
+    
+    if (unlocks && unlocks.length > 0) {
+      // ✅ KUNDE HAT FREISCHALTUNG - ZEIGE WHEEL!
+      showWheel(unlocks.length)
+    } else {
+      // ❌ KEINE FREISCHALTUNG - VERSTECKE WHEEL!
+      hideWheel()
+    }
+  } catch (e) {
+    console.log('Wheel error:', e)
+    hideWheel()
+  }
+}
+
+function showWheel(count) {
+  const section = document.getElementById('wheel-section')
+  const badge = document.getElementById('wheel-available-badge')
+  // Spin button entfernt - Logo ist jetzt klickbar
+  const wheelInfo = document.getElementById('wheel-info')
+  const countSpan = document.getElementById('wheel-count')
+  
+  if (!section) return
+  
+  section.classList.add('active')  // Macht Sektion sichtbar
+  badge.style.display = 'block'
+  countSpan.textContent = count
+  wheelInfo.style.display = 'none'
+  
+  // Initialisiere Wheel Canvas
+  initWheel()
+  
+  console.log(`✅ Wheel angezeigt - ${count} Drehung(en) verfügbar`)
+}
+
+function hideWheel() {
+  const section = document.getElementById('wheel-section')
+  if (section) {
+    section.classList.remove('active')  // Macht Sektion unsichtbar
+    console.log('🔒 Wheel versteckt - keine Freischaltung')
+  }
+}
+
 function getRandomPrize() {
   const array = new Uint32Array(1)
   crypto.getRandomValues(array)
-  const randomIndex = Math.floor((array[0] / (0xFFFFFFFF + 1)) * prizes.length)
-  return prizes[randomIndex]
+  const randomIndex = Math.floor((array[0] / (0xFFFFFFFF + 1)) * wheelPrizes.length)
+  return wheelPrizes[randomIndex]
 }
 
-async function canSpin(customerId) {
+async function spinWheel() {
+  if (isSpinning || !currentCustomer) return
+  
   try {
-    const { data, error } = await supabase
+    const { data: unlocks, error } = await supabase
       .from('wheel_unlocks')
       .select('*')
-      .eq('customer_id', customerId)
+      .eq('customer_id', currentCustomer.id)
       .eq('is_used', false)
       .gt('expires_at', new Date().toISOString())
       .limit(1)
     
-    if (error) {
-      console.log('⚠️ Tabelle wheel_unlocks nicht gefunden')
-      return null
-    }
-    
-    return data && data.length > 0 ? data[0] : null
-  } catch (e) {
-    console.log('⚠️ Fehler bei canSpin:', e)
-    return null
-  }
-}
-
-let currentUnlockId = null // Speichern der aktuellen unlock ID für Spin Again
-
-async function spinWheel() {
-  if (isSpinning) return
-  
-  // Hole customer_id aus URL Parameter
-  const urlParams = new URLSearchParams(window.location.search)
-  const customerId = urlParams.get('customer_id')
-  
-  if (!customerId) {
-    alert('❌ Fehler: Keine Kunden-ID gefunden')
-    return
-  }
-  
-  // Nur beim ersten Spin prüfen, ob unlock vorhanden ist
-  if (!currentUnlockId) {
-    const unlock = await canSpin(customerId)
-    if (!unlock) {
+    if (error || !unlocks || unlocks.length === 0) {
       alert('❌ Du hast derzeit keine freie Drehung!')
       return
     }
-    currentUnlockId = unlock.id
-  }
-
-  isSpinning = true
-
-  const winningPrize = getRandomPrize()
-  const winningIndex = prizes.indexOf(winningPrize)
-  
-  const array = new Uint32Array(1)
-  crypto.getRandomValues(array)
-  const randomOffset = ((array[0] / 0xFFFFFFFF) - 0.5) * 0.6 * anglePerSegment
-  
-  // WICHTIG: Rotation auf 0 zurücksetzen für konsistente Startposition
-  rotation = 0
-  
-  // 6-10 volle Drehungen (mehr als vorher für bessere Animation)
-  const spins = 6 + Math.floor((array[0] / 0xFFFFFFFF) * 5)
-  const baseRotation = spins * 2 * Math.PI
-  
-  // Berechne Zielfeld
-  const fieldMidAngle = winningIndex * anglePerSegment + anglePerSegment / 2 + randomOffset
-  const targetRotation = -Math.PI / 2 - OFFSET - fieldMidAngle
-  
-  // Normalisiere für positive Rotation
-  let normalizedTarget = targetRotation
-  while (normalizedTarget < 0) {
-    normalizedTarget += 2 * Math.PI
-  }
-  
-  const totalRotation = baseRotation + normalizedTarget
-
-  const startRotation = 0 // Immer von 0 starten
-  const startTime = Date.now()
-  const duration = 5000 + Math.floor((array[0] / 0xFFFFFFFF) * 1000) // 5-6 Sekunden
-
-  function animate() {
-    const elapsed = Date.now() - startTime
-    const progress = Math.min(elapsed / duration, 1)
-    const easeOut = 1 - Math.pow(1 - progress, 4)
     
-    rotation = startRotation + (easeOut * totalRotation)
-    drawWheel()
+    const unlock = unlocks[0]
+    isSpinning = true
 
-    if (progress < 1) {
-      requestAnimationFrame(animate)
-    } else {
-      isSpinning = false
+    const winningPrize = getRandomPrize()
+    const winningIndex = wheelPrizes.indexOf(winningPrize)
+    
+    const array = new Uint32Array(1)
+    crypto.getRandomValues(array)
+    const randomOffset = ((array[0] / 0xFFFFFFFF) - 0.5) * 0.6 * anglePerSegment
+    
+    // WICHTIG: Rotation auf 0 zurücksetzen für konsistente Startposition
+    wheelRotation = 0
+    
+    // 6-10 volle Drehungen (mehr für bessere Animation)
+    const spins = 6 + Math.floor((array[0] / 0xFFFFFFFF) * 5)
+    const baseRotation = spins * 2 * Math.PI
+    
+    // Berechne Zielfeld
+    const fieldMidAngle = winningIndex * anglePerSegment + anglePerSegment / 2 + randomOffset
+    const targetRotation = -Math.PI / 2 - WHEEL_OFFSET - fieldMidAngle
+    
+    // Normalisiere für positive Rotation
+    let normalizedTarget = targetRotation
+    while (normalizedTarget < 0) {
+      normalizedTarget += 2 * Math.PI
+    }
+    
+    const totalRotation = baseRotation + normalizedTarget
+
+    const startRotation = 0 // Immer von 0 starten
+    const startTime = Date.now()
+    const duration = 5000 + Math.floor((array[0] / 0xFFFFFFFF) * 1000) // 5-6 Sekunden
+
+    function animate() {
+      const elapsed = Date.now() - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const easeOut = 1 - Math.pow(1 - progress, 4)
       
-      // Gewinn-Berechnung
-      let normalizedRotation = rotation % (2 * Math.PI)
-      if (normalizedRotation > Math.PI) normalizedRotation -= 2 * Math.PI
-      if (normalizedRotation < -Math.PI) normalizedRotation += 2 * Math.PI
-      
-      let fieldAngle = -Math.PI / 2 - normalizedRotation - OFFSET
-      if (fieldAngle < 0) fieldAngle += 2 * Math.PI
-      
-      const fieldIndex = Math.floor(fieldAngle / anglePerSegment) % prizes.length
-      const actualPrize = prizes[fieldIndex]
-      
-      console.log('🎯 Gewonnen:', actualPrize.label, actualPrize.type, actualPrize.value)
-      
-      // Rotation auf 0 zurücksetzen für nächsten Spin
-      rotation = 0
+      wheelRotation = startRotation + (easeOut * totalRotation)
       drawWheel()
-      
-      // Prüfe ob "Spin Again"
-      if (actualPrize.type === 'spin_again') {
-        showSpinAgain(customerId)
+
+      if (progress < 1) {
+        requestAnimationFrame(animate)
       } else {
-        // Echte Punkte gewonnen
-        showResult(actualPrize)
-        saveSpin(customerId, currentUnlockId, actualPrize)
-        currentUnlockId = null // Reset für nächstes Mal
+        isSpinning = false
+        
+        let normalizedRotation = wheelRotation % (2 * Math.PI)
+        if (normalizedRotation > Math.PI) normalizedRotation -= 2 * Math.PI
+        if (normalizedRotation < -Math.PI) normalizedRotation += 2 * Math.PI
+        
+        let fieldAngle = -Math.PI / 2 - normalizedRotation - WHEEL_OFFSET
+        if (fieldAngle < 0) fieldAngle += 2 * Math.PI
+        
+        const fieldIndex = Math.floor(fieldAngle / anglePerSegment) % wheelPrizes.length
+        const actualPrize = wheelPrizes[fieldIndex]
+        
+        console.log('🎯 Gewonnen:', actualPrize.label, actualPrize.type, actualPrize.value)
+        
+        // Rotation auf 0 zurücksetzen für nächsten Spin
+        wheelRotation = 0
+        drawWheel()
+        
+        // Prüfe ob "Spin Again"
+        if (actualPrize.type === 'spin_again') {
+          showSpinAgainResult()
+        } else {
+          // Echte Punkte gewonnen
+          showWheelResult(actualPrize)
+          saveWheelSpin(unlock.id, actualPrize)
+          currentWheelUnlockId = null // Reset
+        }
       }
     }
-  }
 
-  animate()
-}
-
-function showSpinAgain(customerId) {
-  const modal = document.getElementById('resultModal')
-  const icon = document.getElementById('resultIcon')
-  const title = document.getElementById('resultTitle')
-  const prizeText = document.getElementById('resultPrize')
-
-  icon.textContent = '🔄'
-  title.textContent = 'Drehe nochmal!'
-  prizeText.textContent = 'Du darfst nochmal drehen! 🎉'
-
-  modal.classList.add('active')
-  
-  // Button wird zu "Nochmal drehen"
-  const button = document.querySelector('.result-button')
-  button.textContent = '🎰 Nochmal drehen!'
-  button.onclick = () => {
-    closeSpinAgainResult()
+    animate()
+  } catch (e) {
+    console.error('❌ Spin error:', e)
+    isSpinning = false
   }
 }
 
-function closeSpinAgainResult() {
-  document.getElementById('resultModal').classList.remove('active')
-  
-  // Button zurücksetzen
-  const button = document.querySelector('.result-button')
-  button.textContent = 'Weiter'
-  button.onclick = closeResult
-  
-  // Info aktualisieren
-  document.getElementById('spinInfo').textContent = '🎉 Klicke auf das Logo zum Drehen!'
-}
-
-function showResult(prize) {
-  const modal = document.getElementById('resultModal')
-  const icon = document.getElementById('resultIcon')
-  const title = document.getElementById('resultTitle')
-  const prizeText = document.getElementById('resultPrize')
+function showWheelResult(prize) {
+  const modal = document.getElementById('wheel-result-modal')
+  const icon = document.getElementById('wheel-result-icon')
+  const title = document.getElementById('wheel-result-title')
+  const prizeText = document.getElementById('wheel-result-prize')
 
   icon.textContent = '⭐'
   title.textContent = 'Glückwunsch! 🎉'
@@ -526,100 +1362,121 @@ function showResult(prize) {
   modal.classList.add('active')
 }
 
-function closeResult() {
-  document.getElementById('resultModal').classList.remove('active')
-  document.getElementById('spinInfo').textContent = '✅ Punkte wurden gutgeschrieben!'
+function showSpinAgainResult() {
+  const modal = document.getElementById('wheel-result-modal')
+  const icon = document.getElementById('wheel-result-icon')
+  const title = document.getElementById('wheel-result-title')
+  const prizeText = document.getElementById('wheel-result-prize')
+
+  icon.textContent = '🔄'
+  title.textContent = 'Drehe nochmal!'
+  prizeText.textContent = 'Du darfst nochmal drehen! 🎉'
+
+  modal.classList.add('active')
+  
+  // Button-Text ändern
+  const closeButton = modal.querySelector('.wheel-result-button')
+  if (closeButton) {
+    closeButton.textContent = '🎰 Nochmal drehen!'
+    closeButton.onclick = () => {
+      closeSpinAgainResult()
+    }
+  }
 }
 
-async function saveSpin(customerId, unlockId, prize) {
+function closeSpinAgainResult() {
+  const modal = document.getElementById('wheel-result-modal')
+  modal.classList.remove('active')
+  
+  // Button zurücksetzen
+  const closeButton = modal.querySelector('.wheel-result-button')
+  if (closeButton) {
+    closeButton.textContent = 'Weiter'
+    closeButton.onclick = closeWheelResult
+  }
+  
+  // Button wieder aktivieren für nächsten Spin
+  // Spin button entfernt - Logo ist jetzt klickbar
+}
+
+function closeWheelResult() {
+  document.getElementById('wheel-result-modal').classList.remove('active')
+  // Spin button entfernt - Logo ist jetzt klickbar
+  document.getElementById('wheel-info').innerHTML = '✅ Punkte wurden gutgeschrieben!'
+  document.getElementById('wheel-info').style.display = 'block'
+  document.getElementById('wheel-available-badge').style.display = 'none'
+  
+  // Refresh customer data
+  if (currentCustomer) {
+    setTimeout(() => {
+      checkWheelAvailability()  // Prüfe ob weitere Drehungen verfügbar
+      refreshCustomerData()
+    }, 1000)
+  }
+}
+
+async function saveWheelSpin(unlockId, prize) {
   try {
     // Markiere unlock als verwendet
-    await supabase
+    const { error: unlockError } = await supabase
       .from('wheel_unlocks')
       .update({ is_used: true })
       .eq('id', unlockId)
     
-    // Speichere Spin
-    await supabase.from('wheel_spins').insert({
-      customer_id: customerId,
-      unlock_id: unlockId,
-      prize_label: prize.label,
-      prize_points: prize.value
+    if (unlockError) {
+      console.error('❌ Fehler beim Markieren des Unlocks:', unlockError)
+      throw unlockError
+    }
+    
+    // Speichere Spin - mit Ihrem AKTUELLEN Schema
+    // Generiere einen KURZEN 4-stelligen Code (varchar(4))
+    const prizeCode = Math.random().toString(36).substr(2, 4).toUpperCase()
+    
+    const { error: spinError } = await supabase.from('wheel_spins').insert({
+      customer_id: currentCustomer.id,       // bigint ID
+      prize_type: prize.type,                // "points" oder "spin_again" (max 20 Zeichen)
+      prize_value: String(prize.value),      // "50" als String (max 100 Zeichen)
+      prize_code: prizeCode,                 // 4-stelliger Code: "A3X9"
+      prize_points: prize.value,             // 50 als Integer
+      is_redeemed: false                     // noch nicht eingelöst
+      // spun_at: wird automatisch gesetzt (DEFAULT now())
+      // created_at: wird automatisch gesetzt (DEFAULT now())
+      // expires_at: wird automatisch gesetzt (DEFAULT now() + 30 days)
     })
     
-    // Schreibe Punkte gut
-    const { data: customer } = await supabase
-      .from('customers')
-      .select('points')
-      .eq('id', customerId)
-      .single()
+    if (spinError) {
+      console.error('❌ Fehler beim Speichern des Spins:', spinError)
+      throw spinError
+    }
     
-    if (customer) {
-      await supabase
+    // ✅ NUR bei Erfolg UND bei echten Punktgewinnen: Punkte gutschreiben
+    if (prize.type === 'points' && prize.value > 0) {
+      const newPoints = currentCustomer.points + prize.value
+      
+      const { error: pointsError } = await supabase
         .from('customers')
-        .update({ points: customer.points + prize.value })
-        .eq('id', customerId)
+        .update({ points: newPoints })
+        .eq('id', currentCustomer.id)
+      
+      if (pointsError) {
+        console.error('❌ Fehler beim Gutschreiben der Punkte:', pointsError)
+        throw pointsError
+      }
+      
+      // Update local customer object
+      currentCustomer.points = newPoints
+      document.getElementById('app-points').textContent = newPoints
     }
     
     console.log('✅ Spin gespeichert und Punkte gutgeschrieben!')
   } catch (e) {
-    console.log('⚠️ Fehler beim Speichern:', e)
+    console.error('❌ Fehler beim Speichern des Wheel Spins:', e)
+    alert('⚠️ Es gab einen Fehler beim Speichern deines Gewinns. Bitte kontaktiere den Support.')
+    throw e  // Fehler weitergeben
   }
 }
 
-async function checkWheelStatus() {
-  const urlParams = new URLSearchParams(window.location.search)
-  const customerId = urlParams.get('customer_id')
-  
-  if (!customerId) {
-    document.getElementById('spinInfo').textContent = '❌ Keine Kunden-ID gefunden'
-    return
-  }
-  
-  const unlock = await canSpin(customerId)
-  
-  if (unlock) {
-    document.getElementById('spinInfo').textContent = '🎉 Klicke auf das Logo zum Drehen!'
-  } else {
-    document.getElementById('spinInfo').textContent = '🕒 Keine freie Drehung verfügbar'
-  }
-}
-
-logoImg.onload = () => drawWheel()
-drawWheel()
-checkWheelStatus()
-
-// Click-Handler: Nur Logo-Bereich ist klickbar
-canvas.addEventListener('click', (event) => {
-  const rect = canvas.getBoundingClientRect()
-  const x = event.clientX - rect.left
-  const y = event.clientY - rect.top
-  
-  const centerX = canvas.width / 2
-  const centerY = canvas.height / 2
-  
-  // Berechne Distanz vom Zentrum
-  const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
-  
-  // Nur wenn innerhalb des Logo-Bereichs (Radius 48)
-  if (distance <= 48) {
-    spinWheel()
-  }
-})
-
-// Cursor ändern wenn über Logo
-canvas.addEventListener('mousemove', (event) => {
-  const rect = canvas.getBoundingClientRect()
-  const x = event.clientX - rect.left
-  const y = event.clientY - rect.top
-  
-  const centerX = canvas.width / 2
-  const centerY = canvas.height / 2
-  const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
-  
-  canvas.style.cursor = distance <= 48 ? 'pointer' : 'default'
-})
+console.log('✅ Döner Boxx Kunden-App geladen!')
 </script>
-
 </body>
 </html>
