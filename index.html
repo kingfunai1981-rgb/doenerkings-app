@@ -1428,12 +1428,13 @@ async function saveWheelSpin(unlockId, prize) {
       throw unlockError
     }
     
-    // Speichere Spin
+    // Speichere Spin - mit korrektem Schema!
     const { error: spinError } = await supabase.from('wheel_spins').insert({
       customer_id: currentCustomer.id,
-      unlock_id: unlockId,
-      prize_label: prize.label,
-      prize_points: prize.value
+      prize_points: prize.value,        // Die gewonnenen Punkte
+      prize_type: prize.type             // 'points' oder 'spin_again'
+      // store_id: optional, wenn Filialen-Support gewünscht
+      // spun_at: wird automatisch gesetzt (DEFAULT now())
     })
     
     if (spinError) {
@@ -1441,22 +1442,24 @@ async function saveWheelSpin(unlockId, prize) {
       throw spinError
     }
     
-    // ✅ NUR bei Erfolg: Punkte gutschreiben
-    const newPoints = currentCustomer.points + prize.value
-    
-    const { error: pointsError } = await supabase
-      .from('customers')
-      .update({ points: newPoints })
-      .eq('id', currentCustomer.id)
-    
-    if (pointsError) {
-      console.error('❌ Fehler beim Gutschreiben der Punkte:', pointsError)
-      throw pointsError
+    // ✅ NUR bei Erfolg UND bei echten Punktgewinnen: Punkte gutschreiben
+    if (prize.type === 'points' && prize.value > 0) {
+      const newPoints = currentCustomer.points + prize.value
+      
+      const { error: pointsError } = await supabase
+        .from('customers')
+        .update({ points: newPoints })
+        .eq('id', currentCustomer.id)
+      
+      if (pointsError) {
+        console.error('❌ Fehler beim Gutschreiben der Punkte:', pointsError)
+        throw pointsError
+      }
+      
+      // Update local customer object
+      currentCustomer.points = newPoints
+      document.getElementById('app-points').textContent = newPoints
     }
-    
-    // Update local customer object
-    currentCustomer.points = newPoints
-    document.getElementById('app-points').textContent = newPoints
     
     console.log('✅ Spin gespeichert und Punkte gutgeschrieben!')
   } catch (e) {
