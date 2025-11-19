@@ -83,6 +83,24 @@ canvas { display: none; }
 
 .tab-content { display: none; }
 .tab-content.active { display: block; }
+
+.wheel-badge {
+  background: linear-gradient(135deg, #F9A825, #f59e0b);
+  color: white;
+  padding: 16px;
+  border-radius: 12px;
+  margin: 16px 0;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  animation: pulse 2s infinite;
+  box-shadow: 0 4px 12px rgba(249, 168, 37, 0.4);
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
 </style>
 </head>
 <body>
@@ -219,6 +237,61 @@ async function checkAndUpdateChallenges(customerId, amount) {
   } catch (e) { console.error('Challenge error:', e) }
 }
 
+// 🎡 WHEEL CHECK - Prüft ob Glücksrad freigeschaltet wird
+async function checkAndUnlockWheel(customerId, amount) {
+  try {
+    // Hole Wheel Config
+    const { data: config, error: configError } = await supabase
+      .from('wheel_config')
+      .select('*')
+      .limit(1)
+    
+    if (configError || !config || config.length === 0) {
+      console.log('ℹ️ Wheel Config nicht gefunden')
+      return false
+    }
+    
+    const wheelConfig = config[0]
+    
+    // Prüfe ob aktiv
+    if (!wheelConfig.is_active) {
+      return false
+    }
+    
+    // Prüfe Zeitfenster (Happy Hour)
+    const now = new Date()
+    const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0')
+    const startTime = wheelConfig.start_time.substring(0, 5) // "15:00:00" -> "15:00"
+    const endTime = wheelConfig.end_time.substring(0, 5)
+    
+    if (currentTime < startTime || currentTime > endTime) {
+      console.log('ℹ️ Außerhalb der Happy Hour')
+      return false
+    }
+    
+    // Prüfe Mindestbestellwert
+    if (amount < parseFloat(wheelConfig.min_order_amount)) {
+      console.log('ℹ️ Betrag zu gering für Wheel')
+      return false
+    }
+    
+    // Wheel freischalten!
+    await supabase.from('wheel_unlocks').insert({
+      customer_id: customerId,
+      order_amount: amount,
+      is_used: false,
+      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+    })
+    
+    console.log('✅ Glücksrad freigeschaltet!')
+    return true
+    
+  } catch (e) {
+    console.error('Wheel check error:', e)
+    return false
+  }
+}
+
 function normalizePhone(phone) {
   let n = phone.replace(/[\s\-\(\)]/g, '')
   if (n.startsWith('+')) n = n.substring(1)
@@ -322,10 +395,17 @@ async function addPointsByPhone() {
     
     await checkAndUpdateChallenges(customer.id, amount)
     
+    // 🎡 Wheel-Check
+    const wheelUnlocked = await checkAndUnlockWheel(customer.id, amount)
+    
     let msg = `✅ <strong>ERFOLG!</strong><br>👤 ${customer.name}<br>💰 ${amount.toFixed(2)} €<br>⭐ +${Math.round(amount * 10)}P`
     if (bonusApplied) msg += `<br>🎉 ${bonusApplied} (+${bonusPointsAdded}P)`
     if (couponUsed) msg += `<br>✅ ${couponUsed}`
     msg += `<br>📊 Neu: <strong>${newTotal}P</strong>`
+    
+    if (wheelUnlocked) {
+      msg += `<br><br><div class="wheel-badge">🎡 GLÜCKSRAD FREIGESCHALTET!</div>`
+    }
     
     showResult('result-phone', msg, 'success')
     document.getElementById('phone').value = ''
@@ -470,9 +550,16 @@ async function addPointsFromScan() {
     
     await checkAndUpdateChallenges(currentCustomer.id, amount)
     
+    // 🎡 Wheel-Check
+    const wheelUnlocked = await checkAndUnlockWheel(currentCustomer.id, amount)
+    
     let msg = `✅ <strong>ERFOLG!</strong><br>👤 ${currentCustomer.name}<br>💰 ${amount.toFixed(2)} €<br>⭐ +${Math.round(amount * 10)}P`
     if (bonusApplied) msg += `<br>🎉 ${bonusApplied} (+${bonusPointsAdded}P)`
     msg += `<br>📊 Neu: <strong>${newTotal}P</strong>`
+    
+    if (wheelUnlocked) {
+      msg += `<br><br><div class="wheel-badge">🎡 GLÜCKSRAD FREIGESCHALTET!</div>`
+    }
     
     showResult('result-scan', msg, 'success')
     setTimeout(() => {
