@@ -297,14 +297,16 @@ const ctx = canvas.getContext('2d')
 
 const anglePerSegment = (2 * Math.PI) / 18
 
-// 🔴 WICHTIG: FIXE Startrotation
-// Canvas-Koordinaten: 0° = rechts (3 Uhr), -90° = oben (12 Uhr)
-// Das erste Segment (Index 0 = DÖNER) beginnt bei 0° und geht bis anglePerSegment
-// Um die MITTE vom ersten Segment nach oben (12 Uhr = -90°) zu bringen:
-// rotation = -90° - halbes Segment = -π/2 - anglePerSegment/2
-const INITIAL_ROTATION = -Math.PI / 2 - anglePerSegment / 2
+// 🔴 WICHTIG: Fester Offset-Winkel
+// Zeiger zeigt nach oben = -90° = -π/2
+// Wir wollen dass DÖNER (Feld 0) genau unter dem Zeiger ist
+// Das bedeutet: Die Mitte von Feld 0 muss bei -90° sein
+// Feld 0 geht von 0° bis anglePerSegment, Mitte ist bei anglePerSegment/2
+// Offset = -90° - anglePerSegment/2
+const OFFSET = -Math.PI / 2 - anglePerSegment / 2
 
-let rotation = INITIAL_ROTATION  // Immer diese fixe Startposition!
+// Rotation startet bei 0 - wir zeichnen die Felder mit OFFSET
+let rotation = 0
 let isSpinning = false
 let testCustomerId = 1
 
@@ -340,9 +342,9 @@ function drawWheel() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   ctx.save()
   ctx.translate(centerX, centerY)
-  ctx.rotate(rotation)
+  ctx.rotate(rotation + OFFSET)  // 🔴 OFFSET hier anwenden!
 
-  // Zeichne Segmente (beginnen bei 0° und gehen im Uhrzeigersinn)
+  // Zeichne Segmente (beginnen bei 0° im rotierten System)
   prizes.forEach((prize, i) => {
     const startAngle = i * anglePerSegment
     const endAngle = startAngle + anglePerSegment
@@ -374,7 +376,7 @@ function drawWheel() {
 
   ctx.restore()
   
-  // Logo SEPARAT zeichnen - OHNE Rotation (bleibt horizontal)
+  // Logo SEPARAT zeichnen - OHNE Rotation
   ctx.save()
   ctx.translate(centerX, centerY)
   
@@ -451,13 +453,19 @@ async function spinWheel() {
   const spins = 5 + Math.floor((array[0] / 0xFFFFFFFF) * 3)
   const baseRotation = spins * 2 * Math.PI
   
-  // Zielwinkel: Das gewonnene Feld soll bei -90° (oben) landen
-  // Feld i hat Mitte bei: i * anglePerSegment + anglePerSegment/2 (in rotiertem System)
-  // Wir wollen dass diese Mitte bei -90° - anglePerSegment/2 landet (weil INITIAL_ROTATION das ist)
-  const targetFieldAngle = winningIndex * anglePerSegment + anglePerSegment / 2 + randomOffset
-  const targetRotation = INITIAL_ROTATION - targetFieldAngle
+  // 🔴 WICHTIG: Berechnung OHNE OFFSET
+  // rotation ist die "reine" Drehung, OFFSET wird nur beim Zeichnen addiert
+  // Wir wollen dass Feld winningIndex unter dem Zeiger (-90°) landet
+  // Feld i hat Mitte bei: i * anglePerSegment + anglePerSegment/2 (im System ohne OFFSET)
+  // Mit OFFSET ist die Mitte bei: i * anglePerSegment + anglePerSegment/2 + OFFSET
+  // Das soll bei -90° landen, also:
+  // rotation + OFFSET + fieldMidAngle = -π/2
+  // rotation = -π/2 - OFFSET - fieldMidAngle
   
-  // Normalisiere targetRotation auf den Bereich der aktuellen Rotation
+  const fieldMidAngle = winningIndex * anglePerSegment + anglePerSegment / 2 + randomOffset
+  const targetRotation = -Math.PI / 2 - OFFSET - fieldMidAngle
+  
+  // Normalisiere auf Bereich um aktuelle rotation
   let normalizedTarget = targetRotation
   while (normalizedTarget > rotation) {
     normalizedTarget -= 2 * Math.PI
@@ -482,23 +490,25 @@ async function spinWheel() {
     } else {
       isSpinning = false
       
-      // Ermittle welches Feld unter dem Zeiger ist
+      // 🔴 GEWINN-BERECHNUNG mit OFFSET
+      // Zeiger ist bei -90°
+      // Welches Feld ist dort?
+      // rotation + OFFSET + fieldMidAngle = -π/2
+      // fieldMidAngle = -π/2 - rotation - OFFSET
+      
       let normalizedRotation = rotation % (2 * Math.PI)
-      if (normalizedRotation < 0) normalizedRotation += 2 * Math.PI
+      if (normalizedRotation > Math.PI) normalizedRotation -= 2 * Math.PI
+      if (normalizedRotation < -Math.PI) normalizedRotation += 2 * Math.PI
       
-      // INITIAL_ROTATION normalisiert
-      let normalizedInitial = INITIAL_ROTATION % (2 * Math.PI)
-      if (normalizedInitial < 0) normalizedInitial += 2 * Math.PI
+      let fieldAngle = -Math.PI / 2 - normalizedRotation - OFFSET
+      if (fieldAngle < 0) fieldAngle += 2 * Math.PI
       
-      let relativeAngle = normalizedInitial - normalizedRotation
-      if (relativeAngle < 0) relativeAngle += 2 * Math.PI
-      
-      const fieldIndex = Math.floor(relativeAngle / anglePerSegment) % prizes.length
+      const fieldIndex = Math.floor(fieldAngle / anglePerSegment) % prizes.length
       const actualPrize = prizes[fieldIndex]
       
       console.log('🎯 Sollte gewinnen:', winningPrize.label, '(Index:', winningIndex, ')')
       console.log('🎯 Hat gewonnen:', actualPrize.label, '(Index:', fieldIndex, ')')
-      console.log('📐 Volle Drehungen:', spins)
+      console.log('📐 Rotation:', normalizedRotation.toFixed(3), 'Field Angle:', fieldAngle.toFixed(3))
       
       showResult(actualPrize)
       saveSpin(actualPrize)
@@ -596,11 +606,11 @@ drawWheel()
 updateSpinInfo()
 canvas.addEventListener('click', spinWheel)
 
-console.log('✅ Lucky Wheel mit FIXER Startposition!')
-console.log('🔴 INITIAL_ROTATION =', INITIAL_ROTATION, '(fixiert)')
-console.log('🔴 DÖNER (rot) steht IMMER exakt mittig oben')
-console.log('🔧 Logo bleibt horizontal')
-console.log('🎯 5-7 volle Drehungen')
+console.log('✅ Lucky Wheel mit OFFSET-Berechnung!')
+console.log('🔴 OFFSET =', OFFSET, '(wird beim Zeichnen & Berechnen verwendet)')
+console.log('🔴 rotation startet bei 0, Felder werden mit OFFSET gezeichnet')
+console.log('🔴 DÖNER steht exakt mittig oben')
+console.log('🎯 Gewinn-Berechnung berücksichtigt OFFSET')
 </script>
 
 </body>
