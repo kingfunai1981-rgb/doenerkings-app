@@ -604,12 +604,9 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
           </div>
         </div>
         
-        <button id="spin-button" onclick="spinWheel()">🎰 JETZT DREHEN!</button>
-        
         <!-- Info wenn nicht verfügbar -->
         <div id="wheel-info" class="wheel-info-box">
-          🕒 Happy Hour: 15-18 Uhr<br>
-          Bei Bestellung ≥10€ darfst du drehen!
+          🎉 Klicke auf das Logo zum Drehen!
         </div>
       </div>
     </div>
@@ -1075,6 +1072,37 @@ function initWheel() {
   logoImg.src = '/logo-round.png'
   logoImg.onload = () => drawWheel()
   
+  // Click-Handler: Nur Logo-Bereich ist klickbar
+  canvas.addEventListener('click', (event) => {
+    const rect = canvas.getBoundingClientRect()
+    const x = event.clientX - rect.left
+    const y = event.clientY - rect.top
+    
+    const centerX = canvas.width / 2
+    const centerY = canvas.height / 2
+    
+    // Berechne Distanz vom Zentrum
+    const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
+    
+    // Nur wenn innerhalb des Logo-Bereichs (Radius 48)
+    if (distance <= 48) {
+      spinWheel()
+    }
+  })
+  
+  // Cursor ändern wenn über Logo
+  canvas.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect()
+    const x = event.clientX - rect.left
+    const y = event.clientY - rect.top
+    
+    const centerX = canvas.width / 2
+    const centerY = canvas.height / 2
+    const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
+    
+    canvas.style.cursor = distance <= 48 ? 'pointer' : 'default'
+  })
+  
   drawWheel()
 }
 
@@ -1184,7 +1212,7 @@ async function checkWheelAvailability() {
 function showWheel(count) {
   const section = document.getElementById('wheel-section')
   const badge = document.getElementById('wheel-available-badge')
-  const spinButton = document.getElementById('spin-button')
+  // Spin button entfernt - Logo ist jetzt klickbar
   const wheelInfo = document.getElementById('wheel-info')
   const countSpan = document.getElementById('wheel-count')
   
@@ -1236,7 +1264,6 @@ async function spinWheel() {
     
     const unlock = unlocks[0]
     isSpinning = true
-    document.getElementById('spin-button').disabled = true
 
     const winningPrize = getRandomPrize()
     const winningIndex = wheelPrizes.indexOf(winningPrize)
@@ -1245,22 +1272,28 @@ async function spinWheel() {
     crypto.getRandomValues(array)
     const randomOffset = ((array[0] / 0xFFFFFFFF) - 0.5) * 0.6 * anglePerSegment
     
-    const spins = 5 + Math.floor((array[0] / 0xFFFFFFFF) * 3)
+    // WICHTIG: Rotation auf 0 zurücksetzen für konsistente Startposition
+    wheelRotation = 0
+    
+    // 6-10 volle Drehungen (mehr für bessere Animation)
+    const spins = 6 + Math.floor((array[0] / 0xFFFFFFFF) * 5)
     const baseRotation = spins * 2 * Math.PI
     
+    // Berechne Zielfeld
     const fieldMidAngle = winningIndex * anglePerSegment + anglePerSegment / 2 + randomOffset
     const targetRotation = -Math.PI / 2 - WHEEL_OFFSET - fieldMidAngle
     
+    // Normalisiere für positive Rotation
     let normalizedTarget = targetRotation
-    while (normalizedTarget > wheelRotation) {
-      normalizedTarget -= 2 * Math.PI
+    while (normalizedTarget < 0) {
+      normalizedTarget += 2 * Math.PI
     }
     
-    const totalRotation = baseRotation + (normalizedTarget - wheelRotation)
+    const totalRotation = baseRotation + normalizedTarget
 
-    const startRotation = wheelRotation
+    const startRotation = 0 // Immer von 0 starten
     const startTime = Date.now()
-    const duration = 4000 + Math.floor((array[0] / 0xFFFFFFFF) * 1000)
+    const duration = 5000 + Math.floor((array[0] / 0xFFFFFFFF) * 1000) // 5-6 Sekunden
 
     function animate() {
       const elapsed = Date.now() - startTime
@@ -1287,6 +1320,10 @@ async function spinWheel() {
         
         console.log('🎯 Gewonnen:', actualPrize.label, actualPrize.type, actualPrize.value)
         
+        // Rotation auf 0 zurücksetzen für nächsten Spin
+        wheelRotation = 0
+        drawWheel()
+        
         // Prüfe ob "Spin Again"
         if (actualPrize.type === 'spin_again') {
           showSpinAgainResult()
@@ -1303,7 +1340,7 @@ async function spinWheel() {
   } catch (e) {
     console.error('❌ Spin error:', e)
     isSpinning = false
-    document.getElementById('spin-button').disabled = false
+    // Spin button entfernt - Logo ist jetzt klickbar
   }
 }
 
@@ -1354,12 +1391,12 @@ function closeSpinAgainResult() {
   }
   
   // Button wieder aktivieren für nächsten Spin
-  document.getElementById('spin-button').disabled = false
+  // Spin button entfernt - Logo ist jetzt klickbar
 }
 
 function closeWheelResult() {
   document.getElementById('wheel-result-modal').classList.remove('active')
-  document.getElementById('spin-button').disabled = true
+  // Spin button entfernt - Logo ist jetzt klickbar
   document.getElementById('wheel-info').innerHTML = '✅ Punkte wurden gutgeschrieben!'
   document.getElementById('wheel-info').style.display = 'block'
   document.getElementById('wheel-available-badge').style.display = 'none'
