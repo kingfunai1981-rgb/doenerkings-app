@@ -204,42 +204,8 @@ canvas {
   padding: 16px;
   margin-top: 20px;
   text-align: center;
-}
-
-.test-controls {
-  margin-top: 30px;
-  padding: 20px;
-  background: #f9fafb;
-  border-radius: 12px;
-  border: 2px dashed #ccc;
-}
-
-.test-controls h3 {
-  color: #666;
-  font-size: 16px;
-  margin-bottom: 12px;
-}
-
-.test-controls input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  font-family: 'Flame', sans-serif;
-}
-
-.test-controls button {
-  width: 100%;
-  padding: 12px;
-  background: #6b7280;
-  color: white;
-  border: none;
-  border-radius: 8px;
   font-size: 14px;
-  cursor: pointer;
-  margin-top: 4px;
-  font-family: 'Flame', sans-serif;
+  color: #666;
 }
 </style>
 </head>
@@ -266,21 +232,14 @@ canvas {
   </button>
 
   <div class="info-box">
-    <div id="spinInfo">Du kannst 1x pro Tag drehen</div>
-  </div>
-
-  <div class="test-controls">
-    <h3>🛠️ Test-Steuerung</h3>
-    <input type="number" id="testCustomerId" placeholder="Kunden-ID" value="1">
-    <button onclick="resetSpin()">🔄 Spin zurücksetzen</button>
-    <button onclick="loadTestPrizes()">📋 Alle Preise anzeigen</button>
+    <div id="spinInfo">🕒 Happy Hour: 15-18 Uhr | Bei Bestellung ≥10€</div>
   </div>
 </div>
 
 <div id="resultModal" class="result-modal">
   <div class="result-content">
     <div class="result-icon" id="resultIcon">🎉</div>
-    <div class="result-title" id="resultTitle">Gewonnen!</div>
+    <div class="result-title" id="resultTitle">Glückwunsch!</div>
     <div class="result-prize" id="resultPrize">100 Punkte</div>
     <button class="result-button" onclick="closeResult()">Weiter</button>
   </div>
@@ -297,37 +256,31 @@ const ctx = canvas.getContext('2d')
 
 const anglePerSegment = (2 * Math.PI) / 18
 
-// 🔴 WICHTIG: Fester Offset-Winkel
-// Zeiger zeigt nach oben = -90° = -π/2
-// Wir wollen dass DÖNER (Feld 0) genau unter dem Zeiger ist
-// Das bedeutet: Die Mitte von Feld 0 muss bei -90° sein
-// Feld 0 geht von 0° bis anglePerSegment, Mitte ist bei anglePerSegment/2
-// Offset = -90° - anglePerSegment/2
+// 🔴 Fester Offset-Winkel: DÖNER (rot) exakt mittig oben
 const OFFSET = -Math.PI / 2 - anglePerSegment / 2
 
-// Rotation startet bei 0 - wir zeichnen die Felder mit OFFSET
 let rotation = 0
 let isSpinning = false
-let testCustomerId = 1
 
+// 🎨 KLASSISCHE FARBEN: Rot, Schwarz, Weiß
 const prizes = [
-  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', type: 'reward', value: 'Döner' },
+  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },
   { label: '50 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },
-  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Ayran (0.25 l)' },
+  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 150 },
   { label: '100 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },
-  { label: 'POMMES', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Pommes' },
+  { label: 'POMMES', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 200 },
   { label: '75 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },
-  { label: 'COLA', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Cola (0.33 l)' },
+  { label: 'COLA', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 150 },
   { label: '150 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 150 },
-  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Ayran (0.25 l)' },
-  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', type: 'reward', value: 'Döner' },
+  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 150 },
+  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },
   { label: '200 PUNKTE', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 200 },
   { label: '50 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },
-  { label: 'POMMES', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Pommes' },
+  { label: 'POMMES', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 200 },
   { label: '100 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },
-  { label: 'COLA', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Cola (0.33 l)' },
+  { label: 'COLA', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 150 },
   { label: '75 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },
-  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'reward', value: 'Ayran (0.25 l)' },
+  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 150 },
   { label: '250 PUNKTE', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 250 }
 ]
 
@@ -342,9 +295,8 @@ function drawWheel() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   ctx.save()
   ctx.translate(centerX, centerY)
-  ctx.rotate(rotation + OFFSET)  // 🔴 OFFSET hier anwenden!
+  ctx.rotate(rotation + OFFSET)
 
-  // Zeichne Segmente (beginnen bei 0° im rotierten System)
   prizes.forEach((prize, i) => {
     const startAngle = i * anglePerSegment
     const endAngle = startAngle + anglePerSegment
@@ -376,7 +328,7 @@ function drawWheel() {
 
   ctx.restore()
   
-  // Logo SEPARAT zeichnen - OHNE Rotation
+  // Logo SEPARAT zeichnen - OHNE Rotation (bleibt horizontal)
   ctx.save()
   ctx.translate(centerX, centerY)
   
@@ -407,35 +359,43 @@ function getRandomPrize() {
   return prizes[randomIndex]
 }
 
-async function canSpin() {
+async function canSpin(customerId) {
   try {
-    const customerId = parseInt(document.getElementById('testCustomerId').value) || testCustomerId
-    const today = new Date().toISOString().split('T')[0]
-    
     const { data, error } = await supabase
-      .from('wheel_spins')
+      .from('wheel_unlocks')
       .select('*')
       .eq('customer_id', customerId)
-      .gte('created_at', today + 'T00:00:00')
+      .eq('is_used', false)
+      .gt('expires_at', new Date().toISOString())
+      .limit(1)
     
     if (error) {
-      console.log('⚠️ Tabelle wheel_spins existiert nicht')
-      return true
+      console.log('⚠️ Tabelle wheel_unlocks nicht gefunden')
+      return null
     }
     
-    return !data || data.length === 0
+    return data && data.length > 0 ? data[0] : null
   } catch (e) {
     console.log('⚠️ Fehler bei canSpin:', e)
-    return true
+    return null
   }
 }
 
 async function spinWheel() {
   if (isSpinning) return
   
-  const canSpinNow = await canSpin()
-  if (!canSpinNow) {
-    alert('❌ Du hast heute bereits gedreht! Komm morgen wieder.')
+  // Hole customer_id aus URL Parameter
+  const urlParams = new URLSearchParams(window.location.search)
+  const customerId = urlParams.get('customer_id')
+  
+  if (!customerId) {
+    alert('❌ Fehler: Keine Kunden-ID gefunden')
+    return
+  }
+  
+  const unlock = await canSpin(customerId)
+  if (!unlock) {
+    alert('❌ Du hast derzeit keine freie Drehung!')
     return
   }
 
@@ -453,19 +413,9 @@ async function spinWheel() {
   const spins = 5 + Math.floor((array[0] / 0xFFFFFFFF) * 3)
   const baseRotation = spins * 2 * Math.PI
   
-  // 🔴 WICHTIG: Berechnung OHNE OFFSET
-  // rotation ist die "reine" Drehung, OFFSET wird nur beim Zeichnen addiert
-  // Wir wollen dass Feld winningIndex unter dem Zeiger (-90°) landet
-  // Feld i hat Mitte bei: i * anglePerSegment + anglePerSegment/2 (im System ohne OFFSET)
-  // Mit OFFSET ist die Mitte bei: i * anglePerSegment + anglePerSegment/2 + OFFSET
-  // Das soll bei -90° landen, also:
-  // rotation + OFFSET + fieldMidAngle = -π/2
-  // rotation = -π/2 - OFFSET - fieldMidAngle
-  
   const fieldMidAngle = winningIndex * anglePerSegment + anglePerSegment / 2 + randomOffset
   const targetRotation = -Math.PI / 2 - OFFSET - fieldMidAngle
   
-  // Normalisiere auf Bereich um aktuelle rotation
   let normalizedTarget = targetRotation
   while (normalizedTarget > rotation) {
     normalizedTarget -= 2 * Math.PI
@@ -490,12 +440,7 @@ async function spinWheel() {
     } else {
       isSpinning = false
       
-      // 🔴 GEWINN-BERECHNUNG mit OFFSET
-      // Zeiger ist bei -90°
-      // Welches Feld ist dort?
-      // rotation + OFFSET + fieldMidAngle = -π/2
-      // fieldMidAngle = -π/2 - rotation - OFFSET
-      
+      // Gewinn-Berechnung
       let normalizedRotation = rotation % (2 * Math.PI)
       if (normalizedRotation > Math.PI) normalizedRotation -= 2 * Math.PI
       if (normalizedRotation < -Math.PI) normalizedRotation += 2 * Math.PI
@@ -506,12 +451,10 @@ async function spinWheel() {
       const fieldIndex = Math.floor(fieldAngle / anglePerSegment) % prizes.length
       const actualPrize = prizes[fieldIndex]
       
-      console.log('🎯 Sollte gewinnen:', winningPrize.label, '(Index:', winningIndex, ')')
-      console.log('🎯 Hat gewonnen:', actualPrize.label, '(Index:', fieldIndex, ')')
-      console.log('📐 Rotation:', normalizedRotation.toFixed(3), 'Field Angle:', fieldAngle.toFixed(3))
+      console.log('🎯 Gewonnen:', actualPrize.label, actualPrize.value, 'Punkte')
       
       showResult(actualPrize)
-      saveSpin(actualPrize)
+      saveSpin(customerId, unlock.id, actualPrize)
     }
   }
 
@@ -524,93 +467,80 @@ function showResult(prize) {
   const title = document.getElementById('resultTitle')
   const prizeText = document.getElementById('resultPrize')
 
-  if (prize.type === 'points') {
-    icon.textContent = '⭐'
-  } else if (prize.type === 'reward') {
-    if (prize.label.includes('DÖNER')) icon.textContent = '🍔'
-    else if (prize.label.includes('AYRAN')) icon.textContent = '🥤'
-    else if (prize.label.includes('COLA')) icon.textContent = '🥤'
-    else if (prize.label.includes('POMMES')) icon.textContent = '🍟'
-    else icon.textContent = '🎁'
-  } else {
-    icon.textContent = '🎉'
-  }
-
+  icon.textContent = '⭐'
   title.textContent = 'Glückwunsch! 🎉'
-  prizeText.textContent = prize.label
+  prizeText.textContent = `+${prize.value} Punkte`
 
   modal.classList.add('active')
 }
 
 function closeResult() {
   document.getElementById('resultModal').classList.remove('active')
-  updateSpinInfo()
+  document.getElementById('spinButton').disabled = true
+  document.getElementById('spinInfo').textContent = '✅ Punkte wurden gutgeschrieben!'
 }
 
-async function saveSpin(prize) {
+async function saveSpin(customerId, unlockId, prize) {
   try {
-    const customerId = parseInt(document.getElementById('testCustomerId').value) || testCustomerId
+    // Markiere unlock als verwendet
+    await supabase
+      .from('wheel_unlocks')
+      .update({ is_used: true })
+      .eq('id', unlockId)
     
+    // Speichere Spin
     await supabase.from('wheel_spins').insert({
       customer_id: customerId,
-      prize_type: prize.type,
-      prize_value: prize.value.toString(),
-      prize_label: prize.label
+      unlock_id: unlockId,
+      prize_label: prize.label,
+      prize_points: prize.value
     })
     
-    console.log('✅ Spin gespeichert:', prize.label)
+    // Schreibe Punkte gut
+    const { data: customer } = await supabase
+      .from('customers')
+      .select('points')
+      .eq('id', customerId)
+      .single()
+    
+    if (customer) {
+      await supabase
+        .from('customers')
+        .update({ points: customer.points + prize.value })
+        .eq('id', customerId)
+    }
+    
+    console.log('✅ Spin gespeichert und Punkte gutgeschrieben!')
   } catch (e) {
     console.log('⚠️ Fehler beim Speichern:', e)
   }
 }
 
-async function updateSpinInfo() {
-  const canSpinNow = await canSpin()
-  const button = document.getElementById('spinButton')
-  const info = document.getElementById('spinInfo')
+async function checkWheelStatus() {
+  const urlParams = new URLSearchParams(window.location.search)
+  const customerId = urlParams.get('customer_id')
   
-  if (canSpinNow) {
-    button.disabled = false
-    info.textContent = 'Du kannst 1x pro Tag drehen'
+  if (!customerId) {
+    document.getElementById('spinButton').disabled = true
+    document.getElementById('spinInfo').textContent = '❌ Keine Kunden-ID gefunden'
+    return
+  }
+  
+  const unlock = await canSpin(customerId)
+  
+  if (unlock) {
+    document.getElementById('spinButton').disabled = false
+    document.getElementById('spinInfo').textContent = '🎉 Du hast 1 freie Drehung!'
   } else {
-    button.disabled = true
-    info.textContent = 'Heute bereits gedreht! Komm morgen wieder 🎡'
+    document.getElementById('spinButton').disabled = true
+    document.getElementById('spinInfo').textContent = '🕒 Happy Hour: 15-18 Uhr | Bei Bestellung ≥10€'
   }
-}
-
-async function resetSpin() {
-  const customerId = parseInt(document.getElementById('testCustomerId').value) || testCustomerId
-  const today = new Date().toISOString().split('T')[0]
-  
-  try {
-    await supabase
-      .from('wheel_spins')
-      .delete()
-      .eq('customer_id', customerId)
-      .gte('created_at', today + 'T00:00:00')
-    
-    alert('✅ Spin zurückgesetzt!')
-    updateSpinInfo()
-  } catch (e) {
-    console.log('⚠️ Fehler beim Reset:', e)
-  }
-}
-
-function loadTestPrizes() {
-  const prizeList = prizes.map((p, i) => `${i+1}. ${p.label}`).join('\n')
-  alert('🎁 18 Felder:\n\n' + prizeList)
 }
 
 logoImg.onload = () => drawWheel()
 drawWheel()
-updateSpinInfo()
+checkWheelStatus()
 canvas.addEventListener('click', spinWheel)
-
-console.log('✅ Lucky Wheel mit OFFSET-Berechnung!')
-console.log('🔴 OFFSET =', OFFSET, '(wird beim Zeichnen & Berechnen verwendet)')
-console.log('🔴 rotation startet bei 0, Felder werden mit OFFSET gezeichnet')
-console.log('🔴 DÖNER steht exakt mittig oben')
-console.log('🎯 Gewinn-Berechnung berücksichtigt OFFSET')
 </script>
 
 </body>
