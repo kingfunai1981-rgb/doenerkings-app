@@ -258,15 +258,27 @@ async function checkAndUnlockWheel(customerId, amount) {
       return false
     }
     
-    // Prüfe Zeitfenster (Happy Hour)
-    const now = new Date()
-    const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0')
-    const startTime = wheelConfig.start_time.substring(0, 5) // "15:00:00" -> "15:00"
-    const endTime = wheelConfig.end_time.substring(0, 5)
+    // Prüfe Wochentag (falls aktiviert)
+    if (wheelConfig.active_days && wheelConfig.active_days.length > 0) {
+      const now = new Date()
+      const currentDay = now.getDay() // 0=Sonntag, 1=Montag, ..., 6=Samstag
+      if (!wheelConfig.active_days.includes(currentDay)) {
+        console.log('ℹ️ Glücksrad heute nicht aktiv')
+        return false
+      }
+    }
     
-    if (currentTime < startTime || currentTime > endTime) {
-      console.log('ℹ️ Außerhalb der Happy Hour')
-      return false
+    // Prüfe Zeitfenster (Happy Hour) - nur wenn start_time und end_time gesetzt sind
+    if (wheelConfig.start_time && wheelConfig.end_time) {
+      const now = new Date()
+      const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0')
+      const startTime = wheelConfig.start_time.substring(0, 5) // "15:00:00" -> "15:00"
+      const endTime = wheelConfig.end_time.substring(0, 5)
+      
+      if (currentTime < startTime || currentTime > endTime) {
+        console.log('ℹ️ Außerhalb der Happy Hour')
+        return false
+      }
     }
     
     // Prüfe Mindestbestellwert
@@ -711,56 +723,54 @@ async function handleCouponCode(activation, code) {
 
 async function handleRedeemCode(codeData, code) {
   try {
-    currentCodeData = codeData
     if (codeData.used) throw new Error('Code bereits verwendet')
     if (new Date(codeData.valid_until) < new Date()) throw new Error('Code abgelaufen')
     
     const customer = codeData.customers
-    const expires = new Date(codeData.valid_until).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+    showResult('result-code', '⏳ Code wird eingelöst...', 'info')
     
-    showResult('result-code', '✅ Prämien-Code gefunden!', 'success')
+    // SOFORT EINLÖSEN - kein Bestätigen-Schritt mehr
+    const newPoints = customer.points - codeData.points_cost
     
+    await supabase.from('transactions').insert({ 
+      customer_id: codeData.customer_id, 
+      type: 'redeem', 
+      amount: 0, 
+      points: -codeData.points_cost, 
+      staff: 'Scanner', 
+      notes: `${codeData.reward_name} (Code: ${code})` 
+    })
+    
+    await supabase.from('customers').update({ points: newPoints }).eq('id', codeData.customer_id)
+    await supabase.from('redeem_codes').update({ used: true, used_at: new Date().toISOString() }).eq('code', code)
+    
+    // POPUP mit eingelöster Prämie
     document.getElementById('code-details').style.display = 'block'
     document.getElementById('code-details').innerHTML = `
-      <div class="code-item">
-        <h3>🎁 ${codeData.reward_name}</h3>
-        <div class="code">${code}</div>
-        <div style="font-size:14px;color:#92400e;margin-bottom:16px;">
-          <strong>Kunde:</strong> ${customer.name}<br>
-          <strong>Aktuell:</strong> ${customer.points} Punkte<br>
-          <strong>Kosten:</strong> ${codeData.points_cost} Punkte<br>
-          <strong>Danach:</strong> ${customer.points - codeData.points_cost} Punkte<br>
-          <strong>Gültig bis:</strong> ${expires}
+      <div class="code-item" style="background:linear-gradient(135deg,#d1fae5,#a7f3d0);border:2px solid #10b981;">
+        <div style="font-size:60px;text-align:center;margin:20px 0;">✅</div>
+        <h3 style="text-align:center;color:#065f46;font-size:28px;margin-bottom:16px;">Erfolgreich eingelöst!</h3>
+        <div style="font-size:22px;font-weight:700;color:#059669;text-align:center;margin:20px 0;">
+          🎁 ${codeData.reward_name}
         </div>
-        <button onclick="confirmRedeemCode()" class="success" style="width:100%;margin-bottom:8px;">✅ Bestätigen & Punkte abziehen</button>
-        <button onclick="cancelCodeConfirm()" class="secondary" style="width:100%;">❌ Abbrechen</button>
+        <div style="font-size:16px;color:#065f46;text-align:center;margin:16px 0;">
+          <strong>Kunde:</strong> ${customer.name}<br>
+          <strong>Neue Punkte:</strong> ${newPoints}
+        </div>
+        <button onclick="closeCodeDetails()" class="success" style="width:100%;margin-top:16px;">Weiter</button>
       </div>
     `
+    
+    showResult('result-code', '✅ Code erfolgreich eingelöst!', 'success')
   } catch (e) {
     showResult('result-code', '❌ ' + e.message, 'error')
     console.error('Handle redeem error:', e)
   }
 }
 
-async function confirmRedeemCode() {
-  if (!currentCodeData) return
-  try {
-    showResult('result-code', '⏳ Bestätige...', 'info')
-    
-    const newPoints = currentCodeData.customers.points - currentCodeData.points_cost
-    
-    await supabase.from('transactions').insert({ customer_id: currentCodeData.customer_id, type: 'redeem', amount: 0, points: -currentCodeData.points_cost, staff: 'Scanner', notes: `${currentCodeData.reward_name} (Code: ${currentCodeData.code})` })
-    await supabase.from('customers').update({ points: newPoints }).eq('id', currentCodeData.customer_id)
-    await supabase.from('redeem_codes').update({ used: true, used_at: new Date().toISOString() }).eq('code', currentCodeData.code)
-    
-    showResult('result-code', '✅ Code erfolgreich eingelöst!', 'success')
-    document.getElementById('code').value = ''
-    document.getElementById('code-details').style.display = 'none'
-    currentCodeData = null
-  } catch (e) {
-    showResult('result-code', '❌ Fehler: ' + e.message, 'error')
-    console.error('Confirm redeem error:', e)
-  }
+function closeCodeDetails() {
+  document.getElementById('code').value = ''
+  document.getElementById('code-details').style.display = 'none'
 }
 
 async function useCoupon(activationId) {
