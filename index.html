@@ -1039,29 +1039,30 @@ window.onload = () => {
 // 🎡 NEU: Lucky Wheel Functions
 let wheelRotation = 0
 let isSpinning = false
+let currentWheelUnlockId = null // Für Spin Again
 
 const anglePerSegment = (2 * Math.PI) / 18
 const WHEEL_OFFSET = -Math.PI / 2 - anglePerSegment / 2
 
 const wheelPrizes = [
-  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', value: 500 },
-  { label: '50 PUNKTE', color: '#000000', textColor: '#FFFFFF', value: 50 },
-  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', value: 150 },
-  { label: '100 PUNKTE', color: '#000000', textColor: '#FFFFFF', value: 100 },
-  { label: 'POMMES', color: '#FFFFFF', textColor: '#000000', value: 200 },
-  { label: '75 PUNKTE', color: '#000000', textColor: '#FFFFFF', value: 75 },
-  { label: 'COLA', color: '#FFFFFF', textColor: '#000000', value: 150 },
-  { label: '150 PUNKTE', color: '#000000', textColor: '#FFFFFF', value: 150 },
-  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', value: 150 },
-  { label: 'DÖNER', color: '#E31E24', textColor: '#FFFFFF', value: 500 },
-  { label: '200 PUNKTE', color: '#FFFFFF', textColor: '#000000', value: 200 },
-  { label: '50 PUNKTE', color: '#000000', textColor: '#FFFFFF', value: 50 },
-  { label: 'POMMES', color: '#FFFFFF', textColor: '#000000', value: 200 },
-  { label: '100 PUNKTE', color: '#000000', textColor: '#FFFFFF', value: 100 },
-  { label: 'COLA', color: '#FFFFFF', textColor: '#000000', value: 150 },
-  { label: '75 PUNKTE', color: '#000000', textColor: '#FFFFFF', value: 75 },
-  { label: 'AYRAN', color: '#FFFFFF', textColor: '#000000', value: 150 },
-  { label: '250 PUNKTE', color: '#000000', textColor: '#FFFFFF', value: 250 }
+  { label: '500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },          // 1 - ROT
+  { label: '50', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },            // 2 - WEIß
+  { label: '100', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },          // 3 - SCHWARZ
+  { label: '25', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 25 },            // 4 - WEIß
+  { label: '75', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },            // 5 - SCHWARZ
+  { label: 'DREHE NOCHMAL!', color: '#FFFFFF', textColor: '#000000', type: 'spin_again', value: 0 }, // 6 - WEIß
+  { label: '50', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },            // 7 - SCHWARZ
+  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },          // 8 - WEIß
+  { label: '25', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25 },            // 9 - SCHWARZ
+  { label: '500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },          // 10 - ROT
+  { label: '75', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },            // 11 - SCHWARZ
+  { label: '50', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },            // 12 - WEIß
+  { label: 'DREHE NOCHMAL!', color: '#000000', textColor: '#FFFFFF', type: 'spin_again', value: 0 }, // 13 - SCHWARZ
+  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },          // 14 - WEIß
+  { label: '25', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25 },            // 15 - SCHWARZ
+  { label: '75', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 75 },            // 16 - WEIß
+  { label: '50', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },            // 17 - SCHWARZ
+  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 }           // 18 - WEIß
 ]
 
 let logoImg = null
@@ -1108,14 +1109,16 @@ function drawWheel() {
     ctx.textBaseline = 'middle'
     ctx.fillStyle = prize.textColor
     
-    const words = prize.label.split(' ')
-    if (words.length === 1) {
-      ctx.font = 'bold 16px Flame, Arial'
-      ctx.fillText(prize.label, radius * 0.7, 0)
+    // Unterscheide zwischen Zahlen und "DREHE NOCHMAL!"
+    if (prize.label === 'DREHE NOCHMAL!') {
+      // Text in 2 Zeilen aufteilen
+      ctx.font = 'bold 11px Flame, Arial'
+      ctx.fillText('DREHE', radius * 0.68, -8)
+      ctx.fillText('NOCHMAL!', radius * 0.68, 8)
     } else {
-      ctx.font = 'bold 14px Flame, Arial'
-      ctx.fillText(words[0], radius * 0.7, -8)
-      ctx.fillText(words[1], radius * 0.7, 8)
+      // Nur Zahl anzeigen - größer
+      ctx.font = 'bold 28px Flame, Arial'
+      ctx.fillText(prize.label, radius * 0.7, 0)
     }
     ctx.restore()
   })
@@ -1282,10 +1285,17 @@ async function spinWheel() {
         const fieldIndex = Math.floor(fieldAngle / anglePerSegment) % wheelPrizes.length
         const actualPrize = wheelPrizes[fieldIndex]
         
-        console.log('🎯 Gewonnen:', actualPrize.label, actualPrize.value, 'Punkte')
+        console.log('🎯 Gewonnen:', actualPrize.label, actualPrize.type, actualPrize.value)
         
-        showWheelResult(actualPrize)
-        saveWheelSpin(unlock.id, actualPrize)
+        // Prüfe ob "Spin Again"
+        if (actualPrize.type === 'spin_again') {
+          showSpinAgainResult()
+        } else {
+          // Echte Punkte gewonnen
+          showWheelResult(actualPrize)
+          saveWheelSpin(unlock.id, actualPrize)
+          currentWheelUnlockId = null // Reset
+        }
       }
     }
 
@@ -1308,6 +1318,43 @@ function showWheelResult(prize) {
   prizeText.textContent = `+${prize.value} Punkte`
 
   modal.classList.add('active')
+}
+
+function showSpinAgainResult() {
+  const modal = document.getElementById('wheel-result-modal')
+  const icon = document.getElementById('wheel-result-icon')
+  const title = document.getElementById('wheel-result-title')
+  const prizeText = document.getElementById('wheel-result-prize')
+
+  icon.textContent = '🔄'
+  title.textContent = 'Drehe nochmal!'
+  prizeText.textContent = 'Du darfst nochmal drehen! 🎉'
+
+  modal.classList.add('active')
+  
+  // Button-Text ändern
+  const closeButton = modal.querySelector('.wheel-result-button')
+  if (closeButton) {
+    closeButton.textContent = '🎰 Nochmal drehen!'
+    closeButton.onclick = () => {
+      closeSpinAgainResult()
+    }
+  }
+}
+
+function closeSpinAgainResult() {
+  const modal = document.getElementById('wheel-result-modal')
+  modal.classList.remove('active')
+  
+  // Button zurücksetzen
+  const closeButton = modal.querySelector('.wheel-result-button')
+  if (closeButton) {
+    closeButton.textContent = 'Weiter'
+    closeButton.onclick = closeWheelResult
+  }
+  
+  // Button wieder aktivieren für nächsten Spin
+  document.getElementById('spin-button').disabled = false
 }
 
 function closeWheelResult() {
