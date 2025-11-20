@@ -1068,61 +1068,81 @@ let wheelHandlersAttached = false  // ✅ Flag um mehrfache Handler zu verhinder
 function initWheel() {
   const canvas = document.getElementById('wheelCanvas')
   if (!canvas) return
-  
-  logoImg = new Image()
-  logoImg.src = '/logo-round-new.png'
-  logoImg.onload = () => drawWheel()
-  
+
+  // Logo laden (nur einmal)
+  if (!logoImg) {
+    logoImg = new Image()
+    logoImg.src = '/logo-round-new.png'
+    logoImg.onload = () => drawWheel()
+  }
+
   // ✅ Event-Handler nur EINMAL registrieren
   if (!wheelHandlersAttached) {
-    // Click-Handler: Nur Logo-Bereich ist klickbar
     canvas.addEventListener('click', (event) => {
       const rect = canvas.getBoundingClientRect()
       const x = event.clientX - rect.left
       const y = event.clientY - rect.top
-      
-      const centerX = canvas.width / 2
-      const centerY = canvas.height / 2
-      
-      // Berechne Distanz vom Zentrum
+
+      const centerX = rect.width / 2
+      const centerY = rect.height / 2
+
       const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
-      
-      // Nur wenn innerhalb des Logo-Bereichs (Radius 58, erhöht von 48)
+
+      // Nur wenn innerhalb des Logo-Bereichs (Radius 58)
       if (distance <= 58) {
         spinWheel()
       }
     })
-    
-    // Cursor ändern wenn über Logo
+
     canvas.addEventListener('mousemove', (event) => {
       const rect = canvas.getBoundingClientRect()
       const x = event.clientX - rect.left
       const y = event.clientY - rect.top
-      
-      const centerX = canvas.width / 2
-      const centerY = canvas.height / 2
+
+      const centerX = rect.width / 2
+      const centerY = rect.height / 2
       const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
-      
+
       canvas.style.cursor = distance <= 58 ? 'pointer' : 'default'
     })
-    
+
     wheelHandlersAttached = true
     console.log('✅ Wheel Event-Handler registriert (einmalig)')
   }
-  
+
   drawWheel()
 }
 
 function drawWheel() {
   const canvas = document.getElementById('wheelCanvas')
   if (!canvas) return
-  
-  const ctx = canvas.getContext('2d')
-  const centerX = canvas.width / 2
-  const centerY = canvas.height / 2
-  const radius = canvas.width / 2 - 5
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  const ctx = canvas.getContext('2d')
+
+  // 📐 Aktuelle sichtbare Größe des Canvas (in CSS-Pixeln)
+  const rect = canvas.getBoundingClientRect()
+  const ratio = window.devicePixelRatio || 1
+
+  // Canvas-Auflösung an Bildschirmdichte anpassen (für Schärfe)
+  const targetWidth = rect.width * ratio
+  const targetHeight = rect.height * ratio
+
+  if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+    canvas.width = targetWidth
+    canvas.height = targetHeight
+  }
+
+  // Zeichenkoordinaten wieder auf CSS-Pixel normalisieren
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0)
+
+  const centerX = rect.width / 2
+  const centerY = rect.height / 2
+  const radius = rect.width / 2 - 5
+
+  // Canvas in CSS-Einheiten löschen
+  ctx.clearRect(0, 0, rect.width, rect.height)
+
+  // 🎡 Segmente zeichnen
   ctx.save()
   ctx.translate(centerX, centerY)
   ctx.rotate(wheelRotation + WHEEL_OFFSET)
@@ -1143,15 +1163,12 @@ function drawWheel() {
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.fillStyle = prize.textColor
-    
-    // Unterscheide zwischen Zahlen und "DREHE NOCHMAL!"
+
     if (prize.label === 'DREHE NOCHMAL!') {
-      // Text in 2 Zeilen aufteilen
       ctx.font = 'bold 11px Flame, Arial'
       ctx.fillText('DREHE', radius * 0.68, -8)
       ctx.fillText('NOCHMAL!', radius * 0.68, 8)
     } else {
-      // Nur Zahl anzeigen - größer
       ctx.font = 'bold 28px Flame, Arial'
       ctx.fillText(prize.label, radius * 0.7, 0)
     }
@@ -1159,19 +1176,21 @@ function drawWheel() {
   })
 
   ctx.restore()
-  
-  // Logo mittig
+
+  // 🧿 Logo mittig
   ctx.save()
   ctx.translate(centerX, centerY)
-  
-  const logoRadius = 57.3     // Logo-Größe bleibt gleich
-  const centerRadius = logoRadius + 2  // Schmaler Rand wie außen
-  
+
+  const logoRadius = 57.3            // Logo-Größe
+  const centerRadius = logoRadius + 1 // schmaler weißer Rand
+
+  // Weißer Kreis hinter dem Logo
   ctx.beginPath()
   ctx.arc(0, 0, centerRadius, 0, 2 * Math.PI)
   ctx.fillStyle = 'white'
   ctx.fill()
 
+  // Logo scharf einzeichnen
   if (logoImg && logoImg.complete) {
     ctx.save()
     ctx.beginPath()
@@ -1180,7 +1199,7 @@ function drawWheel() {
     ctx.drawImage(logoImg, -logoRadius, -logoRadius, logoRadius * 2, logoRadius * 2)
     ctx.restore()
   }
-  
+
   ctx.restore()
 }
 
