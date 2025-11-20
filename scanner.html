@@ -209,6 +209,61 @@ canvas { display: none; }
 <script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
 
 <script>
+// ═══════════════════════════════════════════════════════════════
+// 🔐 PASSWORT-SCHUTZ - NICHT ENTFERNEN!
+// ═══════════════════════════════════════════════════════════════
+(async function() {
+  const PASSWORT_HASH = 'efc68709a6bc20b7983129e56ce1d98739876e4274463aaece1a3edef374d47e';
+  
+  // Prüfe ob bereits eingeloggt (Session)
+  const session = sessionStorage.getItem('db_auth');
+  if (session === PASSWORT_HASH) {
+    console.log('✅ Bereits authentifiziert');
+    return; // Bereits eingeloggt, weiter zur App
+  }
+  
+  // Zeige Login-Dialog
+  let versuche = 3;
+  while (versuche > 0) {
+    const eingabe = prompt(`🔐 Döner Boxx Admin\n\nPasswort eingeben:\n(${versuche} Versuche übrig)`);
+    
+    if (eingabe === null) {
+      // Abgebrochen
+      document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;"><h1>❌ Zugriff verweigert</h1><p>Authentifizierung abgebrochen.</p><a href="/">← Zurück zur Startseite</a></div>';
+      throw new Error('Auth abgebrochen');
+    }
+    
+    const hash = await sha256(eingabe);
+    
+    if (hash === PASSWORT_HASH) {
+      // Richtig! Session speichern
+      sessionStorage.setItem('db_auth', PASSWORT_HASH);
+      console.log('✅ Authentifizierung erfolgreich');
+      return; // Weiter zur App
+    }
+    
+    versuche--;
+    if (versuche > 0) {
+      alert(`❌ Falsches Passwort!\n\nNoch ${versuche} Versuche.`);
+    }
+  }
+  
+  // Alle Versuche aufgebraucht
+  document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;background:#fee2e2;min-height:100vh;"><h1 style="color:#dc2626;">🚫 Zugriff gesperrt</h1><p>Zu viele falsche Versuche.</p><p>Bitte lade die Seite neu, um es erneut zu versuchen.</p><a href="/" style="color:#dc2626;">← Zurück zur Startseite</a></div>';
+  throw new Error('Zu viele Fehlversuche');
+  
+  async function sha256(text) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(text);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+})();
+// ═══════════════════════════════════════════════════════════════
+// 🔐 ENDE PASSWORT-SCHUTZ
+// ═══════════════════════════════════════════════════════════════
+
 const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
