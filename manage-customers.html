@@ -7,505 +7,164 @@
 <link rel="icon" href="/favicon-new.png" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon-new.png">
 <style>
-@font-face {
-  font-family: 'Flame';
-  src: url('Flame-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
+@font-face { font-family: 'Flame'; src: url('Flame-Regular.ttf') format('truetype'); font-weight: normal; font-style: normal; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { 
-  font-family: 'Flame', system-ui, -apple-system, sans-serif;
-  background: linear-gradient(135deg, #E31E24 0%, #F9A825 100%);
-  min-height: 100vh;
-  padding: 20px;
-}
-.container { 
-  max-width: 1200px; 
-  margin: 0 auto;
-}
-.card {
-  background: white;
-  border-radius: 20px;
-  padding: 24px;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-.header-card {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-.header-logo {
-  width: 80px;
-  height: 80px;
-  flex-shrink: 0;
-}
-.header-logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-.header-text {
-  flex: 1;
-}
-h1 {
-  color: #E31E24;
-  font-size: 28px;
-  margin-bottom: 8px;
-}
-h2 {
-  color: #374151;
-  font-size: 20px;
-  margin-bottom: 16px;
-}
-.subtitle {
-  color: #6b7280;
-  font-size: 14px;
-  margin-bottom: 20px;
-}
-.stats {
-  background: #f9fafb;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 16px;
-}
-.stat-item {
-  text-align: center;
-  padding: 12px;
-}
-.stat-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: #E31E24;
-}
-.stat-label {
-  font-size: 13px;
-  color: #6b7280;
-  margin-top: 4px;
-}
-button {
-  padding: 12px 20px;
-  border: none;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-button.primary {
-  background: linear-gradient(135deg, #E31E24, #F9A825);
-  color: white;
-  width: 100%;
-  margin-bottom: 10px;
-}
-button.primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-button.danger {
-  background: #dc2626;
-  color: white;
-  padding: 8px 16px;
-  font-size: 14px;
-}
-button.danger:hover {
-  background: #b91c1c;
-}
-button.success {
-  background: #F9A825;
-  color: white;
-  width: 100%;
-  margin-bottom: 10px;
-}
-button.success:hover {
-  background: #f59e0b;
-}
-input, select, textarea {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid #e5e7eb;
-  border-radius: 10px;
-  font-size: 15px;
-  margin-bottom: 10px;
-  transition: all 0.2s;
-}
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: #E31E24;
-}
-textarea {
-  resize: vertical;
-  min-height: 60px;
-}
-.form-label {
-  display: block;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 6px;
-  font-size: 14px;
-}
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-.warning {
-  background: #fef3c7;
-  border: 2px solid #f59e0b;
-  color: #92400e;
-  padding: 14px;
-  border-radius: 10px;
-  margin-bottom: 16px;
-  font-size: 14px;
-  font-weight: 600;
-}
-.customer-list {
-  max-height: 600px;
-  overflow-y: auto;
-  margin-top: 16px;
-}
-.customer-item {
-  background: #f9fafb;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: all 0.2s;
-}
-.customer-item:hover {
-  border-color: #E31E24;
-  background: #f3f4f6;
-}
-.customer-info {
-  flex: 1;
-}
-.customer-info h3 {
-  color: #111827;
-  font-size: 18px;
-  margin-bottom: 6px;
-  font-weight: 700;
-}
-.customer-info p {
-  color: #6b7280;
-  font-size: 13px;
-  margin: 3px 0;
-}
-.customer-info .qr-id {
-  display: inline-block;
-  background: #E31E24;
-  color: white;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  margin-top: 6px;
-  font-family: monospace;
-  letter-spacing: 2px;
-}
-.customer-stats {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  margin-right: 16px;
-}
-.customer-points {
-  text-align: center;
-}
-.customer-points .value {
-  background: linear-gradient(135deg, #E31E24, #F9A825);
-  color: white;
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 20px;
-  display: block;
-  margin-bottom: 4px;
-}
-.customer-points .label {
-  font-size: 11px;
-  color: #6b7280;
-  font-weight: 600;
-}
-.customer-txs {
-  text-align: center;
-}
-.customer-txs .value {
-  background: #F9A825;
-  color: white;
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 20px;
-  display: block;
-  margin-bottom: 4px;
-}
-.customer-txs .label {
-  font-size: 11px;
-  color: #6b7280;
-  font-weight: 600;
-}
-.result {
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 12px;
-  font-size: 14px;
-  text-align: center;
-  font-weight: 600;
-}
-.success { 
-  background: #fef3c7; 
-  color: #92400e;
-  border: 2px solid #F9A825;
-}
-.error { 
-  background: #fee2e2; 
-  color: #991b1b;
-  border: 2px solid #ef4444;
-}
-.info { 
-  background: #dbeafe; 
-  color: #1e40af;
-  border: 2px solid #3b82f6;
-}
-.loading {
-  text-align: center;
-  padding: 40px;
-  color: #6b7280;
-  font-size: 16px;
-}
-.empty-state {
-  text-align: center;
-  padding: 40px;
-  color: #6b7280;
-  font-size: 15px;
-  background: #f9fafb;
-  border-radius: 12px;
-  border: 2px dashed #e5e7eb;
-}
+body { font-family: 'Flame', system-ui, -apple-system, sans-serif; background: linear-gradient(135deg, #E31E24 0%, #F9A825 100%); min-height: 100vh; padding: 20px; }
+.container { max-width: 1200px; margin: 0 auto; }
+.card { background: white; border-radius: 20px; padding: 24px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.header-card { display: flex; align-items: center; gap: 20px; }
+.header-logo { width: 80px; height: 80px; flex-shrink: 0; }
+.header-logo img { width: 100%; height: 100%; object-fit: contain; }
+.header-text { flex: 1; }
+h1 { color: #E31E24; font-size: 28px; margin-bottom: 8px; }
+h2 { color: #374151; font-size: 20px; margin-bottom: 16px; }
+.subtitle { color: #6b7280; font-size: 14px; margin-bottom: 20px; }
+.stats { background: #f9fafb; border-radius: 12px; padding: 16px; margin-bottom: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; }
+.stat-item { text-align: center; padding: 12px; }
+.stat-value { font-size: 32px; font-weight: 700; color: #E31E24; }
+.stat-label { font-size: 13px; color: #6b7280; margin-top: 4px; }
+button { padding: 12px 20px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+button.primary { background: linear-gradient(135deg, #E31E24, #F9A825); color: white; width: 100%; margin-bottom: 10px; }
+button.primary:hover { opacity: 0.9; transform: translateY(-1px); }
+button.danger { background: #dc2626; color: white; padding: 8px 16px; font-size: 14px; }
+button.danger:hover { background: #b91c1c; }
+button.success { background: #F9A825; color: white; width: 100%; margin-bottom: 10px; }
+button.success:hover { background: #f59e0b; }
+input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 15px; margin-bottom: 10px; transition: all 0.2s; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #E31E24; }
+textarea { resize: vertical; min-height: 60px; }
+.form-label { display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 14px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.warning { background: #fef3c7; border: 2px solid #f59e0b; color: #92400e; padding: 14px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; font-weight: 600; }
+.customer-list { max-height: 600px; overflow-y: auto; margin-top: 16px; }
+.customer-item { background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
+.customer-item:hover { border-color: #E31E24; background: #f3f4f6; }
+.customer-info { flex: 1; }
+.customer-info h3 { color: #111827; font-size: 18px; margin-bottom: 6px; font-weight: 700; }
+.customer-info p { color: #6b7280; font-size: 13px; margin: 3px 0; }
+.customer-info .qr-id { display: inline-block; background: #E31E24; color: white; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 700; margin-top: 6px; font-family: monospace; letter-spacing: 2px; }
+.customer-stats { display: flex; gap: 16px; align-items: center; margin-right: 16px; }
+.customer-points { text-align: center; }
+.customer-points .value { background: linear-gradient(135deg, #E31E24, #F9A825); color: white; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 20px; display: block; margin-bottom: 4px; }
+.customer-points .label { font-size: 11px; color: #6b7280; font-weight: 600; }
+.customer-txs { text-align: center; }
+.customer-txs .value { background: #F9A825; color: white; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 20px; display: block; margin-bottom: 4px; }
+.customer-txs .label { font-size: 11px; color: #6b7280; font-weight: 600; }
+.result { padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 14px; text-align: center; font-weight: 600; }
+.success { background: #fef3c7; color: #92400e; border: 2px solid #F9A825; }
+.error { background: #fee2e2; color: #991b1b; border: 2px solid #ef4444; }
+.info { background: #dbeafe; color: #1e40af; border: 2px solid #3b82f6; }
+.loading { text-align: center; padding: 40px; color: #6b7280; font-size: 16px; }
+.empty-state { text-align: center; padding: 40px; color: #6b7280; font-size: 15px; background: #f9fafb; border-radius: 12px; border: 2px dashed #e5e7eb; }
 </style>
 </head>
 <body>
 
 <div class="container">
   <div class="card header-card">
-    <div class="header-logo">
-      <img src="/logo-round-new.png" alt="Döner Boxx">
-    </div>
-    <div class="header-text">
-      <h1>Kunden verwalten</h1>
-      <p class="subtitle">Verwalte alle Kunden, Transaktionen und Punkte</p>
-    </div>
+    <div class="header-logo"><img src="/logo-round-new.png" alt="Döner Boxx"></div>
+    <div class="header-text"><h1>Kunden verwalten</h1><p class="subtitle">Verwalte alle Kunden, Transaktionen und Punkte</p></div>
   </div>
 
   <div class="card">
     <h2>🎁 Globale Bonusse</h2>
     <p class="subtitle">Erstelle Bonusse, die sofort bei allen Kunden erscheinen</p>
-
     <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px;">
       <h3 style="color: #92400e; margin-bottom: 12px;">Neuen Bonus erstellen</h3>
-      
       <label class="form-label">🎯 Bonus-Typ</label>
       <select id="globalBonusType" onchange="toggleBonusAmount()">
         <option value="bonus_points">💰 Extra-Punkte</option>
         <option value="double_points">⭐ Doppelte Punkte</option>
       </select>
-
       <div id="globalBonusAmountField">
         <label class="form-label">💵 Bonus-Punkte</label>
         <input type="number" id="globalBonusAmount" placeholder="z.B. 100" value="100">
       </div>
-
       <div class="form-grid">
-        <div>
-          <label class="form-label">📅 Start-Datum</label>
-          <input type="date" id="globalBonusStart">
-        </div>
-        <div>
-          <label class="form-label">📅 End-Datum</label>
-          <input type="date" id="globalBonusEnd">
-        </div>
+        <div><label class="form-label">📅 Start-Datum</label><input type="date" id="globalBonusStart"></div>
+        <div><label class="form-label">📅 End-Datum</label><input type="date" id="globalBonusEnd"></div>
       </div>
-
       <button class="success" onclick="createGlobalBonus()">🚀 Bonus erstellen</button>
       <div id="result-global-bonus"></div>
     </div>
-
-    <div style="margin-top: 24px;">
-      <h3>Aktive Bonusse</h3>
-      <div id="globalBonusList"></div>
-    </div>
+    <div style="margin-top: 24px;"><h3>Aktive Bonusse</h3><div id="globalBonusList"></div></div>
   </div>
 
   <div class="card">
     <h2>🎯 Challenge-Bonus</h2>
     <p class="subtitle">Erstelle zeitlich begrenzte Herausforderungen mit Mindestbestellwert</p>
-
     <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px;">
       <h3 style="color: #92400e; margin-bottom: 12px;">Neue Challenge</h3>
-      
       <div class="form-grid">
-        <div>
-          <label class="form-label">🎁 Extra-Punkte</label>
-          <input type="number" id="challengePoints" placeholder="z.B. 300" value="300">
-        </div>
-        <div>
-          <label class="form-label">🔢 Anzahl Bestellungen</label>
-          <input type="number" id="challengeOrders" placeholder="z.B. 2" value="2" min="1">
-        </div>
+        <div><label class="form-label">🎁 Extra-Punkte</label><input type="number" id="challengePoints" placeholder="z.B. 300" value="300"></div>
+        <div><label class="form-label">🔢 Anzahl Bestellungen</label><input type="number" id="challengeOrders" placeholder="z.B. 2" value="2" min="1"></div>
       </div>
-
       <label class="form-label">💰 Mindestbestellwert pro Bestellung (€)</label>
       <input type="number" id="challengeMinAmount" placeholder="z.B. 10" value="10" step="0.01">
-
       <div class="form-grid">
-        <div>
-          <label class="form-label">📅 Start-Datum</label>
-          <input type="date" id="challengeStart" onchange="autoCalculateEndDate()">
-        </div>
-        <div>
-          <label class="form-label">📅 End-Datum (automatisch: 20 Tage)</label>
-          <input type="date" id="challengeEnd">
-        </div>
+        <div><label class="form-label">📅 Start-Datum</label><input type="date" id="challengeStart" onchange="autoCalculateEndDate()"></div>
+        <div><label class="form-label">📅 End-Datum (automatisch: 20 Tage)</label><input type="date" id="challengeEnd"></div>
       </div>
-
-      <div style="background: #dbeafe; border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 13px; color: #1e40af;">
-        ℹ️ <strong>Hinweis:</strong> Nur 1 Challenge Bonus gleichzeitig möglich. Bitte zuerst laufende Challenge beenden oder löschen.
-      </div>
-
+      <div style="background: #dbeafe; border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 13px; color: #1e40af;">ℹ️ <strong>Hinweis:</strong> Nur 1 Challenge Bonus gleichzeitig möglich.</div>
       <button class="success" onclick="createChallenge()">🚀 Challenge erstellen</button>
       <div id="result-challenge"></div>
     </div>
-
-    <div style="margin-top: 20px;">
-      <h3>Aktive Challenges</h3>
-      <div id="challengeList"></div>
-    </div>
+    <div style="margin-top: 20px;"><h3>Aktive Challenges</h3><div id="challengeList"></div></div>
   </div>
 
   <div class="card">
     <h2>🎟️ Coupon-System (Deal der Woche)</h2>
     <p class="subtitle">Erstelle Angebote mit Start- und End-Datum</p>
-
     <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
       <h3 style="color: #92400e; margin-bottom: 12px;">Neuen Coupon erstellen</h3>
-      
       <div class="form-grid">
-        <div>
-          <label class="form-label">🍴 Produktname</label>
-          <input type="text" id="couponProduct" placeholder="z.B. Lahmacun Spezial">
-        </div>
-        <div>
-          <label class="form-label">💰 Preis</label>
-          <input type="text" id="couponPrice" placeholder="z.B. 7,50 €">
-        </div>
+        <div><label class="form-label">🍴 Produktname</label><input type="text" id="couponProduct" placeholder="z.B. Lahmacun Spezial"></div>
+        <div><label class="form-label">💰 Preis</label><input type="text" id="couponPrice" placeholder="z.B. 7,50 €"></div>
       </div>
-
       <div class="form-grid">
-        <div>
-          <label class="form-label">📅 Start-Datum</label>
-          <input type="date" id="couponStart">
-        </div>
-        <div>
-          <label class="form-label">📅 End-Datum</label>
-          <input type="date" id="couponEnd">
-        </div>
+        <div><label class="form-label">📅 Start-Datum</label><input type="date" id="couponStart"></div>
+        <div><label class="form-label">📅 End-Datum</label><input type="date" id="couponEnd"></div>
       </div>
-
       <button class="success" onclick="createCoupon()">🎁 Coupon erstellen</button>
       <div id="result-coupon-create"></div>
     </div>
-
-    <div>
-      <h3>Aktuelle Coupons</h3>
-      <div id="result-coupon-load"></div>
-      <div id="couponList" style="margin-top: 12px;"></div>
-    </div>
+    <div><h3>Aktuelle Coupons</h3><div id="result-coupon-load"></div><div id="couponList" style="margin-top: 12px;"></div></div>
   </div>
 
   <div class="card">
     <h2>🎡 Lucky Wheel Einstellungen</h2>
     <p class="subtitle">Verwalte Glücksrad-Konfiguration</p>
-
     <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px; margin-bottom: 20px;">
       <h3 style="color: #92400e; margin-bottom: 12px;">⚙️ Grundeinstellungen</h3>
-      
       <label class="form-label">Status</label>
-      <select id="wheel-active">
-        <option value="true">✅ Aktiv</option>
-        <option value="false">❌ Inaktiv</option>
-      </select>
-
+      <select id="wheel-active"><option value="true">✅ Aktiv</option><option value="false">❌ Inaktiv</option></select>
       <label class="form-label">📅 Aktive Wochentage</label>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 16px;">
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;">
-          <input type="checkbox" id="day-1" class="wheel-day" value="1" style="width: auto; margin: 0;">
-          <span>Montag</span>
-        </label>
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;">
-          <input type="checkbox" id="day-2" class="wheel-day" value="2" style="width: auto; margin: 0;">
-          <span>Dienstag</span>
-        </label>
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;">
-          <input type="checkbox" id="day-3" class="wheel-day" value="3" style="width: auto; margin: 0;">
-          <span>Mittwoch</span>
-        </label>
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;">
-          <input type="checkbox" id="day-4" class="wheel-day" value="4" style="width: auto; margin: 0;">
-          <span>Donnerstag</span>
-        </label>
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;">
-          <input type="checkbox" id="day-5" class="wheel-day" value="5" style="width: auto; margin: 0;">
-          <span>Freitag</span>
-        </label>
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;">
-          <input type="checkbox" id="day-6" class="wheel-day" value="6" style="width: auto; margin: 0;">
-          <span>Samstag</span>
-        </label>
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;">
-          <input type="checkbox" id="day-0" class="wheel-day" value="0" style="width: auto; margin: 0;">
-          <span>Sonntag</span>
-        </label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;"><input type="checkbox" id="day-1" class="wheel-day" value="1" style="width: auto; margin: 0;"><span>Montag</span></label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;"><input type="checkbox" id="day-2" class="wheel-day" value="2" style="width: auto; margin: 0;"><span>Dienstag</span></label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;"><input type="checkbox" id="day-3" class="wheel-day" value="3" style="width: auto; margin: 0;"><span>Mittwoch</span></label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;"><input type="checkbox" id="day-4" class="wheel-day" value="4" style="width: auto; margin: 0;"><span>Donnerstag</span></label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;"><input type="checkbox" id="day-5" class="wheel-day" value="5" style="width: auto; margin: 0;"><span>Freitag</span></label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;"><input type="checkbox" id="day-6" class="wheel-day" value="6" style="width: auto; margin: 0;"><span>Samstag</span></label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;"><input type="checkbox" id="day-0" class="wheel-day" value="0" style="width: auto; margin: 0;"><span>Sonntag</span></label>
       </div>
       <p style="font-size: 13px; color: #6b7280; margin-top: -8px; margin-bottom: 16px;">Wenn keine Tage ausgewählt sind, ist das Wheel jeden Tag verfügbar.</p>
-
       <label class="form-label">🕐 Happy Hour Startzeit</label>
       <input type="time" id="wheel-start-time" placeholder="z.B. 15:00">
       <p style="font-size: 13px; color: #6b7280; margin-top: 4px; margin-bottom: 16px;">Leer lassen = ganztägig verfügbar</p>
-
       <label class="form-label">🕐 Happy Hour Endzeit</label>
       <input type="time" id="wheel-end-time" placeholder="z.B. 18:00">
       <p style="font-size: 13px; color: #6b7280; margin-top: 4px; margin-bottom: 16px;">Leer lassen = ganztägig verfügbar</p>
-
       <label class="form-label">💰 Mindestbestellwert (€)</label>
       <input type="number" step="0.01" id="wheel-min-amount" value="10.00" placeholder="z.B. 10.00">
-
       <button class="success" onclick="saveWheelConfig()">💾 Einstellungen speichern</button>
       <div id="result-wheel-config"></div>
     </div>
-
-    <div style="margin-top: 24px;">
-      <h3>📊 Statistiken</h3>
+    <div style="margin-top: 24px;"><h3>📊 Statistiken</h3>
       <div class="stats" style="margin-top: 12px;">
-        <div class="stat-item">
-          <div class="stat-value" id="stat-wheel-today">0</div>
-          <div class="stat-label">Heute gedreht</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value" id="stat-wheel-total">0</div>
-          <div class="stat-label">Gesamt gedreht</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value" id="stat-wheel-avg">0</div>
-          <div class="stat-label">Ø Gewinn (Punkte)</div>
-        </div>
+        <div class="stat-item"><div class="stat-value" id="stat-wheel-today">0</div><div class="stat-label">Heute gedreht</div></div>
+        <div class="stat-item"><div class="stat-value" id="stat-wheel-total">0</div><div class="stat-label">Gesamt gedreht</div></div>
+        <div class="stat-item"><div class="stat-value" id="stat-wheel-avg">0</div><div class="stat-label">Ø Gewinn (Punkte)</div></div>
       </div>
     </div>
   </div>
@@ -513,50 +172,19 @@ textarea {
   <div class="card">
     <h2>📋 Kunden verwalten</h2>
     <p class="subtitle">Verwalte alle Kunden, Transaktionen und Punkte</p>
-
     <div class="stats">
-      <div class="stat-item">
-        <div class="stat-value" id="totalCustomers">0</div>
-        <div class="stat-label">Kunden</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value" id="totalTransactions">0</div>
-        <div class="stat-label">Transaktionen</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value" id="totalCodes">0</div>
-        <div class="stat-label">Codes</div>
-      </div>
+      <div class="stat-item"><div class="stat-value" id="totalCustomers">0</div><div class="stat-label">Kunden</div></div>
+      <div class="stat-item"><div class="stat-value" id="totalTransactions">0</div><div class="stat-label">Transaktionen</div></div>
+      <div class="stat-item"><div class="stat-value" id="totalCodes">0</div><div class="stat-label">Codes</div></div>
     </div>
-
     <div style="margin-top: 24px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <h3 style="margin: 0;">Kundenliste</h3>
-      </div>
-      
-      <!-- Suchfeld -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;"><h3 style="margin: 0;">Kundenliste</h3></div>
       <div style="margin-bottom: 16px;">
-        <input 
-          type="text" 
-          id="customerSearch" 
-          placeholder="🔍 Suche nach Name oder Handynummer..." 
-          style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;"
-          oninput="filterCustomers()"
-        >
-        <div style="margin-top: 8px; font-size: 14px; color: #666;">
-          <span id="searchResultCount"></span>
-        </div>
+        <input type="text" id="customerSearch" placeholder="🔍 Suche nach Name oder Handynummer..." style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" oninput="filterCustomers()">
+        <div style="margin-top: 8px; font-size: 14px; color: #666;"><span id="searchResultCount"></span></div>
       </div>
-      
-      <div class="warning" id="warningBox" style="display: none;">
-        ⚠️ <strong>Hinweis:</strong> Beim Löschen eines Kunden werden auch alle zugehörigen Transaktionen und Codes gelöscht!
-      </div>
-      
-      <div id="customerListContainer">
-        <div class="loading">
-          <p>⏳ Lade Kundendaten...</p>
-        </div>
-      </div>
+      <div class="warning" id="warningBox" style="display: none;">⚠️ <strong>Hinweis:</strong> Beim Löschen eines Kunden werden auch alle zugehörigen Transaktionen und Codes gelöscht!</div>
+      <div id="customerListContainer"><div class="loading"><p>⏳ Lade Kundendaten...</p></div></div>
     </div>
   </div>
 </div>
@@ -566,54 +194,71 @@ textarea {
 // ═══════════════════════════════════════════════════════════════
 // 🔐 PASSWORT-SCHUTZ - NICHT ENTFERNEN!
 // ═══════════════════════════════════════════════════════════════
-(async function() {
-  const PASSWORT_HASH = 'efc68709a6bc20b7983129e56ce1d98739876e4274463aaece1a3edef374d47e';
+const PASSWORT_HASH = 'efc68709a6bc20b7983129e56ce1d98739876e4274463aaece1a3edef374d47e';
+let authVersuche = 3;
+
+async function sha256(text) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function showLoginScreen() {
+  document.body.innerHTML = `
+    <div style="font-family:'Flame',system-ui,sans-serif;background:linear-gradient(135deg,#E31E24,#F9A825);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:white;border-radius:20px;padding:40px;max-width:400px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.2);text-align:center;">
+        <div style="font-size:60px;margin-bottom:20px;">🔐</div>
+        <h1 style="color:#E31E24;margin-bottom:10px;font-size:24px;">Döner Boxx Admin</h1>
+        <p style="color:#666;margin-bottom:30px;">Bitte Passwort eingeben</p>
+        <input type="password" id="loginPassword" placeholder="Passwort" style="width:100%;padding:14px;border:2px solid #e5e7eb;border-radius:10px;font-size:16px;margin-bottom:15px;text-align:center;" onkeypress="if(event.key==='Enter')checkLogin()">
+        <button onclick="checkLogin()" style="width:100%;padding:14px;background:linear-gradient(135deg,#E31E24,#F9A825);color:white;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;">🔓 Einloggen</button>
+        <p id="loginError" style="color:#dc2626;margin-top:15px;font-size:14px;display:none;"></p>
+        <p id="loginVersuche" style="color:#666;margin-top:10px;font-size:12px;">${authVersuche} Versuche übrig</p>
+      </div>
+    </div>
+  `;
+  setTimeout(() => document.getElementById('loginPassword').focus(), 100);
+}
+
+async function checkLogin() {
+  const eingabe = document.getElementById('loginPassword').value;
+  const errorEl = document.getElementById('loginError');
+  const versucheEl = document.getElementById('loginVersuche');
   
-  // Prüfe ob bereits eingeloggt (Session)
-  const session = sessionStorage.getItem('db_auth');
-  if (session === PASSWORT_HASH) {
-    console.log('✅ Bereits authentifiziert');
-    return; // Bereits eingeloggt, weiter zur App
+  if (!eingabe) {
+    errorEl.textContent = '❌ Bitte Passwort eingeben!';
+    errorEl.style.display = 'block';
+    return;
   }
   
-  // Zeige Login-Dialog
-  let versuche = 3;
-  while (versuche > 0) {
-    const eingabe = prompt(`🔐 Döner Boxx Admin\n\nPasswort eingeben:\n(${versuche} Versuche übrig)`);
-    
-    if (eingabe === null) {
-      // Abgebrochen
-      document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;"><h1>❌ Zugriff verweigert</h1><p>Authentifizierung abgebrochen.</p><a href="/">← Zurück zur Startseite</a></div>';
-      throw new Error('Auth abgebrochen');
-    }
-    
-    const hash = await sha256(eingabe);
-    
-    if (hash === PASSWORT_HASH) {
-      // Richtig! Session speichern
-      sessionStorage.setItem('db_auth', PASSWORT_HASH);
-      console.log('✅ Authentifizierung erfolgreich');
-      return; // Weiter zur App
-    }
-    
-    versuche--;
-    if (versuche > 0) {
-      alert(`❌ Falsches Passwort!\n\nNoch ${versuche} Versuche.`);
-    }
+  const hash = await sha256(eingabe);
+  
+  if (hash === PASSWORT_HASH) {
+    sessionStorage.setItem('db_auth', PASSWORT_HASH);
+    location.reload();
+    return;
   }
   
-  // Alle Versuche aufgebraucht
-  document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;background:#fee2e2;min-height:100vh;"><h1 style="color:#dc2626;">🚫 Zugriff gesperrt</h1><p>Zu viele falsche Versuche.</p><p>Bitte lade die Seite neu, um es erneut zu versuchen.</p><a href="/" style="color:#dc2626;">← Zurück zur Startseite</a></div>';
-  throw new Error('Zu viele Fehlversuche');
+  authVersuche--;
   
-  async function sha256(text) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(text);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  if (authVersuche <= 0) {
+    document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;background:#fee2e2;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;"><h1 style="color:#dc2626;font-size:48px;">🚫</h1><h2 style="color:#dc2626;">Zugriff gesperrt</h2><p style="color:#666;">Zu viele Fehlversuche.</p><a href="/" style="color:#dc2626;margin-top:20px;">← Zurück zur Startseite</a></div>';
+    return;
   }
-})();
+  
+  errorEl.textContent = '❌ Falsches Passwort!';
+  errorEl.style.display = 'block';
+  versucheEl.textContent = authVersuche + ' Versuche übrig';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginPassword').focus();
+}
+
+// Prüfe Session beim Laden
+if (sessionStorage.getItem('db_auth') !== PASSWORT_HASH) {
+  showLoginScreen();
+  throw new Error('Login erforderlich');
+}
 // ═══════════════════════════════════════════════════════════════
 // 🔐 ENDE PASSWORT-SCHUTZ
 // ═══════════════════════════════════════════════════════════════
@@ -632,136 +277,49 @@ function showResult(elementId, message, type) {
 async function loadAllCustomers() {
   const container = document.getElementById('customerListContainer')
   try {
-    // Lade alle Kunden alphabetisch sortiert nach Name
-    const { data: customers, error: custError } = await supabase
-      .from('customers')
-      .select('*')
-      .order('name', { ascending: true })  // Alphabetisch sortiert
-    
+    const { data: customers, error: custError } = await supabase.from('customers').select('*').order('name', { ascending: true })
     if (custError) throw custError
-    
     const { count: txCount, error: txError } = await supabase.from('transactions').select('*', { count: 'exact', head: true })
     if (txError) throw txError
     const { count: codeCount, error: codeError } = await supabase.from('redeem_codes').select('*', { count: 'exact', head: true })
     if (codeError) throw codeError
-    
     document.getElementById('totalCustomers').textContent = customers?.length || 0
     document.getElementById('totalTransactions').textContent = txCount || 0
     document.getElementById('totalCodes').textContent = codeCount || 0
-    
-    if (!customers || customers.length === 0) {
-      container.innerHTML = '<div class="empty-state">📭 Noch keine Kunden vorhanden</div>'
-      document.getElementById('warningBox').style.display = 'none'
-      document.getElementById('searchResultCount').textContent = ''
-      return
-    }
-    
-    // Speichere Kundendaten global für Filter-Funktion
+    if (!customers || customers.length === 0) { container.innerHTML = '<div class="empty-state">📭 Noch keine Kunden vorhanden</div>'; document.getElementById('warningBox').style.display = 'none'; document.getElementById('searchResultCount').textContent = ''; return }
     window.allCustomers = customers
-    
-    // Lade Transaction-Counts für alle Kunden
     const customerTxCounts = {}
-    for (const customer of customers) {
-      const { count } = await supabase
-        .from('transactions')
-        .select('*', { count: 'exact', head: true })
-        .eq('customer_id', customer.id)
-      customerTxCounts[customer.id] = count || 0
-    }
+    for (const customer of customers) { const { count } = await supabase.from('transactions').select('*', { count: 'exact', head: true }).eq('customer_id', customer.id); customerTxCounts[customer.id] = count || 0 }
     window.customerTxCounts = customerTxCounts
-    
-    // Zeige alle Kunden initial
     displayCustomers(customers)
-    
     document.getElementById('warningBox').style.display = 'block'
     document.getElementById('searchResultCount').textContent = `Zeige ${customers.length} von ${customers.length} Kunden`
-    
-  } catch (e) { 
-    container.innerHTML = `<div class="result error">❌ Fehler beim Laden: ${e.message}</div>` 
-  }
+  } catch (e) { container.innerHTML = `<div class="result error">❌ Fehler beim Laden: ${e.message}</div>` }
 }
 
 function displayCustomers(customers) {
   const container = document.getElementById('customerListContainer')
-  
-  if (!customers || customers.length === 0) {
-    container.innerHTML = '<div class="empty-state">📭 Keine Kunden gefunden</div>'
-    return
-  }
-  
+  if (!customers || customers.length === 0) { container.innerHTML = '<div class="empty-state">📭 Keine Kunden gefunden</div>'; return }
   container.innerHTML = '<div class="customer-list" id="customerList"></div>'
   const customerList = document.getElementById('customerList')
   customerList.innerHTML = ''
-  
   for (const customer of customers) {
     const txCount = window.customerTxCounts?.[customer.id] || 0
-    const created = new Date(customer.created_at).toLocaleDateString('de-DE', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric' 
-    })
-    
-    customerList.innerHTML += `
-      <div class="customer-item" data-customer-id="${customer.id}">
-        <div class="customer-info">
-          <h3>${customer.name}</h3>
-          <p>📱 ${customer.phone}</p>
-          <p>📅 Registriert: ${created}</p>
-          <span class="qr-id">QR: ${customer.qr_id}</span>
-        </div>
-        <div class="customer-stats">
-          <div class="customer-points">
-            <span class="value">${customer.points}</span>
-            <span class="label">Punkte</span>
-          </div>
-          <div class="customer-txs">
-            <span class="value">${txCount}</span>
-            <span class="label">Transaktionen</span>
-          </div>
-        </div>
-        <button class="danger" onclick="deleteSingleCustomer('${customer.id}', '${customer.name}')">🗑️ Löschen</button>
-      </div>
-    `
+    const created = new Date(customer.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    customerList.innerHTML += `<div class="customer-item" data-customer-id="${customer.id}"><div class="customer-info"><h3>${customer.name}</h3><p>📱 ${customer.phone}</p><p>📅 Registriert: ${created}</p><span class="qr-id">QR: ${customer.qr_id}</span></div><div class="customer-stats"><div class="customer-points"><span class="value">${customer.points}</span><span class="label">Punkte</span></div><div class="customer-txs"><span class="value">${txCount}</span><span class="label">Transaktionen</span></div></div><button class="danger" onclick="deleteSingleCustomer('${customer.id}', '${customer.name}')">🗑️ Löschen</button></div>`
   }
 }
 
 function filterCustomers() {
   const searchTerm = document.getElementById('customerSearch').value.toLowerCase().trim()
-  
-  if (!window.allCustomers) {
-    return  // Noch keine Daten geladen
-  }
-  
-  if (!searchTerm) {
-    // Kein Suchbegriff - zeige alle Kunden
-    displayCustomers(window.allCustomers)
-    document.getElementById('searchResultCount').textContent = 
-      `Zeige ${window.allCustomers.length} von ${window.allCustomers.length} Kunden`
-    return
-  }
-  
-  // Filtere nach Name oder Handynummer
-  const filtered = window.allCustomers.filter(customer => {
-    const nameMatch = customer.name.toLowerCase().includes(searchTerm)
-    const phoneMatch = customer.phone.toLowerCase().includes(searchTerm)
-    return nameMatch || phoneMatch
-  })
-  
+  if (!window.allCustomers) return
+  if (!searchTerm) { displayCustomers(window.allCustomers); document.getElementById('searchResultCount').textContent = `Zeige ${window.allCustomers.length} von ${window.allCustomers.length} Kunden`; return }
+  const filtered = window.allCustomers.filter(customer => { const nameMatch = customer.name.toLowerCase().includes(searchTerm); const phoneMatch = customer.phone.toLowerCase().includes(searchTerm); return nameMatch || phoneMatch })
   displayCustomers(filtered)
-  
-  // Zeige Anzahl der Ergebnisse
   const totalCount = window.allCustomers.length
-  const resultText = filtered.length === totalCount
-    ? `Zeige ${totalCount} von ${totalCount} Kunden`
-    : `Zeige ${filtered.length} von ${totalCount} Kunden`
-  
+  const resultText = filtered.length === totalCount ? `Zeige ${totalCount} von ${totalCount} Kunden` : `Zeige ${filtered.length} von ${totalCount} Kunden`
   document.getElementById('searchResultCount').textContent = resultText
-  
-  // Zeige Hinweis wenn keine Ergebnisse
-  if (filtered.length === 0) {
-    document.getElementById('searchResultCount').textContent = 
-      `Keine Kunden gefunden für "${searchTerm}"`
-  }
+  if (filtered.length === 0) { document.getElementById('searchResultCount').textContent = `Keine Kunden gefunden für "${searchTerm}"` }
 }
 
 async function deleteSingleCustomer(customerId, customerName) {
@@ -769,19 +327,10 @@ async function deleteSingleCustomer(customerId, customerName) {
   if (!confirmed) return
   const doubleCheck = prompt(`Tippe "${customerName}" ein, um zu bestätigen:`)
   if (doubleCheck !== customerName) { alert('❌ Abgebrochen - falsche Eingabe'); return }
-  try {
-    await supabase.from('redeem_codes').delete().eq('customer_id', customerId)
-    await supabase.from('transactions').delete().eq('customer_id', customerId)
-    await supabase.from('customers').delete().eq('id', customerId)
-    alert(`✅ Kunde "${customerName}" wurde erfolgreich gelöscht!`)
-    loadAllCustomers()
-  } catch (e) { alert('❌ Fehler beim Löschen: ' + e.message) }
+  try { await supabase.from('redeem_codes').delete().eq('customer_id', customerId); await supabase.from('transactions').delete().eq('customer_id', customerId); await supabase.from('customers').delete().eq('id', customerId); alert(`✅ Kunde "${customerName}" wurde erfolgreich gelöscht!`); loadAllCustomers() } catch (e) { alert('❌ Fehler beim Löschen: ' + e.message) }
 }
 
-function toggleBonusAmount() {
-  const type = document.getElementById('globalBonusType').value
-  document.getElementById('globalBonusAmountField').style.display = type === 'double_points' ? 'none' : 'block'
-}
+function toggleBonusAmount() { const type = document.getElementById('globalBonusType').value; document.getElementById('globalBonusAmountField').style.display = type === 'double_points' ? 'none' : 'block' }
 
 async function createGlobalBonus() {
   const type = document.getElementById('globalBonusType').value
@@ -812,9 +361,7 @@ async function loadGlobalBonuses() {
     list.innerHTML = bonuses.map(bonus => {
       const startDate = bonus.start_date ? new Date(bonus.start_date) : new Date(bonus.created_at)
       const endDate = bonus.end_date ? new Date(bonus.end_date) : new Date(bonus.expires_at)
-      const isExpired = endDate < now
-      const isNotStarted = startDate > now
-      const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
+      const isExpired = endDate < now; const isNotStarted = startDate > now; const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
       const isActive = bonus.is_active && !isExpired && !isNotStarted
       let bonusText = bonus.bonus_type === 'double_points' ? '⭐ Doppelte Punkte' : `💰 +${bonus.bonus_amount} Bonus-Punkte`
       let titleHTML = bonus.title ? `<p style="font-size: 14px; color: #6b7280; margin: 4px 0; font-weight: 600;">${bonus.title}</p>` : ''
@@ -824,27 +371,10 @@ async function loadGlobalBonuses() {
   } catch (e) { console.error('Load global bonuses error:', e) }
 }
 
-async function toggleGlobalBonus(id, active) {
-  try { await supabase.from('global_bonuses').update({ is_active: active }).eq('id', id); loadGlobalBonuses() } catch (e) { alert('❌ Fehler: ' + e.message) }
-}
+async function toggleGlobalBonus(id, active) { try { await supabase.from('global_bonuses').update({ is_active: active }).eq('id', id); loadGlobalBonuses() } catch (e) { alert('❌ Fehler: ' + e.message) } }
+async function deleteGlobalBonus(id) { if (!confirm('Bonus wirklich löschen?')) return; try { await supabase.from('global_bonuses').delete().eq('id', id); loadGlobalBonuses() } catch (e) { alert('❌ Fehler: ' + e.message) } }
 
-async function deleteGlobalBonus(id) {
-  if (!confirm('Bonus wirklich löschen?')) return
-  try { await supabase.from('global_bonuses').delete().eq('id', id); loadGlobalBonuses() } catch (e) { alert('❌ Fehler: ' + e.message) }
-}
-
-// Automatische End-Datum Berechnung (20 Tage wie McDonald's)
-function autoCalculateEndDate() {
-  const startDate = document.getElementById('challengeStart').value
-  if (!startDate) return
-  
-  const start = new Date(startDate)
-  const end = new Date(start)
-  end.setDate(end.getDate() + 20) // 20 Tage Dauer wie McDonald's
-  
-  const endDateStr = end.toISOString().split('T')[0]
-  document.getElementById('challengeEnd').value = endDateStr
-}
+function autoCalculateEndDate() { const startDate = document.getElementById('challengeStart').value; if (!startDate) return; const start = new Date(startDate); const end = new Date(start); end.setDate(end.getDate() + 20); const endDateStr = end.toISOString().split('T')[0]; document.getElementById('challengeEnd').value = endDateStr }
 
 async function createChallenge() {
   const points = parseInt(document.getElementById('challengePoints').value)
@@ -856,20 +386,9 @@ async function createChallenge() {
   if (endDate <= startDate) { showResult('result-challenge', '❌ End-Datum muss nach Start-Datum liegen!', 'error'); return }
   const today = new Date().toISOString().split('T')[0]
   if (startDate < today) { showResult('result-challenge', '❌ Start-Datum darf nicht in der Vergangenheit liegen!', 'error'); return }
-  
   try {
-    // Prüfe ob bereits eine aktive Challenge existiert
-    const { data: existingChallenges } = await supabase
-      .from('challenges')
-      .select('*')
-      .eq('is_active', true)
-      .gte('end_date', today)
-    
-    if (existingChallenges && existingChallenges.length > 0) {
-      showResult('result-challenge', '❌ 2x Challenge Bonus nicht möglich, zuerst eine Challenge auslaufen lassen oder Challenge löschen.', 'error')
-      return
-    }
-    
+    const { data: existingChallenges } = await supabase.from('challenges').select('*').eq('is_active', true).gte('end_date', today)
+    if (existingChallenges && existingChallenges.length > 0) { showResult('result-challenge', '❌ 2x Challenge Bonus nicht möglich, zuerst eine Challenge auslaufen lassen oder Challenge löschen.', 'error'); return }
     showResult('result-challenge', '⏳ Erstelle Challenge...', 'info')
     const { error } = await supabase.from('challenges').insert({ bonus_points: points, required_orders: orders, min_order_amount: minAmount, start_date: startDate, end_date: endDate, is_active: true, created_at: new Date().toISOString() })
     if (error) throw error
@@ -885,24 +404,15 @@ async function loadChallenges() {
     const list = document.getElementById('challengeList')
     if (!challenges || challenges.length === 0) { list.innerHTML = '<div class="empty-state">Keine Challenges vorhanden</div>'; return }
     list.innerHTML = challenges.map(c => {
-      const start = new Date(c.start_date).toLocaleDateString('de-DE')
-      const end = new Date(c.end_date).toLocaleDateString('de-DE')
-      const now = new Date()
-      const isExpired = new Date(c.end_date) < now
-      const isActive = c.is_active && !isExpired
+      const start = new Date(c.start_date).toLocaleDateString('de-DE'); const end = new Date(c.end_date).toLocaleDateString('de-DE'); const now = new Date()
+      const isExpired = new Date(c.end_date) < now; const isActive = c.is_active && !isExpired
       return `<div style="background: ${isActive ? '#fef3c7' : '#fee2e2'}; border: 2px solid ${isActive ? '#F9A825' : '#ef4444'}; border-radius: 10px; padding: 16px; margin-top: 12px;"><div style="display: flex; justify-content: space-between; align-items: start;"><div style="flex: 1;"><h3 style="color: #111827; margin-bottom: 8px;">🎁 ${c.bonus_points} Punkte für ${c.required_orders} Bestellungen ab ${c.min_order_amount} €</h3><p style="font-size: 13px; color: #6b7280; margin: 4px 0;">📅 Gültig: ${start} - ${end}</p><p style="font-size: 12px; color: ${isActive ? '#92400e' : '#dc2626'}; font-weight: 600; margin-top: 6px;">${isActive ? '✅ Aktiv' : isExpired ? '❌ Abgelaufen' : '⏸️ Inaktiv'}</p></div><div style="display: flex; gap: 6px;">${isActive ? `<button class="danger" style="padding: 8px 14px; font-size: 13px; width: auto;" onclick="toggleChallenge(${c.id}, false)">⏸️ Deaktivieren</button>` : `<button class="success" style="padding: 8px 14px; font-size: 13px; width: auto; margin: 0;" onclick="toggleChallenge(${c.id}, true)">✅ Aktivieren</button>`}<button class="danger" style="padding: 8px 14px; font-size: 13px; width: auto;" onclick="deleteChallenge(${c.id})">🗑️</button></div></div></div>`
     }).join('')
   } catch (e) { console.error('Load challenges error:', e) }
 }
 
-async function toggleChallenge(id, active) {
-  try { await supabase.from('challenges').update({ is_active: active }).eq('id', id); loadChallenges() } catch (e) { alert('❌ Fehler: ' + e.message) }
-}
-
-async function deleteChallenge(id) {
-  if (!confirm('Challenge wirklich löschen?')) return
-  try { await supabase.from('challenges').delete().eq('id', id); loadChallenges() } catch (e) { alert('❌ Fehler: ' + e.message) }
-}
+async function toggleChallenge(id, active) { try { await supabase.from('challenges').update({ is_active: active }).eq('id', id); loadChallenges() } catch (e) { alert('❌ Fehler: ' + e.message) } }
+async function deleteChallenge(id) { if (!confirm('Challenge wirklich löschen?')) return; try { await supabase.from('challenges').delete().eq('id', id); loadChallenges() } catch (e) { alert('❌ Fehler: ' + e.message) } }
 
 async function createCoupon() {
   const product = document.getElementById('couponProduct').value.trim()
@@ -919,11 +429,9 @@ async function createCoupon() {
     const code = Math.floor(1000 + Math.random() * 9000).toString()
     const { error } = await supabase.from('coupons').insert({ code: code, title: 'Deal der Woche', product: product, price: price, description: '', start_date: startDate, end_date: endDate, expires_at: endDate, is_active: true, created_at: new Date().toISOString() })
     if (error) throw error
-    const start = new Date(startDate).toLocaleDateString('de-DE')
-    const end = new Date(endDate).toLocaleDateString('de-DE')
+    const start = new Date(startDate).toLocaleDateString('de-DE'); const end = new Date(endDate).toLocaleDateString('de-DE')
     showResult('result-coupon-create', `✅ Coupon erstellt!<br>Produkt: <strong>${product}</strong><br>📅 Gültig: ${start} - ${end}`, 'success')
-    document.getElementById('couponProduct').value = ''
-    document.getElementById('couponPrice').value = ''
+    document.getElementById('couponProduct').value = ''; document.getElementById('couponPrice').value = ''
     loadCoupons()
   } catch (e) { showResult('result-coupon-create', '❌ Fehler: ' + e.message, 'error') }
 }
@@ -938,14 +446,10 @@ async function loadCoupons() {
     for (const coupon of coupons) {
       const startDate = coupon.start_date ? new Date(coupon.start_date) : new Date(coupon.created_at)
       const endDate = coupon.end_date ? new Date(coupon.end_date) : new Date(coupon.expires_at)
-      const now = new Date()
-      const isExpired = endDate < now
-      const isNotStarted = startDate > now
-      const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
+      const now = new Date(); const isExpired = endDate < now; const isNotStarted = startDate > now; const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
       if (isExpired && coupon.is_active) { await supabase.from('coupons').update({ is_active: false }).eq('id', coupon.id); coupon.is_active = false }
       const { data: activations } = await supabase.from('activated_coupons').select('unique_code, is_used, activated_at, customers(name, phone)').eq('coupon_id', coupon.id).order('activated_at', { ascending: false })
-      let activationsHTML = ''
-      if (activations && activations.length > 0) { activationsHTML = `<div style="margin-top: 12px; padding: 8px; background: #f3f4f6; border-radius: 6px;"><strong>👥 Aktiviert von ${activations.length} Kunde(n)</strong></div>` }
+      let activationsHTML = ''; if (activations && activations.length > 0) { activationsHTML = `<div style="margin-top: 12px; padding: 8px; background: #f3f4f6; border-radius: 6px;"><strong>👥 Aktiviert von ${activations.length} Kunde(n)</strong></div>` }
       let statusText = '', statusColor = '', statusBg = ''
       if (isExpired) { statusText = '❌ Abgelaufen'; statusColor = '#991b1b'; statusBg = '#fee2e2' }
       else if (isNotStarted) { statusText = '⏰ Startet bald'; statusColor = '#92400e'; statusBg = '#fef3c7' }
@@ -963,38 +467,17 @@ async function deactivateCoupon(id) { try { await supabase.from('coupons').updat
 async function activateCoupon(id) { try { await supabase.from('coupons').update({ is_active: true }).eq('id', id); loadCoupons() } catch (e) { loadCoupons() } }
 async function deleteCoupon(id) { if (!confirm('Coupon wirklich löschen?')) return; try { await supabase.from('coupons').delete().eq('id', id); loadCoupons() } catch (e) { loadCoupons() } }
 
-// 🎡 WHEEL FUNKTIONEN
 async function loadWheelConfig() {
   try {
     const { data, error } = await supabase.from('wheel_config').select('*').limit(1)
-    
-    if (error || !data || data.length === 0) {
-      showResult('result-wheel-config', 'ℹ️ Wheel Config noch nicht vorhanden. SQL Schema ausführen!', 'info')
-      return
-    }
-    
+    if (error || !data || data.length === 0) { showResult('result-wheel-config', 'ℹ️ Wheel Config noch nicht vorhanden.', 'info'); return }
     const config = data[0]
     document.getElementById('wheel-active').value = config.is_active.toString()
     document.getElementById('wheel-min-amount').value = parseFloat(config.min_order_amount).toFixed(2)
-    
-    // Happy Hour Zeiten setzen
-    if (config.start_time) {
-      document.getElementById('wheel-start-time').value = config.start_time
-    }
-    if (config.end_time) {
-      document.getElementById('wheel-end-time').value = config.end_time
-    }
-    
-    // Wochentags-Checkboxen setzen
-    if (config.active_days && Array.isArray(config.active_days)) {
-      config.active_days.forEach(day => {
-        const checkbox = document.getElementById(`day-${day}`)
-        if (checkbox) checkbox.checked = true
-      })
-    }
-  } catch (e) {
-    console.log('Wheel config load error:', e)
-  }
+    if (config.start_time) { document.getElementById('wheel-start-time').value = config.start_time }
+    if (config.end_time) { document.getElementById('wheel-end-time').value = config.end_time }
+    if (config.active_days && Array.isArray(config.active_days)) { config.active_days.forEach(day => { const checkbox = document.getElementById(`day-${day}`); if (checkbox) checkbox.checked = true }) }
+  } catch (e) { console.log('Wheel config load error:', e) }
 }
 
 async function saveWheelConfig() {
@@ -1002,70 +485,29 @@ async function saveWheelConfig() {
   const minAmount = parseFloat(document.getElementById('wheel-min-amount').value)
   const startTime = document.getElementById('wheel-start-time').value || null
   const endTime = document.getElementById('wheel-end-time').value || null
-  
-  if (!minAmount || minAmount <= 0) {
-    showResult('result-wheel-config', '❌ Bitte gültigen Mindestbestellwert eingeben!', 'error')
-    return
-  }
-  
-  // Sammle ausgewählte Wochentage
-  const activeDays = []
-  document.querySelectorAll('.wheel-day:checked').forEach(checkbox => {
-    activeDays.push(parseInt(checkbox.value))
-  })
-  
+  if (!minAmount || minAmount <= 0) { showResult('result-wheel-config', '❌ Bitte gültigen Mindestbestellwert eingeben!', 'error'); return }
+  const activeDays = []; document.querySelectorAll('.wheel-day:checked').forEach(checkbox => { activeDays.push(parseInt(checkbox.value)) })
   try {
     showResult('result-wheel-config', '⏳ Speichere...', 'info')
-    
-    const configData = {
-      is_active: isActive,
-      min_order_amount: minAmount,
-      active_days: activeDays.length > 0 ? activeDays : null,
-      start_time: startTime,
-      end_time: endTime
-    }
-    
+    const configData = { is_active: isActive, min_order_amount: minAmount, active_days: activeDays.length > 0 ? activeDays : null, start_time: startTime, end_time: endTime }
     const { data: existing } = await supabase.from('wheel_config').select('id').limit(1)
-    
-    if (existing && existing.length > 0) {
-      await supabase.from('wheel_config').update(configData).eq('id', existing[0].id)
-    } else {
-      await supabase.from('wheel_config').insert(configData)
-    }
-    
+    if (existing && existing.length > 0) { await supabase.from('wheel_config').update(configData).eq('id', existing[0].id) }
+    else { await supabase.from('wheel_config').insert(configData) }
     showResult('result-wheel-config', '✅ Einstellungen gespeichert!', 'success')
-  } catch (e) {
-    showResult('result-wheel-config', '❌ Fehler: ' + e.message, 'error')
-    console.error('Save wheel config error:', e)
-  }
+  } catch (e) { showResult('result-wheel-config', '❌ Fehler: ' + e.message, 'error'); console.error('Save wheel config error:', e) }
 }
 
 async function loadWheelStats() {
   try {
-    // Heute gedreht
     const today = new Date().toISOString().split('T')[0]
-    const { count: todayCount } = await supabase
-      .from('wheel_spins')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', today + 'T00:00:00')
-    
-    // Gesamt gedreht
-    const { count: totalCount } = await supabase
-      .from('wheel_spins')
-      .select('*', { count: 'exact', head: true })
-    
-    // Durchschnittlicher Gewinn
+    const { count: todayCount } = await supabase.from('wheel_spins').select('*', { count: 'exact', head: true }).gte('created_at', today + 'T00:00:00')
+    const { count: totalCount } = await supabase.from('wheel_spins').select('*', { count: 'exact', head: true })
     const { data: spins } = await supabase.from('wheel_spins').select('prize_points')
-    const avgPoints = spins && spins.length > 0 
-      ? Math.round(spins.reduce((sum, s) => sum + s.prize_points, 0) / spins.length)
-      : 0
-    
+    const avgPoints = spins && spins.length > 0 ? Math.round(spins.reduce((sum, s) => sum + s.prize_points, 0) / spins.length) : 0
     document.getElementById('stat-wheel-today').textContent = todayCount || 0
     document.getElementById('stat-wheel-total').textContent = totalCount || 0
     document.getElementById('stat-wheel-avg').textContent = avgPoints
-  } catch (e) {
-    console.log('Stats error:', e)
-  }
+  } catch (e) { console.log('Stats error:', e) }
 }
 
 window.addEventListener('DOMContentLoaded', function() {
