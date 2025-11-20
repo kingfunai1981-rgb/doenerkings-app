@@ -1,24 +1,11 @@
 <!DOCTYPE html>
-<!--
-  ═══════════════════════════════════════════════════════════════════
-  Döner Boxx Loyalty System - Customer Management Interface
-  Copyright © 2024 Döner Boxx. Alle Rechte vorbehalten.
-  
-  ⚠️ WARNUNG: Dieses System ist urheberrechtlich geschützt.
-  Unerlaubtes Kopieren, Ändern, Verbreiten oder Reverse Engineering
-  ist verboten und wird zivil- und strafrechtlich verfolgt.
-  
-  Entwickelt exklusiv für Döner Boxx.
-  Bei Interesse an Lizenzen: kontakt@doenerboxx.de
-  ═══════════════════════════════════════════════════════════════════
--->
 <html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🗂️ Kunden verwalten - Döner Boxx</title>
-<link rel="icon" href="/favicon-new.png" type="image/png">
-<link rel="apple-touch-icon" href="/apple-touch-icon-new.png">
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
 @font-face {
   font-family: 'Flame';
@@ -310,7 +297,7 @@ textarea {
 <div class="container">
   <div class="card header-card">
     <div class="header-logo">
-      <img src="/logo-round-new.png" alt="Döner Boxx">
+      <img src="/logo-round.png" alt="Döner Boxx">
     </div>
     <div class="header-text">
       <h1>Kunden verwalten</h1>
@@ -547,6 +534,20 @@ textarea {
         <h3 style="margin: 0;">Kundenliste</h3>
       </div>
       
+      <!-- Suchfeld -->
+      <div style="margin-bottom: 16px;">
+        <input 
+          type="text" 
+          id="customerSearch" 
+          placeholder="🔍 Suche nach Name oder Handynummer..." 
+          style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;"
+          oninput="filterCustomers()"
+        >
+        <div style="margin-top: 8px; font-size: 14px; color: #666;">
+          <span id="searchResultCount"></span>
+        </div>
+      </div>
+      
       <div class="warning" id="warningBox" style="display: none;">
         ⚠️ <strong>Hinweis:</strong> Beim Löschen eines Kunden werden auch alle zugehörigen Transaktionen und Codes gelöscht!
       </div>
@@ -576,50 +577,136 @@ function showResult(elementId, message, type) {
 async function loadAllCustomers() {
   const container = document.getElementById('customerListContainer')
   try {
-    const { data: customers, error: custError } = await supabase.from('customers').select('*').order('created_at', { ascending: false })
+    // Lade alle Kunden alphabetisch sortiert nach Name
+    const { data: customers, error: custError } = await supabase
+      .from('customers')
+      .select('*')
+      .order('name', { ascending: true })  // Alphabetisch sortiert
+    
     if (custError) throw custError
+    
     const { count: txCount, error: txError } = await supabase.from('transactions').select('*', { count: 'exact', head: true })
     if (txError) throw txError
     const { count: codeCount, error: codeError } = await supabase.from('redeem_codes').select('*', { count: 'exact', head: true })
     if (codeError) throw codeError
+    
     document.getElementById('totalCustomers').textContent = customers?.length || 0
     document.getElementById('totalTransactions').textContent = txCount || 0
     document.getElementById('totalCodes').textContent = codeCount || 0
+    
     if (!customers || customers.length === 0) {
       container.innerHTML = '<div class="empty-state">📭 Noch keine Kunden vorhanden</div>'
       document.getElementById('warningBox').style.display = 'none'
+      document.getElementById('searchResultCount').textContent = ''
       return
     }
-    document.getElementById('warningBox').style.display = 'block'
-    container.innerHTML = '<div class="customer-list" id="customerList"></div>'
-    const customerList = document.getElementById('customerList')
-    customerList.innerHTML = ''
+    
+    // Speichere Kundendaten global für Filter-Funktion
+    window.allCustomers = customers
+    
+    // Lade Transaction-Counts für alle Kunden
+    const customerTxCounts = {}
     for (const customer of customers) {
-      const { count: customerTxCount } = await supabase.from('transactions').select('*', { count: 'exact', head: true }).eq('customer_id', customer.id)
-      const created = new Date(customer.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
-      customerList.innerHTML += `
-        <div class="customer-item">
-          <div class="customer-info">
-            <h3>${customer.name}</h3>
-            <p>📱 ${customer.phone}</p>
-            <p>📅 Registriert: ${created}</p>
-            <span class="qr-id">QR: ${customer.qr_id}</span>
-          </div>
-          <div class="customer-stats">
-            <div class="customer-points">
-              <span class="value">${customer.points}</span>
-              <span class="label">Punkte</span>
-            </div>
-            <div class="customer-txs">
-              <span class="value">${customerTxCount || 0}</span>
-              <span class="label">Transaktionen</span>
-            </div>
-          </div>
-          <button class="danger" onclick="deleteSingleCustomer('${customer.id}', '${customer.name}')">🗑️ Löschen</button>
-        </div>
-      `
+      const { count } = await supabase
+        .from('transactions')
+        .select('*', { count: 'exact', head: true })
+        .eq('customer_id', customer.id)
+      customerTxCounts[customer.id] = count || 0
     }
-  } catch (e) { container.innerHTML = `<div class="result error">❌ Fehler beim Laden: ${e.message}</div>` }
+    window.customerTxCounts = customerTxCounts
+    
+    // Zeige alle Kunden initial
+    displayCustomers(customers)
+    
+    document.getElementById('warningBox').style.display = 'block'
+    document.getElementById('searchResultCount').textContent = `Zeige ${customers.length} von ${customers.length} Kunden`
+    
+  } catch (e) { 
+    container.innerHTML = `<div class="result error">❌ Fehler beim Laden: ${e.message}</div>` 
+  }
+}
+
+function displayCustomers(customers) {
+  const container = document.getElementById('customerListContainer')
+  
+  if (!customers || customers.length === 0) {
+    container.innerHTML = '<div class="empty-state">📭 Keine Kunden gefunden</div>'
+    return
+  }
+  
+  container.innerHTML = '<div class="customer-list" id="customerList"></div>'
+  const customerList = document.getElementById('customerList')
+  customerList.innerHTML = ''
+  
+  for (const customer of customers) {
+    const txCount = window.customerTxCounts?.[customer.id] || 0
+    const created = new Date(customer.created_at).toLocaleDateString('de-DE', { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric' 
+    })
+    
+    customerList.innerHTML += `
+      <div class="customer-item" data-customer-id="${customer.id}">
+        <div class="customer-info">
+          <h3>${customer.name}</h3>
+          <p>📱 ${customer.phone}</p>
+          <p>📅 Registriert: ${created}</p>
+          <span class="qr-id">QR: ${customer.qr_id}</span>
+        </div>
+        <div class="customer-stats">
+          <div class="customer-points">
+            <span class="value">${customer.points}</span>
+            <span class="label">Punkte</span>
+          </div>
+          <div class="customer-txs">
+            <span class="value">${txCount}</span>
+            <span class="label">Transaktionen</span>
+          </div>
+        </div>
+        <button class="danger" onclick="deleteSingleCustomer('${customer.id}', '${customer.name}')">🗑️ Löschen</button>
+      </div>
+    `
+  }
+}
+
+function filterCustomers() {
+  const searchTerm = document.getElementById('customerSearch').value.toLowerCase().trim()
+  
+  if (!window.allCustomers) {
+    return  // Noch keine Daten geladen
+  }
+  
+  if (!searchTerm) {
+    // Kein Suchbegriff - zeige alle Kunden
+    displayCustomers(window.allCustomers)
+    document.getElementById('searchResultCount').textContent = 
+      `Zeige ${window.allCustomers.length} von ${window.allCustomers.length} Kunden`
+    return
+  }
+  
+  // Filtere nach Name oder Handynummer
+  const filtered = window.allCustomers.filter(customer => {
+    const nameMatch = customer.name.toLowerCase().includes(searchTerm)
+    const phoneMatch = customer.phone.toLowerCase().includes(searchTerm)
+    return nameMatch || phoneMatch
+  })
+  
+  displayCustomers(filtered)
+  
+  // Zeige Anzahl der Ergebnisse
+  const totalCount = window.allCustomers.length
+  const resultText = filtered.length === totalCount
+    ? `Zeige ${totalCount} von ${totalCount} Kunden`
+    : `Zeige ${filtered.length} von ${totalCount} Kunden`
+  
+  document.getElementById('searchResultCount').textContent = resultText
+  
+  // Zeige Hinweis wenn keine Ergebnisse
+  if (filtered.length === 0) {
+    document.getElementById('searchResultCount').textContent = 
+      `Keine Kunden gefunden für "${searchTerm}"`
+  }
 }
 
 async function deleteSingleCustomer(customerId, customerName) {
@@ -939,18 +1026,6 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('couponStart').value = todayStr; document.getElementById('couponEnd').value = nextWeekStr
 })
 console.log('✅ Döner Boxx Verwaltung geladen!')
-
-// Copyright-Warnung in Console
-console.log('%c⚠️ COPYRIGHT WARNUNG', 'color: #E31E24; font-size: 20px; font-weight: bold; padding: 10px;')
-console.log('%c🔒 Dieser Code ist urheberrechtlich geschützt.', 'font-size: 14px; font-weight: bold;')
-console.log('%cUnerlaubtes Kopieren oder Verwenden ist illegal und wird verfolgt.', 'font-size: 12px; color: #666;')
-console.log('%c© 2024 Döner Boxx - Alle Rechte vorbehalten', 'font-size: 11px; color: #999;')
 </script>
-
-<footer style="text-align: center; padding: 20px 10px; color: #fff; font-size: 11px; margin-top: 40px; background: rgba(0,0,0,0.1); border-radius: 12px;">
-  <div style="margin-bottom: 8px;">© 2024 Döner Boxx. Alle Rechte vorbehalten.</div>
-  <div style="font-size: 10px; opacity: 0.8;">Entwickelt exklusiv für Döner Boxx. Unerlaubte Nutzung verboten.</div>
-</footer>
-
 </body>
 </html>
