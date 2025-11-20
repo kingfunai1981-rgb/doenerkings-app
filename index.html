@@ -1185,8 +1185,22 @@ function drawWheel() {
 }
 
 // 🎯 WICHTIG: Prüft ob Wheel freigeschaltet ist und zeigt/versteckt es
+// 🎯 Throttle-Variablen für checkWheelAvailability
+let wheelCheckInProgress = false
+let lastWheelCheck = 0
+const WHEEL_CHECK_COOLDOWN = 3000  // Min. 3 Sekunden zwischen Checks
+
 async function checkWheelAvailability() {
   if (!currentCustomer) return
+  
+  // Throttle: Verhindere zu häufige Checks
+  const now = Date.now()
+  if (wheelCheckInProgress || (now - lastWheelCheck < WHEEL_CHECK_COOLDOWN)) {
+    return  // Skip wenn Check bereits läuft oder zu kürzlich war
+  }
+  
+  wheelCheckInProgress = true
+  lastWheelCheck = now
   
   try {
     const { data: unlocks, error } = await supabase
@@ -1213,6 +1227,8 @@ async function checkWheelAvailability() {
   } catch (e) {
     console.log('Wheel error:', e)
     hideWheel()
+  } finally {
+    wheelCheckInProgress = false
   }
 }
 
