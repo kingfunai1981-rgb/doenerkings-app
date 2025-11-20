@@ -347,9 +347,9 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
 .screen { display: none; }
 .screen.active { display: block; }
 
-/* 🎡 Lucky Wheel Styles */
+/* 🎡 NEU: Lucky Wheel Styles */
 .wheel-section {
-  display: none;
+  display: none; /* Standard: versteckt */
 }
 
 .wheel-section.active {
@@ -584,17 +584,19 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
       </div>
     </div>
 
-    <!-- 🎡 Lucky Wheel Section -->
+    <!-- 🎡 NEU: Lucky Wheel Section (nur bei Freischaltung sichtbar) -->
     <div id="wheel-section" class="wheel-section">
       <div class="card">
         <h2>🎡 Lucky Wheel</h2>
         
+        <!-- Badge wenn verfügbar -->
         <div id="wheel-available-badge" style="display: none;">
           <div class="wheel-badge">
             🎡 Du hast <span id="wheel-count">0</span> freie Drehung(en)!
           </div>
         </div>
         
+        <!-- Wheel Canvas -->
         <div class="wheel-container">
           <div class="wheel-wrapper">
             <div class="wheel-pointer"></div>
@@ -602,6 +604,7 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
           </div>
         </div>
         
+        <!-- Info wenn nicht verfügbar -->
         <div id="wheel-info" class="wheel-info-box">
           🎉 Klicke auf das Logo zum Drehen!
         </div>
@@ -788,6 +791,8 @@ async function loadCustomer(customer) {
     loadBonuses()
     loadCoupons()
     loadChallenges()
+    
+    // 🎡 NEU: Prüfe Wheel-Verfügbarkeit
     checkWheelAvailability()
     
   } catch (e) {
@@ -824,6 +829,7 @@ async function refreshCustomerData() {
     loadCoupons()
     loadPendingCodes()
     loadChallenges()
+    // 🎡 NEU: Prüfe Wheel-Verfügbarkeit
     checkWheelAvailability()
   } catch (e) { 
     console.error('❌ Refresh error:', e.message, e)
@@ -1027,49 +1033,50 @@ window.onload = () => {
   }
 }
 
-// 🎡 Lucky Wheel Functions
+// 🎡 NEU: Lucky Wheel Functions
 let wheelRotation = 0
 let isSpinning = false
-let currentWheelUnlockId = null
+let currentWheelUnlockId = null // Für Spin Again
 
 const anglePerSegment = (2 * Math.PI) / 18
 const WHEEL_OFFSET = -Math.PI / 2 - anglePerSegment / 2
-const LOGO_CLICK_RADIUS = 57  // Klickbereich fürs Logo
 
 const wheelPrizes = [
-  { label: '500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },
-  { label: '50',  color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50  },
-  { label: '100', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },
-  { label: '25',  color: '#FFFFFF', textColor: '#000000', type: 'points', value: 25  },
-  { label: '75',  color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75  },
-  { label: 'DREHE NOCHMAL!', color: '#FFFFFF', textColor: '#000000', type: 'spin_again', value: 0 },
-  { label: '50',  color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50  },
-  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },
-  { label: '25',  color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25  },
-  { label: '500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },
-  { label: '75',  color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75  },
-  { label: '50',  color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50  },
-  { label: 'DREHE NOCHMAL!', color: '#000000', textColor: '#FFFFFF', type: 'spin_again', value: 0 },
-  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },
-  { label: '25',  color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25  },
-  { label: '75',  color: '#FFFFFF', textColor: '#000000', type: 'points', value: 75  },
-  { label: '50',  color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50  },
-  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 }
+  { label: '500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },          // 1 - ROT
+  { label: '50', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },            // 2 - WEIß
+  { label: '100', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },          // 3 - SCHWARZ
+  { label: '25', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 25 },            // 4 - WEIß
+  { label: '75', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },            // 5 - SCHWARZ
+  { label: 'DREHE NOCHMAL!', color: '#FFFFFF', textColor: '#000000', type: 'spin_again', value: 0 }, // 6 - WEIß
+  { label: '50', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },            // 7 - SCHWARZ
+  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },          // 8 - WEIß
+  { label: '25', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25 },            // 9 - SCHWARZ
+  { label: '500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },          // 10 - ROT
+  { label: '75', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },            // 11 - SCHWARZ
+  { label: '50', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },            // 12 - WEIß
+  { label: 'DREHE NOCHMAL!', color: '#000000', textColor: '#FFFFFF', type: 'spin_again', value: 0 }, // 13 - SCHWARZ
+  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },          // 14 - WEIß
+  { label: '25', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25 },            // 15 - SCHWARZ
+  { label: '75', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 75 },            // 16 - WEIß
+  { label: '50', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },            // 17 - SCHWARZ
+  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 }           // 18 - WEIß
 ]
 
 let logoImg = null
-let wheelHandlersAttached = false
+let wheelHandlersAttached = false  // ✅ Flag um mehrfache Handler zu verhindern
 
 function initWheel() {
   const canvas = document.getElementById('wheelCanvas')
   if (!canvas) return
 
+  // Logo laden (nur einmal)
   if (!logoImg) {
     logoImg = new Image()
     logoImg.src = '/logo-round-new.png'
     logoImg.onload = () => drawWheel()
   }
 
+  // ✅ Event-Handler nur EINMAL registrieren
   if (!wheelHandlersAttached) {
     canvas.addEventListener('click', (event) => {
       const rect = canvas.getBoundingClientRect()
@@ -1081,7 +1088,8 @@ function initWheel() {
 
       const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
 
-      if (distance <= LOGO_CLICK_RADIUS) {
+      // Nur wenn innerhalb des Logo-Bereichs (Radius 58)
+      if (distance <= 58) {
         spinWheel()
       }
     })
@@ -1095,7 +1103,7 @@ function initWheel() {
       const centerY = rect.height / 2
       const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
 
-      canvas.style.cursor = distance <= LOGO_CLICK_RADIUS ? 'pointer' : 'default'
+      canvas.style.cursor = distance <= 58 ? 'pointer' : 'default'
     })
 
     wheelHandlersAttached = true
@@ -1111,9 +1119,11 @@ function drawWheel() {
 
   const ctx = canvas.getContext('2d')
 
+  // 📐 Aktuelle sichtbare Größe des Canvas (in CSS-Pixeln)
   const rect = canvas.getBoundingClientRect()
   const ratio = window.devicePixelRatio || 1
 
+  // Canvas-Auflösung an Bildschirmdichte anpassen (für Schärfe)
   const targetWidth = rect.width * ratio
   const targetHeight = rect.height * ratio
 
@@ -1122,14 +1132,17 @@ function drawWheel() {
     canvas.height = targetHeight
   }
 
+  // Zeichenkoordinaten wieder auf CSS-Pixel normalisieren
   ctx.setTransform(ratio, 0, 0, ratio, 0, 0)
 
   const centerX = rect.width / 2
   const centerY = rect.height / 2
   const radius = rect.width / 2 - 5
 
+  // Canvas in CSS-Einheiten löschen
   ctx.clearRect(0, 0, rect.width, rect.height)
 
+  // 🎡 Segmente zeichnen
   ctx.save()
   ctx.translate(centerX, centerY)
   ctx.rotate(wheelRotation + WHEEL_OFFSET)
@@ -1164,17 +1177,13 @@ function drawWheel() {
 
   ctx.restore()
 
+  // 🧿 Logo mittig
   ctx.save()
   ctx.translate(centerX, centerY)
 
-  const logoRadius = 57.3
-  const centerRadius = logoRadius + 0.3  // extrem schmaler weißer Rand
+  const logoRadius = 57.3  // Logo-Größe
 
-  ctx.beginPath()
-  ctx.arc(0, 0, centerRadius, 0, 2 * Math.PI)
-  ctx.fillStyle = 'white'
-  ctx.fill()
-
+  // Logo scharf einzeichnen (ohne weißen Rahmen)
   if (logoImg && logoImg.complete) {
     ctx.save()
     ctx.beginPath()
@@ -1187,17 +1196,19 @@ function drawWheel() {
   ctx.restore()
 }
 
-// Wheel Availability & Spin (unverändert außer Init-Aufruf)
+// 🎯 WICHTIG: Prüft ob Wheel freigeschaltet ist und zeigt/versteckt es
+// 🎯 Throttle-Variablen für checkWheelAvailability
 let wheelCheckInProgress = false
 let lastWheelCheck = 0
-const WHEEL_CHECK_COOLDOWN = 3000
+const WHEEL_CHECK_COOLDOWN = 3000  // Min. 3 Sekunden zwischen Checks
 
 async function checkWheelAvailability() {
   if (!currentCustomer) return
   
+  // Throttle: Verhindere zu häufige Checks
   const now = Date.now()
   if (wheelCheckInProgress || (now - lastWheelCheck < WHEEL_CHECK_COOLDOWN)) {
-    return
+    return  // Skip wenn Check bereits läuft oder zu kürzlich war
   }
   
   wheelCheckInProgress = true
@@ -1213,13 +1224,16 @@ async function checkWheelAvailability() {
     
     if (error) {
       console.log('⚠️ Wheel check error:', error)
+      // Bei Fehler: Wheel ausblenden
       hideWheel()
       return
     }
     
     if (unlocks && unlocks.length > 0) {
+      // ✅ KUNDE HAT FREISCHALTUNG - ZEIGE WHEEL!
       showWheel(unlocks.length)
     } else {
+      // ❌ KEINE FREISCHALTUNG - VERSTECKE WHEEL!
       hideWheel()
     }
   } catch (e) {
@@ -1233,16 +1247,18 @@ async function checkWheelAvailability() {
 function showWheel(count) {
   const section = document.getElementById('wheel-section')
   const badge = document.getElementById('wheel-available-badge')
+  // Spin button entfernt - Logo ist jetzt klickbar
   const wheelInfo = document.getElementById('wheel-info')
   const countSpan = document.getElementById('wheel-count')
   
   if (!section) return
   
-  section.classList.add('active')
+  section.classList.add('active')  // Macht Sektion sichtbar
   badge.style.display = 'block'
   countSpan.textContent = count
   wheelInfo.style.display = 'none'
   
+  // Initialisiere Wheel Canvas
   initWheel()
   
   console.log(`✅ Wheel angezeigt - ${count} Drehung(en) verfügbar`)
@@ -1251,7 +1267,7 @@ function showWheel(count) {
 function hideWheel() {
   const section = document.getElementById('wheel-section')
   if (section) {
-    section.classList.remove('active')
+    section.classList.remove('active')  // Macht Sektion unsichtbar
     console.log('🔒 Wheel versteckt - keine Freischaltung')
   }
 }
@@ -1290,14 +1306,18 @@ async function spinWheel() {
     crypto.getRandomValues(array)
     const randomOffset = ((array[0] / 0xFFFFFFFF) - 0.5) * 0.6 * anglePerSegment
     
+    // WICHTIG: Rotation auf 0 zurücksetzen für konsistente Startposition
     wheelRotation = 0
     
+    // 6-10 volle Drehungen (mehr für bessere Animation)
     const spins = 6 + Math.floor((array[0] / 0xFFFFFFFF) * 5)
     const baseRotation = spins * 2 * Math.PI
     
+    // Berechne Zielfeld
     const fieldMidAngle = winningIndex * anglePerSegment + anglePerSegment / 2 + randomOffset
     const targetRotation = -Math.PI / 2 - WHEEL_OFFSET - fieldMidAngle
     
+    // Normalisiere für positive Rotation
     let normalizedTarget = targetRotation
     while (normalizedTarget < 0) {
       normalizedTarget += 2 * Math.PI
@@ -1305,9 +1325,9 @@ async function spinWheel() {
     
     const totalRotation = baseRotation + normalizedTarget
 
-    const startRotation = 0
+    const startRotation = 0 // Immer von 0 starten
     const startTime = Date.now()
-    const duration = 5000 + Math.floor((array[0] / 0xFFFFFFFF) * 1000)
+    const duration = 5000 + Math.floor((array[0] / 0xFFFFFFFF) * 1000) // 5-6 Sekunden
 
     function animate() {
       const elapsed = Date.now() - startTime
@@ -1334,15 +1354,18 @@ async function spinWheel() {
         
         console.log('🎯 Gewonnen:', actualPrize.label, actualPrize.type, actualPrize.value)
         
+        // Rotation auf 0 zurücksetzen für nächsten Spin
         wheelRotation = 0
         drawWheel()
         
+        // Prüfe ob "Spin Again"
         if (actualPrize.type === 'spin_again') {
           showSpinAgainResult()
         } else {
+          // Echte Punkte gewonnen
           showWheelResult(actualPrize)
           saveWheelSpin(unlock.id, actualPrize)
-          currentWheelUnlockId = null
+          currentWheelUnlockId = null // Reset
         }
       }
     }
@@ -1378,17 +1401,43 @@ function showSpinAgainResult() {
   prizeText.textContent = 'Du darfst nochmal drehen! 🎉'
 
   modal.classList.add('active')
+  
+  // Button-Text ändern
+  const closeButton = modal.querySelector('.wheel-result-button')
+  if (closeButton) {
+    closeButton.textContent = '🎰 Nochmal drehen!'
+    closeButton.onclick = () => {
+      closeSpinAgainResult()
+    }
+  }
+}
+
+function closeSpinAgainResult() {
+  const modal = document.getElementById('wheel-result-modal')
+  modal.classList.remove('active')
+  
+  // Button zurücksetzen
+  const closeButton = modal.querySelector('.wheel-result-button')
+  if (closeButton) {
+    closeButton.textContent = 'Weiter'
+    closeButton.onclick = closeWheelResult
+  }
+  
+  // Button wieder aktivieren für nächsten Spin
+  // Spin button entfernt - Logo ist jetzt klickbar
 }
 
 function closeWheelResult() {
   document.getElementById('wheel-result-modal').classList.remove('active')
+  // Spin button entfernt - Logo ist jetzt klickbar
   document.getElementById('wheel-info').innerHTML = '✅ Punkte wurden gutgeschrieben!'
   document.getElementById('wheel-info').style.display = 'block'
   document.getElementById('wheel-available-badge').style.display = 'none'
   
+  // Refresh customer data
   if (currentCustomer) {
     setTimeout(() => {
-      checkWheelAvailability()
+      checkWheelAvailability()  // Prüfe ob weitere Drehungen verfügbar
       refreshCustomerData()
     }, 1000)
   }
@@ -1396,6 +1445,7 @@ function closeWheelResult() {
 
 async function saveWheelSpin(unlockId, prize) {
   try {
+    // Markiere unlock als verwendet
     const { error: unlockError } = await supabase
       .from('wheel_unlocks')
       .update({ is_used: true })
@@ -1406,15 +1456,20 @@ async function saveWheelSpin(unlockId, prize) {
       throw unlockError
     }
     
+    // Speichere Spin - mit Ihrem AKTUELLEN Schema
+    // Generiere einen KURZEN 4-stelligen Code (varchar(4))
     const prizeCode = Math.random().toString(36).substr(2, 4).toUpperCase()
     
     const { error: spinError } = await supabase.from('wheel_spins').insert({
-      customer_id: currentCustomer.id,
-      prize_type: prize.type,
-      prize_value: String(prize.value),
-      prize_code: prizeCode,
-      prize_points: prize.value,
-      is_redeemed: false
+      customer_id: currentCustomer.id,       // bigint ID
+      prize_type: prize.type,                // "points" oder "spin_again" (max 20 Zeichen)
+      prize_value: String(prize.value),      // "50" als String (max 100 Zeichen)
+      prize_code: prizeCode,                 // 4-stelliger Code: "A3X9"
+      prize_points: prize.value,             // 50 als Integer
+      is_redeemed: false                     // noch nicht eingelöst
+      // spun_at: wird automatisch gesetzt (DEFAULT now())
+      // created_at: wird automatisch gesetzt (DEFAULT now())
+      // expires_at: wird automatisch gesetzt (DEFAULT now() + 30 days)
     })
     
     if (spinError) {
@@ -1422,6 +1477,7 @@ async function saveWheelSpin(unlockId, prize) {
       throw spinError
     }
     
+    // ✅ NUR bei Erfolg UND bei echten Punktgewinnen: Punkte gutschreiben
     if (prize.type === 'points' && prize.value > 0) {
       const newPoints = currentCustomer.points + prize.value
       
@@ -1435,23 +1491,27 @@ async function saveWheelSpin(unlockId, prize) {
         throw pointsError
       }
       
+      // ✅ Nach erfolgreichem Punkte-Update: Transaction-Eintrag erstellen
+      // Damit der Gewinn im Scanner-Verlauf sichtbar wird
       const { error: transactionError } = await supabase
         .from('transactions')
         .insert({
           customer_id: currentCustomer.id,
           type: 'earn',
-          amount: 0,
-          points: prize.value,
-          staff: 'WHEEL',
-          notes: `Lucky Wheel: ${prize.value}P`
+          amount: 0,                              // Wheel-Gewinne kosten nichts
+          points: prize.value,                    // Gewonnene Punkte
+          staff: 'WHEEL',                         // Kennzeichnung für Scanner-Verlauf
+          notes: `Lucky Wheel: ${prize.value}P`   // Beschreibung
         })
       
       if (transactionError) {
+        // Transaction-Fehler loggen, aber nicht blockieren (Punkte sind bereits gutgeschrieben)
         console.warn('⚠️ Transaction-Eintrag konnte nicht erstellt werden:', transactionError)
       } else {
         console.log('✅ Transaction-Eintrag für Wheel-Gewinn erstellt')
       }
       
+      // Update local customer object
       currentCustomer.points = newPoints
       document.getElementById('app-points').textContent = newPoints
     }
@@ -1460,7 +1520,7 @@ async function saveWheelSpin(unlockId, prize) {
   } catch (e) {
     console.error('❌ Fehler beim Speichern des Wheel Spins:', e)
     alert('⚠️ Es gab einen Fehler beim Speichern deines Gewinns. Bitte kontaktiere den Support.')
-    throw e
+    throw e  // Fehler weitergeben
   }
 }
 
