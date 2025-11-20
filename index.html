@@ -1069,16 +1069,6 @@ function initWheel() {
   const canvas = document.getElementById('wheelCanvas')
   if (!canvas) return
   
-  // High-DPI Canvas für scharfes Logo
-  const ratio = window.devicePixelRatio || 1
-  canvas.width = 400 * ratio
-  canvas.height = 400 * ratio
-  canvas.style.width = '400px'
-  canvas.style.height = '400px'
-  
-  const ctx = canvas.getContext('2d')
-  ctx.scale(ratio, ratio)
-  
   logoImg = new Image()
   logoImg.src = '/logo-round-new.png'
   logoImg.onload = () => drawWheel()
@@ -1091,8 +1081,8 @@ function initWheel() {
       const x = event.clientX - rect.left
       const y = event.clientY - rect.top
       
-      const centerX = 200  // Logisches Zentrum bei 400px / 2
-      const centerY = 200
+      const centerX = canvas.width / 2
+      const centerY = canvas.height / 2
       
       // Berechne Distanz vom Zentrum
       const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
@@ -1109,8 +1099,8 @@ function initWheel() {
       const x = event.clientX - rect.left
       const y = event.clientY - rect.top
       
-      const centerX = 200  // Logisches Zentrum bei 400px / 2
-      const centerY = 200
+      const centerX = canvas.width / 2
+      const centerY = canvas.height / 2
       const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
       
       canvas.style.cursor = distance <= 58 ? 'pointer' : 'default'
@@ -1128,11 +1118,9 @@ function drawWheel() {
   if (!canvas) return
   
   const ctx = canvas.getContext('2d')
-  const logicalWidth = 400  // Logische Größe bleibt 400px
-  const logicalHeight = 400
-  const centerX = logicalWidth / 2
-  const centerY = logicalHeight / 2
-  const radius = logicalWidth / 2 - 5
+  const centerX = canvas.width / 2
+  const centerY = canvas.height / 2
+  const radius = canvas.width / 2 - 5
 
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   ctx.save()
