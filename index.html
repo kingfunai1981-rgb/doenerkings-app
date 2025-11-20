@@ -1100,8 +1100,8 @@ function initWheel() {
       // Berechne Distanz vom Zentrum
       const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
       
-      // Nur wenn innerhalb des Logo-Bereichs (Radius 48)
-      if (distance <= 48) {
+      // Nur wenn innerhalb des Logo-Bereichs (Radius 58, erhöht von 48)
+      if (distance <= 58) {
         spinWheel()
       }
     })
@@ -1116,7 +1116,7 @@ function initWheel() {
       const centerY = canvas.height / 2
       const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
       
-      canvas.style.cursor = distance <= 48 ? 'pointer' : 'default'
+      canvas.style.cursor = distance <= 58 ? 'pointer' : 'default'
     })
     
     wheelHandlersAttached = true
@@ -1177,8 +1177,8 @@ function drawWheel() {
   ctx.save()
   ctx.translate(centerX, centerY)
   
-  const centerRadius = 48
-  const logoRadius = 47.8
+  const centerRadius = 58    // Erhöht von 48 auf 58 (+20%)
+  const logoRadius = 57.3     // Erhöht von 47.8 auf 57.3 (+20%)
   
   ctx.beginPath()
   ctx.arc(0, 0, centerRadius, 0, 2 * Math.PI)
