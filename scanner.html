@@ -212,54 +212,71 @@ canvas { display: none; }
 // ═══════════════════════════════════════════════════════════════
 // 🔐 PASSWORT-SCHUTZ - NICHT ENTFERNEN!
 // ═══════════════════════════════════════════════════════════════
-(async function() {
-  const PASSWORT_HASH = 'efc68709a6bc20b7983129e56ce1d98739876e4274463aaece1a3edef374d47e';
+const PASSWORT_HASH = 'efc68709a6bc20b7983129e56ce1d98739876e4274463aaece1a3edef374d47e';
+let authVersuche = 3;
+
+async function sha256(text) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function showLoginScreen() {
+  document.body.innerHTML = `
+    <div style="font-family:'Flame',system-ui,sans-serif;background:linear-gradient(135deg,#E31E24,#F9A825);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:white;border-radius:20px;padding:40px;max-width:400px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.2);text-align:center;">
+        <div style="font-size:60px;margin-bottom:20px;">🔐</div>
+        <h1 style="color:#E31E24;margin-bottom:10px;font-size:24px;">Döner Boxx Admin</h1>
+        <p style="color:#666;margin-bottom:30px;">Bitte Passwort eingeben</p>
+        <input type="password" id="loginPassword" placeholder="Passwort" style="width:100%;padding:14px;border:2px solid #e5e7eb;border-radius:10px;font-size:16px;margin-bottom:15px;text-align:center;" onkeypress="if(event.key==='Enter')checkLogin()">
+        <button onclick="checkLogin()" style="width:100%;padding:14px;background:linear-gradient(135deg,#E31E24,#F9A825);color:white;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;">🔓 Einloggen</button>
+        <p id="loginError" style="color:#dc2626;margin-top:15px;font-size:14px;display:none;"></p>
+        <p id="loginVersuche" style="color:#666;margin-top:10px;font-size:12px;">${authVersuche} Versuche übrig</p>
+      </div>
+    </div>
+  `;
+  setTimeout(() => document.getElementById('loginPassword').focus(), 100);
+}
+
+async function checkLogin() {
+  const eingabe = document.getElementById('loginPassword').value;
+  const errorEl = document.getElementById('loginError');
+  const versucheEl = document.getElementById('loginVersuche');
   
-  // Prüfe ob bereits eingeloggt (Session)
-  const session = sessionStorage.getItem('db_auth');
-  if (session === PASSWORT_HASH) {
-    console.log('✅ Bereits authentifiziert');
-    return; // Bereits eingeloggt, weiter zur App
+  if (!eingabe) {
+    errorEl.textContent = '❌ Bitte Passwort eingeben!';
+    errorEl.style.display = 'block';
+    return;
   }
   
-  // Zeige Login-Dialog
-  let versuche = 3;
-  while (versuche > 0) {
-    const eingabe = prompt(`🔐 Döner Boxx Admin\n\nPasswort eingeben:\n(${versuche} Versuche übrig)`);
-    
-    if (eingabe === null) {
-      // Abgebrochen
-      document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;"><h1>❌ Zugriff verweigert</h1><p>Authentifizierung abgebrochen.</p><a href="/">← Zurück zur Startseite</a></div>';
-      throw new Error('Auth abgebrochen');
-    }
-    
-    const hash = await sha256(eingabe);
-    
-    if (hash === PASSWORT_HASH) {
-      // Richtig! Session speichern
-      sessionStorage.setItem('db_auth', PASSWORT_HASH);
-      console.log('✅ Authentifizierung erfolgreich');
-      return; // Weiter zur App
-    }
-    
-    versuche--;
-    if (versuche > 0) {
-      alert(`❌ Falsches Passwort!\n\nNoch ${versuche} Versuche.`);
-    }
+  const hash = await sha256(eingabe);
+  
+  if (hash === PASSWORT_HASH) {
+    sessionStorage.setItem('db_auth', PASSWORT_HASH);
+    location.reload();
+    return;
   }
   
-  // Alle Versuche aufgebraucht
-  document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;background:#fee2e2;min-height:100vh;"><h1 style="color:#dc2626;">🚫 Zugriff gesperrt</h1><p>Zu viele falsche Versuche.</p><p>Bitte lade die Seite neu, um es erneut zu versuchen.</p><a href="/" style="color:#dc2626;">← Zurück zur Startseite</a></div>';
-  throw new Error('Zu viele Fehlversuche');
+  authVersuche--;
   
-  async function sha256(text) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(text);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  if (authVersuche <= 0) {
+    document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;background:#fee2e2;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;"><h1 style="color:#dc2626;font-size:48px;">🚫</h1><h2 style="color:#dc2626;">Zugriff gesperrt</h2><p style="color:#666;">Zu viele Fehlversuche.</p><a href="/" style="color:#dc2626;margin-top:20px;">← Zurück zur Startseite</a></div>';
+    return;
   }
-})();
+  
+  errorEl.textContent = '❌ Falsches Passwort!';
+  errorEl.style.display = 'block';
+  versucheEl.textContent = authVersuche + ' Versuche übrig';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginPassword').focus();
+}
+
+// Prüfe Session beim Laden
+if (sessionStorage.getItem('db_auth') !== PASSWORT_HASH) {
+  showLoginScreen();
+  throw new Error('Login erforderlich');
+}
 // ═══════════════════════════════════════════════════════════════
 // 🔐 ENDE PASSWORT-SCHUTZ
 // ═══════════════════════════════════════════════════════════════
@@ -317,71 +334,29 @@ async function checkAndUpdateChallenges(customerId, amount) {
   } catch (e) { console.error('Challenge error:', e) }
 }
 
-// 🎡 WHEEL CHECK - Prüft ob Glücksrad freigeschaltet wird
 async function checkAndUnlockWheel(customerId, amount) {
   try {
-    // Hole Wheel Config
-    const { data: config, error: configError } = await supabase
-      .from('wheel_config')
-      .select('*')
-      .limit(1)
-    
-    if (configError || !config || config.length === 0) {
-      console.log('ℹ️ Wheel Config nicht gefunden')
-      return false
-    }
-    
+    const { data: config, error: configError } = await supabase.from('wheel_config').select('*').limit(1)
+    if (configError || !config || config.length === 0) { console.log('ℹ️ Wheel Config nicht gefunden'); return false }
     const wheelConfig = config[0]
-    
-    // Prüfe ob aktiv
-    if (!wheelConfig.is_active) {
-      return false
-    }
-    
-    // Prüfe Wochentag (falls aktiviert)
+    if (!wheelConfig.is_active) { return false }
     if (wheelConfig.active_days && wheelConfig.active_days.length > 0) {
       const now = new Date()
-      const currentDay = now.getDay() // 0=Sonntag, 1=Montag, ..., 6=Samstag
-      if (!wheelConfig.active_days.includes(currentDay)) {
-        console.log('ℹ️ Glücksrad heute nicht aktiv')
-        return false
-      }
+      const currentDay = now.getDay()
+      if (!wheelConfig.active_days.includes(currentDay)) { console.log('ℹ️ Glücksrad heute nicht aktiv'); return false }
     }
-    
-    // Prüfe Zeitfenster (Happy Hour) - nur wenn start_time und end_time gesetzt sind
     if (wheelConfig.start_time && wheelConfig.end_time) {
       const now = new Date()
       const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0')
-      const startTime = wheelConfig.start_time.substring(0, 5) // "15:00:00" -> "15:00"
+      const startTime = wheelConfig.start_time.substring(0, 5)
       const endTime = wheelConfig.end_time.substring(0, 5)
-      
-      if (currentTime < startTime || currentTime > endTime) {
-        console.log('ℹ️ Außerhalb der Happy Hour')
-        return false
-      }
+      if (currentTime < startTime || currentTime > endTime) { console.log('ℹ️ Außerhalb der Happy Hour'); return false }
     }
-    
-    // Prüfe Mindestbestellwert
-    if (amount < parseFloat(wheelConfig.min_order_amount)) {
-      console.log('ℹ️ Betrag zu gering für Wheel')
-      return false
-    }
-    
-    // Wheel freischalten!
-    await supabase.from('wheel_unlocks').insert({
-      customer_id: customerId,
-      order_amount: amount,
-      is_used: false,
-      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-    })
-    
+    if (amount < parseFloat(wheelConfig.min_order_amount)) { console.log('ℹ️ Betrag zu gering für Wheel'); return false }
+    await supabase.from('wheel_unlocks').insert({ customer_id: customerId, order_amount: amount, is_used: false, expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() })
     console.log('✅ Glücksrad freigeschaltet!')
     return true
-    
-  } catch (e) {
-    console.error('Wheel check error:', e)
-    return false
-  }
+  } catch (e) { console.error('Wheel check error:', e); return false }
 }
 
 function normalizePhone(phone) {
@@ -395,11 +370,7 @@ function normalizePhone(phone) {
 
 function showResult(id, msg, type) {
   const el = document.getElementById(id)
-  if (!msg) {
-    el.className = ''
-    el.innerHTML = ''
-    return
-  }
+  if (!msg) { el.className = ''; el.innerHTML = ''; return }
   el.className = `result ${type}`
   el.innerHTML = msg
 }
@@ -417,96 +388,51 @@ function showTab(name) {
 async function addPointsByPhone() {
   const phoneOrId = document.getElementById('phone').value.trim()
   const amount = parseFloat(document.getElementById('amount').value)
-  
   if (!phoneOrId) { showResult('result-phone', '❌ Handynummer/QR-ID eingeben!', 'error'); return }
   if (!amount || amount <= 0) { showResult('result-phone', '❌ Gültigen Betrag eingeben!', 'error'); return }
-  
   showResult('result-phone', '🔍 Suche Kunde...', 'info')
-  
   try {
     let customer = null
-    
     if (/^\d{4}$/.test(phoneOrId)) {
       const { data } = await supabase.from('customers').select('*').eq('qr_id', phoneOrId).limit(1)
       if (data && data.length > 0) customer = data[0]
     }
-    
     if (!customer) {
       const { data } = await supabase.from('customers').select('*').eq('phone', normalizePhone(phoneOrId)).limit(1)
       if (data && data.length > 0) customer = data[0]
     }
-    
     if (!customer) throw new Error('Kunde nicht gefunden')
-    
-    const { data: activeGlobalBonuses } = await supabase
-      .from('activated_global_bonuses')
-      .select('*, global_bonuses(*)')
-      .eq('customer_id', customer.id)
-      .eq('is_used', false)
-    
+    const { data: activeGlobalBonuses } = await supabase.from('activated_global_bonuses').select('*, global_bonuses(*)').eq('customer_id', customer.id).eq('is_used', false)
     const { data: activatedCoupons } = await supabase.from('activated_coupons').select('*, coupons(*)').eq('customer_id', customer.id).eq('is_used', false)
-    
     let pointsToAdd = Math.round(amount * 10)
     let bonusApplied = null, bonusPointsAdded = 0, couponUsed = null
-    
     if (activeGlobalBonuses && activeGlobalBonuses.length > 0) {
       const globalBonus = activeGlobalBonuses[0]
       const bonus = globalBonus.global_bonuses
-      
-      if (bonus.bonus_type === 'double_points') {
-        bonusPointsAdded = pointsToAdd
-        pointsToAdd *= 2
-        bonusApplied = '⭐ Doppelte Punkte!'
-      } else if (bonus.bonus_type === 'bonus_points') {
-        bonusPointsAdded = bonus.bonus_amount || 100
-        pointsToAdd += bonusPointsAdded
-        bonusApplied = `💰 +${bonusPointsAdded} Bonus!`
-      }
-      
-      await supabase
-        .from('activated_global_bonuses')
-        .update({ 
-          is_used: true, 
-          used_at: new Date().toISOString() 
-        })
-        .eq('id', globalBonus.id)
-      
+      if (bonus.bonus_type === 'double_points') { bonusPointsAdded = pointsToAdd; pointsToAdd *= 2; bonusApplied = '⭐ Doppelte Punkte!' }
+      else if (bonus.bonus_type === 'bonus_points') { bonusPointsAdded = bonus.bonus_amount || 100; pointsToAdd += bonusPointsAdded; bonusApplied = `💰 +${bonusPointsAdded} Bonus!` }
+      await supabase.from('activated_global_bonuses').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', globalBonus.id)
       console.log('✅ Globaler Bonus verwendet:', bonusApplied)
     }
-    
     if (activatedCoupons && activatedCoupons.length > 0) {
       const c = activatedCoupons[0]
       await supabase.from('activated_coupons').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', c.id)
       couponUsed = `🎟️ Coupon: ${c.coupons.product}`
     }
-    
     const newTotal = customer.points + pointsToAdd
-    
     await supabase.from('transactions').insert({ customer_id: customer.id, type: 'earn', amount, points: pointsToAdd, staff: 'SCANNER' })
     await supabase.from('customers').update({ points: newTotal }).eq('id', customer.id)
-    
     await checkAndUpdateChallenges(customer.id, amount)
-    
-    // 🎡 Wheel-Check
     const wheelUnlocked = await checkAndUnlockWheel(customer.id, amount)
-    
     let msg = `✅ <strong>ERFOLG!</strong><br>👤 ${customer.name}<br>💰 ${amount.toFixed(2)} €<br>⭐ +${Math.round(amount * 10)}P`
     if (bonusApplied) msg += `<br>🎉 ${bonusApplied} (+${bonusPointsAdded}P)`
     if (couponUsed) msg += `<br>✅ ${couponUsed}`
     msg += `<br>📊 Neu: <strong>${newTotal}P</strong>`
-    
-    if (wheelUnlocked) {
-      msg += `<br><br><div class="wheel-badge">🎡 GLÜCKSRAD FREIGESCHALTET!</div>`
-    }
-    
+    if (wheelUnlocked) { msg += `<br><br><div class="wheel-badge">🎡 GLÜCKSRAD FREIGESCHALTET!</div>` }
     showResult('result-phone', msg, 'success')
     document.getElementById('phone').value = ''
     document.getElementById('amount').value = ''
-    
-  } catch (e) {
-    showResult('result-phone', `❌ ${e.message}`, 'error')
-    console.error('Add points error:', e)
-  }
+  } catch (e) { showResult('result-phone', `❌ ${e.message}`, 'error'); console.error('Add points error:', e) }
 }
 
 async function startCamera() {
@@ -515,29 +441,15 @@ async function startCamera() {
     document.getElementById('stopBtn').style.display = 'block'
     document.getElementById('videoContainer').classList.add('active')
     document.getElementById('customerCard').style.display = 'none'
-    
     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } })
     video.srcObject = stream
-    video.onloadedmetadata = () => {
-      video.play()
-      scanning = true
-      scanQR()
-      showResult('result-qr', '📸 Kamera aktiv', 'success')
-    }
-  } catch (e) {
-    showResult('result-qr', '❌ Kamera-Fehler: ' + e.message, 'error')
-    document.getElementById('startBtn').style.display = 'block'
-    document.getElementById('stopBtn').style.display = 'none'
-    console.error('Camera error:', e)
-  }
+    video.onloadedmetadata = () => { video.play(); scanning = true; scanQR(); showResult('result-qr', '📸 Kamera aktiv', 'success') }
+  } catch (e) { showResult('result-qr', '❌ Kamera-Fehler: ' + e.message, 'error'); document.getElementById('startBtn').style.display = 'block'; document.getElementById('stopBtn').style.display = 'none'; console.error('Camera error:', e) }
 }
 
 function stopCamera() {
   scanning = false
-  if (stream) {
-    stream.getTracks().forEach(t => t.stop())
-    stream = null
-  }
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null }
   if (video) video.srcObject = null
   document.getElementById('videoContainer').classList.remove('active')
   document.getElementById('startBtn').style.display = 'block'
@@ -548,18 +460,12 @@ function scanQR() {
   if (!scanning || !video) return
   try {
     if (video.readyState === video.HAVE_ENOUGH_DATA) {
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight
       if (canvas.width > 0 && canvas.height > 0) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
         const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" })
-        if (code && code.data) {
-          scanning = false
-          stopCamera()
-          onQRDetected(code.data)
-          return
-        }
+        if (code && code.data) { scanning = false; stopCamera(); onQRDetected(code.data); return }
       }
     }
   } catch (e) { console.error('Scan error:', e) }
@@ -572,361 +478,154 @@ async function onQRDetected(qrCode) {
     const { data, error } = await supabase.from('customers').select('*').eq('qr_id', qrCode).limit(1)
     if (error) throw error
     if (!data || data.length === 0) throw new Error('Kunde nicht gefunden')
-    
     currentCustomer = data[0]
     document.getElementById('custName').textContent = currentCustomer.name
     document.getElementById('custQR').textContent = currentCustomer.qr_id
     document.getElementById('custPoints').textContent = currentCustomer.points
-    
-    const { data: globalBonuses } = await supabase
-      .from('activated_global_bonuses')
-      .select('*, global_bonuses(*)')
-      .eq('customer_id', currentCustomer.id)
-      .eq('is_used', false)
-    
+    const { data: globalBonuses } = await supabase.from('activated_global_bonuses').select('*, global_bonuses(*)').eq('customer_id', currentCustomer.id).eq('is_used', false)
     const badge = document.getElementById('activeBonusBadge')
-    if (globalBonuses && globalBonuses.length > 0) {
-      const b = globalBonuses[0].global_bonuses
-      badge.innerHTML = `<div class="bonus-badge">${b.bonus_type === 'double_points' ? '🔥 2x Punkte!' : `🎁 +${b.bonus_amount}P Bonus!`}</div>`
-    } else {
-      badge.innerHTML = ''
-    }
-    
+    if (globalBonuses && globalBonuses.length > 0) { const b = globalBonuses[0].global_bonuses; badge.innerHTML = `<div class="bonus-badge">${b.bonus_type === 'double_points' ? '🔥 2x Punkte!' : `🎁 +${b.bonus_amount}P Bonus!`}</div>` }
+    else { badge.innerHTML = '' }
     document.getElementById('customerCard').style.display = 'block'
     document.getElementById('scannedAmount').value = ''
     document.getElementById('scannedAmount').focus()
-  } catch (e) {
-    showResult('result-qr', '❌ ' + e.message, 'error')
-    console.error('QR detection error:', e)
-    setTimeout(() => { showResult('result-qr', '', 'info'); startCamera() }, 2000)
-  }
+  } catch (e) { showResult('result-qr', '❌ ' + e.message, 'error'); console.error('QR detection error:', e); setTimeout(() => { showResult('result-qr', '', 'info'); startCamera() }, 2000) }
 }
 
 async function addPointsFromScan() {
   const amount = parseFloat(document.getElementById('scannedAmount').value)
   if (!amount || amount <= 0) { showResult('result-scan', '❌ Betrag eingeben!', 'error'); return }
-  
   try {
-    const { data: globalBonuses } = await supabase
-      .from('activated_global_bonuses')
-      .select('*, global_bonuses(*)')
-      .eq('customer_id', currentCustomer.id)
-      .eq('is_used', false)
-    
+    const { data: globalBonuses } = await supabase.from('activated_global_bonuses').select('*, global_bonuses(*)').eq('customer_id', currentCustomer.id).eq('is_used', false)
     let pointsToAdd = Math.round(amount * 10)
     let bonusApplied = null, bonusPointsAdded = 0
-    
     if (globalBonuses && globalBonuses.length > 0) {
-      const globalBonus = globalBonuses[0]
-      const b = globalBonus.global_bonuses
-      
-      if (b.bonus_type === 'double_points') {
-        bonusPointsAdded = pointsToAdd
-        pointsToAdd *= 2
-        bonusApplied = '⭐ 2x Punkte!'
-      } else {
-        bonusPointsAdded = b.bonus_amount || 100
-        pointsToAdd += bonusPointsAdded
-        bonusApplied = `💰 +${bonusPointsAdded}P!`
-      }
-      
-      await supabase
-        .from('activated_global_bonuses')
-        .update({ is_used: true, used_at: new Date().toISOString() })
-        .eq('id', globalBonus.id)
+      const globalBonus = globalBonuses[0]; const b = globalBonus.global_bonuses
+      if (b.bonus_type === 'double_points') { bonusPointsAdded = pointsToAdd; pointsToAdd *= 2; bonusApplied = '⭐ 2x Punkte!' }
+      else { bonusPointsAdded = b.bonus_amount || 100; pointsToAdd += bonusPointsAdded; bonusApplied = `💰 +${bonusPointsAdded}P!` }
+      await supabase.from('activated_global_bonuses').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', globalBonus.id)
     }
-    
     const newTotal = currentCustomer.points + pointsToAdd
     await supabase.from('transactions').insert({ customer_id: currentCustomer.id, type: 'earn', amount, points: pointsToAdd, staff: 'SCANNER' })
     await supabase.from('customers').update({ points: newTotal }).eq('id', currentCustomer.id)
-    
     await checkAndUpdateChallenges(currentCustomer.id, amount)
-    
-    // 🎡 Wheel-Check
     const wheelUnlocked = await checkAndUnlockWheel(currentCustomer.id, amount)
-    
     let msg = `✅ <strong>ERFOLG!</strong><br>👤 ${currentCustomer.name}<br>💰 ${amount.toFixed(2)} €<br>⭐ +${Math.round(amount * 10)}P`
     if (bonusApplied) msg += `<br>🎉 ${bonusApplied} (+${bonusPointsAdded}P)`
     msg += `<br>📊 Neu: <strong>${newTotal}P</strong>`
-    
-    if (wheelUnlocked) {
-      msg += `<br><br><div class="wheel-badge">🎡 GLÜCKSRAD FREIGESCHALTET!</div>`
-    }
-    
+    if (wheelUnlocked) { msg += `<br><br><div class="wheel-badge">🎡 GLÜCKSRAD FREIGESCHALTET!</div>` }
     showResult('result-scan', msg, 'success')
-    setTimeout(() => {
-      document.getElementById('customerCard').style.display = 'none'
-      showResult('result-qr', '', 'info')
-      document.getElementById('scannedAmount').value = ''
-      showResult('result-scan', '', 'info')
-    }, 3000)
-  } catch (e) {
-    showResult('result-scan', '❌ ' + e.message, 'error')
-    console.error('Scan points error:', e)
-  }
+    setTimeout(() => { document.getElementById('customerCard').style.display = 'none'; showResult('result-qr', '', 'info'); document.getElementById('scannedAmount').value = ''; showResult('result-scan', '', 'info') }, 3000)
+  } catch (e) { showResult('result-scan', '❌ ' + e.message, 'error'); console.error('Scan points error:', e) }
 }
 
 async function loadHistory() {
   try {
     const { data, error } = await supabase.from('transactions').select('id, customer_id, type, amount, points, notes, staff, created_at, customers(name, phone, qr_id)').order('created_at', { ascending: false }).limit(50)
     if (error) throw error
-    
     const list = document.getElementById('historyList')
-    if (!data || data.length === 0) {
-      list.innerHTML = '<div style="text-align:center;padding:20px;color:#666">Keine Transaktionen</div>'
-      return
-    }
-    
+    if (!data || data.length === 0) { list.innerHTML = '<div style="text-align:center;padding:20px;color:#666">Keine Transaktionen</div>'; return }
     list.innerHTML = data.map(tx => {
       const date = new Date(tx.created_at)
       const dateStr = date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
       const time = date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-      const c = tx.customers
-      const isRedeem = tx.type === 'redeem'
-      
-      // 🎡 Lucky Wheel Erkennung (nur Anzeige-Logik)
+      const c = tx.customers; const isRedeem = tx.type === 'redeem'
       const isWheel = tx.staff === 'WHEEL' || (tx.notes && (tx.notes.includes('WHEEL') || tx.notes.includes('Lucky Wheel') || tx.notes.includes('Wheel')))
-      const wheelClass = isWheel ? 'wheel' : ''
-      const redeemClass = isRedeem ? 'redeem' : ''
-      
-      return `
-        <div class="history-item ${redeemClass} ${wheelClass}">
-          <div style="display:flex;justify-content:space-between;margin-bottom:8px;align-items:center;">
-            <div style="font-weight:700;font-size:16px;">
-              ${isRedeem ? '🎁' : (isWheel ? '🎡' : '💰')} ${c.name}
-              ${isWheel ? '<span class="wheel-badge-small">🎡 Lucky Wheel</span>' : ''}
-            </div>
-            <div style="font-size:12px;color:#666;">${dateStr} ${time}</div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:14px;">
-            <div>📱 ${c.phone}</div>
-            <div>🆔 ${c.qr_id}</div>
-            ${isRedeem ? `<div style="color:#92400e;font-weight:600;">🎁 ${tx.notes || 'Eingelöst'}</div>` : (isWheel ? `<div style="color:#f59e0b;font-weight:600;">🎡 Lucky Wheel Gewinn</div>` : `<div style="color:#059669;font-weight:600;">💰 ${tx.amount.toFixed(2)} €</div>`)}
-            <div style="color:${isRedeem ? '#ef4444' : '#E31E24'};font-weight:600;">⭐ ${isRedeem ? Math.abs(tx.points) : '+' + tx.points}P${isWheel ? ' (🎡 Gewinn)' : ''}</div>
-          </div>
-          <div style="display:flex;gap:6px;margin-top:10px;">
-            <button class="small secondary" onclick="editTransaction(${tx.id}, ${tx.amount}, ${tx.points}, ${tx.customer_id})">✏️ Bearbeiten</button>
-            <button class="small danger" onclick="deleteTransaction(${tx.id}, ${tx.customer_id}, ${tx.points})">🗑️ Löschen</button>
-          </div>
-        </div>
-      `
+      const wheelClass = isWheel ? 'wheel' : ''; const redeemClass = isRedeem ? 'redeem' : ''
+      return `<div class="history-item ${redeemClass} ${wheelClass}"><div style="display:flex;justify-content:space-between;margin-bottom:8px;align-items:center;"><div style="font-weight:700;font-size:16px;">${isRedeem ? '🎁' : (isWheel ? '🎡' : '💰')} ${c.name}${isWheel ? '<span class="wheel-badge-small">🎡 Lucky Wheel</span>' : ''}</div><div style="font-size:12px;color:#666;">${dateStr} ${time}</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:14px;"><div>📱 ${c.phone}</div><div>🆔 ${c.qr_id}</div>${isRedeem ? `<div style="color:#92400e;font-weight:600;">🎁 ${tx.notes || 'Eingelöst'}</div>` : (isWheel ? `<div style="color:#f59e0b;font-weight:600;">🎡 Lucky Wheel Gewinn</div>` : `<div style="color:#059669;font-weight:600;">💰 ${tx.amount.toFixed(2)} €</div>`)}<div style="color:${isRedeem ? '#ef4444' : '#E31E24'};font-weight:600;">⭐ ${isRedeem ? Math.abs(tx.points) : '+' + tx.points}P${isWheel ? ' (🎡 Gewinn)' : ''}</div></div><div style="display:flex;gap:6px;margin-top:10px;"><button class="small secondary" onclick="editTransaction(${tx.id}, ${tx.amount}, ${tx.points}, ${tx.customer_id})">✏️ Bearbeiten</button><button class="small danger" onclick="deleteTransaction(${tx.id}, ${tx.customer_id}, ${tx.points})">🗑️ Löschen</button></div></div>`
     }).join('')
-  } catch (e) {
-    console.error('Load history error:', e)
-    document.getElementById('historyList').innerHTML = `<div class="result error">${e.message}</div>`
-  }
+  } catch (e) { console.error('Load history error:', e); document.getElementById('historyList').innerHTML = `<div class="result error">${e.message}</div>` }
 }
 
 async function verifyAnyCode() {
   const code = document.getElementById('code').value.trim()
   if (!code || code.length !== 4) { showResult('result-code', '❌ 4-stelligen Code eingeben!', 'error'); return }
-  
   showResult('result-code', '🔍 Suche Code...', 'info')
-  
   try {
-    const { data, error } = await supabase
-      .from('activated_coupons')
-      .select('*')
-      .eq('unique_code', code)
-      .eq('is_used', false)
-      .limit(1)
-    
+    const { data, error } = await supabase.from('activated_coupons').select('*').eq('unique_code', code).eq('is_used', false).limit(1)
     if (error) throw error
-    
     const activation = data && data[0]
-    
     if (activation) {
-      const { data: coupon } = await supabase
-        .from('coupons')
-        .select('*')
-        .eq('id', activation.coupon_id)
-        .single()
-      
-      const { data: customer } = await supabase
-        .from('customers')
-        .select('name, phone, qr_id, points')
-        .eq('id', activation.customer_id)
-        .single()
-      
-      activation.coupons = coupon
-      activation.customers = customer
-      await handleCouponCode(activation, code)
-      return
+      const { data: coupon } = await supabase.from('coupons').select('*').eq('id', activation.coupon_id).single()
+      const { data: customer } = await supabase.from('customers').select('name, phone, qr_id, points').eq('id', activation.customer_id).single()
+      activation.coupons = coupon; activation.customers = customer
+      await handleCouponCode(activation, code); return
     }
-  } catch (e) {
-    console.error('Coupon check error:', e)
-  }
-  
+  } catch (e) { console.error('Coupon check error:', e) }
   try {
     const { data, error } = await supabase.from('redeem_codes').select('*').eq('code', code).limit(1)
     if (error) throw error
     if (!data || data.length === 0) throw new Error('Code nicht gefunden')
-    
-    const { data: customer } = await supabase
-      .from('customers')
-      .select('name, phone, qr_id, points')
-      .eq('id', data[0].customer_id)
-      .single()
-    
+    const { data: customer } = await supabase.from('customers').select('name, phone, qr_id, points').eq('id', data[0].customer_id).single()
     data[0].customers = customer
     await handleRedeemCode(data[0], code)
-  } catch (e) {
-    showResult('result-code', '❌ ' + e.message, 'error')
-    console.error('Code verification error:', e)
-  }
+  } catch (e) { showResult('result-code', '❌ ' + e.message, 'error'); console.error('Code verification error:', e) }
 }
 
 async function handleCouponCode(activation, code) {
   try {
-    const coupon = activation.coupons
-    const customer = activation.customers
-    
+    const coupon = activation.coupons; const customer = activation.customers
     if (new Date(coupon.expires_at) < new Date()) throw new Error('Coupon abgelaufen')
-    
     const expires = new Date(coupon.expires_at).toLocaleDateString('de-DE')
     const price = parseFloat(coupon.price || 0).toFixed(2).replace('.', ',') + ' €'
-    
     document.getElementById('code-details').style.display = 'block'
-    document.getElementById('code-details').innerHTML = `
-      <div class="code-item" style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #f59e0b;">
-        <h3>🎟️ ${coupon.title}</h3>
-        <div class="code">${code}</div>
-        <div style="font-size:14px;color:#92400e;margin:12px 0;">
-          <strong>Produkt:</strong> ${coupon.product}<br>
-          <strong>Preis:</strong> ${price}<br>
-          <strong>Kunde:</strong> ${customer.name} (${customer.phone})<br>
-          <strong>Punkte:</strong> ${customer.points}<br>
-          <strong>Gültig bis:</strong> ${expires}
-        </div>
-        <button onclick="useCoupon('${activation.id}')" class="success" style="width:100%;margin-bottom:8px;">✅ Coupon einlösen</button>
-        <button onclick="cancelCodeConfirm()" class="secondary" style="width:100%;">❌ Abbrechen</button>
-      </div>
-    `
+    document.getElementById('code-details').innerHTML = `<div class="code-item" style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #f59e0b;"><h3>🎟️ ${coupon.title}</h3><div class="code">${code}</div><div style="font-size:14px;color:#92400e;margin:12px 0;"><strong>Produkt:</strong> ${coupon.product}<br><strong>Preis:</strong> ${price}<br><strong>Kunde:</strong> ${customer.name} (${customer.phone})<br><strong>Punkte:</strong> ${customer.points}<br><strong>Gültig bis:</strong> ${expires}</div><button onclick="useCoupon('${activation.id}')" class="success" style="width:100%;margin-bottom:8px;">✅ Coupon einlösen</button><button onclick="cancelCodeConfirm()" class="secondary" style="width:100%;">❌ Abbrechen</button></div>`
     showResult('result-code', '✅ Coupon gefunden!', 'success')
-  } catch (e) {
-    showResult('result-code', '❌ ' + e.message, 'error')
-    document.getElementById('code-details').style.display = 'none'
-    console.error('Handle coupon error:', e)
-  }
+  } catch (e) { showResult('result-code', '❌ ' + e.message, 'error'); document.getElementById('code-details').style.display = 'none'; console.error('Handle coupon error:', e) }
 }
 
 async function handleRedeemCode(codeData, code) {
   try {
     if (codeData.used) throw new Error('Code bereits verwendet')
     if (new Date(codeData.valid_until) < new Date()) throw new Error('Code abgelaufen')
-    
     const customer = codeData.customers
     showResult('result-code', '⏳ Code wird eingelöst...', 'info')
-    
-    // SOFORT EINLÖSEN - kein Bestätigen-Schritt mehr
     const newPoints = customer.points - codeData.points_cost
-    
-    await supabase.from('transactions').insert({ 
-      customer_id: codeData.customer_id, 
-      type: 'redeem', 
-      amount: 0, 
-      points: -codeData.points_cost, 
-      staff: 'Scanner', 
-      notes: `${codeData.reward_name} (Code: ${code})` 
-    })
-    
+    await supabase.from('transactions').insert({ customer_id: codeData.customer_id, type: 'redeem', amount: 0, points: -codeData.points_cost, staff: 'Scanner', notes: `${codeData.reward_name} (Code: ${code})` })
     await supabase.from('customers').update({ points: newPoints }).eq('id', codeData.customer_id)
     await supabase.from('redeem_codes').update({ used: true, used_at: new Date().toISOString() }).eq('code', code)
-    
-    // POPUP mit eingelöster Prämie
     document.getElementById('code-details').style.display = 'block'
-    document.getElementById('code-details').innerHTML = `
-      <div class="code-item" style="background:linear-gradient(135deg,#d1fae5,#a7f3d0);border:2px solid #10b981;">
-        <div style="font-size:60px;text-align:center;margin:20px 0;">✅</div>
-        <h3 style="text-align:center;color:#065f46;font-size:28px;margin-bottom:16px;">Erfolgreich eingelöst!</h3>
-        <div style="font-size:22px;font-weight:700;color:#059669;text-align:center;margin:20px 0;">
-          🎁 ${codeData.reward_name}
-        </div>
-        <div style="font-size:16px;color:#065f46;text-align:center;margin:16px 0;">
-          <strong>Kunde:</strong> ${customer.name}<br>
-          <strong>Neue Punkte:</strong> ${newPoints}
-        </div>
-        <button onclick="closeCodeDetails()" class="success" style="width:100%;margin-top:16px;">Weiter</button>
-      </div>
-    `
-    
+    document.getElementById('code-details').innerHTML = `<div class="code-item" style="background:linear-gradient(135deg,#d1fae5,#a7f3d0);border:2px solid #10b981;"><div style="font-size:60px;text-align:center;margin:20px 0;">✅</div><h3 style="text-align:center;color:#065f46;font-size:28px;margin-bottom:16px;">Erfolgreich eingelöst!</h3><div style="font-size:22px;font-weight:700;color:#059669;text-align:center;margin:20px 0;">🎁 ${codeData.reward_name}</div><div style="font-size:16px;color:#065f46;text-align:center;margin:16px 0;"><strong>Kunde:</strong> ${customer.name}<br><strong>Neue Punkte:</strong> ${newPoints}</div><button onclick="closeCodeDetails()" class="success" style="width:100%;margin-top:16px;">Weiter</button></div>`
     showResult('result-code', '✅ Code erfolgreich eingelöst!', 'success')
-  } catch (e) {
-    showResult('result-code', '❌ ' + e.message, 'error')
-    console.error('Handle redeem error:', e)
-  }
+  } catch (e) { showResult('result-code', '❌ ' + e.message, 'error'); console.error('Handle redeem error:', e) }
 }
 
-function closeCodeDetails() {
-  document.getElementById('code').value = ''
-  document.getElementById('code-details').style.display = 'none'
-}
+function closeCodeDetails() { document.getElementById('code').value = ''; document.getElementById('code-details').style.display = 'none' }
 
 async function useCoupon(activationId) {
   try {
     showResult('result-code', '⏳ Löse Coupon ein...', 'info')
     await supabase.from('activated_coupons').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', activationId)
     showResult('result-code', '✅ Coupon erfolgreich eingelöst!', 'success')
-    document.getElementById('code').value = ''
-    document.getElementById('code-details').style.display = 'none'
-  } catch (e) {
-    showResult('result-code', '❌ Fehler: ' + e.message, 'error')
-    console.error('Use coupon error:', e)
-  }
+    document.getElementById('code').value = ''; document.getElementById('code-details').style.display = 'none'
+  } catch (e) { showResult('result-code', '❌ Fehler: ' + e.message, 'error'); console.error('Use coupon error:', e) }
 }
 
-function cancelCodeConfirm() {
-  document.getElementById('code-details').style.display = 'none'
-  currentCodeData = null
-  showResult('result-code', '', 'info')
-}
+function cancelCodeConfirm() { document.getElementById('code-details').style.display = 'none'; currentCodeData = null; showResult('result-code', '', 'info') }
 
 async function editTransaction(txId, currentAmount, currentPoints, customerId) {
   const newAmount = prompt('Neuer Betrag in € eingeben:', currentAmount)
   if (!newAmount || isNaN(newAmount)) return
-  
-  const amount = parseFloat(newAmount)
-  const newPoints = Math.round(amount * 10)
-  const pointsDiff = newPoints - currentPoints
-  
+  const amount = parseFloat(newAmount); const newPoints = Math.round(amount * 10); const pointsDiff = newPoints - currentPoints
   try {
     await supabase.from('transactions').update({ amount: amount, points: newPoints }).eq('id', txId)
-    
     const { data: customer } = await supabase.from('customers').select('points').eq('id', customerId).single()
-    if (customer) {
-      await supabase.from('customers').update({ points: customer.points + pointsDiff }).eq('id', customerId)
-    }
-    
-    loadHistory()
-    alert('✅ Transaktion bearbeitet!')
-  } catch (e) {
-    alert('❌ Fehler: ' + e.message)
-    console.error('Edit transaction error:', e)
-  }
+    if (customer) { await supabase.from('customers').update({ points: customer.points + pointsDiff }).eq('id', customerId) }
+    loadHistory(); alert('✅ Transaktion bearbeitet!')
+  } catch (e) { alert('❌ Fehler: ' + e.message); console.error('Edit transaction error:', e) }
 }
 
 async function deleteTransaction(txId, customerId, points) {
   if (!confirm('Transaktion wirklich löschen? Punkte werden zurückgesetzt.')) return
-  
   try {
     await supabase.from('transactions').delete().eq('id', txId)
-    
     const { data: customer } = await supabase.from('customers').select('points').eq('id', customerId).single()
-    if (customer) {
-      await supabase.from('customers').update({ points: customer.points - points }).eq('id', customerId)
-    }
-    
-    loadHistory()
-    alert('✅ Transaktion gelöscht!')
-  } catch (e) {
-    alert('❌ Fehler: ' + e.message)
-    console.error('Delete transaction error:', e)
-  }
+    if (customer) { await supabase.from('customers').update({ points: customer.points - points }).eq('id', customerId) }
+    loadHistory(); alert('✅ Transaktion gelöscht!')
+  } catch (e) { alert('❌ Fehler: ' + e.message); console.error('Delete transaction error:', e) }
 }
 
 console.log('✅ Döner Boxx Scanner PRO geladen!')
-
-// Copyright-Warnung in Console
 console.log('%c⚠️ COPYRIGHT WARNUNG', 'color: #E31E24; font-size: 20px; font-weight: bold; padding: 10px;')
 console.log('%c🔒 Dieser Code ist urheberrechtlich geschützt.', 'font-size: 14px; font-weight: bold;')
 console.log('%cUnerlaubtes Kopieren oder Verwenden ist illegal und wird verfolgt.', 'font-size: 12px; color: #666;')
