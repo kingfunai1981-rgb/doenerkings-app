@@ -347,7 +347,7 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
 .screen { display: none; }
 .screen.active { display: block; }
 
-/* 🎡 NEU: Lucky Wheel Styles */
+/* 🎡 Lucky Wheel Styles */
 .wheel-section {
   display: none;
 }
@@ -584,19 +584,17 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
       </div>
     </div>
 
-    <!-- 🎡 NEU: Lucky Wheel Section (nur bei Freischaltung sichtbar) -->
+    <!-- 🎡 Lucky Wheel Section -->
     <div id="wheel-section" class="wheel-section">
       <div class="card">
         <h2>🎡 Lucky Wheel</h2>
         
-        <!-- Badge wenn verfügbar -->
         <div id="wheel-available-badge" style="display: none;">
           <div class="wheel-badge">
             🎡 Du hast <span id="wheel-count">0</span> freie Drehung(en)!
           </div>
         </div>
         
-        <!-- Wheel Canvas -->
         <div class="wheel-container">
           <div class="wheel-wrapper">
             <div class="wheel-pointer"></div>
@@ -604,7 +602,6 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
           </div>
         </div>
         
-        <!-- Info wenn nicht verfügbar -->
         <div id="wheel-info" class="wheel-info-box">
           🎉 Klicke auf das Logo zum Drehen!
         </div>
@@ -791,8 +788,6 @@ async function loadCustomer(customer) {
     loadBonuses()
     loadCoupons()
     loadChallenges()
-    
-    // 🎡 Lucky Wheel Verfügbarkeit prüfen
     checkWheelAvailability()
     
   } catch (e) {
@@ -1039,25 +1034,26 @@ let currentWheelUnlockId = null
 
 const anglePerSegment = (2 * Math.PI) / 18
 const WHEEL_OFFSET = -Math.PI / 2 - anglePerSegment / 2
+const LOGO_CLICK_RADIUS = 57  // Klickbereich fürs Logo
 
 const wheelPrizes = [
   { label: '500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },
-  { label: '50', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },
+  { label: '50',  color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50  },
   { label: '100', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },
-  { label: '25', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 25 },
-  { label: '75', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },
+  { label: '25',  color: '#FFFFFF', textColor: '#000000', type: 'points', value: 25  },
+  { label: '75',  color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75  },
   { label: 'DREHE NOCHMAL!', color: '#FFFFFF', textColor: '#000000', type: 'spin_again', value: 0 },
-  { label: '50', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },
+  { label: '50',  color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50  },
   { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },
-  { label: '25', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25 },
+  { label: '25',  color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25  },
   { label: '500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },
-  { label: '75', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },
-  { label: '50', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },
+  { label: '75',  color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75  },
+  { label: '50',  color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50  },
   { label: 'DREHE NOCHMAL!', color: '#000000', textColor: '#FFFFFF', type: 'spin_again', value: 0 },
   { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },
-  { label: '25', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25 },
-  { label: '75', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 75 },
-  { label: '50', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },
+  { label: '25',  color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25  },
+  { label: '75',  color: '#FFFFFF', textColor: '#000000', type: 'points', value: 75  },
+  { label: '50',  color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50  },
   { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 }
 ]
 
@@ -1085,7 +1081,7 @@ function initWheel() {
 
       const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
 
-      if (distance <= 58) {
+      if (distance <= LOGO_CLICK_RADIUS) {
         spinWheel()
       }
     })
@@ -1099,7 +1095,7 @@ function initWheel() {
       const centerY = rect.height / 2
       const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
 
-      canvas.style.cursor = distance <= 58 ? 'pointer' : 'default'
+      canvas.style.cursor = distance <= LOGO_CLICK_RADIUS ? 'pointer' : 'default'
     })
 
     wheelHandlersAttached = true
@@ -1126,9 +1122,7 @@ function drawWheel() {
     canvas.height = targetHeight
   }
 
-  // DPI-korrekte Skalierung (schärferes Logo)
-  ctx.setTransform(1, 0, 0, 1, 0, 0)
-  ctx.scale(ratio, ratio)
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0)
 
   const centerX = rect.width / 2
   const centerY = rect.height / 2
@@ -1174,7 +1168,7 @@ function drawWheel() {
   ctx.translate(centerX, centerY)
 
   const logoRadius = 57.3
-  const centerRadius = logoRadius + 0.35   // extrem dünner weißer Rand
+  const centerRadius = logoRadius + 0.3  // extrem schmaler weißer Rand
 
   ctx.beginPath()
   ctx.arc(0, 0, centerRadius, 0, 2 * Math.PI)
@@ -1193,7 +1187,7 @@ function drawWheel() {
   ctx.restore()
 }
 
-// Throttle für Wheel-Check
+// Wheel Availability & Spin (unverändert außer Init-Aufruf)
 let wheelCheckInProgress = false
 let lastWheelCheck = 0
 const WHEEL_CHECK_COOLDOWN = 3000
