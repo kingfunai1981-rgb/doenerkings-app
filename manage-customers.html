@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🗂️ Kunden verwalten - Döner Boxx</title>
-<link rel="icon" href="/favicon.png" type="image/png">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" href="/favicon-new.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon-new.png">
 <style>
 @font-face {
   font-family: 'Flame';
@@ -297,7 +297,7 @@ textarea {
 <div class="container">
   <div class="card header-card">
     <div class="header-logo">
-      <img src="/logo-round.png" alt="Döner Boxx">
+      <img src="/logo-round-new.png" alt="Döner Boxx">
     </div>
     <div class="header-text">
       <h1>Kunden verwalten</h1>
@@ -985,9 +985,6 @@ async function saveWheelConfig() {
   }
 }
 
-// Prizes-Funktionen entfernt - Felder sind jetzt fest in lucky-wheel.html definiert
-
-
 async function loadWheelStats() {
   try {
     // Heute gedreht
@@ -1018,7 +1015,7 @@ async function loadWheelStats() {
 
 window.addEventListener('DOMContentLoaded', function() {
   loadAllCustomers(); loadGlobalBonuses(); loadChallenges(); loadCoupons()
-  loadWheelConfig(); loadWheelStats() // NEU: Wheel laden (Prizes sind jetzt fest)
+  loadWheelConfig(); loadWheelStats()
   const today = new Date(), nextWeek = new Date(); nextWeek.setDate(nextWeek.getDate() + 7)
   const todayStr = today.toISOString().split('T')[0], nextWeekStr = nextWeek.toISOString().split('T')[0]
   document.getElementById('globalBonusStart').value = todayStr; document.getElementById('globalBonusEnd').value = nextWeekStr
