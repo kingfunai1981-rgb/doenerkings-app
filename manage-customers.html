@@ -1,11 +1,24 @@
 <!DOCTYPE html>
+<!--
+  ═══════════════════════════════════════════════════════════════════
+  Döner Boxx Loyalty System - Customer Management Interface
+  Copyright © 2024 Döner Boxx. Alle Rechte vorbehalten.
+  
+  ⚠️ WARNUNG: Dieses System ist urheberrechtlich geschützt.
+  Unerlaubtes Kopieren, Ändern, Verbreiten oder Reverse Engineering
+  ist verboten und wird zivil- und strafrechtlich verfolgt.
+  
+  Entwickelt exklusiv für Döner Boxx.
+  Bei Interesse an Lizenzen: kontakt@doenerboxx.de
+  ═══════════════════════════════════════════════════════════════════
+-->
 <html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🗂️ Kunden verwalten - Döner Boxx</title>
-<link rel="icon" href="/favicon.png" type="image/png">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" href="/favicon-new.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon-new.png">
 <style>
 @font-face {
   font-family: 'Flame';
@@ -297,7 +310,7 @@ textarea {
 <div class="container">
   <div class="card header-card">
     <div class="header-logo">
-      <img src="/logo-round.png" alt="Döner Boxx">
+      <img src="/logo-round-new.png" alt="Döner Boxx">
     </div>
     <div class="header-text">
       <h1>Kunden verwalten</h1>
@@ -926,6 +939,18 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('couponStart').value = todayStr; document.getElementById('couponEnd').value = nextWeekStr
 })
 console.log('✅ Döner Boxx Verwaltung geladen!')
+
+// Copyright-Warnung in Console
+console.log('%c⚠️ COPYRIGHT WARNUNG', 'color: #E31E24; font-size: 20px; font-weight: bold; padding: 10px;')
+console.log('%c🔒 Dieser Code ist urheberrechtlich geschützt.', 'font-size: 14px; font-weight: bold;')
+console.log('%cUnerlaubtes Kopieren oder Verwenden ist illegal und wird verfolgt.', 'font-size: 12px; color: #666;')
+console.log('%c© 2024 Döner Boxx - Alle Rechte vorbehalten', 'font-size: 11px; color: #999;')
 </script>
+
+<footer style="text-align: center; padding: 20px 10px; color: #fff; font-size: 11px; margin-top: 40px; background: rgba(0,0,0,0.1); border-radius: 12px;">
+  <div style="margin-bottom: 8px;">© 2024 Döner Boxx. Alle Rechte vorbehalten.</div>
+  <div style="font-size: 10px; opacity: 0.8;">Entwickelt exklusiv für Döner Boxx. Unerlaubte Nutzung verboten.</div>
+</footer>
+
 </body>
 </html>
