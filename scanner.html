@@ -262,10 +262,42 @@ canvas { display: none; }
 // ═══════════════════════════════════════════════════════════════
 
 // ═══════════════════════════════════════════════════════════════
-// 🔐 PASSWORT-SCHUTZ - NICHT ENTFERNEN!
+// 🔐 PASSWORT-SCHUTZ MIT 5-MINUTEN-SPERRE - NICHT ENTFERNEN!
 // ═══════════════════════════════════════════════════════════════
 const PASSWORT_HASH = 'efc68709a6bc20b7983129e56ce1d98739876e4274463aaece1a3edef374d47e';
-let authVersuche = 3;
+const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 Minuten in Millisekunden
+const MAX_VERSUCHE = 3;
+
+function getAuthState() {
+  const stored = localStorage.getItem('db_auth_state');
+  if (!stored) return { versuche: MAX_VERSUCHE, gesperrtBis: null };
+  try { return JSON.parse(stored); } catch(e) { return { versuche: MAX_VERSUCHE, gesperrtBis: null }; }
+}
+
+function setAuthState(state) {
+  localStorage.setItem('db_auth_state', JSON.stringify(state));
+}
+
+function clearAuthState() {
+  localStorage.removeItem('db_auth_state');
+}
+
+function isLocked() {
+  const state = getAuthState();
+  if (state.gesperrtBis && Date.now() < state.gesperrtBis) {
+    return true;
+  }
+  if (state.gesperrtBis && Date.now() >= state.gesperrtBis) {
+    clearAuthState();
+  }
+  return false;
+}
+
+function getRemainingLockTime() {
+  const state = getAuthState();
+  if (!state.gesperrtBis) return 0;
+  return Math.max(0, Math.ceil((state.gesperrtBis - Date.now()) / 1000));
+}
 
 async function sha256(text) {
   const encoder = new TextEncoder();
@@ -274,7 +306,48 @@ async function sha256(text) {
   return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+function showLockScreen() {
+  const updateTimer = () => {
+    const remaining = getRemainingLockTime();
+    if (remaining <= 0) {
+      clearAuthState();
+      location.reload();
+      return;
+    }
+    const minutes = Math.floor(remaining / 60);
+    const seconds = remaining % 60;
+    const timerEl = document.getElementById('lockTimer');
+    if (timerEl) timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+  
+  document.body.innerHTML = `
+    <div style="font-family:'Flame',system-ui,sans-serif;background:linear-gradient(135deg,#dc2626,#991b1b);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:white;border-radius:20px;padding:40px;max-width:400px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.3);text-align:center;">
+        <div style="font-size:60px;margin-bottom:20px;">🚫</div>
+        <h1 style="color:#dc2626;margin-bottom:10px;font-size:24px;">Zugriff gesperrt</h1>
+        <p style="color:#666;margin-bottom:20px;">Zu viele Fehlversuche!</p>
+        <div style="background:#fee2e2;border:2px solid #dc2626;border-radius:12px;padding:20px;margin-bottom:20px;">
+          <p style="color:#991b1b;font-size:14px;margin-bottom:10px;">Sperre endet in:</p>
+          <div id="lockTimer" style="font-size:36px;font-weight:700;color:#dc2626;">5:00</div>
+        </div>
+        <p style="color:#666;font-size:13px;">Die Seite wird automatisch entsperrt.</p>
+        <a href="/" style="display:inline-block;margin-top:20px;color:#dc2626;font-size:14px;">← Zurück zur Startseite</a>
+      </div>
+    </div>
+  `;
+  updateTimer();
+  setInterval(updateTimer, 1000);
+}
+
 function showLoginScreen() {
+  if (isLocked()) {
+    showLockScreen();
+    return;
+  }
+  
+  const state = getAuthState();
+  const versuche = state.versuche;
+  
   document.body.innerHTML = `
     <div style="font-family:'Flame',system-ui,sans-serif;background:linear-gradient(135deg,#E31E24,#F9A825);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
       <div style="background:white;border-radius:20px;padding:40px;max-width:400px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.2);text-align:center;">
@@ -284,7 +357,7 @@ function showLoginScreen() {
         <input type="password" id="loginPassword" placeholder="Passwort" style="width:100%;padding:14px;border:2px solid #e5e7eb;border-radius:10px;font-size:16px;margin-bottom:15px;text-align:center;" onkeypress="if(event.key==='Enter')checkLogin()">
         <button onclick="checkLogin()" style="width:100%;padding:14px;background:linear-gradient(135deg,#E31E24,#F9A825);color:white;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;">🔓 Einloggen</button>
         <p id="loginError" style="color:#dc2626;margin-top:15px;font-size:14px;display:none;"></p>
-        <p id="loginVersuche" style="color:#666;margin-top:10px;font-size:12px;">${authVersuche} Versuche übrig</p>
+        <p id="loginVersuche" style="color:#666;margin-top:10px;font-size:12px;">${versuche} Versuche übrig</p>
       </div>
     </div>
   `;
@@ -292,6 +365,11 @@ function showLoginScreen() {
 }
 
 async function checkLogin() {
+  if (isLocked()) {
+    showLockScreen();
+    return;
+  }
+  
   const eingabe = document.getElementById('loginPassword').value;
   const errorEl = document.getElementById('loginError');
   const versucheEl = document.getElementById('loginVersuche');
@@ -306,25 +384,36 @@ async function checkLogin() {
   
   if (hash === PASSWORT_HASH) {
     sessionStorage.setItem('db_auth', PASSWORT_HASH);
+    clearAuthState();
     location.reload();
     return;
   }
   
-  authVersuche--;
+  const state = getAuthState();
+  state.versuche--;
   
-  if (authVersuche <= 0) {
-    document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;background:#fee2e2;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;"><h1 style="color:#dc2626;font-size:48px;">🚫</h1><h2 style="color:#dc2626;">Zugriff gesperrt</h2><p style="color:#666;">Zu viele Fehlversuche.</p><a href="/" style="color:#dc2626;margin-top:20px;">← Zurück zur Startseite</a></div>';
+  if (state.versuche <= 0) {
+    state.gesperrtBis = Date.now() + LOCKOUT_DURATION;
+    state.versuche = 0;
+    setAuthState(state);
+    showLockScreen();
     return;
   }
   
+  setAuthState(state);
+  
   errorEl.textContent = '❌ Falsches Passwort!';
-  errorEl.style.display = 'block';
-  versucheEl.textContent = authVersuche + ' Versuche übrig';
+  versucheEl.textContent = state.versuche + ' Versuche übrig';
   document.getElementById('loginPassword').value = '';
   document.getElementById('loginPassword').focus();
 }
 
-// Prüfe Session beim Laden
+// Prüfe Session und Sperre beim Laden
+if (isLocked()) {
+  showLockScreen();
+  throw new Error('Zugriff gesperrt');
+}
+
 if (sessionStorage.getItem('db_auth') !== PASSWORT_HASH) {
   showLoginScreen();
   throw new Error('Login erforderlich');
