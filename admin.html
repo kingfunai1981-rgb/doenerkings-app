@@ -194,20 +194,35 @@ textarea { resize: vertical; min-height: 60px; }
 // ═══════════════════════════════════════════════════════════════
 // 🔐 LIZENZ & DOMAIN-SCHUTZ - NICHT ENTFERNEN!
 // ═══════════════════════════════════════════════════════════════
-const _0x4a3f = ['Döner Boxx', 'DNBX-2025-LOYALTY-SYSTEM-PROTECTED'];
-const _0x2b8c = ['doener-boxx.vercel.app', 'localhost', 'doenerboxx.de', 'www.doenerboxx.de'];
-
 (function() {
-  const _0x1d4e = window.location.hostname;
-  if (!_0x2b8c.includes(_0x1d4e)) {
-    document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;background:#1a1a1a;min-height:100vh;color:#ff4444;"><h1>⛔ LIZENZ UNGÜLTIG</h1><p>Diese Software ist nicht für diese Domain lizenziert.</p><p style="font-size:12px;color:#666;margin-top:30px;">© Döner Boxx - Alle Rechte vorbehalten</p></div>';
-    throw new Error('Unauthorized');
+  const _0xB = 'Döner Boxx';
+  const _0xL = 'DNBX-2025-LOYALTY-SYSTEM-PROTECTED';
+  const _0xD = ['localhost', 'doener-boxx.vercel.app', 'doenerboxx.de', 'www.doenerboxx.de'];
+  const _0xH = ['528de417', '88a8ce6b', 'a1f62429', '5da2c3a0'];
+  
+  const _0xHost = window.location.hostname;
+  
+  // Schritt 1: Domain-Whitelist prüfen
+  if (!_0xD.includes(_0xHost)) {
+    document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;background:#1a1a1a;min-height:100vh;color:#ff4444;display:flex;flex-direction:column;align-items:center;justify-content:center;"><h1 style="font-size:48px;margin-bottom:20px;">⛔</h1><h2>LIZENZ UNGÜLTIG</h2><p style="margin-top:15px;">Diese Software ist nicht für diese Domain lizenziert.</p><p style="font-size:12px;color:#666;margin-top:30px;">© Döner Boxx - Alle Rechte vorbehalten</p></div>';
+    throw new Error('Unauthorized domain');
   }
-  function _0x3c7a(s) { let h = 0; for (let i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) & 0xffffffff; } return h.toString(16); }
-  const _0x5e9b = _0x3c7a(_0x4a3f[0] + '|' + _0x1d4e + '|' + _0x4a3f[1]);
-  const _0x7f2d = ['5765b3f5', '1a8e5c77', 'a3d2c481', '9f3e7b82'];
-  if (!_0x7f2d.includes(_0x5e9b)) {
-    console.warn('License validation: ' + _0x5e9b);
+  
+  // Schritt 2: Lizenz-Hash berechnen und prüfen
+  function _0xHash(s) {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) {
+      h = (h * 31 + s.charCodeAt(i)) & 0xffffffff;
+    }
+    if (h < 0) h = h >>> 0;
+    return h.toString(16);
+  }
+  
+  const _0xCalc = _0xHash(_0xB + '|' + _0xHost + '|' + _0xL);
+  
+  if (!_0xH.includes(_0xCalc)) {
+    document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;background:#1a1a1a;min-height:100vh;color:#ff4444;display:flex;flex-direction:column;align-items:center;justify-content:center;"><h1 style="font-size:48px;margin-bottom:20px;">⛔</h1><h2>LIZENZFEHLER</h2><p style="margin-top:15px;">Die Lizenzprüfung ist fehlgeschlagen.</p><p style="font-size:12px;color:#666;margin-top:30px;">© Döner Boxx - Alle Rechte vorbehalten</p></div>';
+    throw new Error('Invalid license');
   }
 })();
 // ═══════════════════════════════════════════════════════════════
