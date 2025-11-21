@@ -74,23 +74,20 @@ button.small { width: auto; padding: 8px 16px; font-size: 14px; display: inline-
 .error { background: #fee2e2; color: #991b1b; }
 .info { background: #dbeafe; color: #1e40af; }
 
-.video-container { position: relative; width: 100%; min-height: 400px; margin: 16px auto; background: #000; border-radius: 10px; overflow: hidden; display: none; }
+.video-container { position: relative; width: 100%; margin: 16px auto; background: #000; border-radius: 10px; overflow: hidden; display: none; }
 .video-container.active { display: block; }
-#video { width: 100%; min-height: 400px; display: block; object-fit: cover; }
-#qr-shaded-region { position: absolute; border-style: solid; border-color: rgba(0, 0, 0, 0.48); box-sizing: border-box; inset: 0; border-width: calc((100% - 220px) / 2); }
-/* Weiße Ecken oben */
-#qr-shaded-region::before { content: ''; position: absolute; width: 40px; height: 5px; background: #fff; top: -5px; left: 0; box-shadow: calc(220px - 40px) 0 0 #fff, 0 calc(220px) 0 #fff, calc(220px - 40px) calc(220px) 0 #fff; }
-/* Vertikale weiße Ecken */
-.corner-tl, .corner-tr, .corner-bl, .corner-br { position: absolute; width: 5px; height: 45px; background: #fff; }
-.corner-tl { top: -5px; left: -5px; }
-.corner-tr { top: -5px; right: -5px; }
-.corner-bl { bottom: -5px; left: -5px; }
-.corner-br { bottom: -5px; right: -5px; }
-.corner-h { position: absolute; width: 40px; height: 5px; background: #fff; }
-.corner-h.tl { top: -5px; left: 0; }
-.corner-h.tr { top: -5px; right: 0; }
-.corner-h.bl { bottom: -5px; left: 0; }
-.corner-h.br { bottom: -5px; right: 0; }
+#video { width: 100%; display: block; }
+#qr-shaded-region { position: absolute; border-style: solid; border-color: rgba(0, 0, 0, 0.48); box-sizing: border-box; inset: 0; }
+/* Weiße Ecken - horizontal oben */
+.corner-h-tl { position: absolute; background-color: #fff; width: 40px; height: 5px; top: -5px; left: 0; }
+.corner-h-tr { position: absolute; background-color: #fff; width: 40px; height: 5px; top: -5px; right: 0; }
+.corner-h-bl { position: absolute; background-color: #fff; width: 40px; height: 5px; bottom: -5px; left: 0; }
+.corner-h-br { position: absolute; background-color: #fff; width: 40px; height: 5px; bottom: -5px; right: 0; }
+/* Weiße Ecken - vertikal */
+.corner-v-tl { position: absolute; background-color: #fff; width: 5px; height: 45px; top: -5px; left: -5px; }
+.corner-v-bl { position: absolute; background-color: #fff; width: 5px; height: 45px; bottom: -5px; left: -5px; }
+.corner-v-tr { position: absolute; background-color: #fff; width: 5px; height: 45px; top: -5px; right: -5px; }
+.corner-v-br { position: absolute; background-color: #fff; width: 5px; height: 45px; bottom: -5px; right: -5px; }
 canvas { display: none; }
 
 .customer-info { background: #f9fafb; padding: 16px; border-radius: 10px; margin-top: 12px; }
@@ -177,14 +174,14 @@ canvas { display: none; }
     <div class="video-container" id="videoContainer">
       <video id="video" autoplay playsinline></video>
       <div id="qr-shaded-region">
-        <div class="corner-h tl"></div>
-        <div class="corner-h tr"></div>
-        <div class="corner-h bl"></div>
-        <div class="corner-h br"></div>
-        <div class="corner-tl"></div>
-        <div class="corner-tr"></div>
-        <div class="corner-bl"></div>
-        <div class="corner-br"></div>
+        <div class="corner-h-tl"></div>
+        <div class="corner-h-tr"></div>
+        <div class="corner-h-bl"></div>
+        <div class="corner-h-br"></div>
+        <div class="corner-v-tl"></div>
+        <div class="corner-v-bl"></div>
+        <div class="corner-v-tr"></div>
+        <div class="corner-v-br"></div>
       </div>
     </div>
     <canvas id="canvas"></canvas>
@@ -462,7 +459,19 @@ async function startCamera() {
     document.getElementById('customerCard').style.display = 'none'
     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } })
     video.srcObject = stream
-    video.onloadedmetadata = () => { video.play(); scanning = true; scanQR(); showResult('result-qr', '📸 Kamera aktiv', 'success') }
+    video.onloadedmetadata = () => {
+      video.play()
+      scanning = true
+      // Berechne Border dynamisch wie BonusQR
+      const videoWidth = video.offsetWidth
+      const videoHeight = video.offsetHeight
+      const scanBoxSize = 220
+      const borderH = (videoHeight - scanBoxSize) / 2
+      const borderW = (videoWidth - scanBoxSize) / 2
+      document.getElementById('qr-shaded-region').style.borderWidth = borderH + 'px ' + borderW + 'px'
+      scanQR()
+      showResult('result-qr', '📸 Kamera aktiv', 'success')
+    }
   } catch (e) { showResult('result-qr', '❌ Kamera-Fehler: ' + e.message, 'error'); document.getElementById('startBtn').style.display = 'block'; document.getElementById('stopBtn').style.display = 'none'; console.error('Camera error:', e) }
 }
 
