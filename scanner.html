@@ -134,6 +134,101 @@ canvas { display: none; }
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.02); }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL STYLES für Bestätigungs-Dialoge
+   ═══════════════════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalIn 0.3s ease;
+}
+
+@keyframes modalIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-icon {
+  font-size: 60px;
+  margin-bottom: 20px;
+}
+
+.modal-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #E31E24;
+  margin-bottom: 10px;
+}
+
+.modal-amount {
+  font-size: 36px;
+  font-weight: 700;
+  color: #F9A825;
+  margin: 20px 0;
+}
+
+.modal-points {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.modal-warning {
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 20px;
+  color: #92400e;
+  font-size: 14px;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-buttons button {
+  flex: 1;
+  margin: 0;
+}
+
+.modal-pin-input {
+  width: 100%;
+  padding: 16px;
+  border: 3px solid #E31E24;
+  border-radius: 12px;
+  font-size: 24px;
+  text-align: center;
+  letter-spacing: 8px;
+  margin: 20px 0;
+  font-weight: 700;
+}
+
+.modal-pin-input:focus {
+  outline: none;
+  border-color: #F9A825;
+}
 </style>
 </head>
 <body>
@@ -220,6 +315,9 @@ canvas { display: none; }
     <div id="code-details" style="display: none; margin-top: 20px;"></div>
   </div>
 </div>
+
+<!-- Modal Container für Bestätigungs-Dialoge -->
+<div id="modalContainer"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
@@ -403,6 +501,7 @@ async function checkLogin() {
   setAuthState(state);
   
   errorEl.textContent = '❌ Falsches Passwort!';
+  errorEl.style.display = 'block';
   versucheEl.textContent = state.versuche + ' Versuche übrig';
   document.getElementById('loginPassword').value = '';
   document.getElementById('loginPassword').focus();
@@ -420,6 +519,138 @@ if (sessionStorage.getItem('db_auth') !== PASSWORT_HASH) {
 }
 // ═══════════════════════════════════════════════════════════════
 // 🔐 ENDE PASSWORT-SCHUTZ
+// ═══════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════
+// 🔒 BETRAGS-SICHERHEIT: Bestätigung ab 40€, Chef-PIN ab 100€
+// ═══════════════════════════════════════════════════════════════
+const BETRAG_WARNUNG_AB = 40;      // Ab diesem Betrag: Bestätigungsabfrage
+const BETRAG_CHEF_PIN_AB = 100;   // Ab diesem Betrag: zusätzlich Chef-PIN
+// Chef-PIN Hash (Standard: 1234 - BITTE ÄNDERN!)
+// Um einen neuen Hash zu generieren: In der Browser-Konsole sha256('DEIN_PIN') ausführen
+const CHEF_PIN_HASH = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'; // Hash für "1234"
+
+function showModal(html) {
+  document.getElementById('modalContainer').innerHTML = html;
+}
+
+function closeModal() {
+  document.getElementById('modalContainer').innerHTML = '';
+}
+
+// Bestätigungs-Dialog für hohe Beträge (40-99€)
+function showAmountConfirmation(amount, points, onConfirm, onCancel) {
+  const html = `
+    <div class="modal-overlay" onclick="event.target === this && closeModal()">
+      <div class="modal-content">
+        <div class="modal-icon">⚠️</div>
+        <div class="modal-title">Hoher Betrag!</div>
+        <div class="modal-amount">${amount.toFixed(2)} €</div>
+        <div class="modal-points">= ${points} Punkte</div>
+        <div class="modal-warning">
+          <strong>Achtung:</strong> Dieser Betrag ist ungewöhnlich hoch.<br>
+          Bitte überprüfen Sie die Eingabe!
+        </div>
+        <p style="margin-bottom: 20px; color: #666;">Ist dieser Betrag korrekt?</p>
+        <div class="modal-buttons">
+          <button class="secondary" onclick="window._modalCancel()">❌ Abbrechen</button>
+          <button onclick="window._modalConfirm()">✅ Ja, korrekt</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  window._modalConfirm = () => { closeModal(); onConfirm(); };
+  window._modalCancel = () => { closeModal(); onCancel(); };
+  
+  showModal(html);
+}
+
+// Chef-PIN Dialog für sehr hohe Beträge (ab 100€)
+function showChefPinDialog(amount, points, onSuccess, onCancel) {
+  const html = `
+    <div class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-icon">🔐</div>
+        <div class="modal-title">Chef-Freigabe erforderlich!</div>
+        <div class="modal-amount">${amount.toFixed(2)} €</div>
+        <div class="modal-points">= ${points} Punkte</div>
+        <div class="modal-warning" style="background: #fee2e2; border-color: #dc2626; color: #991b1b;">
+          <strong>⚠️ Sehr hoher Betrag!</strong><br>
+          Für Beträge ab ${BETRAG_CHEF_PIN_AB} € ist eine Chef-PIN erforderlich.
+        </div>
+        <input type="password" 
+               id="chefPinInput" 
+               class="modal-pin-input" 
+               placeholder="PIN" 
+               maxlength="6"
+               onkeypress="if(event.key==='Enter')window._checkChefPin()">
+        <p id="chefPinError" style="color: #dc2626; font-size: 14px; margin-bottom: 15px; display: none;">❌ Falscher PIN!</p>
+        <div class="modal-buttons">
+          <button class="danger" onclick="window._modalCancel()">❌ Abbrechen</button>
+          <button onclick="window._checkChefPin()">🔓 Freigeben</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  window._checkChefPin = async () => {
+    const pin = document.getElementById('chefPinInput').value;
+    if (!pin) {
+      document.getElementById('chefPinError').textContent = '❌ Bitte PIN eingeben!';
+      document.getElementById('chefPinError').style.display = 'block';
+      return;
+    }
+    
+    const hash = await sha256(pin);
+    if (hash === CHEF_PIN_HASH) {
+      closeModal();
+      onSuccess();
+    } else {
+      document.getElementById('chefPinError').textContent = '❌ Falscher PIN!';
+      document.getElementById('chefPinError').style.display = 'block';
+      document.getElementById('chefPinInput').value = '';
+      document.getElementById('chefPinInput').focus();
+    }
+  };
+  
+  window._modalCancel = () => { closeModal(); onCancel(); };
+  
+  showModal(html);
+  setTimeout(() => document.getElementById('chefPinInput').focus(), 100);
+}
+
+// Validierung mit Callback-System
+async function validateAmount(amount, onValid, onCancel, resultId) {
+  const points = Math.round(amount * 10);
+  
+  // Fall 1: Normaler Betrag (unter 40€) → direkt ausführen
+  if (amount < BETRAG_WARNUNG_AB) {
+    onValid();
+    return;
+  }
+  
+  // Fall 2: Hoher Betrag (40-99€) → Bestätigungsabfrage
+  if (amount < BETRAG_CHEF_PIN_AB) {
+    showAmountConfirmation(amount, points, onValid, () => {
+      showResult(resultId, '❌ Vorgang abgebrochen.', 'error');
+      onCancel();
+    });
+    return;
+  }
+  
+  // Fall 3: Sehr hoher Betrag (ab 100€) → Erst Bestätigung, dann Chef-PIN
+  showAmountConfirmation(amount, points, () => {
+    // Nach Bestätigung: Chef-PIN abfragen
+    showChefPinDialog(amount, points, onValid, () => {
+      showResult(resultId, '❌ Vorgang abgebrochen - Chef-PIN nicht eingegeben.', 'error');
+      onCancel();
+    });
+  }, () => {
+    showResult(resultId, '❌ Vorgang abgebrochen.', 'error');
+    onCancel();
+  });
+}
 // ═══════════════════════════════════════════════════════════════
 
 const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
@@ -526,54 +757,69 @@ function showTab(name) {
   if (name === 'history') loadHistory()
 }
 
+// ═══════════════════════════════════════════════════════════════
+// GEÄNDERT: addPointsByPhone mit Betrags-Sicherheit
+// ═══════════════════════════════════════════════════════════════
 async function addPointsByPhone() {
   const phoneOrId = document.getElementById('phone').value.trim()
   const amount = parseFloat(document.getElementById('amount').value)
   if (!phoneOrId) { showResult('result-phone', '❌ Handynummer/QR-ID eingeben!', 'error'); return }
   if (!amount || amount <= 0) { showResult('result-phone', '❌ Gültigen Betrag eingeben!', 'error'); return }
-  showResult('result-phone', '🔍 Suche Kunde...', 'info')
-  try {
-    let customer = null
-    if (/^\d{4}$/.test(phoneOrId)) {
-      const { data } = await supabase.from('customers').select('*').eq('qr_id', phoneOrId).limit(1)
-      if (data && data.length > 0) customer = data[0]
-    }
-    if (!customer) {
-      const { data } = await supabase.from('customers').select('*').eq('phone', normalizePhone(phoneOrId)).limit(1)
-      if (data && data.length > 0) customer = data[0]
-    }
-    if (!customer) throw new Error('Kunde nicht gefunden')
-    const { data: activeGlobalBonuses } = await supabase.from('activated_global_bonuses').select('*, global_bonuses(*)').eq('customer_id', customer.id).eq('is_used', false)
-    const { data: activatedCoupons } = await supabase.from('activated_coupons').select('*, coupons(*)').eq('customer_id', customer.id).eq('is_used', false)
-    let pointsToAdd = Math.round(amount * 10)
-    let bonusApplied = null, bonusPointsAdded = 0, couponUsed = null
-    if (activeGlobalBonuses && activeGlobalBonuses.length > 0) {
-      const globalBonus = activeGlobalBonuses[0]
-      const bonus = globalBonus.global_bonuses
-      if (bonus.bonus_type === 'double_points') { bonusPointsAdded = pointsToAdd; pointsToAdd *= 2; bonusApplied = '⭐ Doppelte Punkte!' }
-      else if (bonus.bonus_type === 'bonus_points') { bonusPointsAdded = bonus.bonus_amount || 100; pointsToAdd += bonusPointsAdded; bonusApplied = `💰 +${bonusPointsAdded} Bonus!` }
-      await supabase.from('activated_global_bonuses').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', globalBonus.id)
-      console.log('✅ Globaler Bonus verwendet:', bonusApplied)
-    }
-    if (activatedCoupons && activatedCoupons.length > 0) {
-      const c = activatedCoupons[0]
-      await supabase.from('activated_coupons').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', c.id)
-      couponUsed = `🎟️ Coupon: ${c.coupons.product}`
-    }
-    const newTotal = customer.points + pointsToAdd
-    await supabase.from('transactions').insert({ customer_id: customer.id, type: 'earn', amount, points: pointsToAdd, staff: 'SCANNER' })
-    await supabase.from('customers').update({ points: newTotal }).eq('id', customer.id)
-    await checkAndUpdateChallenges(customer.id, amount)
-    const wheelUnlocked = await checkAndUnlockWheel(customer.id, amount)
-    let msg = `✅ <strong>ERFOLG!</strong><br>👤 ${customer.name}<br>💰 ${amount.toFixed(2)} €<br>⭐ +${Math.round(amount * 10)}P`
-    if (bonusApplied) msg += `<br>🎉 ${bonusApplied} (+${bonusPointsAdded}P)`
-    if (couponUsed) msg += `<br>✅ ${couponUsed}`
-    msg += `<br>📊 Neu: <strong>${newTotal}P</strong>`
-    if (wheelUnlocked) { msg += `<br><br><div class="wheel-badge">🎡 GLÜCKSRAD FREIGESCHALTET!</div>` }
-    showResult('result-phone', msg, 'success')
-    document.getElementById('phone').value = ''
-    document.getElementById('amount').value = ''
-  } catch (e) { showResult('result-phone', `❌ ${e.message}`, 'error'); console.error('Add points error:', e) }
+  
+  // Betrags-Validierung mit Callback
+  await validateAmount(amount, 
+    // onValid - Wird ausgeführt wenn Betrag bestätigt wurde
+    async () => {
+      showResult('result-phone', '🔍 Suche Kunde...', 'info')
+      try {
+        let customer = null
+        if (/^\d{4}$/.test(phoneOrId)) {
+          const { data } = await supabase.from('customers').select('*').eq('qr_id', phoneOrId).limit(1)
+          if (data && data.length > 0) customer = data[0]
+        }
+        if (!customer) {
+          const { data } = await supabase.from('customers').select('*').eq('phone', normalizePhone(phoneOrId)).limit(1)
+          if (data && data.length > 0) customer = data[0]
+        }
+        if (!customer) throw new Error('Kunde nicht gefunden')
+        const { data: activeGlobalBonuses } = await supabase.from('activated_global_bonuses').select('*, global_bonuses(*)').eq('customer_id', customer.id).eq('is_used', false)
+        const { data: activatedCoupons } = await supabase.from('activated_coupons').select('*, coupons(*)').eq('customer_id', customer.id).eq('is_used', false)
+        let pointsToAdd = Math.round(amount * 10)
+        let bonusApplied = null, bonusPointsAdded = 0, couponUsed = null
+        if (activeGlobalBonuses && activeGlobalBonuses.length > 0) {
+          const globalBonus = activeGlobalBonuses[0]
+          const bonus = globalBonus.global_bonuses
+          if (bonus.bonus_type === 'double_points') { bonusPointsAdded = pointsToAdd; pointsToAdd *= 2; bonusApplied = '⭐ Doppelte Punkte!' }
+          else if (bonus.bonus_type === 'bonus_points') { bonusPointsAdded = bonus.bonus_amount || 100; pointsToAdd += bonusPointsAdded; bonusApplied = `💰 +${bonusPointsAdded} Bonus!` }
+          await supabase.from('activated_global_bonuses').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', globalBonus.id)
+          console.log('✅ Globaler Bonus verwendet:', bonusApplied)
+        }
+        if (activatedCoupons && activatedCoupons.length > 0) {
+          const c = activatedCoupons[0]
+          await supabase.from('activated_coupons').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', c.id)
+          couponUsed = `🎟️ Coupon: ${c.coupons.product}`
+        }
+        const newTotal = customer.points + pointsToAdd
+        await supabase.from('transactions').insert({ customer_id: customer.id, type: 'earn', amount, points: pointsToAdd, staff: 'SCANNER' })
+        await supabase.from('customers').update({ points: newTotal }).eq('id', customer.id)
+        await checkAndUpdateChallenges(customer.id, amount)
+        const wheelUnlocked = await checkAndUnlockWheel(customer.id, amount)
+        let msg = `✅ <strong>ERFOLG!</strong><br>👤 ${customer.name}<br>💰 ${amount.toFixed(2)} €<br>⭐ +${Math.round(amount * 10)}P`
+        if (bonusApplied) msg += `<br>🎉 ${bonusApplied} (+${bonusPointsAdded}P)`
+        if (couponUsed) msg += `<br>✅ ${couponUsed}`
+        msg += `<br>📊 Neu: <strong>${newTotal}P</strong>`
+        if (wheelUnlocked) { msg += `<br><br><div class="wheel-badge">🎡 GLÜCKSRAD FREIGESCHALTET!</div>` }
+        showResult('result-phone', msg, 'success')
+        document.getElementById('phone').value = ''
+        document.getElementById('amount').value = ''
+      } catch (e) { showResult('result-phone', `❌ ${e.message}`, 'error'); console.error('Add points error:', e) }
+    },
+    // onCancel - Wird ausgeführt wenn abgebrochen wurde
+    () => {
+      // Nichts tun, Fehlermeldung wird bereits in validateAmount angezeigt
+    },
+    'result-phone'
+  );
 }
 
 async function startCamera() {
@@ -645,31 +891,46 @@ async function onQRDetected(qrCode) {
   } catch (e) { showResult('result-qr', '❌ ' + e.message, 'error'); console.error('QR detection error:', e); setTimeout(() => { showResult('result-qr', '', 'info'); startCamera() }, 2000) }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// GEÄNDERT: addPointsFromScan mit Betrags-Sicherheit
+// ═══════════════════════════════════════════════════════════════
 async function addPointsFromScan() {
   const amount = parseFloat(document.getElementById('scannedAmount').value)
   if (!amount || amount <= 0) { showResult('result-scan', '❌ Betrag eingeben!', 'error'); return }
-  try {
-    const { data: globalBonuses } = await supabase.from('activated_global_bonuses').select('*, global_bonuses(*)').eq('customer_id', currentCustomer.id).eq('is_used', false)
-    let pointsToAdd = Math.round(amount * 10)
-    let bonusApplied = null, bonusPointsAdded = 0
-    if (globalBonuses && globalBonuses.length > 0) {
-      const globalBonus = globalBonuses[0]; const b = globalBonus.global_bonuses
-      if (b.bonus_type === 'double_points') { bonusPointsAdded = pointsToAdd; pointsToAdd *= 2; bonusApplied = '⭐ 2x Punkte!' }
-      else { bonusPointsAdded = b.bonus_amount || 100; pointsToAdd += bonusPointsAdded; bonusApplied = `💰 +${bonusPointsAdded}P!` }
-      await supabase.from('activated_global_bonuses').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', globalBonus.id)
-    }
-    const newTotal = currentCustomer.points + pointsToAdd
-    await supabase.from('transactions').insert({ customer_id: currentCustomer.id, type: 'earn', amount, points: pointsToAdd, staff: 'SCANNER' })
-    await supabase.from('customers').update({ points: newTotal }).eq('id', currentCustomer.id)
-    await checkAndUpdateChallenges(currentCustomer.id, amount)
-    const wheelUnlocked = await checkAndUnlockWheel(currentCustomer.id, amount)
-    let msg = `✅ <strong>ERFOLG!</strong><br>👤 ${currentCustomer.name}<br>💰 ${amount.toFixed(2)} €<br>⭐ +${Math.round(amount * 10)}P`
-    if (bonusApplied) msg += `<br>🎉 ${bonusApplied} (+${bonusPointsAdded}P)`
-    msg += `<br>📊 Neu: <strong>${newTotal}P</strong>`
-    if (wheelUnlocked) { msg += `<br><br><div class="wheel-badge">🎡 GLÜCKSRAD FREIGESCHALTET!</div>` }
-    showResult('result-scan', msg, 'success')
-    setTimeout(() => { document.getElementById('customerCard').style.display = 'none'; showResult('result-qr', '', 'info'); document.getElementById('scannedAmount').value = ''; showResult('result-scan', '', 'info') }, 3000)
-  } catch (e) { showResult('result-scan', '❌ ' + e.message, 'error'); console.error('Scan points error:', e) }
+  
+  // Betrags-Validierung mit Callback
+  await validateAmount(amount,
+    // onValid
+    async () => {
+      try {
+        const { data: globalBonuses } = await supabase.from('activated_global_bonuses').select('*, global_bonuses(*)').eq('customer_id', currentCustomer.id).eq('is_used', false)
+        let pointsToAdd = Math.round(amount * 10)
+        let bonusApplied = null, bonusPointsAdded = 0
+        if (globalBonuses && globalBonuses.length > 0) {
+          const globalBonus = globalBonuses[0]; const b = globalBonus.global_bonuses
+          if (b.bonus_type === 'double_points') { bonusPointsAdded = pointsToAdd; pointsToAdd *= 2; bonusApplied = '⭐ 2x Punkte!' }
+          else { bonusPointsAdded = b.bonus_amount || 100; pointsToAdd += bonusPointsAdded; bonusApplied = `💰 +${bonusPointsAdded}P!` }
+          await supabase.from('activated_global_bonuses').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', globalBonus.id)
+        }
+        const newTotal = currentCustomer.points + pointsToAdd
+        await supabase.from('transactions').insert({ customer_id: currentCustomer.id, type: 'earn', amount, points: pointsToAdd, staff: 'SCANNER' })
+        await supabase.from('customers').update({ points: newTotal }).eq('id', currentCustomer.id)
+        await checkAndUpdateChallenges(currentCustomer.id, amount)
+        const wheelUnlocked = await checkAndUnlockWheel(currentCustomer.id, amount)
+        let msg = `✅ <strong>ERFOLG!</strong><br>👤 ${currentCustomer.name}<br>💰 ${amount.toFixed(2)} €<br>⭐ +${Math.round(amount * 10)}P`
+        if (bonusApplied) msg += `<br>🎉 ${bonusApplied} (+${bonusPointsAdded}P)`
+        msg += `<br>📊 Neu: <strong>${newTotal}P</strong>`
+        if (wheelUnlocked) { msg += `<br><br><div class="wheel-badge">🎡 GLÜCKSRAD FREIGESCHALTET!</div>` }
+        showResult('result-scan', msg, 'success')
+        setTimeout(() => { document.getElementById('customerCard').style.display = 'none'; showResult('result-qr', '', 'info'); document.getElementById('scannedAmount').value = ''; showResult('result-scan', '', 'info') }, 3000)
+      } catch (e) { showResult('result-scan', '❌ ' + e.message, 'error'); console.error('Scan points error:', e) }
+    },
+    // onCancel
+    () => {
+      // Nichts tun
+    },
+    'result-scan'
+  );
 }
 
 async function loadHistory() {
@@ -779,6 +1040,7 @@ async function deleteTransaction(txId, customerId, points) {
 }
 
 console.log('✅ Döner Boxx Scanner PRO geladen!')
+console.log('🔒 Betrags-Sicherheit aktiv: Warnung ab ' + BETRAG_WARNUNG_AB + '€, Chef-PIN ab ' + BETRAG_CHEF_PIN_AB + '€')
 console.log('%c⚠️ COPYRIGHT WARNUNG', 'color: #E31E24; font-size: 20px; font-weight: bold; padding: 10px;')
 console.log('%c🔒 Dieser Code ist urheberrechtlich geschützt.', 'font-size: 14px; font-weight: bold;')
 console.log('%cUnerlaubtes Kopieren oder Verwenden ist illegal und wird verfolgt.', 'font-size: 12px; color: #666;')
