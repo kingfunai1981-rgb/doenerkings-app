@@ -90,6 +90,74 @@ textarea { resize: vertical; min-height: 60px; }
     <div style="margin-top: 24px;"><h3>Aktive Bonusse</h3><div id="globalBonusList"></div></div>
   </div>
 
+  <!-- 🔥 HAPPY HOUR KONTROLLE -->
+  <div class="card" style="border: 3px solid #f59e0b;">
+    <h2>🔥 Happy Hour Kontrolle</h2>
+    <p class="subtitle">Starte Happy Hour mit einem Klick → Doppelte Punkte + WhatsApp-Versand</p>
+    
+    <!-- Status-Anzeige -->
+    <div id="happy-hour-status" style="background: #f3f4f6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div id="hh-status-icon" style="font-size: 48px;">⏸️</div>
+        <div style="flex: 1;">
+          <div id="hh-status-text" style="font-size: 18px; font-weight: 700; color: #374151; margin-bottom: 4px;">Happy Hour ist inaktiv</div>
+          <div id="hh-status-sub" style="font-size: 14px; color: #6b7280;">Bereit zum Starten</div>
+        </div>
+        <div id="hh-countdown" style="font-size: 32px; font-weight: 700; color: #E31E24; font-family: monospace; display: none;"></div>
+      </div>
+    </div>
+
+    <!-- Aktion-Buttons -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+      <button class="success" onclick="startHappyHour()" id="btn-start-hh" style="font-size: 16px; padding: 16px;">
+        🔥 Happy Hour JETZT starten
+      </button>
+      <button class="danger" onclick="stopHappyHour()" id="btn-stop-hh" style="display: none; font-size: 16px; padding: 16px;">
+        ⏹️ Happy Hour beenden
+      </button>
+    </div>
+
+    <!-- WhatsApp Nachricht -->
+    <div id="happy-hour-whatsapp" style="display: none; background: #dcfce7; border: 2px solid #22c55e; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #166534; margin-bottom: 12px;">📱 WhatsApp-Versand</h3>
+      
+      <div style="margin-bottom: 16px;">
+        <label class="form-label" style="color: #166534;">1️⃣ Nummern kopieren:</label>
+        <textarea id="hh-numbers" readonly style="font-family: monospace; font-size: 13px; background: white; min-height: 100px;"></textarea>
+        <button onclick="copyHHNumbers()" style="background: #22c55e; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+          📋 Nummern kopieren
+        </button>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <label class="form-label" style="color: #166534;">2️⃣ Nachricht kopieren:</label>
+        <textarea id="hh-message" readonly style="background: white; min-height: 120px;">🔥 JETZT LIVE: Happy Hour bei Döner Boxx!
+
+Bis 18 Uhr → DOPPELTE PUNKTE auf ALLES! 🎉
+
+Komm vorbei und sichere dir extra Punkte!
+
+⏰ Läuft noch: [COUNTDOWN]
+
+📍 [Deine Adresse]</textarea>
+        <button onclick="copyHHMessage()" style="background: #22c55e; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+          📋 Nachricht kopieren
+        </button>
+      </div>
+
+      <div style="background: white; border-radius: 8px; padding: 12px; font-size: 13px; color: #166534;">
+        <strong>📝 Anleitung:</strong><br>
+        1. Nummern kopieren<br>
+        2. WhatsApp Business öffnen → Neue Broadcast-Liste<br>
+        3. Nummern einfügen<br>
+        4. Nachricht kopieren & einfügen<br>
+        5. Senden! ✅
+      </div>
+    </div>
+
+    <div id="result-happy-hour"></div>
+  </div>
+
   <div class="card">
     <h2>🎯 Challenge-Bonus</h2>
     <p class="subtitle">Erstelle zeitlich begrenzte Herausforderungen mit Mindestbestellwert</p>
@@ -726,12 +794,202 @@ async function loadWheelStats() {
 window.addEventListener('DOMContentLoaded', function() {
   loadAllCustomers(); loadGlobalBonuses(); loadChallenges(); loadCoupons()
   loadWheelConfig(); loadWheelStats()
+  checkHappyHourStatus() // ← HAPPY HOUR STATUS PRÜFEN
   const today = new Date(), nextWeek = new Date(); nextWeek.setDate(nextWeek.getDate() + 7)
   const todayStr = today.toISOString().split('T')[0], nextWeekStr = nextWeek.toISOString().split('T')[0]
   document.getElementById('globalBonusStart').value = todayStr; document.getElementById('globalBonusEnd').value = nextWeekStr
   document.getElementById('challengeStart').value = todayStr; document.getElementById('challengeEnd').value = nextWeekStr
   document.getElementById('couponStart').value = todayStr; document.getElementById('couponEnd').value = nextWeekStr
 })
+
+// ═══════════════════════════════════════════════════════════════
+// Happy Hour Funktionen
+// ═══════════════════════════════════════════════════════════════
+
+let happyHourTimer = null
+
+async function startHappyHour() {
+  try {
+    const result = showResult('result-happy-hour', '⏳ Starte Happy Hour...', 'info')
+    
+    // 1. Erstelle Global Bonus für 1 Stunde
+    const now = new Date()
+    const endTime = new Date(now.getTime() + 60 * 60 * 1000) // +1 Stunde
+    
+    const { data: bonus, error: bonusError } = await supabase
+      .from('global_bonuses')
+      .insert({
+        bonus_type: 'double_points',
+        bonus_amount: 0,
+        start_date: now.toISOString(),
+        end_date: endTime.toISOString(),
+        is_active: true,
+        description: '🔥 Happy Hour - Doppelte Punkte!'
+      })
+      .select()
+      .single()
+    
+    if (bonusError) throw bonusError
+    
+    // 2. Exportiere WhatsApp-Nummern
+    const { data: customers, error: customerError } = await supabase
+      .from('customers')
+      .select('phone, name')
+      .eq('whatsapp_optin', true)
+      .order('name')
+    
+    if (customerError) throw customerError
+    
+    // 3. Formatiere Nummern für WhatsApp
+    const numbers = customers.map(c => c.phone).join('\n')
+    const count = customers.length
+    
+    // 4. UI aktualisieren
+    document.getElementById('hh-numbers').value = numbers
+    document.getElementById('happy-hour-whatsapp').style.display = 'block'
+    
+    // 5. Update Status
+    updateHappyHourStatus(true, endTime)
+    
+    // 6. Starte Countdown
+    startHappyHourCountdown(endTime)
+    
+    showResult('result-happy-hour', `✅ Happy Hour gestartet! ${count} WhatsApp-Nachrichten bereit zum Versand!`, 'success')
+  } catch (e) {
+    showResult('result-happy-hour', '❌ Fehler: ' + e.message, 'error')
+    console.error('Happy Hour error:', e)
+  }
+}
+
+async function stopHappyHour() {
+  if (!confirm('Happy Hour wirklich beenden? Doppelte Punkte werden sofort deaktiviert!')) return
+  
+  try {
+    showResult('result-happy-hour', '⏳ Beende Happy Hour...', 'info')
+    
+    // Deaktiviere alle double_points Bonusse
+    const { error } = await supabase
+      .from('global_bonuses')
+      .update({ is_active: false })
+      .eq('bonus_type', 'double_points')
+      .eq('is_active', true)
+    
+    if (error) throw error
+    
+    // Stop Countdown
+    if (happyHourTimer) {
+      clearInterval(happyHourTimer)
+      happyHourTimer = null
+    }
+    
+    // UI zurücksetzen
+    updateHappyHourStatus(false)
+    document.getElementById('happy-hour-whatsapp').style.display = 'none'
+    
+    showResult('result-happy-hour', '✅ Happy Hour beendet!', 'success')
+  } catch (e) {
+    showResult('result-happy-hour', '❌ Fehler: ' + e.message, 'error')
+  }
+}
+
+function updateHappyHourStatus(active, endTime = null) {
+  const statusIcon = document.getElementById('hh-status-icon')
+  const statusText = document.getElementById('hh-status-text')
+  const statusSub = document.getElementById('hh-status-sub')
+  const btnStart = document.getElementById('btn-start-hh')
+  const btnStop = document.getElementById('btn-stop-hh')
+  const countdown = document.getElementById('hh-countdown')
+  
+  if (active) {
+    statusIcon.textContent = '🔥'
+    statusText.textContent = 'Happy Hour AKTIV!'
+    statusText.style.color = '#E31E24'
+    statusSub.textContent = 'Doppelte Punkte für alle Kunden'
+    btnStart.style.display = 'none'
+    btnStop.style.display = 'block'
+    countdown.style.display = 'block'
+  } else {
+    statusIcon.textContent = '⏸️'
+    statusText.textContent = 'Happy Hour ist inaktiv'
+    statusText.style.color = '#374151'
+    statusSub.textContent = 'Bereit zum Starten'
+    btnStart.style.display = 'block'
+    btnStop.style.display = 'none'
+    countdown.style.display = 'none'
+  }
+}
+
+function startHappyHourCountdown(endTime) {
+  const countdownEl = document.getElementById('hh-countdown')
+  
+  if (happyHourTimer) {
+    clearInterval(happyHourTimer)
+  }
+  
+  happyHourTimer = setInterval(() => {
+    const now = new Date()
+    const remaining = endTime - now
+    
+    if (remaining <= 0) {
+      clearInterval(happyHourTimer)
+      updateHappyHourStatus(false)
+      showResult('result-happy-hour', '⏰ Happy Hour automatisch beendet!', 'info')
+      return
+    }
+    
+    const minutes = Math.floor(remaining / 60000)
+    const seconds = Math.floor((remaining % 60000) / 1000)
+    countdownEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`
+  }, 1000)
+}
+
+async function checkHappyHourStatus() {
+  try {
+    const now = new Date().toISOString()
+    
+    const { data, error } = await supabase
+      .from('global_bonuses')
+      .select('*')
+      .eq('bonus_type', 'double_points')
+      .eq('is_active', true)
+      .gte('end_date', now)
+      .lte('start_date', now)
+      .single()
+    
+    if (data) {
+      updateHappyHourStatus(true, new Date(data.end_date))
+      startHappyHourCountdown(new Date(data.end_date))
+      
+      // Lade WhatsApp-Nummern
+      const { data: customers } = await supabase
+        .from('customers')
+        .select('phone')
+        .eq('whatsapp_optin', true)
+      
+      if (customers && customers.length > 0) {
+        document.getElementById('hh-numbers').value = customers.map(c => c.phone).join('\n')
+        document.getElementById('happy-hour-whatsapp').style.display = 'block'
+      }
+    }
+  } catch (e) {
+    // Keine aktive Happy Hour
+    console.log('No active Happy Hour')
+  }
+}
+
+function copyHHNumbers() {
+  const textarea = document.getElementById('hh-numbers')
+  textarea.select()
+  document.execCommand('copy')
+  showResult('result-happy-hour', '✅ Nummern kopiert! Jetzt in WhatsApp Business einfügen.', 'success')
+}
+
+function copyHHMessage() {
+  const textarea = document.getElementById('hh-message')
+  textarea.select()
+  document.execCommand('copy')
+  showResult('result-happy-hour', '✅ Nachricht kopiert! Jetzt in WhatsApp Business einfügen.', 'success')
+}
 
 // ═══════════════════════════════════════════════════════════════
 // WhatsApp-Export-Funktionen
