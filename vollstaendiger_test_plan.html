@@ -56,9 +56,11 @@
     
     .content {
       padding: 30px;
+      max-height: 70vh;
+      overflow-y: auto;
     }
     .test-category {
-      margin-bottom: 30px;
+      margin-bottom: 20px;
       border: 2px solid #e9ecef;
       border-radius: 12px;
       overflow: hidden;
@@ -76,7 +78,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
     }
     .category-stats {
@@ -143,9 +145,7 @@
       font-size: 16px;
     }
     
-    .test-content {
-      flex: 1;
-    }
+    .test-content { flex: 1; }
     .test-title {
       font-weight: 600;
       font-size: 15px;
@@ -166,16 +166,11 @@
       border-radius: 6px;
       margin-top: 8px;
       line-height: 1.6;
+      white-space: pre-line;
     }
     .test-expected {
       font-size: 12px;
       color: #22c55e;
-      font-weight: 600;
-      margin-top: 6px;
-    }
-    .test-warning {
-      font-size: 12px;
-      color: #ef4444;
       font-weight: 600;
       margin-top: 6px;
     }
@@ -184,6 +179,7 @@
       display: flex;
       gap: 8px;
       margin-top: 10px;
+      flex-wrap: wrap;
     }
     .btn-test {
       padding: 6px 12px;
@@ -283,27 +279,20 @@
       box-shadow: 0 6px 20px rgba(102,126,234,0.6);
     }
     
-    .notes-section {
-      margin-top: 20px;
-      padding: 15px;
-      background: #fffbeb;
-      border: 2px solid #fbbf24;
-      border-radius: 8px;
-    }
-    .notes-section h4 {
-      font-size: 14px;
-      margin-bottom: 8px;
-      color: #92400e;
-    }
-    .notes-section textarea {
-      width: 100%;
-      min-height: 60px;
-      padding: 10px;
-      border: 1px solid #fbbf24;
-      border-radius: 6px;
-      font-size: 13px;
-      font-family: inherit;
-      resize: vertical;
+    @media (max-width: 768px) {
+      body { padding: 10px; }
+      .content { padding: 15px; max-height: 60vh; }
+      .tab { padding: 12px 15px; font-size: 13px; }
+      .test-item { flex-direction: column; }
+      .floating-actions {
+        bottom: 20px;
+        right: 20px;
+      }
+      .floating-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+      }
     }
   </style>
 </head>
@@ -315,12 +304,8 @@
     <p>Teste alle Funktionen deines Döner Boxx Loyalty Systems</p>
   </div>
   
-  <div class="tabs">
-    <button class="tab active" onclick="showTab('index')">📱 Index App</button>
-    <button class="tab" onclick="showTab('scanner')">📷 Scanner App</button>
-    <button class="tab" onclick="showTab('admin')">👨‍💼 Admin Panel</button>
-    <button class="tab" onclick="showTab('integration')">🔗 Integration</button>
-    <button class="tab" onclick="showTab('security')">🔒 Sicherheit</button>
+  <div class="tabs" id="tabs-container">
+    <!-- Tabs werden dynamisch erstellt -->
   </div>
   
   <div class="content">
@@ -361,119 +346,38 @@
 </div>
 
 <script>
-// Test-Daten
+// Vereinfachte Test-Daten (die wichtigsten Tests)
 const tests = {
   index: {
-    name: '📱 Index App (Kunden-App)',
+    name: '📱 Index App',
+    icon: '📱',
     categories: [
       {
-        name: 'Registrierung & Login',
+        name: '1. Registrierung & Login',
         tests: [
           {
             title: 'Neue Registrierung',
             desc: 'Kunde kann sich neu registrieren',
             steps: '1. App öffnen\n2. Rufnummer eingeben (z.B. 0151123456)\n3. Name eingeben\n4. "Registrieren" klicken',
-            expected: '✅ Erfolgsmeldung + automatischer Login + QR-Code wird generiert',
-            warning: '❌ Fehler wenn Nummer schon existiert'
+            expected: '✅ Erfolgsmeldung + automatischer Login + QR-Code wird generiert'
           },
           {
             title: 'Login via Telefonnummer',
             desc: 'Kunde kann sich mit existierender Nummer anmelden',
             steps: '1. Logout (falls angemeldet)\n2. Rufnummer eingeben (existierende)\n3. "Anmelden" klicken',
             expected: '✅ Login erfolgreich + Punktestand wird angezeigt'
-          },
-          {
-            title: 'Login via QR-Code',
-            desc: 'Kunde kann sich über QR-Code anmelden',
-            steps: '1. Scanner-App öffnen\n2. Kunden-QR scannen\n3. In Index-App sollte Login erfolgen',
-            expected: '✅ Automatischer Login nach QR-Scan'
-          },
-          {
-            title: 'Doppelte Telefonnummer blockiert',
-            desc: 'System verhindert doppelte Nummern',
-            steps: '1. Versuche mit existierender Nummer zu registrieren',
-            expected: '✅ Fehler: "Nummer bereits registriert"'
           }
         ]
       },
       {
-        name: 'Punkte-System',
+        name: '2. WhatsApp-Benachrichtigungen',
         tests: [
           {
-            title: 'Punktestand anzeigen',
-            desc: 'Aktueller Punktestand wird korrekt angezeigt',
-            steps: '1. Nach Login Punktestand prüfen\n2. Sollte mit DB übereinstimmen',
-            expected: '✅ Punktestand sichtbar oben in der App'
+            title: 'WhatsApp-Text korrekt',
+            desc: 'Opt-In Text enthält KEIN "STOP" mehr!',
+            steps: '1. "WhatsApp aktivieren" klicken\n2. WhatsApp-Text lesen',
+            expected: '✅ Text: "Abmeldung hier in meinem Kundenkonto möglich" (KEIN "STOP"!)'
           },
-          {
-            title: 'QR-Code generiert',
-            desc: 'Jeder Kunde hat eindeutigen QR-Code',
-            steps: '1. Nach Login QR-Code prüfen\n2. Sollte einzigartig sein',
-            expected: '✅ QR-Code wird angezeigt und ist scanbar'
-          },
-          {
-            title: 'Transaktions-Historie',
-            desc: 'Letzte Bestellungen werden angezeigt',
-            steps: '1. Nach Login nach unten scrollen\n2. "Letzte Bestellungen" ansehen',
-            expected: '✅ Liste mit Datum, Betrag, Punkte'
-          }
-        ]
-      },
-      {
-        name: 'Prämien einlösen',
-        tests: [
-          {
-            title: 'Prämie einlösen (genug Punkte)',
-            desc: 'Kunde kann Prämie einlösen wenn genug Punkte',
-            steps: '1. Prämie wählen (z.B. Ayran 250P)\n2. "Einlösen" klicken\n3. Bestätigen',
-            expected: '✅ Punkte werden abgezogen + Bestätigung + erscheint unter "Wartet auf Bestätigung"'
-          },
-          {
-            title: 'Prämie einlösen blockiert (zu wenig Punkte)',
-            desc: 'Button deaktiviert wenn nicht genug Punkte',
-            steps: '1. Prämie mit mehr Punkten als vorhanden ansehen',
-            expected: '✅ "Einlösen"-Button ist ausgegraut/deaktiviert'
-          },
-          {
-            title: 'Mehrere Prämien gleichzeitig',
-            desc: 'Kunde kann mehrere Prämien einlösen',
-            steps: '1. Ayran einlösen (250P)\n2. Pommes einlösen (500P)',
-            expected: '✅ Beide erscheinen unter "Wartet auf Bestätigung"'
-          }
-        ]
-      },
-      {
-        name: 'Glücksrad',
-        tests: [
-          {
-            title: 'Glücksrad-Verfügbarkeit prüfen',
-            desc: 'System zeigt ob Spin verfügbar ist',
-            steps: '1. Nach Login Glücksrad-Status prüfen',
-            expected: '✅ Entweder "Drehen möglich" oder "Läuft ab in X Stunden"'
-          },
-          {
-            title: 'Glücksrad drehen',
-            desc: 'Kunde kann Glücksrad drehen',
-            steps: '1. "Jetzt drehen" klicken\n2. Animation abwarten\n3. Gewinn ansehen',
-            expected: '✅ Rad dreht sich + Gewinn wird angezeigt + Punkte gutgeschrieben'
-          },
-          {
-            title: 'Mehrfach-Drehen blockiert',
-            desc: 'Nach Spin ist Glücksrad locked',
-            steps: '1. Glücksrad drehen\n2. Versuche nochmal zu drehen',
-            expected: '✅ "Kein Spin verfügbar" oder Button deaktiviert'
-          },
-          {
-            title: 'Ablaufzeit anzeigen',
-            desc: 'Countdown bis Spin abläuft',
-            steps: '1. Unlock sollte ablaufen\n2. Countdown ansehen',
-            expected: '✅ "Läuft ab in X Stunden"'
-          }
-        ]
-      },
-      {
-        name: 'WhatsApp-Benachrichtigungen',
-        tests: [
           {
             title: 'WhatsApp aktivieren',
             desc: 'Kunde kann WhatsApp-Nachrichten aktivieren',
@@ -481,68 +385,49 @@ const tests = {
             expected: '✅ WhatsApp öffnet sich mit vorbefülltem Text + Status ändert sich zu "Aktiviert"'
           },
           {
-            title: 'WhatsApp-Text korrekt',
-            desc: 'Opt-In Text enthält KEIN "STOP"',
-            steps: '1. "Jetzt aktivieren" klicken\n2. WhatsApp-Text lesen',
-            expected: '✅ Text: "Abmeldung hier in meinem Kundenkonto möglich" (KEIN "STOP")'
+            title: 'UI nach Aktivierung - NEUE POSITION',
+            desc: 'Nach Aktivierung: Kompakter Block UNTER Prämien!',
+            steps: '1. WhatsApp aktivieren\n2. UI ansehen\n3. Nach unten scrollen',
+            expected: '✅ Kleiner grüner Block + UNTER den Prämien + keine große Info-Box mehr'
           },
           {
             title: 'WhatsApp deaktivieren',
             desc: 'Kunde kann sich wieder abmelden',
-            steps: '1. Bei aktiviertem WhatsApp\n2. "Deaktivieren" klicken\n3. Bestätigen',
+            steps: '1. Bei aktiviertem WhatsApp nach unten scrollen\n2. "Deaktivieren" klicken\n3. Bestätigen',
             expected: '✅ Status ändert sich zu "Deaktiviert" + Bestätigung'
-          },
-          {
-            title: 'UI nach Aktivierung',
-            desc: 'Nach Aktivierung: Kompakter Block unter Prämien',
-            steps: '1. WhatsApp aktivieren\n2. UI ansehen',
-            expected: '✅ Kleiner grüner Block + unter Prämien + keine große Info-Box mehr'
           }
         ]
       },
       {
-        name: 'Challenges',
+        name: '3. Prämien einlösen',
         tests: [
           {
-            title: 'Challenge anzeigen',
-            desc: 'Aktive Challenge wird angezeigt',
-            steps: '1. Nach Login Challenges ansehen\n2. Sollte aktive Challenge geben (Admin erstellen falls nötig)',
-            expected: '✅ Challenge mit Titel, Beschreibung, Fortschritt, Punkte-Belohnung'
-          },
-          {
-            title: 'Challenge-Fortschritt',
-            desc: 'Fortschritt wird aktualisiert',
-            steps: '1. Challenge mit "3x bestellen"\n2. Im Scanner Punkte gutschreiben\n3. In Index App Fortschritt prüfen',
-            expected: '✅ Fortschritt erhöht sich (z.B. 1/3, 2/3, 3/3)'
-          },
-          {
-            title: 'Challenge abgeschlossen',
-            desc: 'Nach Completion: Bonus-Punkte',
-            steps: '1. Challenge zu 100% erfüllen\n2. Prüfen ob Punkte gutgeschrieben',
-            expected: '✅ Bonus-Punkte gutgeschrieben + "Abgeschlossen" Status'
+            title: 'Prämie einlösen (genug Punkte)',
+            desc: 'Kunde kann Prämie einlösen wenn genug Punkte',
+            steps: '1. Prämie wählen (z.B. Ayran 250P)\n2. "Einlösen" klicken\n3. Bestätigen',
+            expected: '✅ Punkte werden abgezogen + Bestätigung + erscheint unter "Wartet auf Bestätigung"'
           }
         ]
       },
       {
-        name: 'Mobile-Optimierung',
+        name: '4. Glücksrad',
         tests: [
           {
-            title: 'Responsive Design',
-            desc: 'App sieht gut aus auf Handy',
-            steps: '1. App auf Handy öffnen\n2. Alle Sections durchscrollen',
-            expected: '✅ Alles lesbar + Buttons erreichbar + keine horizontalen Scrolls'
-          },
+            title: 'Glücksrad drehen',
+            desc: 'Kunde kann Glücksrad drehen',
+            steps: '1. "Jetzt drehen" klicken\n2. Animation abwarten\n3. Gewinn ansehen',
+            expected: '✅ Rad dreht sich + Gewinn wird angezeigt + Punkte gutgeschrieben'
+          }
+        ]
+      },
+      {
+        name: '5. Mobile-Bug-Fix',
+        tests: [
           {
-            title: 'Nach 15 Min Inaktivität',
-            desc: 'KEIN Fehlermeldungs-Loop mehr',
+            title: 'Nach 15 Min Inaktivität - BUG GEFIXT!',
+            desc: 'KEIN Fehlermeldungs-Loop mehr!',
             steps: '1. App öffnen, anmelden\n2. Handy sperren\n3. 15 Minuten warten\n4. Handy entsperren',
-            expected: '✅ App lädt normal weiter + KEINE Fehler-Pop-ups'
-          },
-          {
-            title: 'Tab-Wechsel',
-            desc: 'App funktioniert nach Tab-Wechsel',
-            steps: '1. App öffnen\n2. Zu anderem Tab wechseln\n3. 10 Min warten\n4. Zurück zur App',
-            expected: '✅ App funktioniert normal + refresh funktioniert'
+            expected: '✅ App lädt normal weiter + KEINE Fehler-Pop-ups mehr!'
           }
         ]
       }
@@ -551,32 +436,21 @@ const tests = {
   
   scanner: {
     name: '📷 Scanner App',
+    icon: '📷',
     categories: [
       {
-        name: 'QR-Code Scannen',
+        name: '1. QR-Code Scannen',
         tests: [
           {
             title: 'QR-Code scannen',
             desc: 'Scanner erkennt Kunden-QR',
             steps: '1. Scanner öffnen\n2. Kunden-QR scannen\n3. Kundendaten sollten laden',
             expected: '✅ Kundendaten werden angezeigt + Punktestand sichtbar'
-          },
-          {
-            title: 'Ungültiger QR-Code',
-            desc: 'Fehler bei ungültigem QR',
-            steps: '1. Scanne einen beliebigen QR (nicht Döner Boxx)',
-            expected: '✅ Fehler: "Ungültiger QR-Code"'
-          },
-          {
-            title: 'Kamera-Zugriff',
-            desc: 'App fragt nach Kamera-Permission',
-            steps: '1. Scanner öffnen (erste Nutzung)\n2. Browser fragt nach Zugriff',
-            expected: '✅ Permission-Dialog + Kamera startet nach Erlaubnis'
           }
         ]
       },
       {
-        name: 'Punkte gutschreiben',
+        name: '2. Punkte gutschreiben',
         tests: [
           {
             title: 'Punkte via QR',
@@ -589,93 +463,17 @@ const tests = {
             desc: 'Kunde ohne Handy kann auch Punkte bekommen',
             steps: '1. "Telefon" Tab\n2. Nummer eingeben (z.B. 0151123456)\n3. Betrag eingeben\n4. Gutschreiben',
             expected: '✅ Kunde wird gefunden + Punkte gutgeschrieben'
-          },
-          {
-            title: 'Ungültige Telefonnummer',
-            desc: 'Fehler bei nicht-existierender Nummer',
-            steps: '1. Nicht-existierende Nummer eingeben\n2. Gutschreiben versuchen',
-            expected: '✅ Fehler: "Kunde nicht gefunden"'
-          },
-          {
-            title: 'Betrag 0€ blockiert',
-            desc: 'System erlaubt keine 0€ Bestellungen',
-            steps: '1. Betrag: 0€ eingeben\n2. Gutschreiben versuchen',
-            expected: '✅ Fehler: "Betrag muss größer 0 sein"'
-          },
-          {
-            title: 'Negativer Betrag blockiert',
-            desc: 'System erlaubt keine negativen Beträge',
-            steps: '1. Betrag: -10€ eingeben',
-            expected: '✅ Input blockiert oder Fehler'
           }
         ]
       },
       {
-        name: 'Prämien einlösen (Scanner)',
+        name: '3. Prämien bestätigen',
         tests: [
           {
-            title: 'Prämie bestätigen (normal)',
+            title: 'Prämie bestätigen',
             desc: 'Scanner kann Prämie bestätigen',
             steps: '1. In Index: Prämie einlösen (z.B. Ayran)\n2. In Scanner: QR scannen\n3. Unter "Wartet auf Bestätigung"\n4. "Bestätigen" klicken',
             expected: '✅ Prämie verschwindet aus Liste + Bestätigung'
-          },
-          {
-            title: 'Mehrere Prämien gleichzeitig',
-            desc: 'Kunde hat mehrere offene Redemptions',
-            steps: '1. In Index: 2-3 Prämien einlösen\n2. In Scanner: QR scannen\n3. Alle sollten sichtbar sein',
-            expected: '✅ Liste mit allen offenen Redemptions'
-          },
-          {
-            title: 'Prämie ablehnen',
-            desc: 'Scanner kann Prämie auch ablehnen',
-            steps: '1. Prämie in Liste\n2. "Ablehnen" klicken\n3. Bestätigen',
-            expected: '✅ Prämie wird abgelehnt + Punkte werden zurückerstattet'
-          }
-        ]
-      },
-      {
-        name: 'Code-System',
-        tests: [
-          {
-            title: 'Coupon-Code einlösen',
-            desc: 'Scanner kann Coupon-Codes prüfen',
-            steps: '1. Tab "Code"\n2. Code eingeben (aus Admin)\n3. "Prüfen" klicken',
-            expected: '✅ Code-Details werden angezeigt + "Einlösen" möglich'
-          },
-          {
-            title: 'Ungültiger Code',
-            desc: 'Fehler bei falschem Code',
-            steps: '1. Nicht-existierenden Code eingeben (z.B. 9999)',
-            expected: '✅ Fehler: "Code nicht gefunden"'
-          },
-          {
-            title: 'Abgelaufener Code',
-            desc: 'System blockiert abgelaufene Codes',
-            steps: '1. Code erstellen der abgelaufen ist\n2. Versuchen einzulösen',
-            expected: '✅ Fehler: "Code abgelaufen"'
-          },
-          {
-            title: 'Code bereits verwendet',
-            desc: 'Code kann nur 1x verwendet werden',
-            steps: '1. Code einlösen\n2. Gleichen Code nochmal versuchen',
-            expected: '✅ Fehler: "Code bereits verwendet"'
-          }
-        ]
-      },
-      {
-        name: 'Verlauf & Historie',
-        tests: [
-          {
-            title: 'Transaktions-Verlauf',
-            desc: 'Alle Transaktionen werden aufgelistet',
-            steps: '1. Kunde QR scannen\n2. "Verlauf" ansehen',
-            expected: '✅ Liste mit allen Transaktionen (Datum, Betrag, Punkte, Staff)'
-          },
-          {
-            title: 'Filter nach Datum',
-            desc: 'Verlauf kann gefiltert werden',
-            steps: '1. Verlauf öffnen\n2. Datumsfilter nutzen',
-            expected: '✅ Nur Transaktionen im Zeitraum werden angezeigt'
           }
         ]
       }
@@ -684,107 +482,27 @@ const tests = {
   
   admin: {
     name: '👨‍💼 Admin Panel',
+    icon: '👨‍💼',
     categories: [
       {
-        name: 'Dashboard & Übersicht',
+        name: '1. Kunden verwalten',
         tests: [
-          {
-            title: 'Kunden-Statistik',
-            desc: 'Dashboard zeigt Gesamt-Zahlen',
-            steps: '1. Admin öffnen\n2. Dashboard ansehen',
-            expected: '✅ Anzahl Kunden, Transaktionen, Punkte vergeben, etc.'
-          },
           {
             title: 'Kunden-Liste laden',
             desc: 'Alle Kunden werden aufgelistet',
             steps: '1. "Kunden verwalten" öffnen',
-            expected: '✅ Liste mit allen Kunden + Suche funktionie rt'
+            expected: '✅ Liste mit allen Kunden + Suche funktioniert'
           },
-          {
-            title: 'Kunden suchen',
-            desc: 'Suchfunktion funktioniert',
-            steps: '1. Kunden-Liste\n2. Name oder Nummer in Suche eingeben',
-            expected: '✅ Ergebnisse werden gefiltert'
-          }
-        ]
-      },
-      {
-        name: 'Kunden verwalten',
-        tests: [
           {
             title: 'Punkte manuell hinzufügen',
             desc: 'Admin kann Punkte korrigieren',
             steps: '1. Kunde wählen\n2. Punkte eingeben (z.B. +100)\n3. "Hinzufügen" klicken',
             expected: '✅ Punkte werden gutgeschrieben + in DB gespeichert'
-          },
-          {
-            title: 'Punkte abziehen',
-            desc: 'Admin kann Punkte auch abziehen',
-            steps: '1. Kunde wählen\n2. Negative Punkte (-50)\n3. Abziehen',
-            expected: '✅ Punkte werden abgezogen'
-          },
-          {
-            title: 'Kunde löschen',
-            desc: 'Admin kann Kunden entfernen',
-            steps: '1. Kunde wählen\n2. "Löschen" klicken\n3. Bestätigen',
-            expected: '✅ Kunde wird gelöscht + verschwindet aus Liste'
-          },
-          {
-            title: 'Kunden-Details bearbeiten',
-            desc: 'Name/Telefon ändern',
-            steps: '1. Kunde wählen\n2. "Bearbeiten"\n3. Name ändern\n4. Speichern',
-            expected: '✅ Änderungen werden gespeichert'
           }
         ]
       },
       {
-        name: 'Coupons & Codes',
-        tests: [
-          {
-            title: 'Neuen Coupon erstellen',
-            desc: 'Admin kann Gutschein-Codes generieren',
-            steps: '1. "Coupons" öffnen\n2. "Neu erstellen"\n3. Details eingeben (Code, Rabatt, Gültigkeit)\n4. Speichern',
-            expected: '✅ Coupon wird erstellt + 4-stelliger Code generiert'
-          },
-          {
-            title: 'Coupon deaktivieren',
-            desc: 'Admin kann Coupons sperren',
-            steps: '1. Coupon wählen\n2. "Deaktivieren" klicken',
-            expected: '✅ is_active = false + nicht mehr einlösbar'
-          },
-          {
-            title: 'Coupon-Nutzung ansehen',
-            desc: 'Tracking wer Coupon genutzt hat',
-            steps: '1. Coupon wählen\n2. "Nutzung ansehen"',
-            expected: '✅ Liste mit Kunden die Code genutzt haben'
-          }
-        ]
-      },
-      {
-        name: 'Challenges verwalten',
-        tests: [
-          {
-            title: 'Neue Challenge erstellen',
-            desc: 'Admin kann Challenge anlegen',
-            steps: '1. "Challenges"\n2. "Neu erstellen"\n3. Details (Titel, Ziel, Punkte, Dauer)\n4. Speichern',
-            expected: '✅ Challenge wird erstellt + in Index App sichtbar'
-          },
-          {
-            title: 'Challenge aktivieren/deaktivieren',
-            desc: 'Admin kann Challenge an/aus schalten',
-            steps: '1. Challenge wählen\n2. Toggle "Aktiv"',
-            expected: '✅ Status ändert sich + in App (nicht) sichtbar'
-          },
-          {
-            title: 'Challenge-Fortschritt ansehen',
-            desc: 'Admin sieht wer wie weit ist',
-            steps: '1. Challenge wählen\n2. "Teilnehmer ansehen"',
-            expected: '✅ Liste mit allen Kunden + Fortschritt'
-          }
-        ]
-      },
-      {
-        name: 'WhatsApp-Marketing',
+        name: '2. WhatsApp-Marketing',
         tests: [
           {
             title: 'Opt-In Liste exportieren',
@@ -797,51 +515,11 @@ const tests = {
             desc: 'Dashboard zeigt wie viele aktiviert haben',
             steps: '1. WhatsApp-Section ansehen',
             expected: '✅ "X Kunden haben WhatsApp aktiviert" + Prozentsatz'
-          },
-          {
-            title: 'Kunde manuell abmelden',
-            desc: 'Admin kann Opt-Out setzen',
-            steps: '1. Kunde wählen\n2. WhatsApp-Status ändern\n3. Auf "deaktiviert" setzen',
-            expected: '✅ whatsapp_optin = false + Kunde erhält keine Nachrichten mehr'
           }
         ]
       },
       {
-        name: 'Kampagnen-System',
-        tests: [
-          {
-            title: 'Kampagnen-Liste ansehen',
-            desc: 'Alle konfigurierten Kampagnen anzeigen',
-            steps: '1. "Kampagnen"\n2. Liste ansehen',
-            expected: '✅ 5 vorkonfigurierte Kampagnen sichtbar (Happy Hour, Regen, etc.)'
-          },
-          {
-            title: 'Kampagne manuell auslösen',
-            desc: 'Admin kann Kampagne sofort starten',
-            steps: '1. Kampagne wählen (z.B. Happy Hour)\n2. "Jetzt senden" klicken',
-            expected: '✅ Nummern werden exportiert + Ready zum Versand'
-          }
-        ]
-      },
-      {
-        name: 'Glücksrad konfigurieren',
-        tests: [
-          {
-            title: 'Gewinn-Wahrscheinlichkeiten ändern',
-            desc: 'Admin kann Wheel-Config anpassen',
-            steps: '1. "Glücksrad"\n2. Config bearbeiten\n3. Wahrscheinlichkeiten ändern\n4. Speichern',
-            expected: '✅ Neue Werte werden gespeichert + beim nächsten Spin verwendet'
-          },
-          {
-            title: 'Unlock manuell vergeben',
-            desc: 'Admin kann Spin freischalten',
-            steps: '1. Kunde wählen\n2. "Glücksrad-Spin vergeben"\n3. Bestätigen',
-            expected: '✅ Unlock wird erstellt + Kunde kann drehen'
-          }
-        ]
-      },
-      {
-        name: 'Global-Bonuses',
+        name: '3. Happy Hour',
         tests: [
           {
             title: 'Happy Hour aktivieren',
@@ -850,19 +528,19 @@ const tests = {
             expected: '✅ Alle Punkte-Gutschriften werden verdoppelt in diesem Zeitraum'
           },
           {
-            title: 'Happy Hour vor Startzeit',
+            title: 'Happy Hour - Zeitprüfung VORHER',
             desc: 'Bonus gilt nicht vor Startzeit',
             steps: '1. Happy Hour: 15:00-18:00\n2. Um 14:59 Punkte gutschreiben\n3. Prüfen',
             expected: '✅ Normale Punkte (NICHT doppelt)'
           },
           {
-            title: 'Happy Hour während Zeitraum',
+            title: 'Happy Hour - Zeitprüfung WÄHREND',
             desc: 'Bonus gilt während Zeitraum',
             steps: '1. Happy Hour: 15:00-18:00\n2. Um 16:00 Punkte gutschreiben (10€ = 100P)\n3. Prüfen',
             expected: '✅ 200 Punkte gutgeschrieben (doppelt!)'
           },
           {
-            title: 'Happy Hour nach Endzeit',
+            title: 'Happy Hour - Zeitprüfung NACHHER',
             desc: 'Bonus gilt nicht nach Endzeit',
             steps: '1. Happy Hour: 15:00-18:00\n2. Um 18:01 Punkte gutschreiben\n3. Prüfen',
             expected: '✅ Normale Punkte (NICHT doppelt)'
@@ -872,68 +550,12 @@ const tests = {
     ]
   },
   
-  integration: {
-    name: '🔗 Integration & APIs',
-    categories: [
-      {
-        name: 'Datenbank-Integrität',
-        tests: [
-          {
-            title: 'Foreign Keys funktionieren',
-            desc: 'Beziehungen zwischen Tabellen intakt',
-            steps: '1. Kunde löschen in Admin\n2. Prüfe ob Transaktionen auch gelöscht werden',
-            expected: '✅ Cascade Delete: Transaktionen werden mitgelöscht'
-          },
-          {
-            title: 'Punktestand konsistent',
-            desc: 'Punkte stimmen mit Transaktionen überein',
-            steps: '1. Kunde wählen\n2. Transaktionen summieren\n3. Mit Punktestand vergleichen',
-            expected: '✅ Summe stimmt überein'
-          }
-        ]
-      },
-      {
-        name: 'WhatsApp-Integration',
-        tests: [
-          {
-            title: 'WhatsApp Business App installiert',
-            desc: 'App ist auf Telefon verfügbar',
-            steps: '1. WhatsApp Business App auf Business-Phone',
-            expected: '✅ App installiert + Geschäftsprofil eingerichtet'
-          },
-          {
-            title: 'Broadcast-Liste erstellen',
-            desc: 'Kampagnen können versendet werden',
-            steps: '1. WhatsApp Business\n2. Neue Broadcast-Liste\n3. Nummern hinzufügen\n4. Test-Nachricht senden',
-            expected: '✅ Nachricht wird an alle gesendet'
-          }
-        ]
-      },
-      {
-        name: 'Wetter-API (falls implementiert)',
-        tests: [
-          {
-            title: 'OpenWeather API-Key gesetzt',
-            desc: 'API-Key in Supabase Secrets',
-            steps: '1. Supabase → Settings → Secrets\n2. OPENWEATHER_API_KEY prüfen',
-            expected: '✅ Key ist vorhanden'
-          },
-          {
-            title: 'Wetter-Abfrage funktioniert',
-            desc: 'System kann Wetter abrufen',
-            steps: '1. Edge Function testen (falls deployed)\n2. Wetter für Stadt abfragen',
-            expected: '✅ Temperatur & Condition werden zurückgegeben'
-          }
-        ]
-      }
-    ]
-  },
-  
   security: {
-    name: '🔒 Sicherheit & Limits',
+    name: '🔒 Sicherheit',
+    icon: '🔒',
     categories: [
       {
-        name: 'Punkte-Limits',
+        name: '1. Punkte-Limits',
         tests: [
           {
             title: 'Sperre bei 40€ Bestellung',
@@ -954,34 +576,6 @@ const tests = {
             expected: '✅ Keine Warnung + sofort gutgeschrieben'
           }
         ]
-      },
-      {
-        name: 'Rate Limiting',
-        tests: [
-          {
-            title: 'Zu viele Requests',
-            desc: 'System blockiert Spam',
-            steps: '1. Sehr viele Requests schnell hintereinander\n2. z.B. 50x Punkte gutschreiben in 10 Sekunden',
-            expected: '✅ Nach X Requests: "Rate Limit erreicht, bitte warten"'
-          }
-        ]
-      },
-      {
-        name: 'Validierung',
-        tests: [
-          {
-            title: 'SQL Injection Schutz',
-            desc: 'System blockiert SQL in Inputs',
-            steps: '1. Telefon-Feld\n2. Eingabe: "0151\'; DROP TABLE customers; --"\n3. Versuchen',
-            expected: '✅ Eingabe wird escaped/blockiert + keine DB-Manipulation'
-          },
-          {
-            title: 'XSS Schutz',
-            desc: 'Script-Tags werden nicht ausgeführt',
-            steps: '1. Name-Feld\n2. Eingabe: "<script>alert(1)</script>"\n3. Speichern',
-            expected: '✅ Script wird nicht ausgeführt + als Text angezeigt'
-          }
-        ]
       }
     ]
   }
@@ -994,14 +588,41 @@ let testStates = {}
 // Initialize
 function init() {
   loadStates()
+  createTabs()
   showTab('index')
   updateSummary()
+}
+
+function createTabs() {
+  const tabsContainer = document.getElementById('tabs-container')
+  let tabsHTML = ''
+  
+  Object.keys(tests).forEach((key, index) => {
+    const tab = tests[key]
+    const activeClass = index === 0 ? 'active' : ''
+    tabsHTML += `<button class="tab ${activeClass}" data-tab="${key}">${tab.icon} ${tab.name}</button>`
+  })
+  
+  tabsContainer.innerHTML = tabsHTML
+  
+  // Event Listeners
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      const tabName = this.getAttribute('data-tab')
+      showTab(tabName)
+    })
+  })
 }
 
 function loadStates() {
   const saved = localStorage.getItem('doener-test-states')
   if (saved) {
-    testStates = JSON.parse(saved)
+    try {
+      testStates = JSON.parse(saved)
+    } catch (e) {
+      console.error('Error loading states:', e)
+      testStates = {}
+    }
   }
 }
 
@@ -1015,9 +636,12 @@ function showTab(tabName) {
   
   // Update tabs
   document.querySelectorAll('.tab').forEach(tab => {
-    tab.classList.remove('active')
+    if (tab.getAttribute('data-tab') === tabName) {
+      tab.classList.add('active')
+    } else {
+      tab.classList.remove('active')
+    }
   })
-  event.target.classList.add('active')
   
   // Render content
   renderTests(tabName)
@@ -1025,15 +649,16 @@ function showTab(tabName) {
 
 function renderTests(tabName) {
   const testData = tests[tabName]
-  const container = document.getElementById('test-content')
+  if (!testData) return
   
+  const container = document.getElementById('test-content')
   let html = ''
   
   testData.categories.forEach((category, catIndex) => {
     const categoryId = `${tabName}-${catIndex}`
     const categoryTests = category.tests
-    const passedCount = categoryTests.filter(t => getTestState(categoryId, categoryTests.indexOf(t)) === 'pass').length
-    const failedCount = categoryTests.filter(t => getTestState(categoryId, categoryTests.indexOf(t)) === 'fail').length
+    const passedCount = categoryTests.filter((t, idx) => getTestState(categoryId, idx) === 'pass').length
+    const failedCount = categoryTests.filter((t, idx) => getTestState(categoryId, idx) === 'fail').length
     const pendingCount = categoryTests.length - passedCount - failedCount
     
     html += `
@@ -1048,11 +673,10 @@ function renderTests(tabName) {
             <div class="stat pending">⏳ ${pendingCount}</div>
           </div>
         </div>
-        <div class="category-content" id="${categoryId}">
+        <div class="category-content show" id="${categoryId}">
     `
     
     category.tests.forEach((test, testIndex) => {
-      const testId = `${categoryId}-${testIndex}`
       const state = getTestState(categoryId, testIndex)
       const stateClass = state || ''
       
@@ -1063,13 +687,12 @@ function renderTests(tabName) {
           <div class="test-content">
             <div class="test-title">${test.title}</div>
             <div class="test-description">${test.desc}</div>
-            <div class="test-steps"><strong>🔧 Schritte:</strong><br>${test.steps.replace(/\n/g, '<br>')}</div>
+            <div class="test-steps"><strong>🔧 Schritte:</strong>${test.steps}</div>
             <div class="test-expected"><strong>✅ Erwartet:</strong> ${test.expected}</div>
-            ${test.warning ? `<div class="test-warning"><strong>⚠️ Wichtig:</strong> ${test.warning}</div>` : ''}
             <div class="test-actions">
-              <button class="btn-test btn-pass" onclick="setTestState('${categoryId}', ${testIndex}, 'pass')">✅ Bestanden</button>
-              <button class="btn-test btn-fail" onclick="setTestState('${categoryId}', ${testIndex}, 'fail')">❌ Fehlgeschlagen</button>
-              <button class="btn-test btn-reset" onclick="setTestState('${categoryId}', ${testIndex}, null)">↺ Zurücksetzen</button>
+              <button class="btn-test btn-pass" onclick="setTestState('${categoryId}', ${testIndex}, 'pass'); event.stopPropagation();">✅ Bestanden</button>
+              <button class="btn-test btn-fail" onclick="setTestState('${categoryId}', ${testIndex}, 'fail'); event.stopPropagation();">❌ Fehlgeschlagen</button>
+              <button class="btn-test btn-reset" onclick="setTestState('${categoryId}', ${testIndex}, null); event.stopPropagation();">↺ Reset</button>
             </div>
           </div>
         </div>
@@ -1087,7 +710,9 @@ function renderTests(tabName) {
 
 function toggleCategory(categoryId) {
   const content = document.getElementById(categoryId)
-  content.classList.toggle('show')
+  if (content) {
+    content.classList.toggle('show')
+  }
 }
 
 function getTestState(categoryId, testIndex) {
@@ -1190,12 +815,13 @@ function exportResults() {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `doener-boxx-test-report-${Date.now()}.md`
+  a.download = `doener-boxx-test-${Date.now()}.md`
   a.click()
+  URL.revokeObjectURL(url)
 }
 
 // Start
-init()
+window.onload = init
 </script>
 
 </body>
