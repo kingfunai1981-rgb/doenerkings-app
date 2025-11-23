@@ -628,6 +628,11 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
       </div>
     </div>
 
+    <!-- 📱 WhatsApp-Benachrichtigungen Section (VOR Prämien - für NICHT aktiviert) -->
+    <div id="whatsapp-section-top">
+      <!-- Wird dynamisch geladen wenn NICHT aktiviert -->
+    </div>
+
     <!-- 🎁 Prämien einlösen Section -->
     <div class="card">
       <h2>🎁 Prämien einlösen</h2>
@@ -668,15 +673,9 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
       </div>
     </div>
 
-    <!-- 📱 WhatsApp-Benachrichtigungen Section (unter Prämien) -->
-    <div class="card" style="margin-top: 16px;" id="whatsapp-section">
-      <div id="whatsapp-header">
-        <!-- Wird dynamisch geladen -->
-      </div>
-      
-      <div id="whatsapp-status-container">
-        <!-- Wird dynamisch geladen -->
-      </div>
+    <!-- 📱 WhatsApp-Benachrichtigungen Section (NACH Prämien - für aktiviert) -->
+    <div id="whatsapp-section-bottom">
+      <!-- Wird dynamisch geladen wenn aktiviert -->
     </div>
   </div>
 </div>
@@ -1562,67 +1561,71 @@ async function saveWheelSpin(unlockId, prize) {
 async function loadWhatsAppStatus() {
   if (!currentCustomer || !currentCustomer.id) return
   
-  const container = document.getElementById('whatsapp-status-container')
-  const headerContainer = document.getElementById('whatsapp-header')
+  const topContainer = document.getElementById('whatsapp-section-top')
+  const bottomContainer = document.getElementById('whatsapp-section-bottom')
   const isOptedIn = currentCustomer.whatsapp_optin === true
   
   if (isOptedIn) {
-    // Kunde hat WhatsApp aktiviert - KEIN GROSSER HEADER, NUR KOMPAKTER BLOCK
-    headerContainer.innerHTML = ''
+    // ✅ AKTIVIERT → Block wandert NACH UNTEN (unter Prämien)
+    topContainer.innerHTML = '' // Oben leeren
     
     const optinDate = currentCustomer.whatsapp_optin_date ? 
       new Date(currentCustomer.whatsapp_optin_date).toLocaleDateString('de-DE') : 'kürzlich'
     
-    container.innerHTML = `
-      <div style="background: linear-gradient(135deg, #dcfce7, #d1fae5); border: 2px solid #25D366; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="font-size: 24px;">✅</div>
-            <div>
-              <div style="font-weight: 700; color: #166534; font-size: 15px;">WhatsApp aktiviert</div>
-              <div style="font-size: 12px; color: #166534; opacity: 0.8;">Seit ${optinDate}</div>
+    bottomContainer.innerHTML = `
+      <div class="card" style="margin-top: 16px;">
+        <div style="background: linear-gradient(135deg, #dcfce7, #d1fae5); border: 2px solid #25D366; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="font-size: 24px;">✅</div>
+              <div>
+                <div style="font-weight: 700; color: #166534; font-size: 15px;">WhatsApp aktiviert</div>
+                <div style="font-size: 12px; color: #166534; opacity: 0.8;">Seit ${optinDate}</div>
+              </div>
             </div>
           </div>
+          <div style="font-size: 13px; color: #166534; margin-bottom: 10px;">
+            Du erhältst jetzt exklusive Angebote & Happy Hour Alerts! 🎉
+          </div>
+          <button onclick="deactivateWhatsApp()" style="background: #6b7280; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%;">
+            Deaktivieren
+          </button>
         </div>
-        <div style="font-size: 13px; color: #166534; margin-bottom: 10px;">
-          Du erhältst jetzt exklusive Angebote & Happy Hour Alerts! 🎉
-        </div>
-        <button onclick="deactivateWhatsApp()" style="background: #6b7280; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%;">
-          Deaktivieren
-        </button>
       </div>
     `
   } else {
-    // Kunde hat WhatsApp NICHT aktiviert - GROSSER AUFFÄLLIGER HEADER + BLOCK
-    headerContainer.innerHTML = `
-      <h2>📱 WhatsApp-Benachrichtigungen</h2>
-      <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
-        Erhalte exklusive Angebote, Happy Hour Alerts & Glücksrad-Erinnerungen direkt per WhatsApp!
-      </p>
-    `
+    // ❌ NICHT AKTIVIERT → Block bleibt OBEN (prominent, vor Prämien)
+    bottomContainer.innerHTML = '' // Unten leeren
     
-    container.innerHTML = `
-      <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #f59e0b; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-          <div style="font-size: 32px;">📱</div>
-          <div>
-            <div style="font-weight: 700; color: #92400e; font-size: 16px;">Aktiviere WhatsApp</div>
-            <div style="font-size: 13px; color: #92400e;">Verpasse keine Angebote mehr!</div>
+    topContainer.innerHTML = `
+      <div class="card" style="margin-top: 16px;">
+        <h2>📱 WhatsApp-Benachrichtigungen</h2>
+        <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
+          Erhalte exklusive Angebote, Happy Hour Alerts & Glücksrad-Erinnerungen direkt per WhatsApp!
+        </p>
+        
+        <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #f59e0b; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+            <div style="font-size: 32px;">📱</div>
+            <div>
+              <div style="font-weight: 700; color: #92400e; font-size: 16px;">Aktiviere WhatsApp</div>
+              <div style="font-size: 13px; color: #92400e;">Verpasse keine Angebote mehr!</div>
+            </div>
           </div>
+          <div style="font-size: 13px; color: #92400e; margin-bottom: 12px;">
+            Erhalte:<br>
+            • 🔥 Happy Hour Alerts (2x Punkte!)<br>
+            • 🎡 Glücksrad-Erinnerungen<br>
+            • 🎯 Challenge-Updates<br>
+            • 🎁 Exklusive Deals
+          </div>
+          <button onclick="activateWhatsApp()" style="background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border: none; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%;">
+            📱 Jetzt aktivieren
+          </button>
         </div>
-        <div style="font-size: 13px; color: #92400e; margin-bottom: 12px;">
-          Erhalte:<br>
-          • 🔥 Happy Hour Alerts (2x Punkte!)<br>
-          • 🎡 Glücksrad-Erinnerungen<br>
-          • 🎯 Challenge-Updates<br>
-          • 🎁 Exklusive Deals
+        <div style="font-size: 11px; color: #666; text-align: center; padding: 8px;">
+          Datenschutz: Deine Nummer wird nur für Angebote genutzt. Abmeldung jederzeit möglich.
         </div>
-        <button onclick="activateWhatsApp()" style="background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border: none; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%;">
-          📱 Jetzt aktivieren
-        </button>
-      </div>
-      <div style="font-size: 11px; color: #666; text-align: center; padding: 8px;">
-        Datenschutz: Deine Nummer wird nur für Angebote genutzt. Abmeldung jederzeit möglich.
       </div>
     `
   }
@@ -1644,7 +1647,7 @@ async function activateWhatsApp() {
     `Name: ${name}\n` +
     `Telefon: ${phone}\n\n` +
     `Mit dieser Nachricht bestätige ich meine Einwilligung.\n\n` +
-    `📱 Abmeldung jederzeit hier in meinem Kundenkonto möglich`
+    `📱 Abmeldung jederzeit über dein Kundenkonto möglich`
   )
   
   // Öffne WhatsApp mit vorbefülltem Text
