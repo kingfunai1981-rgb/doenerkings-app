@@ -627,6 +627,18 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
         <div id="pending-list"></div>
       </div>
     </div>
+
+    <!-- 📱 WhatsApp-Benachrichtigungen Section -->
+    <div class="card" style="margin-top: 16px;">
+      <h2>📱 WhatsApp-Benachrichtigungen</h2>
+      <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
+        Erhalte exklusive Angebote, Happy Hour Alerts & Glücksrad-Erinnerungen direkt per WhatsApp!
+      </p>
+      
+      <div id="whatsapp-status-container">
+        <!-- Wird dynamisch geladen -->
+      </div>
+    </div>
     
     <div class="card">
       <h2>🎁 Prämien einlösen</h2>
@@ -794,6 +806,9 @@ async function loadCustomer(customer) {
     
     // 🎡 NEU: Prüfe Wheel-Verfügbarkeit
     checkWheelAvailability()
+    
+    // 📱 NEU: Lade WhatsApp-Status
+    loadWhatsAppStatus()
     
   } catch (e) {
     console.error('❌ Fehler beim Laden des Kunden:', e)
@@ -1523,6 +1538,157 @@ async function saveWheelSpin(unlockId, prize) {
     throw e  // Fehler weitergeben
   }
 }
+
+// ═══════════════════════════════════════════════════════════════
+// WhatsApp-Benachrichtigungen Funktionen
+// ═══════════════════════════════════════════════════════════════
+async function loadWhatsAppStatus() {
+  if (!currentCustomer || !currentCustomer.id) return
+  
+  const container = document.getElementById('whatsapp-status-container')
+  const isOptedIn = currentCustomer.whatsapp_optin === true
+  
+  if (isOptedIn) {
+    // Kunde hat WhatsApp aktiviert
+    const optinDate = currentCustomer.whatsapp_optin_date ? 
+      new Date(currentCustomer.whatsapp_optin_date).toLocaleDateString('de-DE') : 'kürzlich'
+    
+    container.innerHTML = `
+      <div style="background: linear-gradient(135deg, #dcfce7, #d1fae5); border: 2px solid #25D366; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <div style="font-size: 32px;">✅</div>
+          <div>
+            <div style="font-weight: 700; color: #166534; font-size: 16px;">WhatsApp aktiviert</div>
+            <div style="font-size: 13px; color: #166534;">Seit ${optinDate}</div>
+          </div>
+        </div>
+        <div style="font-size: 13px; color: #166534; margin-bottom: 12px;">
+          Du erhältst jetzt exklusive Angebote & Happy Hour Alerts per WhatsApp! 🎉
+        </div>
+        <button onclick="deactivateWhatsApp()" style="background: #6b7280; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%;">
+          Deaktivieren
+        </button>
+      </div>
+      <div style="font-size: 12px; color: #666; padding: 12px; background: #f9fafb; border-radius: 8px;">
+        <strong>Was du erhältst:</strong><br>
+        • 🔥 Happy Hour Alerts (doppelte Punkte!)<br>
+        • 🎡 Glücksrad-Erinnerungen<br>
+        • 🎯 Neue Challenges<br>
+        • 🎁 Exklusive Angebote<br>
+        <div style="margin-top: 8px; opacity: 0.8;">Ca. 1-2 Nachrichten pro Woche</div>
+      </div>
+    `
+  } else {
+    // Kunde hat WhatsApp NICHT aktiviert
+    container.innerHTML = `
+      <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #f59e0b; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <div style="font-size: 32px;">📱</div>
+          <div>
+            <div style="font-weight: 700; color: #92400e; font-size: 16px;">Aktiviere WhatsApp</div>
+            <div style="font-size: 13px; color: #92400e;">Verpasse keine Angebote mehr!</div>
+          </div>
+        </div>
+        <div style="font-size: 13px; color: #92400e; margin-bottom: 12px;">
+          Erhalte:<br>
+          • 🔥 Happy Hour Alerts (2x Punkte!)<br>
+          • 🎡 Glücksrad-Erinnerungen<br>
+          • 🎯 Challenge-Updates<br>
+          • 🎁 Exklusive Deals
+        </div>
+        <button onclick="activateWhatsApp()" style="background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border: none; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%;">
+          📱 Jetzt aktivieren
+        </button>
+      </div>
+      <div style="font-size: 11px; color: #666; text-align: center; padding: 8px;">
+        Datenschutz: Deine Nummer wird nur für Angebote genutzt. Abmeldung jederzeit möglich.
+      </div>
+    `
+  }
+}
+
+async function activateWhatsApp() {
+  if (!currentCustomer || !currentCustomer.phone) {
+    alert('❌ Fehler: Kundendaten nicht geladen')
+    return
+  }
+  
+  const phone = currentCustomer.phone
+  const name = currentCustomer.name
+  
+  // WhatsApp Opt-In Text
+  const message = encodeURIComponent(
+    `Hallo Döner Boxx Team! 👋\n\n` +
+    `Ich möchte exklusive Angebote, Happy Hour Alerts und Glücksrad-Erinnerungen per WhatsApp erhalten.\n\n` +
+    `Name: ${name}\n` +
+    `Telefon: ${phone}\n\n` +
+    `Mit dieser Nachricht bestätige ich meine Einwilligung. Abmeldung jederzeit mit "STOP" möglich.`
+  )
+  
+  // Öffne WhatsApp mit vorbefülltem Text
+  // WICHTIG: Hier musst du deine WhatsApp Business Nummer eintragen!
+  const waNumber = '4915123456789' // ← ÄNDERE DIESE NUMMER!
+  const waUrl = `https://wa.me/${waNumber}?text=${message}`
+  
+  // In Datenbank als "wartet auf Bestätigung" markieren
+  try {
+    const { error } = await supabase
+      .from('customers')
+      .update({ 
+        whatsapp_optin: true,
+        whatsapp_optin_date: new Date().toISOString()
+      })
+      .eq('id', currentCustomer.id)
+    
+    if (error) throw error
+    
+    // Update lokales Objekt
+    currentCustomer.whatsapp_optin = true
+    currentCustomer.whatsapp_optin_date = new Date().toISOString()
+    
+    // UI aktualisieren
+    loadWhatsAppStatus()
+    
+    // WhatsApp öffnen
+    window.open(waUrl, '_blank')
+    
+  } catch (e) {
+    console.error('WhatsApp activation error:', e)
+    alert('❌ Fehler beim Aktivieren: ' + e.message)
+  }
+}
+
+async function deactivateWhatsApp() {
+  if (!confirm('Möchtest du WhatsApp-Benachrichtigungen wirklich deaktivieren?\n\nDu verpasst dann exklusive Angebote und Happy Hour Alerts! 😢')) {
+    return
+  }
+  
+  try {
+    const { error } = await supabase
+      .from('customers')
+      .update({ 
+        whatsapp_optin: false,
+        whatsapp_optout_date: new Date().toISOString()
+      })
+      .eq('id', currentCustomer.id)
+    
+    if (error) throw error
+    
+    // Update lokales Objekt
+    currentCustomer.whatsapp_optin = false
+    currentCustomer.whatsapp_optout_date = new Date().toISOString()
+    
+    // UI aktualisieren
+    loadWhatsAppStatus()
+    
+    alert('✅ WhatsApp-Benachrichtigungen wurden deaktiviert.')
+    
+  } catch (e) {
+    console.error('WhatsApp deactivation error:', e)
+    alert('❌ Fehler beim Deaktivieren: ' + e.message)
+  }
+}
+// ═══════════════════════════════════════════════════════════════
 
 console.log('✅ Döner Boxx Kunden-App geladen!')
 </script>
