@@ -823,6 +823,7 @@ async function startHappyHour() {
         bonus_amount: 0,
         start_date: now.toISOString(),
         end_date: endTime.toISOString(),
+        expires_at: endTime.toISOString(), // ← FIX: expires_at hinzugefügt!
         is_active: true,
         description: '🔥 Happy Hour - Doppelte Punkte!'
       })
