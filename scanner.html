@@ -878,7 +878,8 @@ async function onQRDetected(qrCode) {
     if (error) throw error
     if (!data || data.length === 0) throw new Error('Kunde nicht gefunden')
     currentCustomer = data[0]
-    document.getElementById('custName').textContent = currentCustomer.name
+    const whatsappBadge = currentCustomer.whatsapp_optin ? ' <span style="display: inline-block; background: #25D366; color: white; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;">📱 WA</span>' : ''
+    document.getElementById('custName').innerHTML = currentCustomer.name + whatsappBadge
     document.getElementById('custQR').textContent = currentCustomer.qr_id
     document.getElementById('custPoints').textContent = currentCustomer.points
     const { data: globalBonuses } = await supabase.from('activated_global_bonuses').select('*, global_bonuses(*)').eq('customer_id', currentCustomer.id).eq('is_used', false)
