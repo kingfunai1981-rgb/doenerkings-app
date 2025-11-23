@@ -1639,12 +1639,13 @@ async function activateWhatsApp() {
     `Ich möchte exklusive Angebote, Happy Hour Alerts und Glücksrad-Erinnerungen per WhatsApp erhalten.\n\n` +
     `Name: ${name}\n` +
     `Telefon: ${phone}\n\n` +
-    `Mit dieser Nachricht bestätige ich meine Einwilligung. Abmeldung jederzeit mit "STOP" möglich.`
+    `Mit dieser Nachricht bestätige ich meine Einwilligung.\n\n` +
+    `📱 Abmeldung jederzeit in der App unter "WhatsApp-Einstellungen"`
   )
   
   // Öffne WhatsApp mit vorbefülltem Text
   // WICHTIG: Hier musst du deine WhatsApp Business Nummer eintragen!
-  const waNumber = '4917621672130' // ← ÄNDERE DIESE NUMMER!
+  const waNumber = '4915123456789' // ← ÄNDERE DIESE NUMMER!
   const waUrl = `https://wa.me/${waNumber}?text=${message}`
   
   // In Datenbank als "wartet auf Bestätigung" markieren
