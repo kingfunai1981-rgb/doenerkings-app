@@ -176,6 +176,7 @@ textarea { resize: vertical; min-height: 60px; }
       <div class="stat-item"><div class="stat-value" id="totalCustomers">0</div><div class="stat-label">Kunden</div></div>
       <div class="stat-item"><div class="stat-value" id="totalTransactions">0</div><div class="stat-label">Transaktionen</div></div>
       <div class="stat-item"><div class="stat-value" id="totalCodes">0</div><div class="stat-label">Codes</div></div>
+      <div class="stat-item"><div class="stat-value" id="whatsappOptins" style="color: #25D366;">0</div><div class="stat-label">📱 WhatsApp aktiv</div></div>
     </div>
     <div style="margin-top: 24px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;"><h3 style="margin: 0;">Kundenliste</h3></div>
@@ -185,6 +186,83 @@ textarea { resize: vertical; min-height: 60px; }
       </div>
       <div class="warning" id="warningBox" style="display: none;">⚠️ <strong>Hinweis:</strong> Beim Löschen eines Kunden werden auch alle zugehörigen Transaktionen und Codes gelöscht!</div>
       <div id="customerListContainer"><div class="loading"><p>⏳ Lade Kundendaten...</p></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📱 WhatsApp Marketing</h2>
+    <p class="subtitle">Verwalte WhatsApp-Benachrichtigungen für deine Kunden</p>
+    
+    <div style="background: #dcfce7; border: 2px solid #25D366; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #166534; margin-bottom: 8px;">✅ WhatsApp Business App Setup</h3>
+      <p style="font-size: 14px; color: #166534; margin-bottom: 12px;">
+        Für den Start nutze einfach die <strong>kostenlose WhatsApp Business App</strong>:
+      </p>
+      <ol style="font-size: 13px; color: #166534; margin-left: 20px;">
+        <li>WhatsApp Business App herunterladen</li>
+        <li>Geschäftsnummer einrichten</li>
+        <li>Broadcast-Liste erstellen (max. 256 Kontakte)</li>
+        <li>Telefonnummern exportieren (Button unten)</li>
+        <li>Nummern in Broadcast-Liste importieren</li>
+      </ol>
+      <p style="font-size: 12px; color: #166534; margin-top: 12px; font-style: italic;">
+        💡 Tipp: Ab ~100 Kunden mit Opt-In lohnt sich WhatsApp Business API mit Automatisierung!
+      </p>
+    </div>
+
+    <div style="background: #f9fafb; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="margin-bottom: 12px;">📊 Übersicht</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+        <div style="background: white; padding: 12px; border-radius: 8px; border: 2px solid #e5e7eb;">
+          <div style="font-size: 24px; font-weight: 700; color: #25D366;" id="wa-total-optins">0</div>
+          <div style="font-size: 12px; color: #6b7280;">WhatsApp aktiviert</div>
+        </div>
+        <div style="background: white; padding: 12px; border-radius: 8px; border: 2px solid #e5e7eb;">
+          <div style="font-size: 24px; font-weight: 700; color: #F9A825;" id="wa-total-customers">0</div>
+          <div style="font-size: 12px; color: #6b7280;">Gesamt-Kunden</div>
+        </div>
+        <div style="background: white; padding: 12px; border-radius: 8px; border: 2px solid #e5e7eb;">
+          <div style="font-size: 24px; font-weight: 700; color: #E31E24;" id="wa-optin-rate">0%</div>
+          <div style="font-size: 12px; color: #6b7280;">Opt-In Rate</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px;">
+      <h3 style="color: #92400e; margin-bottom: 12px;">📤 Telefonnummern exportieren</h3>
+      <p style="font-size: 14px; color: #92400e; margin-bottom: 12px;">
+        Exportiere alle Telefonnummern von Kunden mit WhatsApp-Opt-In für deine Broadcast-Liste:
+      </p>
+      <button class="success" onclick="exportWhatsAppNumbers()">📥 WhatsApp-Nummern exportieren</button>
+      <div id="result-wa-export"></div>
+      
+      <div id="wa-numbers-list" style="display: none; margin-top: 16px; background: white; padding: 12px; border-radius: 8px; max-height: 300px; overflow-y: auto;">
+        <h4 style="margin-bottom: 8px; font-size: 14px;">Kopiere diese Nummern:</h4>
+        <textarea id="wa-numbers-textarea" readonly style="width: 100%; min-height: 150px; font-family: monospace; font-size: 13px; padding: 8px;"></textarea>
+        <button onclick="copyWhatsAppNumbers()" style="margin-top: 8px; padding: 8px 16px; background: #25D366; color: white; border: none; border-radius: 6px; cursor: pointer;">
+          📋 In Zwischenablage kopieren
+        </button>
+      </div>
+    </div>
+
+    <div style="margin-top: 16px; background: #fffbeb; border: 2px solid #fbbf24; border-radius: 10px; padding: 14px;">
+      <h4 style="color: #92400e; margin-bottom: 8px; font-size: 14px;">💡 Template-Vorschläge für Nachrichten:</h4>
+      <div style="font-size: 13px; color: #92400e;">
+        <strong>Happy Hour:</strong><br>
+        <code style="background: white; padding: 4px 8px; border-radius: 4px; display: block; margin: 6px 0;">
+          🔥 JETZT bei Döner Boxx: Doppelte Punkte bis 19 Uhr! Komm vorbei & sammle mehr Punkte 🎉
+        </code>
+        
+        <strong style="margin-top: 12px; display: block;">Glücksrad-Reminder:</strong><br>
+        <code style="background: white; padding: 4px 8px; border-radius: 4px; display: block; margin: 6px 0;">
+          🎡 Nicht vergessen: Du hast noch ein Glücksrad-Spin offen! Läuft in 4 Stunden ab ⏰ Jetzt in der App einlösen!
+        </code>
+        
+        <strong style="margin-top: 12px; display: block;">Reaktivierung:</strong><br>
+        <code style="background: white; padding: 4px 8px; border-radius: 4px; display: block; margin: 6px 0;">
+          Wir vermissen dich! 😢 Hol dir heute +50 Bonuspunkte mit dem Code COMEBACK50 - nur bis heute 23 Uhr!
+        </code>
+      </div>
     </div>
   </div>
 </div>
@@ -412,6 +490,14 @@ async function loadAllCustomers() {
     document.getElementById('totalCustomers').textContent = customers?.length || 0
     document.getElementById('totalTransactions').textContent = txCount || 0
     document.getElementById('totalCodes').textContent = codeCount || 0
+    
+    // WhatsApp Stats
+    const whatsappOptins = customers.filter(c => c.whatsapp_optin === true).length
+    document.getElementById('whatsappOptins').textContent = whatsappOptins
+    document.getElementById('wa-total-optins').textContent = whatsappOptins
+    document.getElementById('wa-total-customers').textContent = customers?.length || 0
+    const optinRate = customers.length > 0 ? Math.round((whatsappOptins / customers.length) * 100) : 0
+    document.getElementById('wa-optin-rate').textContent = optinRate + '%'
     if (!customers || customers.length === 0) { container.innerHTML = '<div class="empty-state">📭 Noch keine Kunden vorhanden</div>'; document.getElementById('warningBox').style.display = 'none'; document.getElementById('searchResultCount').textContent = ''; return }
     window.allCustomers = customers
     const customerTxCounts = {}
@@ -432,7 +518,8 @@ function displayCustomers(customers) {
   for (const customer of customers) {
     const txCount = window.customerTxCounts?.[customer.id] || 0
     const created = new Date(customer.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
-    customerList.innerHTML += `<div class="customer-item" data-customer-id="${customer.id}"><div class="customer-info"><h3>${customer.name}</h3><p>📱 ${customer.phone}</p><p>📅 Registriert: ${created}</p><span class="qr-id">QR: ${customer.qr_id}</span></div><div class="customer-stats"><div class="customer-points"><span class="value">${customer.points}</span><span class="label">Punkte</span></div><div class="customer-txs"><span class="value">${txCount}</span><span class="label">Transaktionen</span></div></div><button class="danger" onclick="deleteSingleCustomer('${customer.id}', '${customer.name}')">🗑️ Löschen</button></div>`
+    const whatsappBadge = customer.whatsapp_optin ? '<span style="display: inline-block; background: #25D366; color: white; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; margin-left: 6px;">📱 WhatsApp</span>' : ''
+    customerList.innerHTML += `<div class="customer-item" data-customer-id="${customer.id}"><div class="customer-info"><h3>${customer.name}${whatsappBadge}</h3><p>📱 ${customer.phone}</p><p>📅 Registriert: ${created}</p><span class="qr-id">QR: ${customer.qr_id}</span></div><div class="customer-stats"><div class="customer-points"><span class="value">${customer.points}</span><span class="label">Punkte</span></div><div class="customer-txs"><span class="value">${txCount}</span><span class="label">Transaktionen</span></div></div><button class="danger" onclick="deleteSingleCustomer('${customer.id}', '${customer.name}')">🗑️ Löschen</button></div>`
   }
 }
 
@@ -583,7 +670,7 @@ async function loadCoupons() {
       else if (daysLeft <= 3) { statusText = `⏰ ${daysLeft} Tage`; statusColor = '#92400e'; statusBg = '#fef3c7' }
       else { statusText = `⏰ ${daysLeft} Tage`; statusColor = '#92400e'; statusBg = '#fef3c7' }
       let descHTML = coupon.description ? `<p style="color: #6b7280; font-size: 13px; margin: 3px 0;">📝 ${coupon.description}</p>` : ''
-      list.innerHTML += `<div style="background: #f9fafb; border: 2px solid ${isExpired ? '#ef4444' : '#e5e7eb'}; border-radius: 12px; padding: 16px; margin-bottom: 12px; ${isExpired ? 'opacity: 0.6;' : ''}"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;"><span style="padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; background: ${coupon.is_active ? '#fef3c7' : '#fee2e2'}; color: ${coupon.is_active ? '#92400e' : '#991b1b'};">${coupon.is_active ? '✅ Aktiv' : '❌ Inaktiv'}</span></div><div><h3 style="color: #111827; font-size: 16px; margin-bottom: 6px;">🍴 ${coupon.product}</h3><div style="font-size: 18px; font-weight: 700; color: #F9A825; margin: 6px 0;">💰 ${coupon.price}</div>${descHTML}<p style="font-size: 13px; color: #6b7280; margin: 4px 0;">📅 Gültig: ${startDate.toLocaleDateString('de-DE')} - ${endDate.toLocaleDateString('de-DE')}</p><span style="background: ${statusBg}; color: ${statusColor}; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; display: inline-block; margin-top: 4px;">${statusText}</span>${activationsHTML}</div><div style="display: flex; gap: 6px; margin-top: 10px;">${coupon.is_active && !isExpired ? `<button class="danger" style="width: auto; padding: 8px 14px; font-size: 13px;" onclick="deactivateCoupon(${coupon.id})">❌ Deaktivieren</button>` : `<button class="success" style="width: auto; padding: 8px 14px; font-size: 13px; margin: 0;" onclick="activateCoupon(${coupon.id})">✅ Aktivieren</button>`}<button class="danger" style="width: auto; padding: 8px 14px; font-size: 13px;" onclick="deleteCoupon(${coupon.id})">🗑️ Löschen</button></div></div>`
+      list.innerHTML += `<div style="background: #f9fafb; border: 2px solid ${isExpired ? '#ef4444' : '#e5e7eb'}; border-radius: 12px; padding: 16px; margin-bottom: 12px; ${isExpired ? 'opacity: 0.6;' : ''}"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;"><span style="padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; background: ${coupon.is_active ? '#fef3c7' : '#fee2e2'}; color: ${coupon.is_active ? '#92400e' : '#991b1b'};">${coupon.is_active ? '✅ Aktiv' : '❌ Inaktiv'}</span></div><div><h3 style="color: #111827; font-size: 16px; margin-bottom: 6px;">🍴 ${coupon.product}</h3><div style="font-size: 18px; font-weight: 700; color: #F9A825; margin: 6px 0;">💰 ${parseFloat(coupon.price).toFixed(2).replace('.', ',')} €</div>${descHTML}<p style="font-size: 13px; color: #6b7280; margin: 4px 0;">📅 Gültig: ${startDate.toLocaleDateString('de-DE')} - ${endDate.toLocaleDateString('de-DE')}</p><span style="background: ${statusBg}; color: ${statusColor}; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; display: inline-block; margin-top: 4px;">${statusText}</span>${activationsHTML}</div><div style="display: flex; gap: 6px; margin-top: 10px;">${coupon.is_active && !isExpired ? `<button class="danger" style="width: auto; padding: 8px 14px; font-size: 13px;" onclick="deactivateCoupon(${coupon.id})">❌ Deaktivieren</button>` : `<button class="success" style="width: auto; padding: 8px 14px; font-size: 13px; margin: 0;" onclick="activateCoupon(${coupon.id})">✅ Aktivieren</button>`}<button class="danger" style="width: auto; padding: 8px 14px; font-size: 13px;" onclick="deleteCoupon(${coupon.id})">🗑️ Löschen</button></div></div>`
     }
     showResult('result-coupon-load', '', 'success')
   } catch (e) { showResult('result-coupon-load', '❌ Fehler: ' + e.message, 'error') }
@@ -645,6 +732,59 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('challengeStart').value = todayStr; document.getElementById('challengeEnd').value = nextWeekStr
   document.getElementById('couponStart').value = todayStr; document.getElementById('couponEnd').value = nextWeekStr
 })
+
+// ═══════════════════════════════════════════════════════════════
+// WhatsApp-Export-Funktionen
+// ═══════════════════════════════════════════════════════════════
+async function exportWhatsAppNumbers() {
+  const resultDiv = document.getElementById('result-wa-export')
+  const listDiv = document.getElementById('wa-numbers-list')
+  const textarea = document.getElementById('wa-numbers-textarea')
+  
+  try {
+    resultDiv.innerHTML = '<div class="result info">⏳ Lade WhatsApp-Nummern...</div>'
+    
+    const { data: customers, error } = await supabase
+      .from('customers')
+      .select('name, phone, qr_id')
+      .eq('whatsapp_optin', true)
+      .order('name', { ascending: true })
+    
+    if (error) throw error
+    
+    if (!customers || customers.length === 0) {
+      resultDiv.innerHTML = '<div class="result error">❌ Noch keine Kunden mit WhatsApp-Opt-In</div>'
+      listDiv.style.display = 'none'
+      return
+    }
+    
+    // Format: +49... oder direkte Nummer
+    const numbers = customers.map(c => c.phone).join('\n')
+    textarea.value = numbers
+    
+    resultDiv.innerHTML = `<div class="result success">✅ ${customers.length} Nummer(n) exportiert!</div>`
+    listDiv.style.display = 'block'
+    
+  } catch (e) {
+    resultDiv.innerHTML = `<div class="result error">❌ Fehler: ${e.message}</div>`
+    console.error('WhatsApp export error:', e)
+  }
+}
+
+function copyWhatsAppNumbers() {
+  const textarea = document.getElementById('wa-numbers-textarea')
+  textarea.select()
+  document.execCommand('copy')
+  
+  const resultDiv = document.getElementById('result-wa-export')
+  resultDiv.innerHTML = '<div class="result success">✅ Nummern in Zwischenablage kopiert!</div>'
+  
+  setTimeout(() => {
+    resultDiv.innerHTML = ''
+  }, 3000)
+}
+// ═══════════════════════════════════════════════════════════════
+
 console.log('✅ Döner Boxx Verwaltung geladen!')
 </script>
 </body>
