@@ -244,6 +244,148 @@ Komm trocken rein und genieß deinen Döner! 🥙
     <div id="result-weather"></div>
   </div>
 
+  <!-- 💤 INAKTIVITÄTS-KAMPAGNE -->
+  <div class="card" style="border: 3px solid #8b5cf6;">
+    <h2>💤 Inaktivitäts-Kampagne (Win-Back)</h2>
+    <p class="subtitle">Reaktiviere Kunden die länger nicht da waren</p>
+    
+    <!-- Einstellungen -->
+    <div style="background: #ede9fe; border: 2px solid #8b5cf6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #5b21b6; margin-bottom: 12px;">⚙️ Einstellungen</h3>
+      
+      <div class="form-grid">
+        <div>
+          <label class="form-label">Inaktiv nach (Tagen):</label>
+          <input type="number" id="inactive-days" placeholder="z.B. 14" value="14" min="1">
+        </div>
+        <div>
+          <label class="form-label">Rabatt (%):</label>
+          <input type="number" id="inactive-discount" placeholder="z.B. 15" value="15" min="1" max="50">
+        </div>
+      </div>
+      
+      <button class="success" onclick="saveInactiveSettings()">💾 Einstellungen speichern</button>
+      <div id="result-inactive-settings"></div>
+    </div>
+
+    <!-- Statistiken -->
+    <div style="background: #f3f4f6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="margin-bottom: 12px;">📊 Inaktive Kunden</h3>
+      <div id="inactive-stats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
+          <div style="font-size: 32px; font-weight: 700; color: #8b5cf6;" id="stat-inactive-14">-</div>
+          <div style="font-size: 13px; color: #6b7280;">14+ Tage inaktiv</div>
+        </div>
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
+          <div style="font-size: 32px; font-weight: 700; color: #8b5cf6;" id="stat-inactive-30">-</div>
+          <div style="font-size: 13px; color: #6b7280;">30+ Tage inaktiv</div>
+        </div>
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
+          <div style="font-size: 32px; font-weight: 700; color: #8b5cf6;" id="stat-inactive-whatsapp">-</div>
+          <div style="font-size: 13px; color: #6b7280;">Mit WhatsApp</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aktionen -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+      <button class="success" onclick="checkInactiveCustomers()" style="font-size: 16px; padding: 16px; background: linear-gradient(135deg, #8b5cf6, #a78bfa);">
+        🔍 Inaktive Kunden prüfen
+      </button>
+      <button class="success" onclick="sendWinbackCampaign()" id="btn-send-winback" style="font-size: 16px; padding: 16px; background: linear-gradient(135deg, #8b5cf6, #a78bfa);">
+        💌 Win-Back senden
+      </button>
+    </div>
+
+    <!-- WhatsApp Nachricht -->
+    <div id="inactive-whatsapp" style="display: none; background: #ede9fe; border: 2px solid #8b5cf6; border-radius: 10px; padding: 16px;">
+      <h3 style="color: #5b21b6; margin-bottom: 12px;">📱 Win-Back Nachricht</h3>
+      <div style="margin-bottom: 12px;">
+        <label class="form-label" style="color: #5b21b6;">Inaktive Kunden (mit WhatsApp):</label>
+        <div id="inactive-customer-count" style="font-size: 14px; color: #5b21b6; font-weight: 600; margin-bottom: 8px;"></div>
+      </div>
+      <textarea id="inactive-message" readonly style="background: white; min-height: 140px;">Hey! 👋
+
+Wir haben dich schon lange nicht mehr gesehen! 😢
+
+🎁 NUR FÜR DICH: 15% RABATT auf deine nächste Bestellung!
+
+Komm vorbei und lass es dir schmecken! 🥙
+
+📍 [Deine Adresse]
+⏰ Angebot gültig diese Woche!</textarea>
+      <button onclick="copyInactiveMessage()" style="background: #8b5cf6; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px;">
+        📋 Nachricht kopieren
+      </button>
+    </div>
+
+    <div id="result-inactive"></div>
+  </div>
+
+  <!-- 🎯 PUNKTE-REMINDER -->
+  <div class="card" style="border: 3px solid #10b981;">
+    <h2>🎯 Punkte-Reminder (Fast-Prämie)</h2>
+    <p class="subtitle">Erinnere Kunden die fast genug Punkte für eine Prämie haben</p>
+    
+    <!-- Einstellungen -->
+    <div style="background: #d1fae5; border: 2px solid #10b981; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #065f46; margin-bottom: 12px;">⚙️ Einstellungen</h3>
+      
+      <label class="form-label">Prämien-Schwellwerte (Punkte innerhalb dieser Ranges):</label>
+      <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 13px;">
+          <div>
+            <input type="checkbox" id="remind-250" value="250" checked style="width: auto; margin-right: 6px;">
+            <label>Ayran (250P): 200-249P</label>
+          </div>
+          <div>
+            <input type="checkbox" id="remind-500" value="500" checked style="width: auto; margin-right: 6px;">
+            <label>Pommes (500P): 450-499P</label>
+          </div>
+          <div>
+            <input type="checkbox" id="remind-750" value="750" checked style="width: auto; margin-right: 6px;">
+            <label>Döner Box (750P): 700-749P</label>
+          </div>
+          <div>
+            <input type="checkbox" id="remind-1000" value="1000" checked style="width: auto; margin-right: 6px;">
+            <label>Döner XL (1000P): 950-999P</label>
+          </div>
+          <div>
+            <input type="checkbox" id="remind-1250" value="1250" checked style="width: auto; margin-right: 6px;">
+            <label>Döner Teller (1250P): 1200-1249P</label>
+          </div>
+        </div>
+      </div>
+      
+      <button class="success" onclick="saveReminderSettings()">💾 Einstellungen speichern</button>
+      <div id="result-reminder-settings"></div>
+    </div>
+
+    <!-- Statistiken -->
+    <div style="background: #f3f4f6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="margin-bottom: 12px;">📊 Kunden kurz vor Prämie</h3>
+      <div id="reminder-stats"></div>
+    </div>
+
+    <!-- Aktionen -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+      <button class="success" onclick="checkAlmostThereCustomers()" style="font-size: 16px; padding: 16px; background: linear-gradient(135deg, #10b981, #34d399);">
+        🔍 Kunden prüfen
+      </button>
+      <button class="success" onclick="sendPointsReminder()" id="btn-send-reminder" style="font-size: 16px; padding: 16px; background: linear-gradient(135deg, #10b981, #34d399);">
+        🎯 Reminder senden
+      </button>
+    </div>
+
+    <!-- WhatsApp Nachricht -->
+    <div id="reminder-whatsapp" style="display: none; background: #d1fae5; border: 2px solid #10b981; border-radius: 10px; padding: 16px;">
+      <h3 style="color: #065f46; margin-bottom: 12px;">📱 Punkte-Reminder Nachrichten</h3>
+      <div id="reminder-messages"></div>
+    </div>
+
+    <div id="result-reminder"></div>
+  </div>
+
   <div class="card">
     <h2>🎯 Challenge-Bonus</h2>
     <p class="subtitle">Erstelle zeitlich begrenzte Herausforderungen mit Mindestbestellwert</p>
@@ -882,6 +1024,8 @@ window.addEventListener('DOMContentLoaded', function() {
   loadWheelConfig(); loadWheelStats()
   checkHappyHourStatus() // ← HAPPY HOUR STATUS PRÜFEN
   loadWeatherSettings() // ← WETTER EINSTELLUNGEN LADEN
+  loadInactiveSettings() // ← INAKTIVITÄTS-KAMPAGNE LADEN
+  loadReminderSettings() // ← PUNKTE-REMINDER LADEN
   const today = new Date(), nextWeek = new Date(); nextWeek.setDate(nextWeek.getDate() + 7)
   const todayStr = today.toISOString().split('T')[0], nextWeekStr = nextWeek.toISOString().split('T')[0]
   document.getElementById('globalBonusStart').value = todayStr; document.getElementById('globalBonusEnd').value = nextWeekStr
@@ -1340,6 +1484,338 @@ async function loadWeatherSettings() {
   if (active === 'true' && apiKey) {
     startWeatherMonitoring()
   }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Inaktivitäts-Kampagne Funktionen
+// ═══════════════════════════════════════════════════════════════
+
+function saveInactiveSettings() {
+  const days = parseInt(document.getElementById('inactive-days').value) || 14
+  const discount = parseInt(document.getElementById('inactive-discount').value) || 15
+  
+  localStorage.setItem('inactive_days', days)
+  localStorage.setItem('inactive_discount', discount)
+  
+  showResult('result-inactive-settings', `✅ Einstellungen gespeichert! (${days} Tage, ${discount}% Rabatt)`, 'success')
+  
+  // Auto-check
+  checkInactiveCustomers()
+}
+
+async function checkInactiveCustomers() {
+  try {
+    showResult('result-inactive', '⏳ Prüfe inaktive Kunden...', 'info')
+    
+    const inactiveDays = parseInt(localStorage.getItem('inactive_days')) || 14
+    const cutoffDate = new Date()
+    cutoffDate.setDate(cutoffDate.getDate() - inactiveDays)
+    
+    // Hole alle Kunden
+    const { data: allCustomers, error: allError } = await supabase
+      .from('customers')
+      .select('id, name, phone, whatsapp_optin, last_transaction_date')
+      .order('last_transaction_date', { ascending: true })
+    
+    if (allError) throw allError
+    
+    // Filtere inaktive Kunden
+    const inactiveCustomers = allCustomers.filter(customer => {
+      if (!customer.last_transaction_date) return true // Nie bestellt = inaktiv
+      const lastDate = new Date(customer.last_transaction_date)
+      return lastDate < cutoffDate
+    })
+    
+    const inactive14 = inactiveCustomers.length
+    
+    // 30+ Tage
+    const cutoff30 = new Date()
+    cutoff30.setDate(cutoff30.getDate() - 30)
+    const inactive30 = allCustomers.filter(c => {
+      if (!c.last_transaction_date) return true
+      return new Date(c.last_transaction_date) < cutoff30
+    }).length
+    
+    // Mit WhatsApp
+    const inactiveWithWhatsApp = inactiveCustomers.filter(c => c.whatsapp_optin === true)
+    
+    // Update Stats
+    document.getElementById('stat-inactive-14').textContent = inactive14
+    document.getElementById('stat-inactive-30').textContent = inactive30
+    document.getElementById('stat-inactive-whatsapp').textContent = inactiveWithWhatsApp.length
+    
+    if (inactiveWithWhatsApp.length > 0) {
+      document.getElementById('inactive-whatsapp').style.display = 'block'
+      document.getElementById('inactive-customer-count').textContent = 
+        `${inactiveWithWhatsApp.length} Kunden seit ${inactiveDays}+ Tagen inaktiv`
+      
+      showResult('result-inactive', 
+        `✅ ${inactive14} inaktive Kunden gefunden (${inactiveWithWhatsApp.length} mit WhatsApp)`, 
+        'success')
+    } else {
+      document.getElementById('inactive-whatsapp').style.display = 'none'
+      showResult('result-inactive', `ℹ️ Keine inaktiven Kunden mit WhatsApp gefunden`, 'info')
+    }
+    
+  } catch (e) {
+    showResult('result-inactive', '❌ Fehler: ' + e.message, 'error')
+    console.error('Check inactive error:', e)
+  }
+}
+
+async function sendWinbackCampaign() {
+  if (!confirm('Win-Back Kampagne JETZT an inaktive Kunden senden?')) return
+  
+  try {
+    showResult('result-inactive', '⏳ Exportiere Nummern...', 'info')
+    
+    const inactiveDays = parseInt(localStorage.getItem('inactive_days')) || 14
+    const discount = parseInt(localStorage.getItem('inactive_discount')) || 15
+    const cutoffDate = new Date()
+    cutoffDate.setDate(cutoffDate.getDate() - inactiveDays)
+    
+    // Hole inaktive Kunden mit WhatsApp
+    const { data: allCustomers, error } = await supabase
+      .from('customers')
+      .select('id, name, phone, whatsapp_optin, last_transaction_date')
+      .eq('whatsapp_optin', true)
+      .order('last_transaction_date', { ascending: true })
+    
+    if (error) throw error
+    
+    const inactiveCustomers = allCustomers.filter(customer => {
+      if (!customer.last_transaction_date) return true
+      const lastDate = new Date(customer.last_transaction_date)
+      return lastDate < cutoffDate
+    })
+    
+    if (inactiveCustomers.length === 0) {
+      showResult('result-inactive', 'ℹ️ Keine inaktiven Kunden mit WhatsApp gefunden', 'info')
+      return
+    }
+    
+    // Update Nachricht mit aktuellem Rabatt
+    const message = document.getElementById('inactive-message')
+    message.value = `Hey! 👋
+
+Wir haben dich schon lange nicht mehr gesehen! 😢
+
+🎁 NUR FÜR DICH: ${discount}% RABATT auf deine nächste Bestellung!
+
+Komm vorbei und lass es dir schmecken! 🥙
+
+📍 [Deine Adresse]
+⏰ Angebot gültig diese Woche!`
+    
+    document.getElementById('inactive-whatsapp').style.display = 'block'
+    showResult('result-inactive', 
+      `✅ ${inactiveCustomers.length} Kunden bereit für WhatsApp-Versand!`, 
+      'success')
+    
+    alert(`✅ Win-Back Kampagne bereit!\n\n${inactiveCustomers.length} inaktive Kunden (${inactiveDays}+ Tage)\n\nKopiere die Nachricht und sende sie in WhatsApp Business!`)
+    
+  } catch (e) {
+    showResult('result-inactive', '❌ Fehler: ' + e.message, 'error')
+    console.error('Winback error:', e)
+  }
+}
+
+function copyInactiveMessage() {
+  const textarea = document.getElementById('inactive-message')
+  textarea.select()
+  document.execCommand('copy')
+  showResult('result-inactive', '✅ Nachricht kopiert!', 'success')
+}
+
+async function loadInactiveSettings() {
+  const days = localStorage.getItem('inactive_days')
+  const discount = localStorage.getItem('inactive_discount')
+  
+  if (days) {
+    document.getElementById('inactive-days').value = days
+  }
+  if (discount) {
+    document.getElementById('inactive-discount').value = discount
+  }
+  
+  // Auto-check
+  checkInactiveCustomers()
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Punkte-Reminder Funktionen
+// ═══════════════════════════════════════════════════════════════
+
+function saveReminderSettings() {
+  const settings = {
+    250: document.getElementById('remind-250').checked,
+    500: document.getElementById('remind-500').checked,
+    750: document.getElementById('remind-750').checked,
+    1000: document.getElementById('remind-1000').checked,
+    1250: document.getElementById('remind-1250').checked
+  }
+  
+  localStorage.setItem('reminder_settings', JSON.stringify(settings))
+  showResult('result-reminder-settings', '✅ Einstellungen gespeichert!', 'success')
+  
+  // Auto-check
+  checkAlmostThereCustomers()
+}
+
+async function checkAlmostThereCustomers() {
+  try {
+    showResult('result-reminder', '⏳ Prüfe Kunden...', 'info')
+    
+    const settings = JSON.parse(localStorage.getItem('reminder_settings') || '{"250":true,"500":true,"750":true,"1000":true,"1250":true}')
+    
+    // Prämien-Definitionen mit Ranges
+    const rewards = [
+      { points: 250, name: 'Ayran', min: 200, max: 249, emoji: '🥤' },
+      { points: 500, name: 'Pommes', min: 450, max: 499, emoji: '🍟' },
+      { points: 750, name: 'Döner Box', min: 700, max: 749, emoji: '📦' },
+      { points: 1000, name: 'Döner XL', min: 950, max: 999, emoji: '🥙' },
+      { points: 1250, name: 'Döner Teller', min: 1200, max: 1249, emoji: '🍽️' }
+    ]
+    
+    // Hole alle Kunden mit WhatsApp
+    const { data: customers, error } = await supabase
+      .from('customers')
+      .select('id, name, phone, points, whatsapp_optin')
+      .eq('whatsapp_optin', true)
+      .order('points', { ascending: false })
+    
+    if (error) throw error
+    
+    // Gruppiere Kunden nach Prämien-Range
+    const grouped = {}
+    
+    rewards.forEach(reward => {
+      if (!settings[reward.points]) return
+      
+      const inRange = customers.filter(c => 
+        c.points >= reward.min && c.points <= reward.max
+      )
+      
+      if (inRange.length > 0) {
+        grouped[reward.points] = {
+          reward: reward,
+          customers: inRange
+        }
+      }
+    })
+    
+    // Update Stats
+    const statsDiv = document.getElementById('reminder-stats')
+    
+    if (Object.keys(grouped).length === 0) {
+      statsDiv.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 20px;">Keine Kunden kurz vor einer Prämie</div>'
+      document.getElementById('reminder-whatsapp').style.display = 'none'
+      showResult('result-reminder', 'ℹ️ Keine Kunden gefunden', 'info')
+      return
+    }
+    
+    statsDiv.innerHTML = Object.values(grouped).map(group => {
+      const { reward, customers } = group
+      const avgPoints = Math.round(customers.reduce((sum, c) => sum + c.points, 0) / customers.length)
+      const avgNeeded = reward.points - avgPoints
+      
+      return `
+        <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 8px; border-left: 4px solid #10b981;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 700; color: #111827; font-size: 15px;">
+                ${reward.emoji} ${reward.name} (${reward.points}P)
+              </div>
+              <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
+                ${customers.length} Kunden • Ø ${avgNeeded}P fehlen
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 24px; font-weight: 700; color: #10b981;">
+                ${customers.length}
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+    }).join('')
+    
+    // Zeige WhatsApp Section
+    document.getElementById('reminder-whatsapp').style.display = 'block'
+    
+    // Erstelle Nachrichten für jede Gruppe
+    const messagesDiv = document.getElementById('reminder-messages')
+    messagesDiv.innerHTML = Object.values(grouped).map(group => {
+      const { reward, customers } = group
+      const avgNeeded = reward.points - Math.round(customers.reduce((sum, c) => sum + c.points, 0) / customers.length)
+      
+      return `
+        <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+          <div style="font-weight: 700; color: #065f46; margin-bottom: 8px;">
+            ${reward.emoji} ${reward.name} (${customers.length} Kunden)
+          </div>
+          <textarea readonly style="width: 100%; min-height: 100px; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; background: #f9fafb;">Hey! 🎯
+
+Du bist so nah dran! Nur noch ca. ${avgNeeded} Punkte bis zu deinem ${reward.name}! ${reward.emoji}
+
+Komm vorbei und sichere dir deine Prämie! 
+
+📍 [Deine Adresse]</textarea>
+          <button onclick="copyReminderMessage(this)" style="background: #10b981; color: white; width: 100%; padding: 8px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 8px;">
+            📋 Nachricht kopieren
+          </button>
+        </div>
+      `
+    }).join('')
+    
+    const totalCustomers = Object.values(grouped).reduce((sum, g) => sum + g.customers.length, 0)
+    showResult('result-reminder', 
+      `✅ ${totalCustomers} Kunden kurz vor einer Prämie!`, 
+      'success')
+    
+  } catch (e) {
+    showResult('result-reminder', '❌ Fehler: ' + e.message, 'error')
+    console.error('Check almost there error:', e)
+  }
+}
+
+async function sendPointsReminder() {
+  if (!confirm('Punkte-Reminder JETZT senden?')) return
+  
+  await checkAlmostThereCustomers()
+  
+  alert('✅ Reminder bereit!\n\nKopiere die Nachrichten unten und sende sie an die jeweiligen Kunden-Gruppen in WhatsApp Business!')
+}
+
+function copyReminderMessage(button) {
+  const textarea = button.previousElementSibling
+  textarea.select()
+  document.execCommand('copy')
+  
+  const originalText = button.textContent
+  button.textContent = '✅ Kopiert!'
+  button.style.background = '#22c55e'
+  
+  setTimeout(() => {
+    button.textContent = originalText
+    button.style.background = '#10b981'
+  }, 2000)
+}
+
+async function loadReminderSettings() {
+  const settings = localStorage.getItem('reminder_settings')
+  if (settings) {
+    const parsed = JSON.parse(settings)
+    Object.keys(parsed).forEach(key => {
+      const checkbox = document.getElementById(`remind-${key}`)
+      if (checkbox) {
+        checkbox.checked = parsed[key]
+      }
+    })
+  }
+  
+  // Auto-check
+  checkAlmostThereCustomers()
 }
 
 // ═══════════════════════════════════════════════════════════════
