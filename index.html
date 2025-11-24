@@ -889,15 +889,119 @@ function updateRewardButtons(points) {
   document.getElementById('btn-1250').disabled = points < 1250
 }
 
+// Tracking für Einlösungs-Requests (verhindert Doppelklicks)
+let redeemInProgress = {}
+
 async function redeem(rewardName, cost) {
-  if (!currentCustomer || currentCustomer.points < cost) return
+  // 1. Basis-Check
+  if (!currentCustomer || currentCustomer.points < cost) {
+    alert('❌ Nicht genug Punkte!')
+    return
+  }
+  
+  // 2. Doppelklick-Schutz
+  if (redeemInProgress[rewardName]) {
+    console.log('⏳ Einlösung bereits in Bearbeitung...')
+    return
+  }
+  
   try {
+    // 3. Markiere als "in Bearbeitung"
+    redeemInProgress[rewardName] = true
+    
+    // 4. Button deaktivieren
+    const btn = document.getElementById(`btn-${cost}`)
+    if (btn) {
+      btn.disabled = true
+      btn.textContent = '⏳ Wird erstellt...'
+      btn.style.opacity = '0.5'
+    }
+    
+    // 5. Prüfe ob bereits ein PENDING Code für diese Prämie existiert
+    const { data: existingCodes, error: checkError } = await supabase
+      .from('redeem_codes')
+      .select('*')
+      .eq('customer_id', currentCustomer.id)
+      .eq('reward_name', rewardName)
+      .eq('used', false)
+    
+    if (checkError) throw checkError
+    
+    if (existingCodes && existingCodes.length > 0) {
+      alert('❌ Du hast bereits einen Code für diese Prämie!\n\nBitte löse den bestehenden Code erst ein oder storniere ihn.')
+      throw new Error('Existing pending code')
+    }
+    
+    // 6. Aktualisiere Kundenstand aus DB (verhindert veraltete Daten)
+    const { data: freshCustomer, error: customerError } = await supabase
+      .from('customers')
+      .select('points')
+      .eq('id', currentCustomer.id)
+      .single()
+    
+    if (customerError) throw customerError
+    
+    // 7. Finale Punkte-Prüfung mit aktuellen Daten
+    if (freshCustomer.points < cost) {
+      alert('❌ Nicht genug Punkte! (Aktueller Stand: ' + freshCustomer.points + ')')
+      throw new Error('Insufficient points')
+    }
+    
+    // 8. Erstelle Code
     const code = await generateUniqueCode('redeem_codes', 'code')
     const expires = new Date(Date.now() + 24*60*60*1000)
-    const { error } = await supabase.from('redeem_codes').insert({ code, customer_id: currentCustomer.id, reward_name: rewardName, points_cost: cost, valid_until: expires.toISOString(), used: false })
-    if (error) { console.error('❌ Redeem error:', error); alert('❌ Fehler beim Erstellen des Codes. Bitte nochmal versuchen.'); return }
-    loadPendingCodes()
-  } catch (e) { console.error('❌ Redeem error:', e); alert('❌ Fehler: ' + e.message) }
+    
+    const { error: insertError } = await supabase
+      .from('redeem_codes')
+      .insert({ 
+        code, 
+        customer_id: currentCustomer.id, 
+        reward_name: rewardName, 
+        points_cost: cost, 
+        valid_until: expires.toISOString(), 
+        used: false 
+      })
+    
+    if (insertError) throw insertError
+    
+    // 9. Erfolg!
+    if (btn) {
+      btn.textContent = '✅ Code erstellt!'
+      btn.style.background = '#22c55e'
+    }
+    
+    // 10. Lade pending codes + aktualisiere Anzeige
+    await loadPendingCodes()
+    await refreshCustomerData()
+    
+    // 11. Button nach 2 Sekunden zurücksetzen
+    setTimeout(() => {
+      if (btn) {
+        btn.disabled = false
+        btn.textContent = 'Einlösen'
+        btn.style.opacity = '1'
+        btn.style.background = ''
+      }
+      redeemInProgress[rewardName] = false
+    }, 2000)
+    
+  } catch (e) {
+    console.error('❌ Redeem error:', e)
+    
+    // Button zurücksetzen bei Fehler
+    const btn = document.getElementById(`btn-${cost}`)
+    if (btn) {
+      btn.disabled = false
+      btn.textContent = 'Einlösen'
+      btn.style.opacity = '1'
+    }
+    
+    redeemInProgress[rewardName] = false
+    
+    if (e.message !== 'Existing pending code' && e.message !== 'Insufficient points') {
+      alert('❌ Fehler beim Erstellen des Codes. Bitte nochmal versuchen.')
+    }
+  }
 }
 
 async function loadPendingCodes() {
