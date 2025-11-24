@@ -899,15 +899,15 @@ async function redeem(rewardName, cost) {
     return
   }
   
-  // 2. Doppelklick-Schutz
-  if (redeemInProgress[rewardName]) {
+  // 2. Doppelklick-Schutz (global, nicht nur pro Prämie)
+  if (redeemInProgress['any']) {
     console.log('⏳ Einlösung bereits in Bearbeitung...')
     return
   }
   
   try {
-    // 3. Markiere als "in Bearbeitung"
-    redeemInProgress[rewardName] = true
+    // 3. Markiere als "in Bearbeitung" (GLOBAL!)
+    redeemInProgress['any'] = true
     
     // 4. Button deaktivieren
     const btn = document.getElementById(`btn-${cost}`)
@@ -917,19 +917,20 @@ async function redeem(rewardName, cost) {
       btn.style.opacity = '0.5'
     }
     
-    // 5. Prüfe ob bereits ein PENDING Code für diese Prämie existiert
+    // 5. KRITISCH: Prüfe ob IRGENDEIN PENDING Code existiert (nicht nur für diese Prämie!)
     const { data: existingCodes, error: checkError } = await supabase
       .from('redeem_codes')
       .select('*')
       .eq('customer_id', currentCustomer.id)
-      .eq('reward_name', rewardName)
       .eq('used', false)
     
     if (checkError) throw checkError
     
+    // NEU: Prüfe ALLE pending Codes, nicht nur für diese Prämie
     if (existingCodes && existingCodes.length > 0) {
-      alert('❌ Du hast bereits einen Code für diese Prämie!\n\nBitte löse den bestehenden Code erst ein oder storniere ihn.')
-      throw new Error('Existing pending code')
+      const existingRewards = existingCodes.map(c => c.reward_name).join(', ')
+      alert(`❌ Du hast bereits ${existingCodes.length} wartende${existingCodes.length > 1 ? '' : 'n'} Code!\n\nBitte löse zuerst deine bestehenden Codes ein oder storniere sie:\n\n${existingRewards}\n\nDann kannst du eine neue Prämie einlösen.`)
+      throw new Error('Existing pending codes')
     }
     
     // 6. Aktualisiere Kundenstand aus DB (verhindert veraltete Daten)
@@ -982,7 +983,7 @@ async function redeem(rewardName, cost) {
         btn.style.opacity = '1'
         btn.style.background = ''
       }
-      redeemInProgress[rewardName] = false
+      redeemInProgress['any'] = false
     }, 2000)
     
   } catch (e) {
@@ -996,9 +997,9 @@ async function redeem(rewardName, cost) {
       btn.style.opacity = '1'
     }
     
-    redeemInProgress[rewardName] = false
+    redeemInProgress['any'] = false
     
-    if (e.message !== 'Existing pending code' && e.message !== 'Insufficient points') {
+    if (e.message !== 'Existing pending codes' && e.message !== 'Insufficient points') {
       alert('❌ Fehler beim Erstellen des Codes. Bitte nochmal versuchen.')
     }
   }
