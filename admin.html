@@ -158,6 +158,92 @@ Komm vorbei und sichere dir extra Punkte!
     <div id="result-happy-hour"></div>
   </div>
 
+  <!-- 🌧️ WETTER-KAMPAGNE -->
+  <div class="card" style="border: 3px solid #3b82f6;">
+    <h2>🌧️ Wetter-Kampagne (Automatisch)</h2>
+    <p class="subtitle">Automatische Regen-Special Benachrichtigungen bei schlechtem Wetter</p>
+    
+    <!-- Einstellungen -->
+    <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #1e40af; margin-bottom: 12px;">⚙️ Einstellungen</h3>
+      
+      <label class="form-label">OpenWeather API Key:</label>
+      <input type="text" id="weather-api-key" placeholder="Dein OpenWeather API Key" value="">
+      <div style="font-size: 12px; color: #6b7280; margin-bottom: 12px;">
+        Kostenlos bei <a href="https://openweathermap.org/api" target="_blank" style="color: #3b82f6;">OpenWeatherMap.org</a> registrieren
+      </div>
+      
+      <div class="form-grid">
+        <div>
+          <label class="form-label">Stadt:</label>
+          <input type="text" id="weather-city" placeholder="z.B. Kassel" value="Kassel">
+        </div>
+        <div>
+          <label class="form-label">Status:</label>
+          <select id="weather-active">
+            <option value="true">✅ Aktiv</option>
+            <option value="false">❌ Inaktiv</option>
+          </select>
+        </div>
+      </div>
+      
+      <label class="form-label">🌧️ Regen-Schwellwert (mm/h):</label>
+      <input type="number" id="weather-rain-threshold" placeholder="z.B. 1.0" value="1.0" step="0.1">
+      <div style="font-size: 12px; color: #6b7280; margin-bottom: 12px;">
+        Ab wie viel mm Regen pro Stunde soll die Kampagne aktiviert werden?
+      </div>
+      
+      <button class="success" onclick="saveWeatherSettings()">💾 Einstellungen speichern</button>
+      <div id="result-weather-settings"></div>
+    </div>
+
+    <!-- Aktuelles Wetter -->
+    <div id="weather-current" style="background: #f3f4f6; border-radius: 10px; padding: 16px; margin-bottom: 16px; display: none;">
+      <h3 style="margin-bottom: 12px;">☁️ Aktuelles Wetter</h3>
+      <div id="weather-display"></div>
+    </div>
+
+    <!-- Wetter-Status -->
+    <div style="background: #f3f4f6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div id="weather-status-icon" style="font-size: 48px;">☁️</div>
+        <div style="flex: 1;">
+          <div id="weather-status-text" style="font-size: 18px; font-weight: 700; color: #374151; margin-bottom: 4px;">Wetter-Überwachung inaktiv</div>
+          <div id="weather-status-sub" style="font-size: 14px; color: #6b7280;">API-Key eingeben um zu starten</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manuelle Aktion -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+      <button class="success" onclick="checkWeatherNow()" id="btn-check-weather" style="font-size: 16px; padding: 16px;">
+        🌤️ Wetter JETZT prüfen
+      </button>
+      <button class="success" onclick="sendRainSpecial()" id="btn-send-rain" style="font-size: 16px; padding: 16px; background: linear-gradient(135deg, #3b82f6, #60a5fa);">
+        🌧️ Regen-Special senden
+      </button>
+    </div>
+
+    <!-- WhatsApp Nachricht Vorschau -->
+    <div id="weather-whatsapp" style="display: none; background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 16px;">
+      <h3 style="color: #1e40af; margin-bottom: 12px;">📱 Regen-Special Nachricht</h3>
+      <textarea id="weather-message" readonly style="background: white; min-height: 120px;">🌧️ REGEN-SPECIAL bei Döner Boxx!
+
+Bei diesem Wetter hol dir was Leckeres! 😋
+
+🎁 HEUTE: +50 Bonus-Punkte auf jede Bestellung!
+
+Komm trocken rein und genieß deinen Döner! 🥙
+
+📍 [Deine Adresse]</textarea>
+      <button onclick="copyWeatherMessage()" style="background: #3b82f6; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px;">
+        📋 Nachricht kopieren
+      </button>
+    </div>
+
+    <div id="result-weather"></div>
+  </div>
+
   <div class="card">
     <h2>🎯 Challenge-Bonus</h2>
     <p class="subtitle">Erstelle zeitlich begrenzte Herausforderungen mit Mindestbestellwert</p>
@@ -795,6 +881,7 @@ window.addEventListener('DOMContentLoaded', function() {
   loadAllCustomers(); loadGlobalBonuses(); loadChallenges(); loadCoupons()
   loadWheelConfig(); loadWheelStats()
   checkHappyHourStatus() // ← HAPPY HOUR STATUS PRÜFEN
+  loadWeatherSettings() // ← WETTER EINSTELLUNGEN LADEN
   const today = new Date(), nextWeek = new Date(); nextWeek.setDate(nextWeek.getDate() + 7)
   const todayStr = today.toISOString().split('T')[0], nextWeekStr = nextWeek.toISOString().split('T')[0]
   document.getElementById('globalBonusStart').value = todayStr; document.getElementById('globalBonusEnd').value = nextWeekStr
@@ -990,6 +1077,269 @@ function copyHHMessage() {
   textarea.select()
   document.execCommand('copy')
   showResult('result-happy-hour', '✅ Nachricht kopiert! Jetzt in WhatsApp Business einfügen.', 'success')
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Wetter-API Funktionen
+// ═══════════════════════════════════════════════════════════════
+
+let weatherCheckInterval = null
+
+async function saveWeatherSettings() {
+  const apiKey = document.getElementById('weather-api-key').value.trim()
+  const city = document.getElementById('weather-city').value.trim()
+  const active = document.getElementById('weather-active').value === 'true'
+  const rainThreshold = parseFloat(document.getElementById('weather-rain-threshold').value) || 1.0
+  
+  if (!apiKey) {
+    showResult('result-weather-settings', '❌ Bitte API-Key eingeben!', 'error')
+    return
+  }
+  
+  if (!city) {
+    showResult('result-weather-settings', '❌ Bitte Stadt eingeben!', 'error')
+    return
+  }
+  
+  try {
+    showResult('result-weather-settings', '⏳ Speichere & teste API...', 'info')
+    
+    // Teste API-Key
+    const testResponse = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=de`
+    )
+    
+    if (!testResponse.ok) {
+      throw new Error('API-Key oder Stadt ungültig')
+    }
+    
+    // Speichere in localStorage
+    localStorage.setItem('weather_api_key', apiKey)
+    localStorage.setItem('weather_city', city)
+    localStorage.setItem('weather_active', active)
+    localStorage.setItem('weather_rain_threshold', rainThreshold)
+    
+    showResult('result-weather-settings', '✅ Einstellungen gespeichert & API funktioniert!', 'success')
+    
+    // Starte Überwachung wenn aktiv
+    if (active) {
+      startWeatherMonitoring()
+    } else {
+      stopWeatherMonitoring()
+    }
+    
+    // Zeige aktuelles Wetter
+    checkWeatherNow()
+    
+  } catch (e) {
+    showResult('result-weather-settings', '❌ Fehler: ' + e.message, 'error')
+    console.error('Weather settings error:', e)
+  }
+}
+
+async function checkWeatherNow() {
+  const apiKey = localStorage.getItem('weather_api_key')
+  const city = localStorage.getItem('weather_city') || 'Kassel'
+  
+  if (!apiKey) {
+    showResult('result-weather', '❌ Bitte erst API-Key in den Einstellungen eingeben!', 'error')
+    return
+  }
+  
+  try {
+    showResult('result-weather', '⏳ Prüfe Wetter...', 'info')
+    
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=de`
+    )
+    
+    if (!response.ok) {
+      throw new Error('Wetter-Abfrage fehlgeschlagen')
+    }
+    
+    const data = await response.json()
+    
+    // Zeige Wetter-Info
+    const currentDiv = document.getElementById('weather-current')
+    const displayDiv = document.getElementById('weather-display')
+    
+    const temp = Math.round(data.main.temp)
+    const desc = data.weather[0].description
+    const icon = getWeatherIcon(data.weather[0].main)
+    const rain = data.rain && data.rain['1h'] ? data.rain['1h'] : 0
+    
+    displayDiv.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="font-size: 64px;">${icon}</div>
+        <div style="flex: 1;">
+          <div style="font-size: 24px; font-weight: 700; color: #111827;">${temp}°C</div>
+          <div style="font-size: 16px; color: #6b7280; margin-top: 4px;">${desc}</div>
+          <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">
+            💧 Regen: ${rain.toFixed(1)} mm/h
+          </div>
+        </div>
+      </div>
+    `
+    
+    currentDiv.style.display = 'block'
+    
+    // Update Status
+    const threshold = parseFloat(localStorage.getItem('weather_rain_threshold')) || 1.0
+    const isRaining = rain >= threshold
+    
+    updateWeatherStatus(isRaining, rain, temp, desc)
+    
+    if (isRaining) {
+      showResult('result-weather', `🌧️ Es regnet! (${rain.toFixed(1)} mm/h) - Bereit für Regen-Special!`, 'success')
+      document.getElementById('weather-whatsapp').style.display = 'block'
+    } else {
+      showResult('result-weather', `☀️ Kein Regen (${rain.toFixed(1)} mm/h) - Kein Special nötig`, 'info')
+      document.getElementById('weather-whatsapp').style.display = 'none'
+    }
+    
+  } catch (e) {
+    showResult('result-weather', '❌ Fehler: ' + e.message, 'error')
+    console.error('Weather check error:', e)
+  }
+}
+
+function updateWeatherStatus(isRaining, rain, temp, desc) {
+  const statusIcon = document.getElementById('weather-status-icon')
+  const statusText = document.getElementById('weather-status-text')
+  const statusSub = document.getElementById('weather-status-sub')
+  
+  if (isRaining) {
+    statusIcon.textContent = '🌧️'
+    statusText.textContent = 'ES REGNET!'
+    statusText.style.color = '#3b82f6'
+    statusSub.textContent = `${rain.toFixed(1)} mm/h - Perfekt für Regen-Special!`
+  } else {
+    statusIcon.textContent = getWeatherIcon(desc)
+    statusText.textContent = 'Kein Regen'
+    statusText.style.color = '#374151'
+    statusSub.textContent = `${temp}°C - ${desc}`
+  }
+}
+
+function getWeatherIcon(weatherMain) {
+  const icons = {
+    'Clear': '☀️',
+    'Clouds': '☁️',
+    'Rain': '🌧️',
+    'Drizzle': '🌦️',
+    'Thunderstorm': '⛈️',
+    'Snow': '❄️',
+    'Mist': '🌫️',
+    'Fog': '🌫️'
+  }
+  return icons[weatherMain] || '☁️'
+}
+
+async function sendRainSpecial() {
+  if (!confirm('Regen-Special JETZT an alle WhatsApp-Kunden senden?')) return
+  
+  try {
+    showResult('result-weather', '⏳ Erstelle Bonus & exportiere Nummern...', 'info')
+    
+    // 1. Erstelle Global Bonus für heute
+    const today = new Date()
+    const endOfDay = new Date(today)
+    endOfDay.setHours(23, 59, 59)
+    
+    const { data: bonus, error: bonusError } = await supabase
+      .from('global_bonuses')
+      .insert({
+        bonus_type: 'bonus_points',
+        bonus_amount: 50,
+        start_date: today.toISOString(),
+        end_date: endOfDay.toISOString(),
+        expires_at: endOfDay.toISOString(),
+        is_active: true,
+        title: '🌧️ Regen-Special',
+        description: 'Bei Regen gibt\'s Extra-Punkte!'
+      })
+      .select()
+      .single()
+    
+    if (bonusError) throw bonusError
+    
+    // 2. Exportiere WhatsApp-Nummern
+    const { data: customers, error: customerError } = await supabase
+      .from('customers')
+      .select('phone, name')
+      .eq('whatsapp_optin', true)
+      .order('name')
+    
+    if (customerError) throw customerError
+    
+    const count = customers.length
+    
+    // 3. Zeige Nachricht
+    document.getElementById('weather-whatsapp').style.display = 'block'
+    
+    showResult('result-weather', `✅ Bonus erstellt! ${count} Kunden bereit für WhatsApp-Versand!`, 'success')
+    alert(`✅ Regen-Special aktiviert!\n\n${count} Kunden können jetzt benachrichtigt werden.\n\nKopiere die Nachricht und sende sie in WhatsApp Business!`)
+    
+  } catch (e) {
+    showResult('result-weather', '❌ Fehler: ' + e.message, 'error')
+    console.error('Rain special error:', e)
+  }
+}
+
+function copyWeatherMessage() {
+  const textarea = document.getElementById('weather-message')
+  textarea.select()
+  document.execCommand('copy')
+  showResult('result-weather', '✅ Nachricht kopiert!', 'success')
+}
+
+function startWeatherMonitoring() {
+  if (weatherCheckInterval) {
+    clearInterval(weatherCheckInterval)
+  }
+  
+  // Prüfe alle 30 Minuten
+  weatherCheckInterval = setInterval(() => {
+    checkWeatherNow()
+  }, 30 * 60 * 1000)
+  
+  // Erste Prüfung sofort
+  checkWeatherNow()
+  
+  console.log('✅ Wetter-Überwachung gestartet (alle 30 Min)')
+}
+
+function stopWeatherMonitoring() {
+  if (weatherCheckInterval) {
+    clearInterval(weatherCheckInterval)
+    weatherCheckInterval = null
+  }
+  console.log('⏹️ Wetter-Überwachung gestoppt')
+}
+
+async function loadWeatherSettings() {
+  const apiKey = localStorage.getItem('weather_api_key')
+  const city = localStorage.getItem('weather_city')
+  const active = localStorage.getItem('weather_active')
+  const threshold = localStorage.getItem('weather_rain_threshold')
+  
+  if (apiKey) {
+    document.getElementById('weather-api-key').value = apiKey
+  }
+  if (city) {
+    document.getElementById('weather-city').value = city
+  }
+  if (active) {
+    document.getElementById('weather-active').value = active
+  }
+  if (threshold) {
+    document.getElementById('weather-rain-threshold').value = threshold
+  }
+  
+  // Starte Überwachung wenn aktiv
+  if (active === 'true' && apiKey) {
+    startWeatherMonitoring()
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
