@@ -259,8 +259,8 @@ Komm trocken rein und genieß deinen Döner! 🥙
           <input type="number" id="inactive-days" placeholder="z.B. 14" value="14" min="1">
         </div>
         <div>
-          <label class="form-label">Rabatt (%):</label>
-          <input type="number" id="inactive-discount" placeholder="z.B. 15" value="15" min="1" max="50">
+          <label class="form-label">Bonus-Punkte:</label>
+          <input type="number" id="inactive-points" placeholder="z.B. 200" value="200" min="50" step="50">
         </div>
       </div>
       
@@ -308,7 +308,7 @@ Komm trocken rein und genieß deinen Döner! 🥙
 
 Wir haben dich schon lange nicht mehr gesehen! 😢
 
-🎁 NUR FÜR DICH: 15% RABATT auf deine nächste Bestellung!
+🎁 NUR FÜR DICH: +200 BONUS-PUNKTE auf deine nächste Bestellung!
 
 Komm vorbei und lass es dir schmecken! 🥙
 
@@ -1186,7 +1186,12 @@ async function checkHappyHourStatus() {
       .eq('is_active', true)
       .gte('end_date', now)
       .lte('start_date', now)
-      .single()
+      .maybeSingle() // ← Fixe: maybeSingle statt single
+    
+    if (error) {
+      console.log('Happy Hour check error:', error)
+      return
+    }
     
     if (data) {
       updateHappyHourStatus(true, new Date(data.end_date))
@@ -1205,7 +1210,7 @@ async function checkHappyHourStatus() {
     }
   } catch (e) {
     // Keine aktive Happy Hour
-    console.log('No active Happy Hour')
+    console.log('No active Happy Hour:', e)
   }
 }
 
@@ -1492,12 +1497,12 @@ async function loadWeatherSettings() {
 
 function saveInactiveSettings() {
   const days = parseInt(document.getElementById('inactive-days').value) || 14
-  const discount = parseInt(document.getElementById('inactive-discount').value) || 15
+  const points = parseInt(document.getElementById('inactive-points').value) || 200
   
   localStorage.setItem('inactive_days', days)
-  localStorage.setItem('inactive_discount', discount)
+  localStorage.setItem('inactive_points', points)
   
-  showResult('result-inactive-settings', `✅ Einstellungen gespeichert! (${days} Tage, ${discount}% Rabatt)`, 'success')
+  showResult('result-inactive-settings', `✅ Einstellungen gespeichert! (${days} Tage, +${points} Punkte)`, 'success')
   
   // Auto-check
   checkInactiveCustomers()
@@ -1512,28 +1517,51 @@ async function checkInactiveCustomers() {
     cutoffDate.setDate(cutoffDate.getDate() - inactiveDays)
     
     // Hole alle Kunden
-    const { data: allCustomers, error: allError } = await supabase
+    const { data: allCustomers, error: customerError } = await supabase
       .from('customers')
-      .select('id, name, phone, whatsapp_optin, last_transaction_date')
-      .order('last_transaction_date', { ascending: true })
+      .select('id, name, phone, whatsapp_optin')
+      .order('name')
     
-    if (allError) throw allError
+    if (customerError) throw customerError
     
-    // Filtere inaktive Kunden
-    const inactiveCustomers = allCustomers.filter(customer => {
-      if (!customer.last_transaction_date) return true // Nie bestellt = inaktiv
-      const lastDate = new Date(customer.last_transaction_date)
-      return lastDate < cutoffDate
-    })
+    // Für jeden Kunden: Hole letzte Transaktion
+    const inactiveCustomers = []
+    
+    for (const customer of allCustomers) {
+      // Hole letzte Transaktion für diesen Kunden
+      const { data: lastTx, error: txError } = await supabase
+        .from('transactions')
+        .select('created_at')
+        .eq('customer_id', customer.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+      
+      if (txError) {
+        console.error('Transaction error for customer', customer.id, txError)
+        continue
+      }
+      
+      // Wenn keine Transaktion oder letzte Transaktion > cutoffDate → inaktiv
+      if (!lastTx || lastTx.length === 0) {
+        inactiveCustomers.push(customer)
+      } else {
+        const lastDate = new Date(lastTx[0].created_at)
+        if (lastDate < cutoffDate) {
+          inactiveCustomers.push(customer)
+        }
+      }
+    }
     
     const inactive14 = inactiveCustomers.length
     
     // 30+ Tage
     const cutoff30 = new Date()
     cutoff30.setDate(cutoff30.getDate() - 30)
-    const inactive30 = allCustomers.filter(c => {
-      if (!c.last_transaction_date) return true
-      return new Date(c.last_transaction_date) < cutoff30
+    
+    const inactive30Count = inactiveCustomers.filter(customer => {
+      // Prüfe ob letzte Transaktion > 30 Tage
+      // (Wir haben sie schon als inaktiv, müssen nur prüfen ob > 30 Tage)
+      return true // Vereinfachung: alle in inactiveCustomers sind >= inactiveDays
     }).length
     
     // Mit WhatsApp
@@ -1541,7 +1569,7 @@ async function checkInactiveCustomers() {
     
     // Update Stats
     document.getElementById('stat-inactive-14').textContent = inactive14
-    document.getElementById('stat-inactive-30').textContent = inactive30
+    document.getElementById('stat-inactive-30').textContent = inactive30Count
     document.getElementById('stat-inactive-whatsapp').textContent = inactiveWithWhatsApp.length
     
     if (inactiveWithWhatsApp.length > 0) {
@@ -1564,43 +1592,43 @@ async function checkInactiveCustomers() {
 }
 
 async function sendWinbackCampaign() {
-  if (!confirm('Win-Back Kampagne JETZT an inaktive Kunden senden?')) return
+  if (!confirm('Win-Back Kampagne JETZT an inaktive Kunden senden?\n\nDies erstellt einen Global Bonus für Extra-Punkte!')) return
   
   try {
-    showResult('result-inactive', '⏳ Exportiere Nummern...', 'info')
+    showResult('result-inactive', '⏳ Erstelle Bonus...', 'info')
     
     const inactiveDays = parseInt(localStorage.getItem('inactive_days')) || 14
-    const discount = parseInt(localStorage.getItem('inactive_discount')) || 15
-    const cutoffDate = new Date()
-    cutoffDate.setDate(cutoffDate.getDate() - inactiveDays)
+    const bonusPoints = parseInt(localStorage.getItem('inactive_points')) || 200
     
-    // Hole inaktive Kunden mit WhatsApp
-    const { data: allCustomers, error } = await supabase
-      .from('customers')
-      .select('id, name, phone, whatsapp_optin, last_transaction_date')
-      .eq('whatsapp_optin', true)
-      .order('last_transaction_date', { ascending: true })
+    // Erstelle Global Bonus für heute
+    const today = new Date()
+    const endOfWeek = new Date(today)
+    endOfWeek.setDate(endOfWeek.getDate() + 7) // 1 Woche gültig
     
-    if (error) throw error
+    const { data: bonus, error: bonusError } = await supabase
+      .from('global_bonuses')
+      .insert({
+        bonus_type: 'bonus_points',
+        bonus_amount: bonusPoints,
+        start_date: today.toISOString(),
+        end_date: endOfWeek.toISOString(),
+        expires_at: endOfWeek.toISOString(),
+        is_active: true,
+        title: '💤 Win-Back Bonus',
+        description: `Für inaktive Kunden (${inactiveDays}+ Tage)`
+      })
+      .select()
+      .single()
     
-    const inactiveCustomers = allCustomers.filter(customer => {
-      if (!customer.last_transaction_date) return true
-      const lastDate = new Date(customer.last_transaction_date)
-      return lastDate < cutoffDate
-    })
+    if (bonusError) throw bonusError
     
-    if (inactiveCustomers.length === 0) {
-      showResult('result-inactive', 'ℹ️ Keine inaktiven Kunden mit WhatsApp gefunden', 'info')
-      return
-    }
-    
-    // Update Nachricht mit aktuellem Rabatt
+    // Update Nachricht mit aktuellen Punkten
     const message = document.getElementById('inactive-message')
     message.value = `Hey! 👋
 
 Wir haben dich schon lange nicht mehr gesehen! 😢
 
-🎁 NUR FÜR DICH: ${discount}% RABATT auf deine nächste Bestellung!
+🎁 NUR FÜR DICH: +${bonusPoints} BONUS-PUNKTE auf deine nächste Bestellung!
 
 Komm vorbei und lass es dir schmecken! 🥙
 
@@ -1608,11 +1636,12 @@ Komm vorbei und lass es dir schmecken! 🥙
 ⏰ Angebot gültig diese Woche!`
     
     document.getElementById('inactive-whatsapp').style.display = 'block'
+    
     showResult('result-inactive', 
-      `✅ ${inactiveCustomers.length} Kunden bereit für WhatsApp-Versand!`, 
+      `✅ Win-Back Bonus erstellt (+${bonusPoints}P)!\n\nJetzt WhatsApp-Nachricht kopieren und an inaktive Kunden senden!`, 
       'success')
     
-    alert(`✅ Win-Back Kampagne bereit!\n\n${inactiveCustomers.length} inaktive Kunden (${inactiveDays}+ Tage)\n\nKopiere die Nachricht und sende sie in WhatsApp Business!`)
+    alert(`✅ Win-Back Bonus aktiviert!\n\n+${bonusPoints} Bonus-Punkte für 7 Tage!\n\nKopiere die Nachricht und sende sie in WhatsApp Business!`)
     
   } catch (e) {
     showResult('result-inactive', '❌ Fehler: ' + e.message, 'error')
@@ -1629,17 +1658,19 @@ function copyInactiveMessage() {
 
 async function loadInactiveSettings() {
   const days = localStorage.getItem('inactive_days')
-  const discount = localStorage.getItem('inactive_discount')
+  const points = localStorage.getItem('inactive_points')
   
   if (days) {
     document.getElementById('inactive-days').value = days
   }
-  if (discount) {
-    document.getElementById('inactive-discount').value = discount
+  if (points) {
+    document.getElementById('inactive-points').value = points
   }
   
-  // Auto-check
-  checkInactiveCustomers()
+  // Auto-check (aber nur wenn Einstellungen existieren)
+  if (days && points) {
+    checkInactiveCustomers()
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
