@@ -1592,35 +1592,90 @@ async function checkInactiveCustomers() {
 }
 
 async function sendWinbackCampaign() {
-  if (!confirm('Win-Back Kampagne JETZT an inaktive Kunden senden?\n\nDies erstellt einen Global Bonus für Extra-Punkte!')) return
+  if (!confirm('Win-Back Kampagne JETZT an inaktive Kunden senden?\n\nDies schreibt Bonus-Punkte NUR den wirklich inaktiven Kunden gut!')) return
   
   try {
-    showResult('result-inactive', '⏳ Erstelle Bonus...', 'info')
+    showResult('result-inactive', '⏳ Suche inaktive Kunden...', 'info')
     
     const inactiveDays = parseInt(localStorage.getItem('inactive_days')) || 14
     const bonusPoints = parseInt(localStorage.getItem('inactive_points')) || 200
     
-    // Erstelle Global Bonus für heute
-    const today = new Date()
-    const endOfWeek = new Date(today)
-    endOfWeek.setDate(endOfWeek.getDate() + 7) // 1 Woche gültig
+    // ═══════════════════════════════════════════════════════════════
+    // SCHRITT 1: Finde alle WIRKLICH inaktiven Kunden
+    // ═══════════════════════════════════════════════════════════════
+    const cutoffDate = new Date()
+    cutoffDate.setDate(cutoffDate.getDate() - inactiveDays)
     
-    const { data: bonus, error: bonusError } = await supabase
-      .from('global_bonuses')
-      .insert({
-        bonus_type: 'bonus_points',
-        bonus_amount: bonusPoints,
-        start_date: today.toISOString(),
-        end_date: endOfWeek.toISOString(),
-        expires_at: endOfWeek.toISOString(),
-        is_active: true,
-        title: '💤 Win-Back Bonus',
-        description: `Für inaktive Kunden (${inactiveDays}+ Tage)`
-      })
-      .select()
-      .single()
+    const { data: allCustomers, error: customerError } = await supabase
+      .from('customers')
+      .select('id, name, phone, points, whatsapp_optin')
+      .order('name')
     
-    if (bonusError) throw bonusError
+    if (customerError) throw customerError
+    
+    const inactiveCustomers = []
+    
+    for (const customer of allCustomers) {
+      const { data: lastTx, error: txError } = await supabase
+        .from('transactions')
+        .select('created_at')
+        .eq('customer_id', customer.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+      
+      if (txError) continue
+      
+      // Inaktiv = keine Transaktion ODER letzte Transaktion älter als cutoffDate
+      if (!lastTx || lastTx.length === 0) {
+        inactiveCustomers.push(customer)
+      } else {
+        const lastDate = new Date(lastTx[0].created_at)
+        if (lastDate < cutoffDate) {
+          inactiveCustomers.push(customer)
+        }
+      }
+    }
+    
+    if (inactiveCustomers.length === 0) {
+      showResult('result-inactive', 'ℹ️ Keine inaktiven Kunden gefunden!', 'info')
+      return
+    }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // SCHRITT 2: Punkte NUR an inaktive Kunden gutschreiben
+    // ═══════════════════════════════════════════════════════════════
+    showResult('result-inactive', `⏳ Schreibe ${bonusPoints}P an ${inactiveCustomers.length} inaktive Kunden gut...`, 'info')
+    
+    let successCount = 0
+    let errorCount = 0
+    
+    for (const customer of inactiveCustomers) {
+      const { error: updateError } = await supabase
+        .from('customers')
+        .update({ points: customer.points + bonusPoints })
+        .eq('id', customer.id)
+      
+      if (updateError) {
+        console.error('Error updating customer', customer.id, updateError)
+        errorCount++
+      } else {
+        successCount++
+        
+        // Optional: Transaktion für Protokoll erstellen
+        await supabase.from('transactions').insert({
+          customer_id: customer.id,
+          amount: 0,
+          points_earned: bonusPoints,
+          type: 'winback_bonus',
+          created_at: new Date().toISOString()
+        }).catch(() => {}) // Ignoriere Fehler falls Spalten fehlen
+      }
+    }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // SCHRITT 3: WhatsApp-Nummern der inaktiven Kunden anzeigen
+    // ═══════════════════════════════════════════════════════════════
+    const inactiveWithWhatsApp = inactiveCustomers.filter(c => c.whatsapp_optin === true)
     
     // Update Nachricht mit aktuellen Punkten
     const message = document.getElementById('inactive-message')
@@ -1628,20 +1683,21 @@ async function sendWinbackCampaign() {
 
 Wir haben dich schon lange nicht mehr gesehen! 😢
 
-🎁 NUR FÜR DICH: +${bonusPoints} BONUS-PUNKTE auf deine nächste Bestellung!
+🎁 NUR FÜR DICH: +${bonusPoints} BONUS-PUNKTE wurden deinem Konto gutgeschrieben!
 
 Komm vorbei und lass es dir schmecken! 🥙
 
-📍 [Deine Adresse]
-⏰ Angebot gültig diese Woche!`
+📍 [Deine Adresse]`
     
     document.getElementById('inactive-whatsapp').style.display = 'block'
+    document.getElementById('inactive-customer-count').textContent = 
+      `${inactiveWithWhatsApp.length} inaktive Kunden mit WhatsApp`
     
     showResult('result-inactive', 
-      `✅ Win-Back Bonus erstellt (+${bonusPoints}P)!\n\nJetzt WhatsApp-Nachricht kopieren und an inaktive Kunden senden!`, 
+      `✅ Win-Back Bonus an ${successCount} inaktive Kunden vergeben (+${bonusPoints}P)!${errorCount > 0 ? `\n⚠️ ${errorCount} Fehler` : ''}\n\nJetzt WhatsApp-Nachricht kopieren und an inaktive Kunden senden!`, 
       'success')
     
-    alert(`✅ Win-Back Bonus aktiviert!\n\n+${bonusPoints} Bonus-Punkte für 7 Tage!\n\nKopiere die Nachricht und sende sie in WhatsApp Business!`)
+    alert(`✅ Win-Back Bonus vergeben!\n\n+${bonusPoints} Punkte an ${successCount} inaktive Kunden (${inactiveDays}+ Tage) gutgeschrieben!\n\nKopiere die Nachricht und sende sie in WhatsApp Business!`)
     
   } catch (e) {
     showResult('result-inactive', '❌ Fehler: ' + e.message, 'error')
