@@ -244,78 +244,103 @@ Komm trocken rein und genieß deinen Döner! 🥙
     <div id="result-weather"></div>
   </div>
 
-  <!-- 💤 INAKTIVITÄTS-KAMPAGNE -->
+  <!-- 💤 WIN-BACK SYSTEM MIT COOLDOWN -->
   <div class="card" style="border: 3px solid #8b5cf6;">
-    <h2>💤 Inaktivitäts-Kampagne (Win-Back)</h2>
-    <p class="subtitle">Reaktiviere Kunden die länger nicht da waren</p>
+    <h2>💤 Win-Back System (4 Phasen + Cooldown)</h2>
+    <p class="subtitle">Intelligente Rückgewinnung mit automatischem Cooldown - verhindert tägliches Spammen!</p>
     
-    <!-- Einstellungen -->
-    <div style="background: #ede9fe; border: 2px solid #8b5cf6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-      <h3 style="color: #5b21b6; margin-bottom: 12px;">⚙️ Einstellungen</h3>
-      
-      <div class="form-grid">
-        <div>
-          <label class="form-label">Inaktiv nach (Tagen):</label>
-          <input type="number" id="inactive-days" placeholder="z.B. 14" value="14" min="1">
-        </div>
-        <div>
-          <label class="form-label">Bonus-Punkte:</label>
-          <input type="number" id="inactive-points" placeholder="z.B. 200" value="200" min="50" step="50">
-        </div>
-      </div>
-      
-      <button class="success" onclick="saveInactiveSettings()">💾 Einstellungen speichern</button>
-      <div id="result-inactive-settings"></div>
-    </div>
-
-    <!-- Statistiken -->
+    <!-- Statistiken mit Cooldown-Info -->
     <div style="background: #f3f4f6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-      <h3 style="margin-bottom: 12px;">📊 Inaktive Kunden</h3>
-      <div id="inactive-stats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
-        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
-          <div style="font-size: 32px; font-weight: 700; color: #8b5cf6;" id="stat-inactive-14">-</div>
-          <div style="font-size: 13px; color: #6b7280;">14+ Tage inaktiv</div>
+      <h3 style="margin-bottom: 12px;">📊 Bereit für Win-Back (ohne aktiven Cooldown)</h3>
+      <div id="inactive-stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; border-left: 4px solid #3b82f6;">
+          <div style="font-size: 28px; font-weight: 700; color: #3b82f6;" id="stat-phase-1">-</div>
+          <div style="font-size: 12px; color: #6b7280; font-weight: 600;">Phase 1</div>
+          <div style="font-size: 11px; color: #6b7280;">14+ Tage</div>
+          <div style="font-size: 11px; color: #3b82f6; font-weight: 700;">+100P</div>
         </div>
-        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
-          <div style="font-size: 32px; font-weight: 700; color: #8b5cf6;" id="stat-inactive-30">-</div>
-          <div style="font-size: 13px; color: #6b7280;">30+ Tage inaktiv</div>
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; border-left: 4px solid #f59e0b;">
+          <div style="font-size: 28px; font-weight: 700; color: #f59e0b;" id="stat-phase-2">-</div>
+          <div style="font-size: 12px; color: #6b7280; font-weight: 600;">Phase 2</div>
+          <div style="font-size: 11px; color: #6b7280;">21+ Tage</div>
+          <div style="font-size: 11px; color: #f59e0b; font-weight: 700;">+150P</div>
         </div>
-        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
-          <div style="font-size: 32px; font-weight: 700; color: #8b5cf6;" id="stat-inactive-whatsapp">-</div>
-          <div style="font-size: 13px; color: #6b7280;">Mit WhatsApp</div>
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; border-left: 4px solid #f97316;">
+          <div style="font-size: 28px; font-weight: 700; color: #f97316;" id="stat-phase-3">-</div>
+          <div style="font-size: 12px; color: #6b7280; font-weight: 600;">Phase 3</div>
+          <div style="font-size: 11px; color: #6b7280;">30+ Tage</div>
+          <div style="font-size: 11px; color: #f97316; font-weight: 700;">+300P</div>
         </div>
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; border-left: 4px solid #dc2626;">
+          <div style="font-size: 28px; font-weight: 700; color: #dc2626;" id="stat-phase-4">-</div>
+          <div style="font-size: 12px; color: #6b7280; font-weight: 600;">Phase 4</div>
+          <div style="font-size: 11px; color: #6b7280;">60+ Tage</div>
+          <div style="font-size: 11px; color: #dc2626; font-weight: 700;">+500P</div>
+        </div>
+      </div>
+      <div style="background: #fef3c7; border-radius: 8px; padding: 10px; margin-top: 12px; font-size: 13px; color: #92400e;">
+        ℹ️ <strong>Cooldown-Info:</strong> Phase 1&2 = 7 Tage | Phase 3 = 30 Tage | Phase 4 = 60 Tage
       </div>
     </div>
 
-    <!-- Aktionen -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-      <button class="success" onclick="checkInactiveCustomers()" style="font-size: 16px; padding: 16px; background: linear-gradient(135deg, #8b5cf6, #a78bfa);">
-        🔍 Inaktive Kunden prüfen
-      </button>
-      <button class="success" onclick="sendWinbackCampaign()" id="btn-send-winback" style="font-size: 16px; padding: 16px; background: linear-gradient(135deg, #8b5cf6, #a78bfa);">
-        💌 Win-Back senden
-      </button>
+    <!-- Phase auswählen -->
+    <div style="background: #ede9fe; border: 2px solid #8b5cf6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #5b21b6; margin-bottom: 12px;">🎯 Phase auswählen</h3>
+      <select id="winback-phase" style="width: 100%; padding: 12px; font-size: 15px; border: 2px solid #8b5cf6; border-radius: 8px; font-weight: 600;">
+        <option value="1">Phase 1: 14+ Tage inaktiv → +100 Punkte (Cooldown: 7 Tage)</option>
+        <option value="2">Phase 2: 21+ Tage inaktiv → +150 Punkte (Cooldown: 7 Tage)</option>
+        <option value="3">Phase 3: 30+ Tage inaktiv → +300 Punkte (Cooldown: 30 Tage)</option>
+        <option value="4">Phase 4: 60+ Tage inaktiv → +500 Punkte (Cooldown: 60 Tage)</option>
+      </select>
     </div>
 
-    <!-- WhatsApp Nachricht -->
-    <div id="inactive-whatsapp" style="display: none; background: #ede9fe; border: 2px solid #8b5cf6; border-radius: 10px; padding: 16px;">
-      <h3 style="color: #5b21b6; margin-bottom: 12px;">📱 Win-Back Nachricht</h3>
+    <!-- Auto-Check Button -->
+    <button class="success" onclick="autoCheckWinbackPhases()" style="font-size: 16px; padding: 16px; background: linear-gradient(135deg, #8b5cf6, #a78bfa); margin-bottom: 12px;">
+      🔄 Alle Phasen automatisch prüfen
+    </button>
+
+    <!-- Manuelle Phase-Prüfung -->
+    <button class="primary" onclick="checkWinbackPhase()" style="font-size: 15px; padding: 14px; margin-bottom: 16px;">
+      🔍 Gewählte Phase prüfen
+    </button>
+
+    <!-- WhatsApp Export Section -->
+    <div id="winback-whatsapp" style="display: none; margin-top: 16px; background: #ede9fe; border: 2px solid #8b5cf6; border-radius: 10px; padding: 16px;">
+      <h3 style="color: #5b21b6; margin-bottom: 12px;">📱 WhatsApp-Kampagne</h3>
+      
       <div style="margin-bottom: 12px;">
-        <label class="form-label" style="color: #5b21b6;">Inaktive Kunden (mit WhatsApp):</label>
-        <div id="inactive-customer-count" style="font-size: 14px; color: #5b21b6; font-weight: 600; margin-bottom: 8px;"></div>
+        <div id="winback-customer-count" style="font-size: 15px; color: #5b21b6; font-weight: 700; margin-bottom: 8px;"></div>
+        <div id="winback-phase-info" style="font-size: 13px; color: #6b7280; margin-bottom: 12px;"></div>
       </div>
-      <textarea id="inactive-message" readonly style="background: white; min-height: 140px;">Hey! 👋
 
-Wir haben dich schon lange nicht mehr gesehen! 😢
+      <div style="margin-bottom: 12px;">
+        <label class="form-label" style="color: #5b21b6;">1️⃣ WhatsApp-Nummern kopieren:</label>
+        <textarea id="winback-numbers" readonly style="background: white; min-height: 100px; font-family: monospace; font-size: 13px; border: 2px solid #8b5cf6;"></textarea>
+        <button onclick="copyWinbackNumbers()" style="background: #8b5cf6; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 8px;">
+          📋 Nummern kopieren
+        </button>
+      </div>
 
-🎁 NUR FÜR DICH: +200 BONUS-PUNKTE auf deine nächste Bestellung!
+      <div style="margin-bottom: 12px;">
+        <label class="form-label" style="color: #5b21b6;">2️⃣ Nachricht kopieren & versenden:</label>
+        <textarea id="winback-message" readonly style="background: white; min-height: 140px; border: 2px solid #8b5cf6;"></textarea>
+        <button onclick="copyWinbackMessage()" style="background: #8b5cf6; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 8px;">
+          📋 Nachricht kopieren
+        </button>
+      </div>
 
-Komm vorbei und lass es dir schmecken! 🥙
+      <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+        <strong style="color: #92400e; font-size: 14px;">⚠️ WICHTIG - Nach WhatsApp-Versand:</strong><br>
+        <span style="color: #92400e; font-size: 13px; line-height: 1.6;">
+          1. Sende die Nachricht via WhatsApp Business<br>
+          2. Klicke dann unten auf "✅ Kampagne bestätigen"<br>
+          3. System aktiviert automatisch Cooldown (keine Spam-Nachrichten mehr!)<br>
+          4. Kunden werden für X Tage "geschützt" vor erneuten Nachrichten
+        </span>
+      </div>
 
-📍 [Deine Adresse]
-⏰ Angebot gültig diese Woche!</textarea>
-      <button onclick="copyInactiveMessage()" style="background: #8b5cf6; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px;">
-        📋 Nachricht kopieren
+      <button onclick="confirmWinbackCampaign()" style="background: #10b981; color: white; width: 100%; padding: 16px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 16px; box-shadow: 0 2px 8px rgba(16,185,129,0.3);">
+        ✅ Kampagne bestätigen (Nachricht wurde versendet)
       </button>
     </div>
 
@@ -1492,162 +1517,241 @@ async function loadWeatherSettings() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Inaktivitäts-Kampagne Funktionen
+// WIN-BACK SYSTEM MIT 4 PHASEN + COOLDOWN
 // ═══════════════════════════════════════════════════════════════
 
-function saveInactiveSettings() {
-  const days = parseInt(document.getElementById('inactive-days').value) || 14
-  const points = parseInt(document.getElementById('inactive-points').value) || 200
-  
-  localStorage.setItem('inactive_days', days)
-  localStorage.setItem('inactive_points', points)
-  
-  showResult('result-inactive-settings', `✅ Einstellungen gespeichert! (${days} Tage, +${points} Punkte)`, 'success')
-  
-  // Auto-check
-  checkInactiveCustomers()
+const WINBACK_PHASES = {
+  1: { days: 14, points: 100, cooldown: 7, emoji: '❤️', message: 'Wir vermissen dich ❤️\n\nEs ist schon eine Weile her! Komm heute vorbei und sichere dir +{points} Bonuspunkte.\n\nNur heute gültig! 🎁\n\n📍 Döner Boxx' },
+  2: { days: 21, points: 150, cooldown: 7, emoji: '😢', message: 'Es ist lange her 😢\n\nWir haben dich vermisst! Hol dir jetzt +{points} Punkte als Willkommensgeschenk.\n\nNur heute! ⏰\n\n📍 Döner Boxx' },
+  3: { days: 30, points: 300, cooldown: 30, emoji: '🥺', message: '30 Tage ohne Döner Boxx? 🥺\n\nDas ist zu lange! Heute schenken wir dir +{points} Punkte!\n\nKomm zurück, wir vermissen dich! ❤️\n\n📍 Döner Boxx' },
+  4: { days: 60, points: 500, cooldown: 60, emoji: '🔥', message: 'Komm zurück! 🔥\n\nWir legen +{points} Punkte obendrauf - nur für dich!\n\nDas ist unser bestes Angebot! Nur heute gültig!\n\n📍 Döner Boxx' }
 }
 
-async function checkInactiveCustomers() {
+let currentWinbackData = null
+
+// Automatische Prüfung aller Phasen
+async function autoCheckWinbackPhases() {
   try {
-    showResult('result-inactive', '⏳ Prüfe inaktive Kunden...', 'info')
+    showResult('result-inactive', '⏳ Prüfe alle Win-Back Phasen...', 'info')
     
-    const inactiveDays = parseInt(localStorage.getItem('inactive_days')) || 14
-    const cutoffDate = new Date()
-    cutoffDate.setDate(cutoffDate.getDate() - inactiveDays)
-    
-    // Hole alle Kunden
-    const { data: allCustomers, error: customerError } = await supabase
+    const { data: allCustomers, error } = await supabase
       .from('customers')
-      .select('id, name, phone, whatsapp_optin')
+      .select('id, name, phone, whatsapp_optin, winback_status')
+      .eq('whatsapp_optin', true)
       .order('name')
     
-    if (customerError) throw customerError
-    
-    // Für jeden Kunden: Hole letzte Transaktion
-    const inactiveCustomers = []
+    if (error) throw error
+    if (!allCustomers || allCustomers.length === 0) {
+      showResult('result-inactive', 'ℹ️ Keine Kunden mit WhatsApp gefunden', 'info')
+      return
+    }
+
+    const now = new Date()
+    const phaseCounts = { 1: 0, 2: 0, 3: 0, 4: 0 }
     
     for (const customer of allCustomers) {
-      // Hole letzte Transaktion für diesen Kunden
-      const { data: lastTx, error: txError } = await supabase
+      // Hole letzte Transaktion
+      const { data: lastTx } = await supabase
         .from('transactions')
         .select('created_at')
         .eq('customer_id', customer.id)
         .order('created_at', { ascending: false })
         .limit(1)
       
-      if (txError) {
-        console.error('Transaction error for customer', customer.id, txError)
-        continue
+      if (!lastTx || lastTx.length === 0) continue
+      
+      const lastDate = new Date(lastTx[0].created_at)
+      const daysSince = Math.floor((now - lastDate) / (1000 * 60 * 60 * 24))
+      
+      // Prüfe Cooldown
+      const winbackStatus = customer.winback_status || {}
+      let inCooldown = false
+      
+      if (winbackStatus.last_sent && winbackStatus.last_phase) {
+        const lastSent = new Date(winbackStatus.last_sent)
+        const cooldownDays = WINBACK_PHASES[winbackStatus.last_phase].cooldown
+        const daysSinceSent = Math.floor((now - lastSent) / (1000 * 60 * 60 * 24))
+        inCooldown = daysSinceSent < cooldownDays
       }
       
-      // Wenn keine Transaktion oder letzte Transaktion > cutoffDate → inaktiv
-      if (!lastTx || lastTx.length === 0) {
-        inactiveCustomers.push(customer)
-      } else {
-        const lastDate = new Date(lastTx[0].created_at)
-        if (lastDate < cutoffDate) {
-          inactiveCustomers.push(customer)
-        }
-      }
-    }
-    
-    const inactive14 = inactiveCustomers.length
-    
-    // 30+ Tage
-    const cutoff30 = new Date()
-    cutoff30.setDate(cutoff30.getDate() - 30)
-    
-    const inactive30Count = inactiveCustomers.filter(customer => {
-      // Prüfe ob letzte Transaktion > 30 Tage
-      // (Wir haben sie schon als inaktiv, müssen nur prüfen ob > 30 Tage)
-      return true // Vereinfachung: alle in inactiveCustomers sind >= inactiveDays
-    }).length
-    
-    // Mit WhatsApp
-    const inactiveWithWhatsApp = inactiveCustomers.filter(c => c.whatsapp_optin === true)
-    
-    // Update Stats
-    document.getElementById('stat-inactive-14').textContent = inactive14
-    document.getElementById('stat-inactive-30').textContent = inactive30Count
-    document.getElementById('stat-inactive-whatsapp').textContent = inactiveWithWhatsApp.length
-    
-    if (inactiveWithWhatsApp.length > 0) {
-      document.getElementById('inactive-whatsapp').style.display = 'block'
-      document.getElementById('inactive-customer-count').textContent = 
-        `${inactiveWithWhatsApp.length} Kunden seit ${inactiveDays}+ Tagen inaktiv`
+      if (inCooldown) continue
       
-      showResult('result-inactive', 
-        `✅ ${inactive14} inaktive Kunden gefunden (${inactiveWithWhatsApp.length} mit WhatsApp)`, 
-        'success')
-    } else {
-      document.getElementById('inactive-whatsapp').style.display = 'none'
-      showResult('result-inactive', `ℹ️ Keine inaktiven Kunden mit WhatsApp gefunden`, 'info')
+      // Bestimme Phase
+      if (daysSince >= 60) phaseCounts[4]++
+      else if (daysSince >= 30) phaseCounts[3]++
+      else if (daysSince >= 21) phaseCounts[2]++
+      else if (daysSince >= 14) phaseCounts[1]++
     }
+    
+    // Update Statistiken
+    document.getElementById('stat-phase-1').textContent = phaseCounts[1]
+    document.getElementById('stat-phase-2').textContent = phaseCounts[2]
+    document.getElementById('stat-phase-3').textContent = phaseCounts[3]
+    document.getElementById('stat-phase-4').textContent = phaseCounts[4]
+    
+    const total = phaseCounts[1] + phaseCounts[2] + phaseCounts[3] + phaseCounts[4]
+    showResult('result-inactive', `✅ Phasen aktualisiert! ${total} Kunden bereit für Win-Back`, 'success')
     
   } catch (e) {
     showResult('result-inactive', '❌ Fehler: ' + e.message, 'error')
-    console.error('Check inactive error:', e)
+    console.error('Auto check error:', e)
   }
 }
 
-async function sendWinbackCampaign() {
-  if (!confirm('Win-Back Kampagne JETZT an inaktive Kunden senden?\n\nDies schreibt Bonus-Punkte NUR den wirklich inaktiven Kunden gut!')) return
-  
+// Prüfe gewählte Phase
+async function checkWinbackPhase() {
   try {
-    showResult('result-inactive', '⏳ Suche inaktive Kunden...', 'info')
+    const phase = parseInt(document.getElementById('winback-phase').value)
+    const phaseConfig = WINBACK_PHASES[phase]
     
-    const inactiveDays = parseInt(localStorage.getItem('inactive_days')) || 14
-    const bonusPoints = parseInt(localStorage.getItem('inactive_points')) || 200
+    showResult('result-inactive', `⏳ Prüfe Phase ${phase} (${phaseConfig.days}+ Tage inaktiv)...`, 'info')
     
-    // ═══════════════════════════════════════════════════════════════
-    // SCHRITT 1: Finde alle WIRKLICH inaktiven Kunden
-    // ═══════════════════════════════════════════════════════════════
-    const cutoffDate = new Date()
-    cutoffDate.setDate(cutoffDate.getDate() - inactiveDays)
-    
-    const { data: allCustomers, error: customerError } = await supabase
+    const { data: allCustomers, error } = await supabase
       .from('customers')
-      .select('id, name, phone, points, whatsapp_optin')
-      .order('name')
+      .select('id, name, phone, whatsapp_optin, winback_status')
+      .eq('whatsapp_optin', true)
     
-    if (customerError) throw customerError
+    if (error) throw error
     
-    const inactiveCustomers = []
+    const now = new Date()
+    const eligibleCustomers = []
     
     for (const customer of allCustomers) {
-      const { data: lastTx, error: txError } = await supabase
+      const { data: lastTx } = await supabase
         .from('transactions')
         .select('created_at')
         .eq('customer_id', customer.id)
         .order('created_at', { ascending: false })
         .limit(1)
       
-      if (txError) continue
+      if (!lastTx || lastTx.length === 0) continue
       
-      // Inaktiv = keine Transaktion ODER letzte Transaktion älter als cutoffDate
-      if (!lastTx || lastTx.length === 0) {
-        inactiveCustomers.push(customer)
-      } else {
-        const lastDate = new Date(lastTx[0].created_at)
-        if (lastDate < cutoffDate) {
-          inactiveCustomers.push(customer)
-        }
+      const lastDate = new Date(lastTx[0].created_at)
+      const daysSince = Math.floor((now - lastDate) / (1000 * 60 * 60 * 24))
+      
+      // Muss >= Phase Tage sein
+      if (daysSince < phaseConfig.days) continue
+      
+      // Prüfe Cooldown
+      const winbackStatus = customer.winback_status || {}
+      let inCooldown = false
+      
+      if (winbackStatus.last_sent && winbackStatus.last_phase) {
+        const lastSent = new Date(winbackStatus.last_sent)
+        const cooldownDays = WINBACK_PHASES[winbackStatus.last_phase].cooldown
+        const daysSinceSent = Math.floor((now - lastSent) / (1000 * 60 * 60 * 24))
+        inCooldown = daysSinceSent < cooldownDays
+      }
+      
+      if (!inCooldown) {
+        eligibleCustomers.push({ ...customer, daysSince })
       }
     }
     
-    if (inactiveCustomers.length === 0) {
-      showResult('result-inactive', 'ℹ️ Keine inaktiven Kunden gefunden!', 'info')
+    if (eligibleCustomers.length === 0) {
+      showResult('result-inactive', `ℹ️ Keine Kunden für Phase ${phase} verfügbar (alle in Cooldown oder nicht qualifiziert)`, 'info')
+      document.getElementById('winback-whatsapp').style.display = 'none'
       return
     }
     
-    // ═══════════════════════════════════════════════════════════════
-    // SCHRITT 2: Punkte NUR an inaktive Kunden gutschreiben
-    // ═══════════════════════════════════════════════════════════════
-    showResult('result-inactive', `⏳ Schreibe ${bonusPoints}P an ${inactiveCustomers.length} inaktive Kunden gut...`, 'info')
+    // Speichere für später
+    currentWinbackData = {
+      phase,
+      customers: eligibleCustomers,
+      timestamp: now.toISOString()
+    }
     
+    // WhatsApp vorbereiten
+    const numbers = eligibleCustomers.map(c => c.phone).join('\n')
+    const message = phaseConfig.message.replace('{points}', phaseConfig.points)
+    
+    document.getElementById('winback-numbers').value = numbers
+    document.getElementById('winback-message').value = message
+    document.getElementById('winback-customer-count').textContent = 
+      `${eligibleCustomers.length} Kunden bereit für Phase ${phase} ${phaseConfig.emoji}`
+    document.getElementById('winback-phase-info').textContent = 
+      `Inaktiv: ${phaseConfig.days}+ Tage | Bonus: +${phaseConfig.points}P | Cooldown: ${phaseConfig.cooldown} Tage`
+    
+    document.getElementById('winback-whatsapp').style.display = 'block'
+    showResult('result-inactive', `✅ ${eligibleCustomers.length} Kunden bereit für Win-Back Phase ${phase}!`, 'success')
+    
+  } catch (e) {
+    showResult('result-inactive', '❌ Fehler: ' + e.message, 'error')
+    console.error('Check phase error:', e)
+  }
+}
+
+// Kampagne bestätigen (nach WhatsApp-Versand)
+async function confirmWinbackCampaign() {
+  if (!currentWinbackData) {
+    alert('❌ Keine Kampagne vorbereitet!')
+    return
+  }
+  
+  const phase = currentWinbackData.phase
+  const phaseConfig = WINBACK_PHASES[phase]
+  const customers = currentWinbackData.customers
+  
+  if (!confirm(`Bestätige: Du hast die Win-Back Nachricht an ${customers.length} Kunden versendet?\n\nPhase ${phase}: +${phaseConfig.points}P\nCooldown: ${phaseConfig.cooldown} Tage\n\nNach Bestätigung werden die Kunden für ${phaseConfig.cooldown} Tage "geschützt".`)) {
+    return
+  }
+  
+  try {
+    showResult('result-inactive', '⏳ Aktiviere Cooldown...', 'info')
+    
+    const now = new Date().toISOString()
     let successCount = 0
-    let errorCount = 0
+    
+    for (const customer of customers) {
+      const winbackStatus = {
+        last_phase: phase,
+        last_sent: now,
+        cooldown_until: new Date(Date.now() + phaseConfig.cooldown * 24 * 60 * 60 * 1000).toISOString()
+      }
+      
+      const { error } = await supabase
+        .from('customers')
+        .update({ winback_status: winbackStatus })
+        .eq('id', customer.id)
+      
+      if (!error) successCount++
+    }
+    
+    showResult('result-inactive', 
+      `✅ Kampagne aktiviert!<br><br><strong>${successCount} Kunden</strong> sind jetzt für <strong>${phaseConfig.cooldown} Tage</strong> im Cooldown.<br>Sie erhalten <strong>keine weiteren</strong> Win-Back Nachrichten in dieser Zeit! 🎯`, 
+      'success')
+    
+    // Reset
+    currentWinbackData = null
+    document.getElementById('winback-whatsapp').style.display = 'none'
+    
+    // Auto-refresh Stats
+    setTimeout(() => autoCheckWinbackPhases(), 2000)
+    
+  } catch (e) {
+    showResult('result-inactive', '❌ Fehler: ' + e.message, 'error')
+    console.error('Confirm campaign error:', e)
+  }
+}
+
+function copyWinbackNumbers() {
+  const textarea = document.getElementById('winback-numbers')
+  textarea.select()
+  document.execCommand('copy')
+  showResult('result-inactive', '✅ Nummern kopiert!', 'success')
+  setTimeout(() => showResult('result-inactive', '', ''), 2000)
+}
+
+function copyWinbackMessage() {
+  const textarea = document.getElementById('winback-message')
+  textarea.select()
+  document.execCommand('copy')
+  showResult('result-inactive', '✅ Nachricht kopiert!', 'success')
+  setTimeout(() => showResult('result-inactive', '', ''), 2000)
+}
+
+// ALTE FUNKTIONEN ENTFERNT - nicht mehr benötigt
+// saveInactiveSettings, checkInactiveCustomers, sendWinbackCampaign, copyInactiveMessage
     
     for (const customer of inactiveCustomers) {
       const { error: updateError } = await supabase
