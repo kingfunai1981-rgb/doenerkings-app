@@ -1404,6 +1404,30 @@ function drawWheel() {
   }
 
   ctx.restore()
+  
+  // 🎯 Update pointer color based on current field
+  updatePointerColor()
+}
+
+// 🎨 Function to update pointer color dynamically
+function updatePointerColor() {
+  const pointer = document.querySelector('.wheel-pointer')
+  if (!pointer) return
+  
+  // Calculate which field the pointer is currently at (top position)
+  // The pointer points downwards, so we need to check the field at the top (0 degrees)
+  const pointerAngle = -wheelRotation - WHEEL_OFFSET
+  
+  // Normalize angle to 0-2π range
+  let normalizedAngle = pointerAngle % (2 * Math.PI)
+  if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI
+  
+  // Calculate which field index the pointer is at
+  const fieldIndex = Math.floor(normalizedAngle / anglePerSegment) % wheelPrizes.length
+  const currentField = wheelPrizes[fieldIndex]
+  
+  // Update pointer color to match current field
+  pointer.style.borderTopColor = currentField.color
 }
 
 // 🎯 WICHTIG: Prüft ob Wheel freigeschaltet ist und zeigt/versteckt es
