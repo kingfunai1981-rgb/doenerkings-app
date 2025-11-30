@@ -663,32 +663,6 @@ Komm vorbei und sichere dir extra Punkte!
     </div>
 
     <div style="margin-top: 16px; background: #fffbeb; border: 2px solid #fbbf24; border-radius: 10px; padding: 14px;">
-      <h4 style="color: #92400e; margin-bottom: 8px; font-size: 14px;">💡 Template-Vorschläge für Nachrichten:</h4>
-      <div style="font-size: 13px; color: #92400e;">
-        <strong>Happy Hour:</strong><br>
-        <code style="background: white; padding: 4px 8px; border-radius: 4px; display: block; margin: 6px 0;">
-          🔥 JETZT bei Döner Boxx: Doppelte Punkte bis 19 Uhr! Komm vorbei & sammle mehr Punkte 🎉
-        </code>
-        
-        <strong style="margin-top: 12px; display: block;">Glücksrad-Reminder:</strong><br>
-        <code style="background: white; padding: 4px 8px; border-radius: 4px; display: block; margin: 6px 0;">
-          🎡 Nicht vergessen: Du hast noch ein Glücksrad-Spin offen! Läuft in 4 Stunden ab ⏰ Jetzt in der App einlösen!
-        </code>
-        
-        <strong style="margin-top: 12px; display: block;">Reaktivierung:</strong><br>
-        <code style="background: white; padding: 4px 8px; border-radius: 4px; display: block; margin: 6px 0;">
-          Wir vermissen dich! 😢 Hol dir heute +50 Bonuspunkte mit dem Code COMEBACK50 - nur bis heute 23 Uhr!
-        </code>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-// ═══════════════════════════════════════════════════════════════
-// 🔐 LIZENZ & DOMAIN-SCHUTZ - NICHT ENTFERNEN!
-// ═══════════════════════════════════════════════════════════════
 (function() {
   const _0xB = 'Döner Boxx';
   const _0xL = 'DNBX-2025-LOYALTY-SYSTEM-PROTECTED';
@@ -1145,7 +1119,7 @@ window.addEventListener('DOMContentLoaded', function() {
   loadWheelConfig(); loadWheelStats()
   checkHappyHourStatus() // ← HAPPY HOUR STATUS PRÜFEN
   loadWeatherSettings() // ← WETTER EINSTELLUNGEN LADEN
-  loadInactiveSettings() // ← INAKTIVITÄTS-KAMPAGNE LADEN
+  // loadInactiveSettings entfernt - Win-Back nutzt prepareWinbackCampaign
   loadReminderSettings() // ← PUNKTE-REMINDER LADEN
   const today = new Date(), nextWeek = new Date(); nextWeek.setDate(nextWeek.getDate() + 7)
   const todayStr = today.toISOString().split('T')[0], nextWeekStr = nextWeek.toISOString().split('T')[0]
@@ -2066,7 +2040,8 @@ function copyWinbackMessage() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Punkte-Reminder Funktionen
+// ═══════════════════════════════════════════════════════════════
+// Punkte-Reminder Funktionen (Personalisiert)
 // ═══════════════════════════════════════════════════════════════
 
 function saveReminderSettings() {
@@ -2137,20 +2112,35 @@ async function checkAlmostThereCustomers() {
       return
     }
     
+    // NEUE STATS MIT KUNDENLISTE
     statsDiv.innerHTML = Object.values(grouped).map(group => {
       const { reward, customers } = group
-      const avgPoints = Math.round(customers.reduce((sum, c) => sum + c.points, 0) / customers.length)
-      const avgNeeded = reward.points - avgPoints
+      
+      // Kundenliste
+      const customerList = customers.map(c => {
+        const needed = reward.points - c.points
+        return `
+          <div style="padding: 8px; margin-top: 8px; background: #f9fafb; border-radius: 6px; border-left: 3px solid #10b981;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-weight: 600; color: #111827; font-size: 14px;">${c.name}</div>
+                <div style="font-size: 12px; color: #6b7280;">${c.phone}</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-weight: 700; color: #10b981; font-size: 16px;">${c.points}P</div>
+                <div style="font-size: 11px; color: #6b7280;">-${needed}P fehlen</div>
+              </div>
+            </div>
+          </div>
+        `
+      }).join('')
       
       return `
-        <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 8px; border-left: 4px solid #10b981;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px; border-left: 4px solid #10b981;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <div>
               <div style="font-weight: 700; color: #111827; font-size: 15px;">
                 ${reward.emoji} ${reward.name} (${reward.points}P)
-              </div>
-              <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
-                ${customers.length} Kunden • Ø ${avgNeeded}P fehlen
               </div>
             </div>
             <div style="text-align: right;">
@@ -2159,6 +2149,7 @@ async function checkAlmostThereCustomers() {
               </div>
             </div>
           </div>
+          ${customerList}
         </div>
       `
     }).join('')
@@ -2166,26 +2157,35 @@ async function checkAlmostThereCustomers() {
     // Zeige WhatsApp Section
     document.getElementById('reminder-whatsapp').style.display = 'block'
     
-    // Erstelle Nachrichten für jede Gruppe
+    // PERSONALISIERTE NACHRICHTEN FÜR JEDEN KUNDEN
     const messagesDiv = document.getElementById('reminder-messages')
     messagesDiv.innerHTML = Object.values(grouped).map(group => {
       const { reward, customers } = group
-      const avgNeeded = reward.points - Math.round(customers.reduce((sum, c) => sum + c.points, 0) / customers.length)
+      
+      // Für JEDEN Kunden individuelle Nachricht
+      const messages = customers.map(c => {
+        const needed = reward.points - c.points
+        return `
+Hey ${c.name}! 👋
+
+Du hast ${c.points} Punkte!
+Nur noch ${needed} Punkte bis zum ${reward.name}! ${reward.emoji}
+
+Komm vorbei und sichere dir deine Prämie! 
+
+📍 Döner Boxx
+Holländische Str. 214/226
+34127 Kassel`
+      }).join('\n\n---\n\n')
       
       return `
         <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
           <div style="font-weight: 700; color: #065f46; margin-bottom: 8px;">
             ${reward.emoji} ${reward.name} (${customers.length} Kunden)
           </div>
-          <textarea readonly style="width: 100%; min-height: 100px; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; background: #f9fafb;">Hey! 🎯
-
-Du bist so nah dran! Nur noch ca. ${avgNeeded} Punkte bis zu deinem ${reward.name}! ${reward.emoji}
-
-Komm vorbei und sichere dir deine Prämie! 
-
-📍 [Deine Adresse]</textarea>
+          <textarea readonly style="width: 100%; min-height: 200px; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; background: #f9fafb;">${messages}</textarea>
           <button onclick="copyReminderMessage(this)" style="background: #10b981; color: white; width: 100%; padding: 8px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 8px;">
-            📋 Nachricht kopieren
+            📋 Nachrichten kopieren
           </button>
         </div>
       `
@@ -2203,11 +2203,8 @@ Komm vorbei und sichere dir deine Prämie!
 }
 
 async function sendPointsReminder() {
-  if (!confirm('Punkte-Reminder JETZT senden?')) return
-  
+  // KEIN CONFIRM! Direkt checken
   await checkAlmostThereCustomers()
-  
-  alert('✅ Reminder bereit!\n\nKopiere die Nachrichten unten und sende sie an die jeweiligen Kunden-Gruppen in WhatsApp Business!')
 }
 
 function copyReminderMessage(button) {
@@ -2237,7 +2234,7 @@ async function loadReminderSettings() {
     })
   }
   
-  // Auto-check
+  // AUTO-CHECK beim Laden!
   checkAlmostThereCustomers()
 }
 
