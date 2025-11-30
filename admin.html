@@ -160,8 +160,8 @@ Komm vorbei und sichere dir extra Punkte!
 
   <!-- 🌧️ WETTER-DÖNER-DEALS -->
   <div class="card" style="border: 3px solid #3b82f6;">
-    <h2>🌧️ Wetter-Döner-Deals (Automatisch)</h2>
-    <p class="subtitle">Automatische Döner-Rabatte bei schlechtem Wetter - Kunden abholen statt liefern!</p>
+    <h2>🌧️ Wetter-Döner-Deals</h2>
+    <p class="subtitle">Automatischer Check um 11 Uhr | Intelligente Upgrades | Beste Preise garantiert</p>
     
     <!-- Preis-Staffelung Übersicht -->
     <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
@@ -229,7 +229,7 @@ Komm vorbei und sichere dir extra Punkte!
       <div style="margin-top: 12px;">
         <label class="form-label">Status:</label>
         <select id="weather-active" style="padding: 10px; font-size: 14px; font-weight: 600;">
-          <option value="true">✅ Automatik AKTIV (Check + Alerts)</option>
+          <option value="true">✅ Automatik AKTIV</option>
           <option value="false">❌ Inaktiv</option>
         </select>
       </div>
@@ -253,9 +253,7 @@ Komm vorbei und sichere dir extra Punkte!
       
       <div style="background: rgba(255,255,255,0.2); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
         <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">📊 DEAL-VERLAUF HEUTE:</div>
-        <div id="deal-history" style="font-size: 12px; line-height: 1.8;">
-          <!-- Wird dynamisch gefüllt -->
-        </div>
+        <div id="deal-history" style="font-size: 12px; line-height: 1.8;"></div>
       </div>
       
       <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; font-size: 12px;">
@@ -275,7 +273,7 @@ Komm vorbei und sichere dir extra Punkte!
     </div>
 
     <!-- Upgrade-Alert -->
-    <div id="weather-upgrade-alert" style="display: none; background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white; border-radius: 10px; padding: 16px; margin-bottom: 16px; animation: pulse 2s infinite;">
+    <div id="weather-upgrade-alert" style="display: none; background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
       <div style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">
         🚨 BESSERER DEAL MÖGLICH!
       </div>
@@ -316,29 +314,18 @@ Komm vorbei und sichere dir extra Punkte!
           📋 Nummern kopieren
         </button>
       </div>
-      
+
       <div style="margin-bottom: 12px;">
-        <label class="form-label" style="color: #1e40af;">Nachricht mit Preis:</label>
+        <label class="form-label" style="color: #1e40af;">WhatsApp-Nachricht:</label>
         <textarea id="weather-message" readonly style="background: white; min-height: 140px; border: 2px solid #3b82f6;"></textarea>
         <button onclick="copyWeatherMessage()" style="background: #3b82f6; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 8px;">
           📋 Nachricht kopieren
         </button>
       </div>
-      
-      <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 14px;">
-        <strong style="color: #92400e; font-size: 14px;">📋 Nächste Schritte:</strong><br>
-        <span style="color: #92400e; font-size: 13px; line-height: 1.6;">
-          1. Nummern kopieren → WhatsApp Business → Broadcast<br>
-          2. Nachricht kopieren → einfügen → SENDEN<br>
-          3. Kunde zeigt 4-stelligen Coupon-Code im Laden<br>
-          4. Scanner erkennt Code automatisch → Deal-Preis!
-        </span>
-      </div>
     </div>
 
     <div id="result-weather"></div>
   </div>
-
   <!-- 💤 INAKTIVITÄTS-KAMPAGNE -->
   <div class="card" style="border: 3px solid #8b5cf6;">
     <h2>💤 Inaktivitäts-Kampagne (Win-Back)</h2>
@@ -1324,10 +1311,11 @@ function copyHHMessage() {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // Wetter-Döner-Deals System mit Intelligenter Upgrade-Logik
 // ═══════════════════════════════════════════════════════════════
 
-// 🔒 FEST VERANKERT (nicht änderbar)
+// 🔒 FEST VERANKERT (nicht änderbar vom Admin)
 const WEATHER_API_KEY = 'f30b80f8de3772f3145b8eb19139a305'
 const WEATHER_LAT = 51.3127
 const WEATHER_LON = 9.4797
@@ -1358,7 +1346,7 @@ const UPGRADE_RULES = {
 // 📊 TAGES-TRACKING
 let todayDeals = {
   date: null,
-  deals: [],               // [{time, price, discount, sent}]
+  deals: [],
   updateCount: 0,
   customerCount: 0
 }
@@ -1388,13 +1376,11 @@ async function saveWeatherSettings() {
 }
 
 function scheduleDailyAutoCheck(timeString) {
-  // Berechne Zeit bis zum nächsten Check
   const now = new Date()
   const [hours, minutes] = timeString.split(':')
   const targetTime = new Date(now)
   targetTime.setHours(parseInt(hours), parseInt(minutes), 0, 0)
   
-  // Wenn Zeit heute schon vorbei, dann morgen
   if (targetTime <= now) {
     targetTime.setDate(targetTime.getDate() + 1)
   }
@@ -1406,29 +1392,22 @@ function scheduleDailyAutoCheck(timeString) {
   }
   
   scheduledCheckTimeout = setTimeout(() => {
-    console.log('🕐 Täglicher Auto-Check wird ausgeführt...')
-    checkWeatherNow(true) // true = Auto-Check
-    // Plane nächsten Check für morgen
+    console.log('🕐 Täglicher Auto-Check...')
+    checkWeatherNow(true)
     scheduleDailyAutoCheck(timeString)
   }, msUntilCheck)
   
-  console.log(`⏰ Nächster Auto-Check: ${targetTime.toLocaleString('de-DE')}`)
+  console.log(`⏰ Nächster Check: ${targetTime.toLocaleString('de-DE')}`)
 }
 
 async function checkWeatherNow(isAutoCheck = false) {
   try {
-    // Reset Tages-Tracking wenn neuer Tag
     const today = new Date().toDateString()
     if (todayDeals.date !== today) {
-      todayDeals = {
-        date: today,
-        deals: [],
-        updateCount: 0,
-        customerCount: 0
-      }
+      todayDeals = { date: today, deals: [], updateCount: 0, customerCount: 0 }
     }
     
-    showResult('result-weather', '⏳ Prüfe Wetter & berechne Döner-Preis...', 'info')
+    showResult('result-weather', '⏳ Prüfe Wetter...', 'info')
     
     const response = await fetch(
       `https://api.openweathermap.org/data/2.5/weather?lat=${WEATHER_LAT}&lon=${WEATHER_LON}&appid=${WEATHER_API_KEY}&units=metric&lang=de`
@@ -1442,7 +1421,6 @@ async function checkWeatherNow(isAutoCheck = false) {
     const desc = data.weather[0]?.description || 'unbekannt'
     const icon = getWeatherIcon(data.weather[0]?.main)
     
-    // Finde besten Deal
     let rainDeal = null
     for (const deal of RAIN_DEALS) {
       if (rain >= deal.min && rain < deal.max) {
@@ -1459,7 +1437,6 @@ async function checkWeatherNow(isAutoCheck = false) {
       }
     }
     
-    // Wähle besten Deal (höchster Rabatt)
     let newDeal = null
     if (rainDeal && tempDeal) {
       newDeal = rainDeal.discount >= tempDeal.discount ? rainDeal : tempDeal
@@ -1467,22 +1444,17 @@ async function checkWeatherNow(isAutoCheck = false) {
       newDeal = rainDeal || tempDeal
     }
     
-    // Zeige Wetter
     displayWeatherInfo(temp, rain, desc, icon, newDeal)
     
-    // Prüfe ob Upgrade möglich
     if (newDeal && todayDeals.deals.length > 0) {
       checkUpgradeOpportunity(newDeal)
     }
     
-    // Bei Auto-Check: Zeige nur wenn Deal verfügbar
     if (isAutoCheck && newDeal) {
       showResult('result-weather', `🔔 Auto-Check: Deal verfügbar! Döner ${newDeal.price}€`, 'success')
-      // Browser-Notification (optional)
       if ('Notification' in window && Notification.permission === 'granted') {
         new Notification('🌧️ Wetter-Deal verfügbar!', {
-          body: `Döner nur ${newDeal.price}€ (-${newDeal.discount}%)`,
-          icon: '/icon.png'
+          body: `Döner nur ${newDeal.price}€ (-${newDeal.discount}%)`
         })
       }
     }
@@ -1551,7 +1523,6 @@ function displayWeatherInfo(temp, rain, desc, icon, deal) {
 
 async function activateWeatherDeal(price, discount, label, emoji, type) {
   try {
-    // Hole WhatsApp-Kunden
     const { data: customers } = await supabase
       .from('customers')
       .select('phone, name')
@@ -1559,14 +1530,12 @@ async function activateWeatherDeal(price, discount, label, emoji, type) {
       .order('name')
     
     if (!customers || customers.length === 0) {
-      showResult('result-weather', '⚠️ Keine WhatsApp-Kunden gefunden!', 'error')
+      showResult('result-weather', '⚠️ Keine WhatsApp-Kunden!', 'error')
       return
     }
     
-    // Erstelle Coupon-Code (4-stellig)
     const couponCode = Math.floor(1000 + Math.random() * 9000).toString()
     
-    // Erstelle Coupon in DB
     const today = new Date()
     const endOfDay = new Date(today)
     endOfDay.setHours(23, 59, 59)
@@ -1585,7 +1554,6 @@ async function activateWeatherDeal(price, discount, label, emoji, type) {
     
     if (couponError) throw couponError
     
-    // Speichere Deal in Tracking
     const dealInfo = {
       time: new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'}),
       price: price,
@@ -1599,10 +1567,7 @@ async function activateWeatherDeal(price, discount, label, emoji, type) {
     todayDeals.deals.push(dealInfo)
     todayDeals.customerCount = customers.length
     
-    // Update UI
     updateDealStatus()
-    
-    // Bereite WhatsApp vor
     prepareWhatsAppMessage(price, discount, label, emoji, type, couponCode, customers)
     
     showResult('result-weather', `✅ Deal aktiviert! Code: ${couponCode}`, 'success')
@@ -1621,21 +1586,19 @@ function prepareWhatsAppMessage(price, discount, label, emoji, type, code, custo
   let message = ''
   
   if (isUpgrade) {
-    // Upgrade-Nachricht
     const oldDeal = todayDeals.deals[todayDeals.deals.length - 2]
     message = `🚨 WETTER-DEAL UPDATE!\n\n`
-    message += `Wetter ist NOCH SCHLECHTER geworden! ${emoji}\n\n`
+    message += `Wetter ist NOCH SCHLECHTER! ${emoji}\n\n`
     message += `DEIN DEAL WIRD BESSER:\n`
     message += `Vorher: ${oldDeal.price.toFixed(2)}€\n`
     message += `JETZT: ${price.toFixed(2)}€! 🔥\n\n`
     message += `Du sparst jetzt ${(DOENER_NORMAL_PRICE - price).toFixed(2)}€ statt ${(DOENER_NORMAL_PRICE - oldDeal.price).toFixed(2)}€!\n\n`
   } else {
-    // Erste Nachricht
     if (type === 'rain') {
       message = `🌧️ REGEN-DEAL! ${emoji}\n\n`
       message += `Draußen ${label}!\n\n`
     } else {
-      message += `❄️ KÄLTE-DEAL! ${emoji}\n\n`
+      message = `❄️ KÄLTE-DEAL! ${emoji}\n\n`
       message += `Draußen ${label}!\n\n`
     }
   }
@@ -1646,7 +1609,7 @@ function prepareWhatsAppMessage(price, discount, label, emoji, type, code, custo
   message += `⚠️ Nur bei Abholung!\n`
   message += `⚠️ Gültig bis 18:30 Uhr!\n\n`
   message += `📱 Dein Code: ${code}\n\n`
-  message += `Komm vorbei & spare richtig! 💪\n`
+  message += `Komm vorbei & spare! 💪\n`
   message += `📍 Döner Boxx`
   
   document.getElementById('weather-message').value = message
@@ -1656,20 +1619,16 @@ function prepareWhatsAppMessage(price, discount, label, emoji, type, code, custo
 function checkUpgradeOpportunity(newDeal) {
   const lastDeal = todayDeals.deals[todayDeals.deals.length - 1]
   
-  // Prüfe ob Upgrade sinnvoll
   const priceDiff = lastDeal.price - newDeal.price
   const discountDiff = newDeal.discount - lastDeal.discount
   
-  // Prüfe Regeln
   const isSignificantPriceDrop = priceDiff >= UPGRADE_RULES.minPriceDiff
   const isSignificantDiscountIncrease = discountDiff >= UPGRADE_RULES.minDiscountDiff
   const hasUpdatesLeft = todayDeals.updateCount < UPGRADE_RULES.maxUpdatesPerDay
   
   if ((isSignificantPriceDrop || isSignificantDiscountIncrease) && hasUpdatesLeft) {
-    // Zeige Upgrade-Alert
     showUpgradeAlert(lastDeal, newDeal, priceDiff, discountDiff)
   } else {
-    // Kein Upgrade nötig
     document.getElementById('weather-upgrade-alert').style.display = 'none'
   }
 }
@@ -1680,7 +1639,7 @@ function showUpgradeAlert(oldDeal, newDeal, priceDiff, discountDiff) {
   
   let reason = ''
   if (priceDiff >= UPGRADE_RULES.minPriceDiff) {
-    reason = `🎯 ${priceDiff.toFixed(2)}€ günstiger für Kunden!`
+    reason = `🎯 ${priceDiff.toFixed(2)}€ günstiger!`
   } else {
     reason = `📊 ${discountDiff}% mehr Rabatt!`
   }
@@ -1688,7 +1647,6 @@ function showUpgradeAlert(oldDeal, newDeal, priceDiff, discountDiff) {
   
   document.getElementById('weather-upgrade-alert').style.display = 'block'
   
-  // Speichere für Upgrade
   window.pendingUpgrade = newDeal
 }
 
@@ -1696,13 +1654,9 @@ async function sendUpgradeDeal() {
   if (!window.pendingUpgrade) return
   
   const deal = window.pendingUpgrade
-  
-  // Aktiviere Upgrade
   await activateWeatherDeal(deal.price, deal.discount, deal.label, deal.emoji, deal.type)
   
   todayDeals.updateCount++
-  
-  // Verstecke Alert
   dismissUpgrade()
 }
 
@@ -1728,7 +1682,6 @@ function updateDealStatus() {
   const avgDiscount = todayDeals.deals.reduce((sum, d) => sum + d.discount, 0) / todayDeals.deals.length
   document.getElementById('deal-savings').textContent = '-' + avgDiscount.toFixed(0) + '%'
   
-  // History
   let historyHTML = ''
   todayDeals.deals.forEach((d, i) => {
     historyHTML += `<div style="padding: 4px 0; ${i < todayDeals.deals.length - 1 ? 'opacity: 0.7;' : ''}">`
@@ -1772,7 +1725,7 @@ function startWeatherMonitoring() {
   }
   
   weatherCheckInterval = setInterval(() => {
-    checkWeatherNow(false) // false = manueller Background-Check
+    checkWeatherNow(false)
   }, 30 * 60 * 1000)
   
   console.log('✅ Wetter-Monitoring gestartet (alle 30 Min)')
@@ -1783,7 +1736,7 @@ function stopWeatherMonitoring() {
     clearInterval(weatherCheckInterval)
     weatherCheckInterval = null
   }
-  console.log('⏹️ Wetter-Überwachung gestoppt')
+  console.log('⏹️ Wetter-Monitoring gestoppt')
 }
 
 async function loadWeatherSettings() {
@@ -1801,13 +1754,11 @@ async function loadWeatherSettings() {
     scheduleDailyAutoCheck(checkTime)
   }
   
-  // Request Notification Permission
   if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission()
   }
 }
 
-// ═══════════════════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════════════════
 // Inaktivitäts-Kampagne Funktionen
 // ═══════════════════════════════════════════════════════════════
