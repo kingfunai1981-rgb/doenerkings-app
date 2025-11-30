@@ -1146,7 +1146,7 @@ async function loadCoupons() {
         const activatedDate = new Date(a.activated_at)
         // Check if activated today
         if (activatedDate >= todayStart && activatedDate <= todayEnd) {
-          activatedTodayMap.set(a.coupon_id, true)
+          activatedTodayMap.set(a.coupon_id, a.is_used)
         }
         // Track current unused activations
         if (!a.is_used) {
@@ -1156,14 +1156,27 @@ async function loadCoupons() {
     }
     
     section.style.display = 'block'
-    list.innerHTML = activeCoupons.map(coupon => {
+    const couponItems = []
+    
+    activeCoupons.forEach(coupon => {
       const endDate = coupon.end_date ? new Date(coupon.end_date) : new Date(coupon.expires_at)
       endDate.setHours(23, 59, 59, 999)
       const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
       
-      const isActivatedToday = activatedTodayMap.has(coupon.id)
+      const isUsedToday = activatedTodayMap.get(coupon.id) === true
       const hasCurrentActivation = currentActivationMap.has(coupon.id)
       const uniqueCode = currentActivationMap.get(coupon.id)
+      
+      // If used today and coupon expires today, don't show it at all
+      if (isUsedToday && daysLeft === 0) {
+        return // Skip this coupon completely
+      }
+      
+      // Check if coupon will still be valid tomorrow
+      const tomorrow = new Date(now)
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      tomorrow.setHours(0, 0, 0, 0)
+      const willBeValidTomorrow = tomorrow <= endDate
       
       let expiryText = ''
       if (daysLeft === 0) { expiryText = '<span class="coupon-expiry warning">⚠️ Läuft heute ab!</span>' }
@@ -1174,15 +1187,24 @@ async function loadCoupons() {
       // Show different states
       if (hasCurrentActivation) {
         // Currently activated (not yet used)
-        return `<div class="coupon-item activated"><h3>${coupon.title}</h3><div class="coupon-product">🍴 ${coupon.product}</div><div class="coupon-price">💰 ${formattedPrice}</div>${coupon.description ? `<div class="coupon-desc">📝 ${coupon.description}</div>` : ''}<div class="coupon-code-display">${uniqueCode}</div>${expiryText}<div class="coupon-activated-badge">✅ Aktiviert! Zeige Code beim Scannen</div><button onclick="deactivateCoupon(${coupon.id})" style="background: #ef4444; margin-top: 8px;">❌ Stornieren</button></div>`
-      } else if (isActivatedToday) {
-        // Already used today - show as unavailable
-        return `<div class="coupon-item" style="opacity: 0.6; background: #f3f4f6;"><h3>${coupon.title}</h3><div class="coupon-product">🍴 ${coupon.product}</div><div class="coupon-price">💰 ${formattedPrice}</div>${coupon.description ? `<div class="coupon-desc">📝 ${coupon.description}</div>` : ''}<div style="background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 8px; margin-top: 12px; font-weight: 600; text-align: center;">✅ Heute bereits eingelöst<br><span style="font-size: 13px; opacity: 0.8;">Morgen wieder verfügbar</span></div></div>`
+        couponItems.push(`<div class="coupon-item activated"><h3>${coupon.title}</h3><div class="coupon-product">🍴 ${coupon.product}</div><div class="coupon-price">💰 ${formattedPrice}</div>${coupon.description ? `<div class="coupon-desc">📝 ${coupon.description}</div>` : ''}<div class="coupon-code-display">${uniqueCode}</div>${expiryText}<div class="coupon-activated-badge">✅ Aktiviert! Zeige Code beim Scannen</div><button onclick="deactivateCoupon(${coupon.id})" style="background: #ef4444; margin-top: 8px;">❌ Stornieren</button></div>`)
+      } else if (isUsedToday) {
+        // Already used today - show as unavailable only if will be valid tomorrow
+        if (willBeValidTomorrow) {
+          couponItems.push(`<div class="coupon-item" style="opacity: 0.6; background: #f3f4f6;"><h3>${coupon.title}</h3><div class="coupon-product">🍴 ${coupon.product}</div><div class="coupon-price">💰 ${formattedPrice}</div>${coupon.description ? `<div class="coupon-desc">📝 ${coupon.description}</div>` : ''}<div style="background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 8px; margin-top: 12px; font-weight: 600; text-align: center;">✅ Heute bereits eingelöst<br><span style="font-size: 13px; opacity: 0.8;">Morgen wieder verfügbar</span></div></div>`)
+        }
+        // If not valid tomorrow, don't show it (it will disappear)
       } else {
         // Available to activate
-        return `<div class="coupon-item"><h3>${coupon.title}</h3><div class="coupon-product">🍴 ${coupon.product}</div><div class="coupon-price">💰 ${formattedPrice}</div>${coupon.description ? `<div class="coupon-desc">📝 ${coupon.description}</div>` : ''}${expiryText}<button onclick="activateCoupon(${coupon.id})">🚀 Jetzt aktivieren</button></div>`
+        couponItems.push(`<div class="coupon-item"><h3>${coupon.title}</h3><div class="coupon-product">🍴 ${coupon.product}</div><div class="coupon-price">💰 ${formattedPrice}</div>${coupon.description ? `<div class="coupon-desc">📝 ${coupon.description}</div>` : ''}${expiryText}<button onclick="activateCoupon(${coupon.id})">🚀 Jetzt aktivieren</button></div>`)
       }
-    }).join('')
+    })
+    
+    if (couponItems.length === 0) {
+      section.style.display = 'none'
+    } else {
+      list.innerHTML = couponItems.join('')
+    }
   } catch (e) { console.error('Load coupons error:', e) }
 }
 
