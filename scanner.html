@@ -980,8 +980,11 @@ async function verifyAnyCode() {
 async function handleCouponCode(activation, code) {
   try {
     const coupon = activation.coupons; const customer = activation.customers
-    if (new Date(coupon.expires_at) < new Date()) throw new Error('Coupon abgelaufen')
-    const expires = new Date(coupon.expires_at).toLocaleDateString('de-DE')
+    // Check expiry using end_date with end of day logic
+    const endDate = coupon.end_date ? new Date(coupon.end_date) : new Date(coupon.expires_at)
+    endDate.setHours(23, 59, 59, 999)
+    if (endDate < new Date()) throw new Error('Coupon abgelaufen')
+    const expires = endDate.toLocaleDateString('de-DE')
     const price = parseFloat(coupon.price || 0).toFixed(2).replace('.', ',') + ' €'
     document.getElementById('code-details').style.display = 'block'
     document.getElementById('code-details').innerHTML = `<div class="code-item" style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #f59e0b;"><h3>🎟️ ${coupon.title}</h3><div class="code">${code}</div><div style="font-size:14px;color:#92400e;margin:12px 0;"><strong>Produkt:</strong> ${coupon.product}<br><strong>Preis:</strong> ${price}<br><strong>Kunde:</strong> ${customer.name} (${customer.phone})<br><strong>Punkte:</strong> ${customer.points}<br><strong>Gültig bis:</strong> ${expires}</div><button onclick="useCoupon('${activation.id}')" class="success" style="width:100%;margin-bottom:8px;">✅ Coupon einlösen</button><button onclick="cancelCodeConfirm()" class="secondary" style="width:100%;">❌ Abbrechen</button></div>`
