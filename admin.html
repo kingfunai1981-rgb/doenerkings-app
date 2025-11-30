@@ -817,7 +817,7 @@ async function createGlobalBonus() {
   const startDate = document.getElementById('globalBonusStart').value
   const endDate = document.getElementById('globalBonusEnd').value
   if (!startDate || !endDate) { showResult('result-global-bonus', '❌ Bitte Start- und End-Datum wählen!', 'error'); return }
-  if (endDate <= startDate) { showResult('result-global-bonus', '❌ End-Datum muss nach Start-Datum liegen!', 'error'); return }
+  if (endDate < startDate) { showResult('result-global-bonus', '❌ End-Datum muss nach oder gleich Start-Datum sein!', 'error'); return }
   const today = new Date().toISOString().split('T')[0]
   if (startDate < today) { showResult('result-global-bonus', '❌ Start-Datum darf nicht in der Vergangenheit liegen!', 'error'); return }
   try {
@@ -900,7 +900,7 @@ async function createCoupon() {
   const endDate = document.getElementById('couponEnd').value
   if (!product || !price) { showResult('result-coupon-create', '❌ Bitte Produktname und Preis ausfüllen!', 'error'); return }
   if (!startDate || !endDate) { showResult('result-coupon-create', '❌ Bitte Start- und End-Datum wählen!', 'error'); return }
-  if (endDate <= startDate) { showResult('result-coupon-create', '❌ End-Datum muss nach Start-Datum liegen!', 'error'); return }
+  if (endDate < startDate) { showResult('result-coupon-create', '❌ End-Datum muss nach oder gleich Start-Datum sein!', 'error'); return }
   const today = new Date().toISOString().split('T')[0]
   if (startDate < today) { showResult('result-coupon-create', '❌ Start-Datum darf nicht in der Vergangenheit liegen!', 'error'); return }
   showResult('result-coupon-create', '🎁 Erstelle Coupon...', 'info')
@@ -994,10 +994,12 @@ window.addEventListener('DOMContentLoaded', function() {
   loadWheelConfig(); loadWheelStats()
   loadWeatherSettings() // ← WETTER EINSTELLUNGEN LADEN
   const today = new Date(), nextWeek = new Date(); nextWeek.setDate(nextWeek.getDate() + 7)
+  const challenge20Days = new Date(); challenge20Days.setDate(challenge20Days.getDate() + 20)
   const todayStr = today.toISOString().split('T')[0], nextWeekStr = nextWeek.toISOString().split('T')[0]
-  document.getElementById('globalBonusStart').value = todayStr; document.getElementById('globalBonusEnd').value = nextWeekStr
-  document.getElementById('challengeStart').value = todayStr; document.getElementById('challengeEnd').value = nextWeekStr
-  document.getElementById('couponStart').value = todayStr; document.getElementById('couponEnd').value = nextWeekStr
+  const challenge20DaysStr = challenge20Days.toISOString().split('T')[0]
+  document.getElementById('globalBonusStart').value = todayStr; document.getElementById('globalBonusEnd').value = todayStr
+  document.getElementById('challengeStart').value = todayStr; document.getElementById('challengeEnd').value = challenge20DaysStr
+  document.getElementById('couponStart').value = todayStr; document.getElementById('couponEnd').value = todayStr
 })
 
 // ═══════════════════════════════════════════════════════════════
