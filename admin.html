@@ -840,6 +840,8 @@ async function loadGlobalBonuses() {
     list.innerHTML = bonuses.map(bonus => {
       const startDate = bonus.start_date ? new Date(bonus.start_date) : new Date(bonus.created_at)
       const endDate = bonus.end_date ? new Date(bonus.end_date) : new Date(bonus.expires_at)
+      // Set end date to end of day (23:59:59)
+      endDate.setHours(23, 59, 59, 999)
       const isExpired = endDate < now; const isNotStarted = startDate > now; const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
       const isActive = bonus.is_active && !isExpired && !isNotStarted
       let bonusText = bonus.bonus_type === 'double_points' ? '⭐ Doppelte Punkte' : `💰 +${bonus.bonus_amount} Bonus-Punkte`
@@ -883,8 +885,13 @@ async function loadChallenges() {
     const list = document.getElementById('challengeList')
     if (!challenges || challenges.length === 0) { list.innerHTML = '<div class="empty-state">Keine Challenges vorhanden</div>'; return }
     list.innerHTML = challenges.map(c => {
-      const start = new Date(c.start_date).toLocaleDateString('de-DE'); const end = new Date(c.end_date).toLocaleDateString('de-DE'); const now = new Date()
-      const isExpired = new Date(c.end_date) < now; const isActive = c.is_active && !isExpired
+      const start = new Date(c.start_date).toLocaleDateString('de-DE')
+      const endDate = new Date(c.end_date)
+      // Set end date to end of day (23:59:59)
+      endDate.setHours(23, 59, 59, 999)
+      const end = endDate.toLocaleDateString('de-DE')
+      const now = new Date()
+      const isExpired = endDate < now; const isActive = c.is_active && !isExpired
       return `<div style="background: ${isActive ? '#fef3c7' : '#fee2e2'}; border: 2px solid ${isActive ? '#F9A825' : '#ef4444'}; border-radius: 10px; padding: 16px; margin-top: 12px;"><div style="display: flex; justify-content: space-between; align-items: start;"><div style="flex: 1;"><h3 style="color: #111827; margin-bottom: 8px;">🎁 ${c.bonus_points} Punkte für ${c.required_orders} Bestellungen ab ${c.min_order_amount} €</h3><p style="font-size: 13px; color: #6b7280; margin: 4px 0;">📅 Gültig: ${start} - ${end}</p><p style="font-size: 12px; color: ${isActive ? '#92400e' : '#dc2626'}; font-weight: 600; margin-top: 6px;">${isActive ? '✅ Aktiv' : isExpired ? '❌ Abgelaufen' : '⏸️ Inaktiv'}</p></div><div style="display: flex; gap: 6px;">${isActive ? `<button class="danger" style="padding: 8px 14px; font-size: 13px; width: auto;" onclick="toggleChallenge(${c.id}, false)">⏸️ Deaktivieren</button>` : `<button class="success" style="padding: 8px 14px; font-size: 13px; width: auto; margin: 0;" onclick="toggleChallenge(${c.id}, true)">✅ Aktivieren</button>`}<button class="danger" style="padding: 8px 14px; font-size: 13px; width: auto;" onclick="deleteChallenge(${c.id})">🗑️</button></div></div></div>`
     }).join('')
   } catch (e) { console.error('Load challenges error:', e) }
@@ -925,6 +932,8 @@ async function loadCoupons() {
     for (const coupon of coupons) {
       const startDate = coupon.start_date ? new Date(coupon.start_date) : new Date(coupon.created_at)
       const endDate = coupon.end_date ? new Date(coupon.end_date) : new Date(coupon.expires_at)
+      // Set end date to end of day (23:59:59)
+      endDate.setHours(23, 59, 59, 999)
       const now = new Date(); const isExpired = endDate < now; const isNotStarted = startDate > now; const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
       if (isExpired && coupon.is_active) { await supabase.from('coupons').update({ is_active: false }).eq('id', coupon.id); coupon.is_active = false }
       const { data: activations } = await supabase.from('activated_coupons').select('unique_code, is_used, activated_at, customers(name, phone)').eq('coupon_id', coupon.id).order('activated_at', { ascending: false })
