@@ -1114,14 +1114,23 @@ async function loadCoupons() {
     const list = document.getElementById('coupons-list')
     if (!coupons || coupons.length === 0) { section.style.display = 'none'; return }
     const now = new Date()
-    const activeCoupons = coupons.filter(c => new Date(c.expires_at) > now)
+    // Filter active coupons: check if within date range (start_date to end_date)
+    const activeCoupons = coupons.filter(c => {
+      const startDate = c.start_date ? new Date(c.start_date) : new Date(c.created_at)
+      const endDate = c.end_date ? new Date(c.end_date) : new Date(c.expires_at)
+      // Set end date to end of day (23:59:59)
+      endDate.setHours(23, 59, 59, 999)
+      // Check if coupon is within valid date range
+      return now >= startDate && now <= endDate
+    })
     if (activeCoupons.length === 0) { section.style.display = 'none'; return }
     const { data: activated } = await supabase.from('activated_coupons').select('coupon_id, unique_code').eq('customer_id', currentCustomer.id).eq('is_used', false)
     const activatedMap = new Map(activated?.map(a => [a.coupon_id, a.unique_code]) || [])
     section.style.display = 'block'
     list.innerHTML = activeCoupons.map(coupon => {
-      const expiry = new Date(coupon.expires_at)
-      const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24))
+      const endDate = coupon.end_date ? new Date(coupon.end_date) : new Date(coupon.expires_at)
+      endDate.setHours(23, 59, 59, 999)
+      const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
       const isActivated = activatedMap.has(coupon.id)
       const uniqueCode = activatedMap.get(coupon.id)
       let expiryText = ''
@@ -1866,8 +1875,6 @@ window.addEventListener('offline', function() {
 // ═══════════════════════════════════════════════════════════════
 
 console.log('✅ Döner Boxx Kunden-App geladen!')
-console.log('📱 VERSION: MOBILE-FIX-v2.0 (22.11.2024)')
-console.log('🔧 Enthält: Error-Counter, Page Visibility API, Online/Offline Detection')
 </script>
 
 <footer style="text-align: center; padding: 20px 10px; color: #666; font-size: 11px; margin-top: 40px; background: #f5f5f5; border-top: 1px solid #e5e7eb;">
