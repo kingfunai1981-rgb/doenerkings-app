@@ -936,8 +936,19 @@ async function loadCoupons() {
       endDate.setHours(23, 59, 59, 999)
       const now = new Date(); const isExpired = endDate < now; const isNotStarted = startDate > now; const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
       if (isExpired && coupon.is_active) { await supabase.from('coupons').update({ is_active: false }).eq('id', coupon.id); coupon.is_active = false }
-      const { data: activations } = await supabase.from('activated_coupons').select('unique_code, is_used, activated_at, customers(name, phone)').eq('coupon_id', coupon.id).order('activated_at', { ascending: false })
-      let activationsHTML = ''; if (activations && activations.length > 0) { activationsHTML = `<div style="margin-top: 12px; padding: 8px; background: #f3f4f6; border-radius: 6px;"><strong>👥 Aktiviert von ${activations.length} Kunde(n)</strong></div>` }
+      const { data: activations } = await supabase.from('activated_coupons').select('customer_id, unique_code, is_used, activated_at, customers(name, phone)').eq('coupon_id', coupon.id).order('activated_at', { ascending: false })
+
+// Zähle nur eindeutige Kunden
+let uniqueCustomers = 0;
+if (activations && activations.length > 0) {
+  const uniqueCustomerIds = new Set(activations.map(a => a.customer_id));
+  uniqueCustomers = uniqueCustomerIds.size;
+}
+
+let activationsHTML = ''; 
+if (uniqueCustomers > 0) { 
+  activationsHTML = `<div style="margin-top: 12px; padding: 8px; background: #f3f4f6; border-radius: 6px;"><strong>👥 Aktiviert von ${uniqueCustomers} Kunde(n)</strong></div>` 
+}
       let statusText = '', statusColor = '', statusBg = ''
       if (isExpired) { statusText = '❌ Abgelaufen'; statusColor = '#991b1b'; statusBg = '#fee2e2' }
       else if (isNotStarted) { statusText = '⏰ Startet bald'; statusColor = '#92400e'; statusBg = '#fef3c7' }
