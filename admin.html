@@ -1952,7 +1952,6 @@ function showStats(category) {
   else if (category === 'segments') loadSegmentStats()
   else if (category === 'trends') loadTrendStats()
 }
-
 async function loadWinbackStats() {
   const content = document.getElementById('stats-content')
   content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Win-Back Statistiken...</div>'
@@ -2054,11 +2053,6 @@ async function loadWinbackStats() {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// ALLE STATISTIK-FUNKTIONEN MIT ECHTEN SUPABASE-DATEN
-// ═══════════════════════════════════════════════════════════════
-
-// 🎟️ COUPON ROI
 async function loadCouponStats() {
   const content = document.getElementById('stats-content')
   content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Coupon Statistiken...</div>'
@@ -2066,7 +2060,6 @@ async function loadCouponStats() {
   try {
     const range = getDateRange()
     
-    // Hole alle Coupon-Aktivierungen im Zeitraum
     const { data: activations, error: actError } = await supabase
       .from('activated_coupons')
       .select('*, coupons(product, price)')
@@ -2086,30 +2079,22 @@ async function loadCouponStats() {
       return
     }
     
-    // Gruppiere nach Coupon
     const grouped = {}
     activations.forEach(a => {
       if (!a.coupons) return
       const key = a.coupons.product
       if (!grouped[key]) {
-        grouped[key] = {
-          product: a.coupons.product,
-          price: a.coupons.price,
-          activations: 0,
-          redemptions: 0
-        }
+        grouped[key] = { product: a.coupons.product, price: a.coupons.price, activations: 0, redemptions: 0 }
       }
       grouped[key].activations++
       if (a.is_used) grouped[key].redemptions++
     })
     
-    // Erstelle HTML für jeden Coupon
     let html = `<h3 style="color: #111827; margin-bottom: 8px;">🎟️ Coupon Performance</h3>
                 <div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">${range.label}</div>`
     
     Object.values(grouped).forEach(coupon => {
       const conversionRate = Math.round((coupon.redemptions / coupon.activations) * 100)
-      
       html += `
         <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #F9A825;">
           <div style="font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 12px;">${coupon.product}</div>
@@ -2133,6 +2118,17 @@ async function loadCouponStats() {
         </div>
       `
     })
+    
+    content.innerHTML = html
+  } catch (e) {
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+    console.error('Coupon Stats Error:', e)
+  }
+}
+// ALLE STATISTIK-FUNKTIONEN MIT ECHTEN SUPABASE-DATEN
+// ═══════════════════════════════════════════════════════════════
+
+// 🎟️ COUPON ROI
     
     content.innerHTML = html
     
@@ -2584,6 +2580,15 @@ async function loadTrendStats() {
     console.error('Trend Stats Error:', e)
   }
 }
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      
+      <div style="background: #dcfce7; padding: 16px; border-radius: 10px; margin-top: 16px; border: 2px solid #22c55e;">
+        <div style="font-weight: 700; color: #166534; margin-bottom: 8px;">💡 Optimierung:</div>
+        <div style="color: #166534; font-size: 14px;">Freitag & Samstag sind Toptage! Biete Happy Hour 18-20 Uhr für noch mehr Umsatz.</div>
+      </div>
     `
   } catch (e) {
     content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
