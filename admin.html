@@ -152,15 +152,16 @@ textarea { resize: vertical; min-height: 60px; }
       
       <!-- Auto-Check: 9-22 Uhr, alle 30 Min (hardcoded) -->
       
-      <div style="background: #dcfce7; border: 2px solid #10b981; border-radius: 8px; padding: 14px; margin-top: 12px;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <div style="font-size: 24px;">🤖</div>
-          <div>
-            <div style="font-weight: 700; color: #166534; font-size: 14px;">Auto-Check AKTIV</div>
-            <div style="font-size: 13px; color: #166534;">Läuft täglich: 9-22 Uhr, alle 30 Minuten automatisch</div>
-          </div>
-        </div>
+      <div style="margin-top: 12px;">
+        <label class="form-label">Status:</label>
+        <select id="weather-active" style="padding: 10px; font-size: 14px; font-weight: 600;">
+          <option value="true">✅ Automatik AKTIV</option>
+          <option value="false">❌ Inaktiv</option>
+        </select>
       </div>
+      
+      <button class="success" onclick="saveWeatherSettings()" style="margin-top: 12px;">💾 Einstellungen speichern</button>
+      <div id="result-weather-settings"></div>
     </div>
 
     <!-- Deal-Status & Upgrade-Tracking -->
@@ -218,19 +219,9 @@ textarea { resize: vertical; min-height: 60px; }
     </div>
 
     <!-- Aktuelles Wetter + Döner-Preis -->
-    <div id="weather-current" style="background: #f3f4f6; border-radius: 10px; padding: 16px; margin-bottom: 16px; display: block;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <h3 style="margin: 0;">☁️ Aktuelles Wetter</h3>
-        <div id="weather-timestamp" style="font-size: 12px; color: #6b7280; text-align: right;">
-          <div>🔄 Zuletzt aktualisiert:</div>
-          <div id="weather-time" style="font-weight: 600; color: #111827;">--:--</div>
-        </div>
-      </div>
-      <div id="weather-display">
-        <div style="text-align: center; padding: 20px; color: #6b7280;">
-          ⏳ Lade Wetter-Daten...
-        </div>
-      </div>
+    <div id="weather-current" style="background: #f3f4f6; border-radius: 10px; padding: 16px; margin-bottom: 16px; display: none;">
+      <h3 style="margin-bottom: 12px;">☁️ Aktuelles Wetter</h3>
+      <div id="weather-display"></div>
     </div>
 
     <!-- Manuelle Aktion -->
@@ -488,32 +479,6 @@ textarea { resize: vertical; min-height: 60px; }
       <button onclick="showStats('trends')" id="btn-stats-trends" style="padding: 10px 16px; background: #f3f4f6; color: #6b7280; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
         📅 Trends
       </button>
-    </div>
-
-    <!-- Zeitraum-Filter -->
-    <div style="background: white; border-radius: 10px; padding: 14px; margin-bottom: 16px; border: 2px solid #e5e7eb;">
-      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-        <div style="font-weight: 600; color: #111827; font-size: 14px;">📅 Zeitraum:</div>
-        <select id="stats-timeframe" onchange="applyStatsFilter()" style="padding: 8px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">
-          <option value="today">Heute</option>
-          <option value="7days" selected>Letzte 7 Tage</option>
-          <option value="30days">Letzte 30 Tage</option>
-          <option value="thismonth">Dieser Monat</option>
-          <option value="lastmonth">Letzter Monat</option>
-          <option value="custom">Custom</option>
-        </select>
-        <div id="custom-date-range" style="display: none; gap: 8px;">
-          <input type="date" id="stats-from" style="padding: 8px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 13px;">
-          <span style="color: #6b7280;">bis</span>
-          <input type="date" id="stats-to" style="padding: 8px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 13px;">
-        </div>
-        <button onclick="applyStatsFilter()" style="padding: 8px 16px; background: #F9A825; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
-          ✓ Anwenden
-        </button>
-      </div>
-      <div id="stats-period-display" style="font-size: 12px; color: #6b7280; margin-top: 8px;">
-        Zeitraum: Letzte 7 Tage
-      </div>
     </div>
 
     <!-- Statistik-Inhalte -->
@@ -1138,6 +1103,21 @@ let todayDeals = {
 }
 
 let weatherCheckInterval = null
+let scheduledCheckTimeout = null
+
+async function saveWeatherSettings() {
+  const active = document.getElementById('weather-active').value === 'true'
+  
+  localStorage.setItem('weather_active', active)
+  
+  showResult('result-weather-settings', `✅ Einstellungen gespeichert! ${active ? 'Auto-Check aktiv (9-22 Uhr, alle 30min)' : 'Inaktiv'}`, 'success')
+  
+  if (active) {
+    startWeatherMonitoring()
+  } else {
+    stopWeatherMonitoring()
+  }
+}
 
 async function checkWeatherNow(isAutoCheck = false) {
   try {
@@ -1185,11 +1165,6 @@ async function checkWeatherNow(isAutoCheck = false) {
     
     displayWeatherInfo(temp, rain, desc, icon, newDeal)
     
-    // Update Zeitstempel
-    const now = new Date()
-    const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-    document.getElementById('weather-time').textContent = timeStr + ' Uhr'
-    
     if (newDeal && todayDeals.deals.length > 0) {
       checkUpgradeOpportunity(newDeal)
     }
@@ -1201,8 +1176,6 @@ async function checkWeatherNow(isAutoCheck = false) {
           body: `Döner nur ${newDeal.price}€ (-${newDeal.discount}%)`
         })
       }
-    } else if (!isAutoCheck) {
-      showResult('result-weather', `✅ Wetter aktualisiert um ${timeStr} Uhr`, 'success')
     }
     
   } catch (e) {
@@ -1481,11 +1454,15 @@ function stopWeatherMonitoring() {
 }
 
 async function loadWeatherSettings() {
-  // Auto-Check startet IMMER (kein Toggle mehr)
-  startWeatherMonitoring()
+  const active = localStorage.getItem('weather_active')
   
-  // Initial check beim Laden
-  checkWeatherNow(false)
+  if (active) {
+    document.getElementById('weather-active').value = active
+  }
+  
+  if (active === 'true') {
+    startWeatherMonitoring()
+  }
   
   if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission()
@@ -1815,119 +1792,6 @@ function copyWhatsAppNumbers() {
 // Business Intelligence / Statistiken
 // ═══════════════════════════════════════════════════════════════
 
-// Globale Zeitraum-Variable
-let currentStatsTimeframe = {
-  type: '7days',
-  from: null,
-  to: null
-}
-
-function getDateRange() {
-  const now = new Date()
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  
-  switch(currentStatsTimeframe.type) {
-    case 'today':
-      return {
-        from: today.toISOString(),
-        to: new Date(today.getTime() + 24*60*60*1000).toISOString(),
-        label: 'Heute'
-      }
-    
-    case '7days':
-      const last7 = new Date(today)
-      last7.setDate(last7.getDate() - 7)
-      return {
-        from: last7.toISOString(),
-        to: now.toISOString(),
-        label: 'Letzte 7 Tage'
-      }
-    
-    case '30days':
-      const last30 = new Date(today)
-      last30.setDate(last30.getDate() - 30)
-      return {
-        from: last30.toISOString(),
-        to: now.toISOString(),
-        label: 'Letzte 30 Tage'
-      }
-    
-    case 'thismonth':
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
-      return {
-        from: firstDay.toISOString(),
-        to: now.toISOString(),
-        label: 'Dieser Monat'
-      }
-    
-    case 'lastmonth':
-      const lastMonthFirst = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-      const lastMonthLast = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
-      return {
-        from: lastMonthFirst.toISOString(),
-        to: lastMonthLast.toISOString(),
-        label: 'Letzter Monat'
-      }
-    
-    case 'custom':
-      if (currentStatsTimeframe.from && currentStatsTimeframe.to) {
-        return {
-          from: new Date(currentStatsTimeframe.from).toISOString(),
-          to: new Date(currentStatsTimeframe.to + 'T23:59:59').toISOString(),
-          label: `${currentStatsTimeframe.from} bis ${currentStatsTimeframe.to}`
-        }
-      }
-      // Fallback
-      return getDateRange.call({...currentStatsTimeframe, type: '7days'})
-  }
-}
-
-function applyStatsFilter() {
-  const timeframe = document.getElementById('stats-timeframe').value
-  const customDiv = document.getElementById('custom-date-range')
-  
-  if (timeframe === 'custom') {
-    customDiv.style.display = 'flex'
-    currentStatsTimeframe.from = document.getElementById('stats-from').value
-    currentStatsTimeframe.to = document.getElementById('stats-to').value
-    
-    if (!currentStatsTimeframe.from || !currentStatsTimeframe.to) {
-      alert('Bitte beide Daten auswählen')
-      return
-    }
-  } else {
-    customDiv.style.display = 'none'
-  }
-  
-  currentStatsTimeframe.type = timeframe
-  
-  // Update Anzeige
-  const range = getDateRange()
-  document.getElementById('stats-period-display').textContent = `Zeitraum: ${range.label}`
-  
-  // Reload aktuelle Statistik
-  const activeBtn = document.querySelector('[id^="btn-stats-"][style*="8b5cf6"]')
-  if (activeBtn) {
-    const category = activeBtn.id.replace('btn-stats-', '')
-    showStats(category)
-  }
-}
-
-// Custom-Date anzeigen wenn Custom gewählt
-document.addEventListener('DOMContentLoaded', function() {
-  const timeframeSelect = document.getElementById('stats-timeframe')
-  if (timeframeSelect) {
-    timeframeSelect.addEventListener('change', function() {
-      const customDiv = document.getElementById('custom-date-range')
-      if (this.value === 'custom') {
-        customDiv.style.display = 'flex'
-      } else {
-        customDiv.style.display = 'none'
-      }
-    })
-  }
-})
-
 function showStats(category) {
   // Update Button States
   const buttons = ['winback', 'coupon', 'rewards', 'weather', 'wheel', 'challenges', 'segments', 'trends']
@@ -1958,99 +1822,45 @@ async function loadWinbackStats() {
   content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Win-Back Statistiken...</div>'
   
   try {
-    const range = getDateRange()
-    
-    // Hole ALLE Kunden mit winback_status
-    const { data: customers, error } = await supabase
-      .from('customers')
-      .select('winback_status')
-      .not('winback_status', 'is', null)
-    
-    if (error) throw error
-    
-    // Zähle pro Phase
+    // MOCK DATA - Du musst hier echte Daten aus Supabase laden
     const stats = {
-      phase1: { sent: 0, returned: 0, rate: 0 },
-      phase2: { sent: 0, returned: 0, rate: 0 },
-      phase3: { sent: 0, returned: 0, rate: 0 },
-      phase4: { sent: 0, returned: 0, rate: 0 }
-    }
-    
-    customers.forEach(c => {
-      const wb = c.winback_status
-      if (!wb || !wb.history || wb.history.length === 0) return
-      
-      // Prüfe alle History-Einträge im Zeitraum
-      wb.history.forEach(entry => {
-        const sentDate = new Date(entry.sent_at)
-        if (sentDate >= new Date(range.from) && sentDate <= new Date(range.to)) {
-          const phase = 'phase' + entry.phase
-          if (stats[phase]) {
-            stats[phase].sent++
-            if (entry.awarded) {
-              stats[phase].returned++
-            }
-          }
-        }
-      })
-    })
-    
-    // Berechne Raten
-    Object.keys(stats).forEach(key => {
-      if (stats[key].sent > 0) {
-        stats[key].rate = Math.round((stats[key].returned / stats[key].sent) * 100)
-      }
-    })
-    
-    // Zeige "Keine Daten" wenn alles 0
-    const hasData = Object.values(stats).some(s => s.sent > 0)
-    
-    if (!hasData) {
-      content.innerHTML = `
-        <div style="text-align: center; padding: 60px;">
-          <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
-          <div style="font-size: 18px; color: #6b7280; margin-bottom: 8px;">Noch keine Win-Back Daten</div>
-          <div style="font-size: 14px; color: #9ca3af;">Starte deine erste Win-Back Kampagne!</div>
-        </div>
-      `
-      return
+      phase1: { sent: 12, returned: 8, rate: 67 },
+      phase2: { sent: 15, returned: 10, rate: 67 },
+      phase3: { sent: 8, returned: 3, rate: 38 },
+      phase4: { sent: 5, returned: 1, rate: 20 }
     }
     
     content.innerHTML = `
-      <h3 style="color: #111827; margin-bottom: 8px;">💤 Win-Back Erfolgsrate</h3>
-      <div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">${range.label}</div>
+      <h3 style="color: #111827; margin-bottom: 16px;">💤 Win-Back Erfolgsrate</h3>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
         <div style="background: white; padding: 16px; border-radius: 10px; border-left: 4px solid #f472b6;">
           <div style="font-size: 13px; color: #6b7280; margin-bottom: 4px;">❤️ Phase 1 (14d, +100P)</div>
-          <div style="font-size: 24px; font-weight: 700; color: #f472b6; margin-bottom: 4px;">${stats.phase1.sent > 0 ? stats.phase1.rate + '%' : '-'}</div>
+          <div style="font-size: 24px; font-weight: 700; color: #f472b6; margin-bottom: 4px;">${stats.phase1.rate}%</div>
           <div style="font-size: 12px; color: #6b7280;">${stats.phase1.returned}/${stats.phase1.sent} zurückgekehrt</div>
         </div>
         <div style="background: white; padding: 16px; border-radius: 10px; border-left: 4px solid #fb923c;">
           <div style="font-size: 13px; color: #6b7280; margin-bottom: 4px;">😢 Phase 2 (21d, +150P)</div>
-          <div style="font-size: 24px; font-weight: 700; color: #fb923c; margin-bottom: 4px;">${stats.phase2.sent > 0 ? stats.phase2.rate + '%' : '-'}</div>
+          <div style="font-size: 24px; font-weight: 700; color: #fb923c; margin-bottom: 4px;">${stats.phase2.rate}%</div>
           <div style="font-size: 12px; color: #6b7280;">${stats.phase2.returned}/${stats.phase2.sent} zurückgekehrt</div>
         </div>
         <div style="background: white; padding: 16px; border-radius: 10px; border-left: 4px solid #f59e0b;">
           <div style="font-size: 13px; color: #6b7280; margin-bottom: 4px;">🥺 Phase 3 (30d, +300P)</div>
-          <div style="font-size: 24px; font-weight: 700; color: #f59e0b; margin-bottom: 4px;">${stats.phase3.sent > 0 ? stats.phase3.rate + '%' : '-'}</div>
+          <div style="font-size: 24px; font-weight: 700; color: #f59e0b; margin-bottom: 4px;">${stats.phase3.rate}%</div>
           <div style="font-size: 12px; color: #6b7280;">${stats.phase3.returned}/${stats.phase3.sent} zurückgekehrt</div>
         </div>
         <div style="background: white; padding: 16px; border-radius: 10px; border-left: 4px solid #dc2626;">
           <div style="font-size: 13px; color: #6b7280; margin-bottom: 4px;">🔥 Phase 4 (60d, +500P)</div>
-          <div style="font-size: 24px; font-weight: 700; color: #dc2626; margin-bottom: 4px;">${stats.phase4.sent > 0 ? stats.phase4.rate + '%' : '-'}</div>
+          <div style="font-size: 24px; font-weight: 700; color: #dc2626; margin-bottom: 4px;">${stats.phase4.rate}%</div>
           <div style="font-size: 12px; color: #6b7280;">${stats.phase4.returned}/${stats.phase4.sent} zurückgekehrt</div>
         </div>
       </div>
-      ${stats.phase1.sent > 0 || stats.phase2.sent > 0 ? `
       <div style="background: #dcfce7; padding: 16px; border-radius: 10px; margin-top: 16px; border: 2px solid #22c55e;">
         <div style="font-weight: 700; color: #166534; margin-bottom: 8px;">💡 Empfehlung:</div>
-        <div style="color: #166534; font-size: 14px;">Phase 1+2 haben oft die beste Erfolgsrate! Fokus auf frühe Reaktivierung bringt mehr Kunden zurück.</div>
+        <div style="color: #166534; font-size: 14px;">Phase 1+2 haben die beste Erfolgsrate (67%)! Fokus auf frühe Reaktivierung bringt mehr Kunden zurück.</div>
       </div>
-      ` : ''}
     `
   } catch (e) {
     content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
-    console.error('Win-Back Stats Error:', e)
   }
 }
 
@@ -2114,67 +1924,21 @@ async function loadRewardStats() {
   content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Prämien Statistiken...</div>'
   
   try {
-    const range = getDateRange()
+    // MOCK DATA
+    const rewards = [
+      { name: 'Döner XL', points: 1000, count: 234, emoji: '🥙' },
+      { name: 'Pommes', points: 500, count: 189, emoji: '🍟' },
+      { name: 'Döner Teller', points: 1250, count: 87, emoji: '🍽️' },
+      { name: 'Döner Box', points: 750, count: 56, emoji: '📦' },
+      { name: 'Ayran', points: 250, count: 23, emoji: '🥤' }
+    ]
     
-    const { data: redemptions, error } = await supabase
-      .from('transactions')
-      .select('points, notes, created_at')
-      .lt('points', 0)
-      .gte('created_at', range.from)
-      .lte('created_at', range.to)
-    
-    if (error) throw error
-    
-    if (!redemptions || redemptions.length === 0) {
-      content.innerHTML = `
-        <div style="text-align: center; padding: 60px;">
-          <div style="font-size: 48px; margin-bottom: 16px;">🏆</div>
-          <div style="font-size: 18px; color: #6b7280; margin-bottom: 8px;">Keine Prämien eingelöst</div>
-          <div style="font-size: 14px; color: #9ca3af;">Zeitraum: ${range.label}</div>
-        </div>
-      `
-      return
-    }
-    
-    const rewardMap = {
-      '-250': { name: 'Ayran', emoji: '🥤', count: 0 },
-      '-500': { name: 'Pommes', emoji: '🍟', count: 0 },
-      '-750': { name: 'Döner Box', emoji: '📦', count: 0 },
-      '-1000': { name: 'Döner XL', emoji: '🥙', count: 0 },
-      '-1250': { name: 'Döner Teller', emoji: '🍽️', count: 0 }
-    }
-    
-    redemptions.forEach(r => {
-      const key = r.points.toString()
-      if (rewardMap[key]) {
-        rewardMap[key].count++
-      }
-    })
-    
-    const sorted = Object.entries(rewardMap)
-      .map(([points, data]) => ({ points: Math.abs(parseInt(points)), ...data }))
-      .filter(r => r.count > 0)
-      .sort((a, b) => b.count - a.count)
-    
-    if (sorted.length === 0) {
-      content.innerHTML = `
-        <div style="text-align: center; padding: 60px;">
-          <div style="font-size: 48px; margin-bottom: 16px;">🏆</div>
-          <div style="font-size: 18px; color: #6b7280;">Keine Prämien eingelöst</div>
-        </div>
-      `
-      return
-    }
-    
-    let html = `<h3 style="color: #111827; margin-bottom: 8px;">🏆 Prämien-Ranking</h3>
-                <div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">${range.label}</div>`
-    
-    sorted.forEach((r, i) => {
-      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🏅'
-      html += `
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">🏆 Prämien-Ranking</h3>
+      ${rewards.map((r, i) => `
         <div style="background: white; padding: 14px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid ${i === 0 ? '#F9A825' : '#e5e7eb'};">
           <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="font-size: 32px;">${medal}</div>
+            <div style="font-size: 32px;">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🏅'}</div>
             <div>
               <div style="font-size: 16px; font-weight: 700; color: #111827;">${r.emoji} ${r.name}</div>
               <div style="font-size: 13px; color: #6b7280;">${r.points} Punkte</div>
@@ -2185,14 +1949,14 @@ async function loadRewardStats() {
             <div style="font-size: 12px; color: #6b7280;">eingelöst</div>
           </div>
         </div>
-      `
-    })
-    
-    content.innerHTML = html
-    
+      `).join('')}
+      <div style="background: #dbeafe; padding: 16px; border-radius: 10px; margin-top: 16px; border: 2px solid #3b82f6;">
+        <div style="font-weight: 700; color: #1e40af; margin-bottom: 8px;">💡 Insight:</div>
+        <div style="color: #1e40af; font-size: 14px;">Kunden sparen lieber für Döner XL! Überlege höherwertige Prämien anzubieten.</div>
+      </div>
+    `
   } catch (e) {
     content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
-    console.error('Reward Stats Error:', e)
   }
 }
 
@@ -2201,67 +1965,43 @@ async function loadWeatherDealStats() {
   content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Wetter-Deal Statistiken...</div>'
   
   try {
-    const range = getDateRange()
-    
-    const { data: coupons, error: cpError } = await supabase
-      .from('coupons')
-      .select('id, product, price, created_at')
-      .gte('created_at', range.from)
-      .lte('created_at', range.to)
-    
-    if (cpError) throw cpError
-    
-    const weatherCoupons = coupons?.filter(c => {
-      const price = c.price.toLowerCase()
-      return price.includes('3€') || price.includes('4€') || price.includes('5€')
-    }) || []
-    
-    if (weatherCoupons.length === 0) {
-      content.innerHTML = `
-        <div style="text-align: center; padding: 60px;">
-          <div style="font-size: 48px; margin-bottom: 16px;">🌧️</div>
-          <div style="font-size: 18px; color: #6b7280; margin-bottom: 8px;">Keine Wetter-Deals</div>
-          <div style="font-size: 14px; color: #9ca3af;">Zeitraum: ${range.label}</div>
-        </div>
-      `
-      return
-    }
-    
-    let totalActivations = 0
-    for (const c of weatherCoupons) {
-      const { count } = await supabase
-        .from('activated_coupons')
-        .select('*', { count: 'exact', head: true })
-        .eq('coupon_id', c.id)
-      totalActivations += (count || 0)
+    // MOCK DATA
+    const stats = {
+      activated: 8,
+      avgDiscount: 28,
+      orders: 127,
+      increase: 312,
+      roi: 540
     }
     
     content.innerHTML = `
-      <h3 style="color: #111827; margin-bottom: 8px;">🌧️ Wetter-Deal Erfolg</h3>
-      <div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">${range.label}</div>
+      <h3 style="color: #111827; margin-bottom: 16px;">🌧️ Wetter-Deal Erfolg</h3>
       <div style="background: white; padding: 20px; border-radius: 10px;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+        <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 16px;">Letzter Monat</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 16px;">
           <div style="text-align: center;">
-            <div style="font-size: 28px; font-weight: 700; color: #3b82f6;">${weatherCoupons.length}x</div>
-            <div style="font-size: 13px; color: #6b7280;">Deals erstellt</div>
+            <div style="font-size: 28px; font-weight: 700; color: #3b82f6;">${stats.activated}x</div>
+            <div style="font-size: 13px; color: #6b7280;">Deals aktiviert</div>
           </div>
           <div style="text-align: center;">
-            <div style="font-size: 28px; font-weight: 700; color: #10b981;">${totalActivations}</div>
-            <div style="font-size: 13px; color: #6b7280;">Aktivierungen</div>
+            <div style="font-size: 28px; font-weight: 700; color: #f59e0b;">-${stats.avgDiscount}%</div>
+            <div style="font-size: 13px; color: #6b7280;">Ø Rabatt</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 28px; font-weight: 700; color: #10b981;">${stats.orders}</div>
+            <div style="font-size: 13px; color: #6b7280;">Bestellungen</div>
           </div>
         </div>
-      </div>
-      <div style="background: #dbeafe; padding: 16px; border-radius: 10px; margin-top: 16px; border: 2px solid #3b82f6;">
-        <div style="font-weight: 700; color: #1e40af; margin-bottom: 8px;">💡 Info:</div>
-        <div style="color: #1e40af; font-size: 14px;">Wetter-Deals (3-5€) ziehen Kunden bei schlechtem Wetter!</div>
-      </div>
-    `
-    
-  } catch (e) {
-    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
-    console.error('Weather Deal Stats Error:', e)
-  }
-}
+        <div style="background: #dcfce7; padding: 12px; border-radius: 8px; border: 2px solid #22c55e; margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 14px; color: #166534;">Mehr Bestellungen vs Normal:</div>
+            <div style="font-size: 20px; font-weight: 900; color: #166534;">+${stats.increase}% 🚀</div>
+          </div>
+        </div>
+        <div style="background: #f3f4f6; padding: 12px; border-radius: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 14px; color: #6b7280;">ROI:</div>
+            <div style="font-size: 20px; font-weight: 900; color: #F9A825;">+${stats.roi}% 🔥</div>
           </div>
         </div>
       </div>
@@ -2278,98 +2018,184 @@ async function loadWeatherDealStats() {
 async function loadWheelStatsDetailed() {
   const content = document.getElementById('stats-content')
   content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Glücksrad Statistiken...</div>'
+  
   try {
-    const range = getDateRange()
-    const { data: spins, error } = await supabase.from('wheel_spins').select('prize_points, created_at').gte('created_at', range.from).lte('created_at', range.to)
-    if (error) throw error
-    if (!spins || spins.length === 0) {
-      content.innerHTML = '<div style="text-align: center; padding: 60px;"><div style="font-size: 48px; margin-bottom: 16px;">🎡</div><div style="font-size: 18px; color: #6b7280; margin-bottom: 8px;">Keine Glücksrad-Spins</div><div style="font-size: 14px; color: #9ca3af;">Zeitraum: '+range.label+'</div></div>'
-      return
+    // MOCK DATA
+    const stats = {
+      spinsWeek: 89,
+      avgPrize: 67,
+      mostWon: { prize: '50P', count: 34, percent: 38 },
+      jackpot: 3,
+      engagement: 76
     }
-    const avgPrize = Math.round(spins.reduce((sum, s) => sum + s.prize_points, 0) / spins.length)
-    const jackpots = spins.filter(s => s.prize_points >= 200).length
-    const prizeCount = {}
-    spins.forEach(s => { prizeCount[s.prize_points] = (prizeCount[s.prize_points] || 0) + 1 })
-    const mostWon = Object.entries(prizeCount).sort((a, b) => b[1] - a[1])[0]
-    const mostWonPercent = Math.round((mostWon[1] / spins.length) * 100)
-    content.innerHTML = '<h3 style="color: #111827; margin-bottom: 8px;">🎡 Glücksrad Performance</h3><div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">'+range.label+'</div><div style="background: white; padding: 20px; border-radius: 10px;"><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 16px;"><div style="text-align: center;"><div style="font-size: 28px; font-weight: 700; color: #F9A825;">'+spins.length+'</div><div style="font-size: 13px; color: #6b7280;">Spins gesamt</div></div><div style="text-align: center;"><div style="font-size: 28px; font-weight: 700; color: #3b82f6;">'+avgPrize+'P</div><div style="font-size: 13px; color: #6b7280;">Ø Gewinn</div></div><div style="text-align: center;"><div style="font-size: 28px; font-weight: 700; color: #10b981;">'+jackpots+'x</div><div style="font-size: 13px; color: #6b7280;">Jackpot (200P)</div></div></div><div style="background: #f3f4f6; padding: 12px; border-radius: 8px;"><div style="display: flex; justify-content: space-between; align-items: center;"><div style="font-size: 14px; color: #6b7280;">Meist gewonnen:</div><div style="font-size: 18px; font-weight: 700; color: #F9A825;">'+mostWon[0]+'P ('+mostWonPercent+'%)</div></div></div></div>'
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">🎡 Glücksrad Performance</h3>
+      <div style="background: white; padding: 20px; border-radius: 10px;">
+        <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 16px;">Diese Woche</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 16px;">
+          <div style="text-align: center;">
+            <div style="font-size: 28px; font-weight: 700; color: #F9A825;">${stats.spinsWeek}</div>
+            <div style="font-size: 13px; color: #6b7280;">Spins</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 28px; font-weight: 700; color: #3b82f6;">${stats.avgPrize}P</div>
+            <div style="font-size: 13px; color: #6b7280;">Ø Gewinn</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 28px; font-weight: 700; color: #10b981;">${stats.jackpot}x</div>
+            <div style="font-size: 13px; color: #6b7280;">Jackpot (200P)</div>
+          </div>
+        </div>
+        <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 14px; color: #6b7280;">Meist gewonnen:</div>
+            <div style="font-size: 18px; font-weight: 700; color: #F9A825;">${stats.mostWon.prize} (${stats.mostWon.percent}%)</div>
+          </div>
+        </div>
+        <div style="background: #dcfce7; padding: 12px; border-radius: 8px; border: 2px solid #22c55e;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 14px; color: #166534;">Engagement Boost:</div>
+            <div style="font-size: 20px; font-weight: 900; color: #166534;">+${stats.engagement}% 🎯</div>
+          </div>
+        </div>
+      </div>
+    `
   } catch (e) {
-    content.innerHTML = '<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: '+e.message+'</div>'
-    console.error('Wheel Stats Error:', e)
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
   }
 }
 
 async function loadChallengeStats() {
   const content = document.getElementById('stats-content')
   content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Challenge Statistiken...</div>'
+  
   try {
-    const range = getDateRange()
-    const { data: progress, error } = await supabase.from('challenge_progress').select('*, challenges(*)').gte('created_at', range.from).lte('created_at', range.to)
-    if (error) throw error
-    if (!progress || progress.length === 0) {
-      content.innerHTML = '<div style="text-align: center; padding: 60px;"><div style="font-size: 48px; margin-bottom: 16px;">🎯</div><div style="font-size: 18px; color: #6b7280; margin-bottom: 8px;">Keine Challenge-Teilnehmer</div><div style="font-size: 14px; color: #9ca3af;">Zeitraum: '+range.label+'</div></div>'
-      return
+    // MOCK DATA
+    const stats = {
+      participants: 67,
+      completed: 45,
+      completionRate: 67,
+      revenue: 1340,
+      avgIncrease: 8.50
     }
-    const completed = progress.filter(p => p.is_completed).length
-    const completionRate = Math.round((completed / progress.length) * 100)
-    const sampleChallenge = progress[0].challenges
-    content.innerHTML = '<h3 style="color: #111827; margin-bottom: 8px;">🎯 Challenge Success</h3><div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">'+range.label+'</div><div style="background: white; padding: 20px; border-radius: 10px;">'+(sampleChallenge ? '<div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 16px;">Challenge: "'+sampleChallenge.required_orders+'x bestellen, +'+sampleChallenge.bonus_points+'P"</div>' : '')+'<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;"><div style="text-align: center;"><div style="font-size: 28px; font-weight: 700; color: #3b82f6;">'+progress.length+'</div><div style="font-size: 13px; color: #6b7280;">Teilnehmer</div></div><div style="text-align: center;"><div style="font-size: 28px; font-weight: 700; color: #10b981;">'+completed+'</div><div style="font-size: 13px; color: #6b7280;">Abgeschlossen</div></div><div style="text-align: center;"><div style="font-size: 28px; font-weight: 700; color: #F9A825;">'+completionRate+'%</div><div style="font-size: 13px; color: #6b7280;">Erfolgsrate</div></div></div></div>'
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">🎯 Challenge Success</h3>
+      <div style="background: white; padding: 20px; border-radius: 10px;">
+        <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 16px;">Challenge: "2x bestellen, +300P"</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 16px;">
+          <div style="text-align: center;">
+            <div style="font-size: 28px; font-weight: 700; color: #3b82f6;">${stats.participants}</div>
+            <div style="font-size: 13px; color: #6b7280;">Teilnehmer</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 28px; font-weight: 700; color: #10b981;">${stats.completed}</div>
+            <div style="font-size: 13px; color: #6b7280;">Abgeschlossen</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 28px; font-weight: 700; color: #F9A825;">${stats.completionRate}%</div>
+            <div style="font-size: 13px; color: #6b7280;">Erfolgsrate</div>
+          </div>
+        </div>
+        <div style="background: #dcfce7; padding: 12px; border-radius: 8px; border: 2px solid #22c55e; margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 14px; color: #166534;">Gesamt-Umsatz:</div>
+            <div style="font-size: 22px; font-weight: 900; color: #166534;">${stats.revenue}€</div>
+          </div>
+        </div>
+        <div style="background: #f3f4f6; padding: 12px; border-radius: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 14px; color: #6b7280;">Ø mehr Umsatz pro Kunde:</div>
+            <div style="font-size: 20px; font-weight: 900; color: #F9A825;">+${stats.avgIncrease.toFixed(2)}€</div>
+          </div>
+        </div>
+      </div>
+    `
   } catch (e) {
-    content.innerHTML = '<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: '+e.message+'</div>'
-    console.error('Challenge Stats Error:', e)
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
   }
 }
 
 async function loadSegmentStats() {
   const content = document.getElementById('stats-content')
   content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Kunden-Segmente...</div>'
+  
   try {
-    const { data: customers, error: custError } = await supabase.from('customers').select('id')
-    if (custError) throw custError
-    if (!customers || customers.length === 0) {
-      content.innerHTML = '<div style="text-align: center; padding: 60px;"><div style="font-size: 48px; margin-bottom: 16px;">👥</div><div style="font-size: 18px; color: #6b7280;">Keine Kunden</div></div>'
-      return
-    }
-    const segments = { vip: { name: 'VIP', visits: '20+', count: 0, color: '#dc2626' }, stamm: { name: 'Stamm', visits: '10-19', count: 0, color: '#f59e0b' }, regular: { name: 'Regular', visits: '5-9', count: 0, color: '#3b82f6' }, gelegentlich: { name: 'Gelegentlich', visits: '2-4', count: 0, color: '#6b7280' }, einmalig: { name: 'Einmalig', visits: '1', count: 0, color: '#9ca3af' } }
-    for (const customer of customers) {
-      const { count } = await supabase.from('transactions').select('*', { count: 'exact', head: true }).eq('customer_id', customer.id).eq('type', 'earn')
-      const txCount = count || 0
-      if (txCount >= 20) segments.vip.count++; else if (txCount >= 10) segments.stamm.count++; else if (txCount >= 5) segments.regular.count++; else if (txCount >= 2) segments.gelegentlich.count++; else segments.einmalig.count++
-    }
-    Object.keys(segments).forEach(key => { segments[key].percent = Math.round((segments[key].count / customers.length) * 100) })
-    let html = '<h3 style="color: #111827; margin-bottom: 16px;">👥 Kunden-Segmente</h3>'
-    Object.values(segments).forEach(s => { html += '<div style="background: white; padding: 14px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid '+s.color+';"><div style="display: flex; justify-content: space-between; align-items: center;"><div><div style="font-size: 16px; font-weight: 700; color: #111827;">'+s.name+'</div><div style="font-size: 13px; color: #6b7280;">'+s.visits+' Besuche</div></div><div style="text-align: right;"><div style="font-size: 24px; font-weight: 700; color: '+s.color+';">'+s.count+'</div><div style="font-size: 12px; color: #6b7280;">'+s.percent+'%</div></div></div></div>' })
-    content.innerHTML = html
+    // MOCK DATA
+    const segments = [
+      { name: 'VIP', visits: '20+', count: 12, percent: 5, color: '#dc2626' },
+      { name: 'Stamm', visits: '10-19', count: 34, percent: 15, color: '#f59e0b' },
+      { name: 'Regular', visits: '5-9', count: 78, percent: 35, color: '#3b82f6' },
+      { name: 'Gelegentlich', visits: '2-4', count: 89, percent: 40, color: '#6b7280' },
+      { name: 'Einmalig', visits: '1', count: 11, percent: 5, color: '#9ca3af' }
+    ]
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">👥 Kunden-Segmente</h3>
+      ${segments.map(s => `
+        <div style="background: white; padding: 14px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid ${s.color};">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 16px; font-weight: 700; color: #111827;">${s.name}</div>
+              <div style="font-size: 13px; color: #6b7280;">${s.visits} Besuche</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 24px; font-weight: 700; color: ${s.color};">${s.count}</div>
+              <div style="font-size: 12px; color: #6b7280;">${s.percent}%</div>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+      <div style="background: #dbeafe; padding: 16px; border-radius: 10px; margin-top: 16px; border: 2px solid #3b82f6;">
+        <div style="font-weight: 700; color: #1e40af; margin-bottom: 8px;">💡 Focus:</div>
+        <div style="color: #1e40af; font-size: 14px;">Gelegentliche (40%) zu Regular entwickeln! Biete nach 3. Besuch Bonus an.</div>
+      </div>
+    `
   } catch (e) {
-    content.innerHTML = '<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: '+e.message+'</div>'
-    console.error('Segment Stats Error:', e)
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
   }
 }
 
 async function loadTrendStats() {
   const content = document.getElementById('stats-content')
   content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Trend-Daten...</div>'
+  
   try {
-    const range = getDateRange()
-    const { data: transactions, error } = await supabase.from('transactions').select('created_at, type').eq('type', 'earn').gte('created_at', range.from).lte('created_at', range.to)
-    if (error) throw error
-    if (!transactions || transactions.length === 0) {
-      content.innerHTML = '<div style="text-align: center; padding: 60px;"><div style="font-size: 48px; margin-bottom: 16px;">📅</div><div style="font-size: 18px; color: #6b7280;">Keine Transaktionen</div></div>'
-      return
-    }
-    const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']
-    const dayCounts = [0, 0, 0, 0, 0, 0, 0]
-    transactions.forEach(t => { const day = new Date(t.created_at).getDay(); dayCounts[day]++ })
-    const dayStats = dayNames.map((name, i) => ({ name, count: dayCounts[i], day: i })).sort((a, b) => b.count - a.count)
-    const colors = ['#dc2626', '#f59e0b', '#F9A825', '#3b82f6', '#6b7280', '#9ca3af', '#9ca3af']
-    let html = '<h3 style="color: #111827; margin-bottom: 8px;">📅 Zeitbasierte Trends</h3><div style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">'+range.label+' • '+transactions.length+' Bestellungen</div><div style="font-size: 15px; font-weight: 700; color: #111827; margin-bottom: 12px;">Beste Verkaufstage:</div>'
-    dayStats.forEach((d, i) => { const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '📊'; const percent = Math.round((d.count / transactions.length) * 100); html += '<div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 6px; border-left: 4px solid '+colors[i]+';"><div style="display: flex; justify-content: space-between; align-items: center;"><div style="display: flex; align-items: center; gap: 8px;"><div style="font-size: 20px;">'+medal+'</div><div style="font-size: 14px; font-weight: 600; color: #111827;">'+d.name+'</div></div><div style="display: flex; align-items: center; gap: 12px;"><div style="font-size: 18px; font-weight: 700; color: '+colors[i]+';">'+d.count+'</div><div style="font-size: 13px; color: #6b7280;">'+percent+'%</div></div></div></div>' })
-    content.innerHTML = html
-  } catch (e) {
-    content.innerHTML = '<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: '+e.message+'</div>'
-    console.error('Trend Stats Error:', e)
-  }
-}
+    // MOCK DATA
+    const days = [
+      { name: 'Freitag', orders: 234, percent: 28, color: '#dc2626' },
+      { name: 'Samstag', orders: 198, percent: 24, color: '#f59e0b' },
+      { name: 'Donnerstag', orders: 176, percent: 21, color: '#F9A825' },
+      { name: 'Mittwoch', orders: 145, percent: 17, color: '#3b82f6' },
+      { name: 'Dienstag', orders: 43, percent: 5, color: '#6b7280' },
+      { name: 'Montag', orders: 25, percent: 3, color: '#9ca3af' },
+      { name: 'Sonntag', orders: 17, percent: 2, color: '#9ca3af' }
+    ]
+    
+    const rushHours = [
+      { time: '12-14 Uhr', percent: 45, color: '#dc2626' },
+      { time: '18-20 Uhr', percent: 38, color: '#f59e0b' },
+      { time: '15-17 Uhr', percent: 17, color: '#3b82f6' }
+    ]
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">📅 Zeitbasierte Trends</h3>
+      
+      <div style="margin-bottom: 24px;">
+        <div style="font-size: 15px; font-weight: 700; color: #111827; margin-bottom: 12px;">Beste Verkaufstage:</div>
+        ${days.map((d, i) => `
+          <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 6px; border-left: 4px solid ${d.color};">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="font-size: 20px;">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '📊'}</div>
+                <div style="font-size: 14px; font-weight: 600; color: #111827;">${d.name}</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="font-size: 18px; font-weight: 700; color: ${d.color};">${d.orders}</div>
+                <div style="font-size: 13px; color: #6b7280;">${d.percent}%</div>
+              </div>
+            </div>
           </div>
         `).join('')}
       </div>
