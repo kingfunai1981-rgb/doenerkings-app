@@ -66,6 +66,25 @@ textarea { resize: vertical; min-height: 60px; }
     <div class="header-text"><h1>Kunden verwalten</h1><p class="subtitle">Verwalte alle Kunden, Transaktionen und Punkte</p></div>
   </div>
 
+  <!-- ══════════════════════════════════════════════════════════
+       TAB NAVIGATION - NEU HINZUGEFÜGT
+       ══════════════════════════════════════════════════════════ -->
+  <div class="card" style="padding: 16px; background: white;">
+    <div style="display: flex; gap: 12px;">
+      <button id="tab-admin-btn" class="tab-switch-btn active" onclick="switchTab('admin')" style="flex: 1; padding: 14px; background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s;">
+        🗂️ Kunden verwalten
+      </button>
+      <button id="tab-stats-btn" class="tab-switch-btn" onclick="switchTab('stats')" style="flex: 1; padding: 14px; background: #f3f4f6; color: #6b7280; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s;">
+        📊 Business Intelligence
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       ADMIN CONTENT (Original - unverändert)
+       ══════════════════════════════════════════════════════════ -->
+  <div id="admin-content" class="tab-content-section">
+
   <div class="card">
     <h2>🎁 Globale Bonusse</h2>
     <p class="subtitle">Erstelle Bonusse, die sofort bei allen Kunden erscheinen</p>
@@ -1738,6 +1757,1709 @@ function copyWhatsAppNumbers() {
 // ═══════════════════════════════════════════════════════════════
 
 console.log('✅ Döner Boxx Verwaltung geladen!')
+  </div><!-- Ende admin-content -->
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       STATS CONTENT (NEU HINZUGEFÜGT)
+       ══════════════════════════════════════════════════════════ -->
+  <div id="stats-content-section" class="tab-content-section" style="display: none;">
+  <div class="card" style="border: 3px solid #F9A825;">
+    <!-- Zeitraum-Filter -->
+    <div style="background: #f9fafb; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <label class="form-label">📅 Zeitraum wählen:</label>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 12px;">
+        <button class="stat-btn" onclick="setTimeRange('today')">Heute</button>
+        <button class="stat-btn active" id="btn-7days" onclick="setTimeRange('7days')">7 Tage</button>
+        <button class="stat-btn" onclick="setTimeRange('30days')">30 Tage</button>
+        <button class="stat-btn" onclick="setTimeRange('thisMonth')">Dieser Monat</button>
+        <button class="stat-btn" onclick="setTimeRange('lastMonth')">Letzter Monat</button>
+        <button class="stat-btn" onclick="setTimeRange('all')">Alle Zeit</button>
+        <button class="stat-btn" onclick="setTimeRange('custom')">Custom</button>
+      </div>
+      
+      <div id="custom-date-range" style="display: none;">
+        <div class="form-grid">
+          <div>
+            <label class="form-label">Von:</label>
+            <input type="date" id="date-from">
+          </div>
+          <div>
+            <label class="form-label">Bis:</label>
+            <input type="date" id="date-to">
+          </div>
+        </div>
+        <button class="success" onclick="applyCustomRange()">✓ Anwenden</button>
+      </div>
+    </div>
+    
+    <!-- Statistik-Navigation -->
+    <div style="margin-bottom: 16px;">
+      <button class="stat-btn active" id="btn-coupon" onclick="loadCouponStats()">🎟️ Coupon ROI</button>
+      <button class="stat-btn" id="btn-rewards" onclick="loadRewardStats()">🏆 Prämien-Ranking</button>
+      <button class="stat-btn" id="btn-weather" onclick="loadWeatherStats()">🌧️ Wetter-Deals</button>
+      <button class="stat-btn" id="btn-wheel" onclick="loadWheelStats()">🎡 Glücksrad</button>
+      <button class="stat-btn" id="btn-challenges" onclick="loadChallengeStats()">⚡ Challenges</button>
+      <button class="stat-btn" id="btn-segments" onclick="loadSegmentStats()">👥 Segmente</button>
+      <button class="stat-btn" id="btn-trends" onclick="loadTrendStats()">📈 Trends</button>
+    </div>
+    
+    <!-- Stats Content -->
+    <div id="stats-content" style="background: #f9fafb; border-radius: 12px; padding: 20px; min-height: 400px;">
+      <div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Initialisiere Statistiken...</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+// ✅ Auto-detect ob 'action' oder 'type' Spalte existiert (OHNE 400-Fehler!)
+let ACTION_COLUMN = null
+
+async function detectActionColumn() {
+  if (ACTION_COLUMN !== null) return ACTION_COLUMN
+  
+  // Strategie: Hol einfach ALLE Spalten einer Zeile und schau was drin ist
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('*')
+    .limit(1)
+
+  if (error) {
+    console.error('❌ Fehler beim transactions-Check:', error)
+    // Fallback
+    ACTION_COLUMN = 'type'
+    console.log('⚠️ Fallback: Using column "type"')
+    return ACTION_COLUMN
+  }
+
+  // Wenn keine Daten vorhanden, prüfe Schema
+  if (!data || data.length === 0) {
+    console.log('⚠️ Keine Transaktionen in DB, nehme "type" als Default')
+    ACTION_COLUMN = 'type'
+    return ACTION_COLUMN
+  }
+
+  const row = data[0]
+
+  if ('action' in row) {
+    ACTION_COLUMN = 'action'
+    console.log('✅ Detected column: action')
+  } else if ('type' in row) {
+    ACTION_COLUMN = 'type'
+    console.log('✅ Detected column: type')
+  } else {
+    // Fallback, falls beides nicht existiert
+    ACTION_COLUMN = 'type'
+    console.log('⚠️ Neither "action" nor "type" found, using "type" as fallback')
+  }
+
+  return ACTION_COLUMN
+}
+
+let currentTimeRange = { start: null, end: null, label: '7days' }
+
+function setTimeRange(range, skipReload = false) {
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  
+  document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => btn.classList.remove('active'))
+  currentTimeRange.label = range
+  
+  switch(range) {
+    case 'today':
+      currentTimeRange.start = today
+      currentTimeRange.end = new Date(today.getTime() + 24*60*60*1000)
+      document.getElementById('custom-date-range').style.display = 'none'
+      break
+    case '7days':
+      currentTimeRange.start = new Date(now.getTime() - 7*24*60*60*1000)
+      currentTimeRange.end = now
+      document.getElementById('custom-date-range').style.display = 'none'
+      document.getElementById('btn-7days').classList.add('active')
+      break
+    case '30days':
+      currentTimeRange.start = new Date(now.getTime() - 30*24*60*60*1000)
+      currentTimeRange.end = now
+      document.getElementById('custom-date-range').style.display = 'none'
+      break
+    case 'thisMonth':
+      currentTimeRange.start = new Date(now.getFullYear(), now.getMonth(), 1)
+      currentTimeRange.end = now
+      document.getElementById('custom-date-range').style.display = 'none'
+      break
+    case 'lastMonth':
+      currentTimeRange.start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+      currentTimeRange.end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
+      document.getElementById('custom-date-range').style.display = 'none'
+      break
+    case 'all':
+      currentTimeRange.start = null
+      currentTimeRange.end = null
+      document.getElementById('custom-date-range').style.display = 'none'
+      break
+    case 'custom':
+      document.getElementById('custom-date-range').style.display = 'block'
+      return
+  }
+  
+  console.log('🕐 Zeitraum gesetzt:', currentTimeRange)
+  
+  if (!skipReload) {
+    const activeStatBtn = document.querySelector('.stat-btn[onclick^="load"].active')
+    if (activeStatBtn) activeStatBtn.click()
+  }
+}
+
+function applyCustomRange() {
+  const from = document.getElementById('date-from').value
+  const to = document.getElementById('date-to').value
+  
+  if (!from || !to) {
+    alert('Bitte beide Daten auswählen!')
+    return
+  }
+  
+  currentTimeRange.start = new Date(from)
+  currentTimeRange.end = new Date(to + 'T23:59:59')
+  currentTimeRange.label = 'custom'
+  
+  console.log('🕐 Custom Range:', currentTimeRange)
+  
+  const activeStatBtn = document.querySelector('.stat-btn[onclick^="load"].active')
+  if (activeStatBtn) activeStatBtn.click()
+}
+
+function filterByTimeRange(data, dateField = 'created_at') {
+  const total = data?.length || 0
+  
+  // WICHTIG: Bei "all" keine Filterung
+  if (!currentTimeRange.start || !currentTimeRange.end) {
+    console.log('⭐ Alle Zeit ausgewählt - kein Filter')
+    return data
+  }
+  
+  const filtered = data?.filter(item => {
+    const date = new Date(item[dateField])
+    return date >= currentTimeRange.start && date <= currentTimeRange.end
+  })
+  
+  console.log(`📊 Filter: ${total} → ${filtered?.length || 0} Einträge`)
+  return filtered
+}
+
+async function loadCouponStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Coupon-Statistiken...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  document.getElementById('btn-coupon').classList.add('active')
+  
+  try {
+    const { data: coupons } = await supabase.from('coupons').select('*')
+    let { data: activations, error: activationsError } = await supabase
+      .from('activated_coupons')
+      .select('*, coupons(title, product, price)')
+    
+    if (activationsError) {
+      console.error('❌ Activations error:', activationsError)
+      throw activationsError
+    }
+    
+    console.log('📦 Alle Aktivierungen:', activations?.length)
+    const allCount = activations?.length || 0
+    activations = filterByTimeRange(activations, 'activated_at')
+    console.log('✅ Nach Filter:', activations?.length)
+    
+    const totalCoupons = coupons?.length || 0
+    const activeCoupons = coupons?.filter(c => c.is_active).length || 0
+    const totalActivations = activations?.length || 0
+    const usedActivations = activations?.filter(a => a.is_used).length || 0
+    
+    const couponMap = new Map()
+    activations?.forEach(a => {
+      const title = a.coupons?.title || 'Unbekannt'
+      if (!couponMap.has(title)) {
+        couponMap.set(title, { title, activated: 0, used: 0 })
+      }
+      const entry = couponMap.get(title)
+      entry.activated++
+      if (a.is_used) entry.used++
+    })
+    
+    const topCoupons = Array.from(couponMap.values())
+      .map(c => ({
+        ...c,
+        rate: c.activated > 0 ? Math.round((c.used / c.activated) * 100) : 0,
+        revenue: c.used * 6
+      }))
+      .sort((a, b) => b.activated - a.activated)
+      .slice(0, 5)
+    
+    const conversionRate = totalActivations > 0 ? Math.round((usedActivations / totalActivations) * 100) : 0
+    const revenue = usedActivations * 6
+    const avgIncrease = totalActivations > 0 ? (revenue / totalActivations).toFixed(2) : 0
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">🎟️ Coupon ROI Analyse</h3>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+        <strong style="color: #1e40af;">🔍 Zeitraum:</strong> ${currentTimeRange.label}<br>
+        <span style="color: #1e3a8a;">Gesamt: ${allCount} | Nach Filter: ${totalActivations}</span>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #E31E24;">${totalCoupons}</div>
+          <div style="font-size: 13px; color: #6b7280;">Total Coupons</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #10b981;">${activeCoupons}</div>
+          <div style="font-size: 13px; color: #6b7280;">Aktive Coupons</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${totalActivations}</div>
+          <div style="font-size: 13px; color: #6b7280;">Aktivierungen</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${usedActivations}</div>
+          <div style="font-size: 13px; color: #6b7280;">Einlösungen</div>
+        </div>
+      </div>
+      
+      <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 16px;">
+        <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">💰 Performance</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 700; color: #10b981;">${conversionRate}%</div>
+            <div style="font-size: 12px; color: #6b7280;">Conversion</div>
+          </div>
+          <div style="background: #dcfce7; padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #22c55e;">
+            <div style="font-size: 24px; font-weight: 700; color: #166534;">${revenue}€</div>
+            <div style="font-size: 12px; color: #166534;">Umsatz</div>
+          </div>
+          <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 700; color: #F9A825;">+${avgIncrease}€</div>
+            <div style="font-size: 12px; color: #6b7280;">Ø pro Kunde</div>
+          </div>
+        </div>
+      </div>
+      
+      ${topCoupons.length > 0 ? `
+        <div style="background: white; padding: 20px; border-radius: 10px;">
+          <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">🏆 Top Coupons</div>
+          ${topCoupons.map((c, i) => `
+            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ${i === 0 ? '#F9A825' : '#e5e7eb'};">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-size: 14px; font-weight: 700; color: #111827;">${i + 1}. ${c.title}</div>
+                  <div style="font-size: 12px; color: #6b7280;">Aktiviert: ${c.activated}x | Eingelöst: ${c.used}x</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-size: 18px; font-weight: 700; color: ${c.rate >= 75 ? '#22c55e' : c.rate >= 50 ? '#f59e0b' : '#6b7280'};">${c.rate}%</div>
+                  <div style="font-size: 11px; color: #6b7280;">${c.revenue}€</div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : '<div style="text-align: center; padding: 20px; color: #6b7280;">Noch keine Coupon-Daten im gewählten Zeitraum</div>'}
+    `
+  } catch (e) {
+    console.error('❌ Fehler:', e)
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+async function loadRewardStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Prämien-Statistiken...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  document.getElementById('btn-rewards')?.classList.add('active')
+  
+  try {
+    // ✅ NEUE LOGIK: Lade ALLE Transaktionen und filtere dann
+    let { data: allTransactions, error: redeemsError } = await supabase
+      .from('transactions')
+      .select('points, created_at, type, notes')
+    
+    if (redeemsError) {
+      console.error('❌ Redeems error:', redeemsError)
+      throw redeemsError
+    }
+    
+    // ✅ FIX: Filtere Einlösungen (negative Punkte ODER type=redeem)
+    let redeems = allTransactions?.filter(tx => {
+      const isRedeem = tx.type === 'redeem' || 
+                       (tx.notes && tx.notes.includes('Code:')) ||
+                       (tx.points && tx.points < 0)
+      return isRedeem
+    }) || []
+    
+    const allCount = redeems?.length || 0
+    redeems = filterByTimeRange(redeems)
+    
+    const rewardMap = new Map()
+    redeems?.forEach(r => {
+      const points = Math.abs(r.points)  // ✅ FIX: use 'points' not 'amount'
+      if (!rewardMap.has(points)) {
+        rewardMap.set(points, 0)
+      }
+      rewardMap.set(points, rewardMap.get(points) + 1)
+    })
+    
+    const rewards = Array.from(rewardMap.entries())
+      .map(([points, count]) => ({
+        points,
+        count,
+        name: points >= 1000 ? 'Große Prämie' : points >= 500 ? 'Mittlere Prämie' : 'Kleine Prämie',
+        emoji: points >= 1000 ? '🥙' : points >= 500 ? '🍟' : '🥤'
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+    
+    const totalRedeems = redeems?.length || 0
+    const totalPoints = redeems?.reduce((sum, r) => sum + Math.abs(r.points), 0) || 0  // ✅ FIX: use 'points'
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">🏆 Prämien-Ranking</h3>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+        <strong style="color: #1e40af;">🔍 Zeitraum:</strong> ${currentTimeRange.label}<br>
+        <span style="color: #1e3a8a;">Gesamt: ${allCount} | Nach Filter: ${totalRedeems}</span>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${totalRedeems}</div>
+          <div style="font-size: 13px; color: #6b7280;">Eingelöste Prämien</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #E31E24;">${totalPoints}</div>
+          <div style="font-size: 13px; color: #6b7280;">Verbrauchte Punkte</div>
+        </div>
+      </div>
+      
+      ${rewards.length > 0 ? rewards.map((r, i) => `
+        <div style="background: white; padding: 16px; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid ${i === 0 ? '#F9A825' : '#e5e7eb'};">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="font-size: 36px;">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🏅'}</div>
+            <div>
+              <div style="font-size: 18px; font-weight: 700; color: #111827;">${r.emoji} ${r.name}</div>
+              <div style="font-size: 13px; color: #6b7280;">${r.points} Punkte</div>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 28px; font-weight: 700; color: #F9A825;">${r.count}x</div>
+            <div style="font-size: 12px; color: #6b7280;">eingelöst</div>
+          </div>
+        </div>
+      `).join('') : '<div style="text-align: center; padding: 40px; color: #6b7280;">Noch keine Prämien eingelöst</div>'}
+    `
+  } catch (e) {
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+async function loadWeatherStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Wetter-Deal Statistiken...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  document.getElementById('btn-weather')?.classList.add('active')
+  
+  try {
+    const { data: coupons } = await supabase.from('coupons').select('*')
+    let { data: activations, error: activationsError } = await supabase
+      .from('activated_coupons')
+      .select('*, coupons(title, product)')
+    
+    if (activationsError) {
+      console.error('❌ Activations error:', activationsError)
+      throw activationsError
+    }
+    
+    const allCount = activations?.length || 0
+    activations = filterByTimeRange(activations, 'activated_at')
+    
+    const weatherDeals = coupons?.filter(c => 
+      c.title?.includes('3€') || c.title?.includes('4€') || c.title?.includes('4.50€') || c.title?.includes('5€')
+    ) || []
+    
+    const weatherActivations = activations?.filter(a => 
+      a.coupons?.title?.includes('3€') || a.coupons?.title?.includes('4€') || 
+      a.coupons?.title?.includes('4.50€') || a.coupons?.title?.includes('5€')
+    ) || []
+    
+    const totalActivated = weatherActivations.length
+    const totalUsed = weatherActivations.filter(a => a.is_used).length
+    const avgDiscount = 30
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">🌧️ Wetter-Döner-Deals Performance</h3>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+        <strong style="color: #1e40af;">🔍 Zeitraum:</strong> ${currentTimeRange.label}<br>
+        <span style="color: #1e3a8a;">Gesamt: ${allCount} | Weather-Activations: ${totalActivated}</span>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${weatherDeals.length}</div>
+          <div style="font-size: 13px; color: #6b7280;">Aktive Deals</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${totalActivated}</div>
+          <div style="font-size: 13px; color: #6b7280;">Aktivierungen</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #f59e0b;">-${avgDiscount}%</div>
+          <div style="font-size: 13px; color: #6b7280;">Ø Rabatt</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #10b981;">${totalUsed}</div>
+          <div style="font-size: 13px; color: #6b7280;">Bestellungen</div>
+        </div>
+      </div>
+      
+      <div style="background: #dcfce7; padding: 16px; border-radius: 10px; border: 2px solid #22c55e;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 14px; color: #166534;">Conversion Rate:</div>
+          <div style="font-size: 22px; font-weight: 900; color: #166534;">${totalActivated > 0 ? Math.round((totalUsed/totalActivated)*100) : 0}%</div>
+        </div>
+      </div>
+    `
+  } catch (e) {
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+async function loadChallengeStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Challenge-Statistiken...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  document.getElementById('btn-challenges')?.classList.add('active')
+  
+  try {
+    const { data: challenges } = await supabase.from('challenges').select('*')
+    let { data: progress } = await supabase.from('challenge_progress').select('*')
+    
+    const totalChallenges = challenges?.length || 0
+    const activeChallenges = challenges?.filter(c => c.is_active).length || 0
+    const totalParticipants = new Set(progress?.map(p => p.customer_id)).size
+    const completedChallenges = progress?.filter(p => p.is_completed).length || 0
+    const completionRate = progress?.length > 0 ? Math.round((completedChallenges / progress.length) * 100) : 0
+    
+    const challengeStats = challenges?.map(c => {
+      const participations = progress?.filter(p => p.challenge_id === c.id) || []
+      const completed = participations.filter(p => p.is_completed).length
+      return {
+        title: c.title,
+        participants: participations.length,
+        completed,
+        rate: participations.length > 0 ? Math.round((completed / participations.length) * 100) : 0,
+        reward: c.reward_points
+      }
+    }).sort((a, b) => b.participants - a.participants).slice(0, 3) || []
+    
+    const totalRevenueFromChallenges = completedChallenges * 6
+    const avgIncreasePerCustomer = totalParticipants > 0 ? (totalRevenueFromChallenges / totalParticipants).toFixed(2) : 0
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">⚡ Challenge Performance</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #E31E24;">${totalChallenges}</div>
+          <div style="font-size: 13px; color: #6b7280;">Total Challenges</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #10b981;">${activeChallenges}</div>
+          <div style="font-size: 13px; color: #6b7280;">Aktiv</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${totalParticipants}</div>
+          <div style="font-size: 13px; color: #6b7280;">Teilnehmer</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${completionRate}%</div>
+          <div style="font-size: 13px; color: #6b7280;">Erfolgsrate</div>
+        </div>
+      </div>
+      
+      ${challengeStats.length > 0 ? `
+        <div style="background: white; padding: 20px; border-radius: 10px;">
+          <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">🏆 Top Challenges</div>
+          ${challengeStats.map((c, i) => `
+            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ${i === 0 ? '#F9A825' : '#e5e7eb'};">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-size: 14px; font-weight: 700; color: #111827;">${c.title}</div>
+                  <div style="font-size: 12px; color: #6b7280;">Teilnehmer: ${c.participants} | Abgeschlossen: ${c.completed}</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-size: 18px; font-weight: 700; color: ${c.rate >= 75 ? '#22c55e' : c.rate >= 50 ? '#f59e0b' : '#6b7280'};">${c.rate}%</div>
+                  <div style="font-size: 11px; color: #6b7280;">${c.reward}P</div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : '<div style="text-align: center; padding: 20px; color: #6b7280;">Noch keine Challenges vorhanden</div>'}
+    `
+  } catch (e) {
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+async function loadSegmentStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Kunden-Segmente...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  document.getElementById('btn-segments')?.classList.add('active')
+  
+  try {
+    // ✅ NEUE LOGIK: Lade ALLE und filtere dann
+    let { data: allTransactions } = await supabase
+      .from('transactions')
+      .select('customer_id, created_at, amount, staff, notes')
+    
+    // ✅ FIX: Filtere echte Käufe (Betrag > 0 UND keine Wheel-Gewinne)
+    let transactions = allTransactions?.filter(tx => {
+      const hasAmount = tx.amount && parseFloat(tx.amount) > 0
+      const isWheelWin = tx.staff === 'WHEEL' || 
+                         (tx.notes && (tx.notes.includes('Wheel') || tx.notes.includes('Lucky')))
+      return hasAmount && !isWheelWin
+    }) || []
+    
+    const allCount = transactions?.length || 0
+    transactions = filterByTimeRange(transactions)
+    
+    const customerTxCount = new Map()
+    transactions?.forEach(t => {
+      customerTxCount.set(t.customer_id, (customerTxCount.get(t.customer_id) || 0) + 1)
+    })
+    
+    let vipCount = 0, stammCount = 0, regularCount = 0, gelegentlichCount = 0, einmaligCount = 0
+    
+    customerTxCount.forEach(count => {
+      if (count >= 20) vipCount++
+      else if (count >= 10) stammCount++
+      else if (count >= 5) regularCount++
+      else if (count >= 2) gelegentlichCount++
+      else einmaligCount++
+    })
+    
+    const totalCustomers = customerTxCount.size || 1
+    
+    const segments = [
+      { name: 'VIP', visits: '20+', count: vipCount, percent: Math.round((vipCount/totalCustomers)*100), color: '#dc2626' },
+      { name: 'Stamm', visits: '10-19', count: stammCount, percent: Math.round((stammCount/totalCustomers)*100), color: '#f59e0b' },
+      { name: 'Regular', visits: '5-9', count: regularCount, percent: Math.round((regularCount/totalCustomers)*100), color: '#3b82f6' },
+      { name: 'Gelegentlich', visits: '2-4', count: gelegentlichCount, percent: Math.round((gelegentlichCount/totalCustomers)*100), color: '#6b7280' },
+      { name: 'Einmalig', visits: '1', count: einmaligCount, percent: Math.round((einmaligCount/totalCustomers)*100), color: '#9ca3af' }
+    ]
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">👥 Kunden-Segmente</h3>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+        <strong style="color: #1e40af;">🔍 Zeitraum:</strong> ${currentTimeRange.label}<br>
+        <span style="color: #1e3a8a;">Käufe gesamt: ${allCount} | Nach Filter: ${transactions?.length || 0}</span>
+      </div>
+      
+      <div style="background: white; padding: 16px; border-radius: 10px; margin-bottom: 16px; text-align: center;">
+        <div style="font-size: 32px; font-weight: 700; color: #E31E24;">${totalCustomers}</div>
+        <div style="font-size: 13px; color: #6b7280;">Aktive Kunden</div>
+      </div>
+      
+      ${segments.map(s => `
+        <div style="background: white; padding: 16px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid ${s.color};">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 16px; font-weight: 700; color: #111827;">${s.name}</div>
+              <div style="font-size: 13px; color: #6b7280;">${s.visits} Käufe</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 28px; font-weight: 700; color: ${s.color};">${s.count}</div>
+              <div style="font-size: 13px; color: #6b7280;">${s.percent}%</div>
+            </div>
+          </div>
+          <div style="background: #f3f4f6; height: 8px; border-radius: 4px; margin-top: 12px; overflow: hidden;">
+            <div style="background: ${s.color}; height: 100%; width: ${s.percent}%; transition: width 0.3s;"></div>
+          </div>
+        </div>
+      `).join('')}
+    `
+  } catch (e) {
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+async function loadTrendStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Trend-Daten...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  document.getElementById('btn-trends')?.classList.add('active')
+  
+  try {
+    // ✅ NEUE LOGIK: Lade ALLE Transaktionen und filtere dann
+    let { data: allTransactions, error } = await supabase
+      .from('transactions')
+      .select('created_at, amount, points, staff, notes, type')
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    
+    console.log('📦 Alle Transaktionen geladen:', allTransactions?.length)
+    
+    // ✅ FIX: Filtere echte Käufe (Betrag > 0 UND keine Wheel-Gewinne)
+    let transactions = allTransactions?.filter(tx => {
+      const hasAmount = tx.amount && parseFloat(tx.amount) > 0
+      const isWheelWin = tx.staff === 'WHEEL' || 
+                         (tx.notes && (tx.notes.includes('Wheel') || tx.notes.includes('Lucky')))
+      return hasAmount && !isWheelWin
+    }) || []
+    
+    console.log('📦 Echte KÄUFE (Betrag > 0, kein Wheel):', transactions?.length)
+    
+    const allCount = transactions?.length || 0
+    transactions = filterByTimeRange(transactions)
+    console.log('✅ Nach Zeitfilter:', transactions?.length)
+    
+    const dayCount = new Map()
+    const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']
+    
+    transactions?.forEach(t => {
+      const date = new Date(t.created_at)
+      const dayIndex = date.getDay()
+      const dayName = dayNames[dayIndex]
+      dayCount.set(dayName, (dayCount.get(dayName) || 0) + 1)
+    })
+    
+    const totalTx = transactions?.length || 1
+    const days = dayNames
+      .map(name => ({
+        name,
+        orders: dayCount.get(name) || 0,
+        percent: Math.round(((dayCount.get(name) || 0) / totalTx) * 100)
+      }))
+      .sort((a, b) => b.orders - a.orders)
+    
+    const hourCount = new Map()
+    transactions?.forEach(t => {
+      const hour = new Date(t.created_at).getHours()
+      hourCount.set(hour, (hourCount.get(hour) || 0) + 1)
+    })
+    
+    const rushHours = []
+    if (hourCount.size > 0) {
+      const lunchCount = [11,12,13,14].reduce((sum, h) => sum + (hourCount.get(h) || 0), 0)
+      if (lunchCount > 0) rushHours.push({ time: '11-14 Uhr', count: lunchCount, percent: Math.round((lunchCount/totalTx)*100), color: '#dc2626' })
+      
+      const dinnerCount = [17,18,19,20].reduce((sum, h) => sum + (hourCount.get(h) || 0), 0)
+      if (dinnerCount > 0) rushHours.push({ time: '17-20 Uhr', count: dinnerCount, percent: Math.round((dinnerCount/totalTx)*100), color: '#f59e0b' })
+      
+      const afternoonCount = [14,15,16,17].reduce((sum, h) => sum + (hourCount.get(h) || 0), 0)
+      if (afternoonCount > 0) rushHours.push({ time: '14-17 Uhr', count: afternoonCount, percent: Math.round((afternoonCount/totalTx)*100), color: '#3b82f6' })
+    }
+    
+    rushHours.sort((a, b) => b.percent - a.percent)
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">📈 Zeitbasierte Trends (NUR Käufe)</h3>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+        <strong style="color: #1e40af;">🔍 Debug-Info:</strong><br>
+        <span style="color: #1e3a8a;">Gesamt Käufe in DB: ${allCount} | Nach Zeitfilter: ${totalTx}</span>
+      </div>
+      
+      <div style="margin-bottom: 24px;">
+        <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">📅 Beste Verkaufstage:</div>
+        ${days.slice(0, 7).map((d, i) => `
+          <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ${i === 0 ? '#F9A825' : i === 1 ? '#f59e0b' : i === 2 ? '#3b82f6' : '#e5e7eb'};">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="font-size: 20px;">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '📊'}</div>
+                <div style="font-size: 14px; font-weight: 600; color: #111827;">${d.name}</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="font-size: 20px; font-weight: 700; color: #F9A825;">${d.orders}</div>
+                <div style="font-size: 13px; color: #6b7280; min-width: 40px; text-align: right;">${d.percent}%</div>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      
+      ${rushHours.length > 0 ? `
+        <div style="margin-bottom: 20px;">
+          <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">🕐 Rush-Hours:</div>
+          ${rushHours.map(r => `
+            <div style="background: white; padding: 14px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ${r.color};">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 14px; font-weight: 600; color: #111827;">${r.time}</div>
+                <div>
+                  <span style="font-size: 18px; font-weight: 700; color: ${r.color};">${r.count}</span>
+                  <span style="font-size: 14px; color: #6b7280; margin-left: 8px;">(${r.percent}%)</span>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+    `
+  } catch (e) {
+    console.error('❌ Fehler:', e)
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+async function loadWheelStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Glücksrad-Statistiken...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  document.getElementById('btn-wheel')?.classList.add('active')
+  
+  try {
+    let { data: spins, error } = await supabase
+      .from('wheel_spins')
+      .select('*')
+      .order('spun_at', { ascending: false })
+    
+    if (error) throw error
+    
+    console.log('📦 Alle Spins geladen:', spins?.length)
+    const allCount = spins?.length || 0
+    spins = filterByTimeRange(spins, 'spun_at')
+    console.log('✅ Nach Filter:', spins?.length)
+    
+    const { data: unlocks } = await supabase.from('wheel_unlocks').select('*')
+    const totalSpins = spins?.length || 0
+    const totalUnlocks = unlocks?.length || 0
+    
+    const prizeMap = new Map()
+    spins?.forEach(s => {
+      const prize = s.prize_value || 'Unbekannt'
+      prizeMap.set(prize, (prizeMap.get(prize) || 0) + 1)
+    })
+    
+    const prizes = Array.from(prizeMap.entries())
+      .map(([prize, count]) => ({
+        prize: prize + ' Punkte',
+        count,
+        percent: totalSpins > 0 ? Math.round((count / totalSpins) * 100) : 0
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+    
+    const weekAgo = new Date()
+    weekAgo.setDate(weekAgo.getDate() - 7)
+    const spinsThisWeek = spins?.filter(s => new Date(s.spun_at) >= weekAgo).length || 0
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">🎡 Glücksrad Performance</h3>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+        <strong style="color: #1e40af;">🔍 Debug-Info:</strong><br>
+        <span style="color: #1e3a8a;">Gesamt Spins in DB: ${allCount} | Nach Zeitfilter: ${totalSpins}</span>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${totalSpins}</div>
+          <div style="font-size: 13px; color: #6b7280;">Gesamt Spins</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${spinsThisWeek}</div>
+          <div style="font-size: 13px; color: #6b7280;">Diese Woche</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #10b981;">${totalUnlocks}</div>
+          <div style="font-size: 13px; color: #6b7280;">Freischaltungen</div>
+        </div>
+      </div>
+      
+      ${prizes.length > 0 ? `
+        <div style="background: white; padding: 20px; border-radius: 10px;">
+          <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">🎁 Gewinn-Verteilung</div>
+          ${prizes.map(p => `
+            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 14px; font-weight: 600; color: #111827;">${p.prize}</div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="font-size: 18px; font-weight: 700; color: #F9A825;">${p.count}x</div>
+                  <div style="font-size: 14px; color: #6b7280;">(${p.percent}%)</div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : '<div style="text-align: center; padding: 20px; color: #6b7280;">Noch keine Gewinne</div>'}
+    `
+  } catch (e) {
+    console.error('❌ Fehler:', e)
+  </div><!-- Ende stats-content-section -->
+
+</div><!-- Ende container -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+// ✅ Auto-detect ob 'action' oder 'type' Spalte existiert (OHNE 400-Fehler!)
+let ACTION_COLUMN = null
+
+async function detectActionColumn() {
+  if (ACTION_COLUMN !== null) return ACTION_COLUMN
+  
+  // Strategie: Hol einfach ALLE Spalten einer Zeile und schau was drin ist
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('*')
+    .limit(1)
+
+  if (error) {
+    console.error('❌ Fehler beim transactions-Check:', error)
+    // Fallback
+    ACTION_COLUMN = 'type'
+    console.log('⚠️ Fallback: Using column "type"')
+    return ACTION_COLUMN
+  }
+
+  // Wenn keine Daten vorhanden, prüfe Schema
+  if (!data || data.length === 0) {
+    console.log('⚠️ Keine Transaktionen in DB, nehme "type" als Default')
+    ACTION_COLUMN = 'type'
+    return ACTION_COLUMN
+  }
+
+  const row = data[0]
+
+  if ('action' in row) {
+    ACTION_COLUMN = 'action'
+    console.log('✅ Detected column: action')
+  } else if ('type' in row) {
+    ACTION_COLUMN = 'type'
+    console.log('✅ Detected column: type')
+  } else {
+    // Fallback, falls beides nicht existiert
+    ACTION_COLUMN = 'type'
+    console.log('⚠️ Neither "action" nor "type" found, using "type" as fallback')
+  }
+
+  return ACTION_COLUMN
+}
+
+let currentTimeRange = { start: null, end: null, label: '7days' }
+
+function setTimeRange(range, skipReload = false) {
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  
+  document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => btn.classList.remove('active'))
+  currentTimeRange.label = range
+  
+  switch(range) {
+    case 'today':
+      currentTimeRange.start = today
+      currentTimeRange.end = new Date(today.getTime() + 24*60*60*1000)
+      document.getElementById('custom-date-range').style.display = 'none'
+      break
+    case '7days':
+      currentTimeRange.start = new Date(now.getTime() - 7*24*60*60*1000)
+      currentTimeRange.end = now
+      document.getElementById('custom-date-range').style.display = 'none'
+      document.getElementById('btn-7days').classList.add('active')
+      break
+    case '30days':
+      currentTimeRange.start = new Date(now.getTime() - 30*24*60*60*1000)
+      currentTimeRange.end = now
+      document.getElementById('custom-date-range').style.display = 'none'
+      break
+    case 'thisMonth':
+      currentTimeRange.start = new Date(now.getFullYear(), now.getMonth(), 1)
+      currentTimeRange.end = now
+      document.getElementById('custom-date-range').style.display = 'none'
+      break
+    case 'lastMonth':
+      currentTimeRange.start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+      currentTimeRange.end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
+      document.getElementById('custom-date-range').style.display = 'none'
+      break
+    case 'all':
+      currentTimeRange.start = null
+      currentTimeRange.end = null
+      document.getElementById('custom-date-range').style.display = 'none'
+      break
+    case 'custom':
+      document.getElementById('custom-date-range').style.display = 'block'
+      return
+  }
+  
+  console.log('🕐 Zeitraum gesetzt:', currentTimeRange)
+  
+  if (!skipReload) {
+    const activeStatBtn = document.querySelector('.stat-btn[onclick^="load"].active')
+    if (activeStatBtn) activeStatBtn.click()
+  }
+}
+
+function applyCustomRange() {
+  const from = document.getElementById('date-from').value
+  const to = document.getElementById('date-to').value
+  
+  if (!from || !to) {
+    alert('Bitte beide Daten auswählen!')
+    return
+  }
+  
+  currentTimeRange.start = new Date(from)
+  currentTimeRange.end = new Date(to + 'T23:59:59')
+  currentTimeRange.label = 'custom'
+  
+  console.log('🕐 Custom Range:', currentTimeRange)
+  
+  const activeStatBtn = document.querySelector('.stat-btn[onclick^="load"].active')
+  if (activeStatBtn) activeStatBtn.click()
+}
+
+function filterByTimeRange(data, dateField = 'created_at') {
+  const total = data?.length || 0
+  
+  // WICHTIG: Bei "all" keine Filterung
+  if (!currentTimeRange.start || !currentTimeRange.end) {
+    console.log('⭐ Alle Zeit ausgewählt - kein Filter')
+    return data
+  }
+  
+  const filtered = data?.filter(item => {
+    const date = new Date(item[dateField])
+    return date >= currentTimeRange.start && date <= currentTimeRange.end
+  })
+  
+  console.log(`📊 Filter: ${total} → ${filtered?.length || 0} Einträge`)
+  return filtered
+}
+
+async function loadCouponStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Coupon-Statistiken...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  document.getElementById('btn-coupon').classList.add('active')
+  
+  try {
+    const { data: coupons } = await supabase.from('coupons').select('*')
+    let { data: activations, error: activationsError } = await supabase
+      .from('activated_coupons')
+      .select('*, coupons(title, product, price)')
+    
+    if (activationsError) {
+      console.error('❌ Activations error:', activationsError)
+      throw activationsError
+    }
+    
+    console.log('📦 Alle Aktivierungen:', activations?.length)
+    const allCount = activations?.length || 0
+    activations = filterByTimeRange(activations, 'activated_at')
+    console.log('✅ Nach Filter:', activations?.length)
+    
+    const totalCoupons = coupons?.length || 0
+    const activeCoupons = coupons?.filter(c => c.is_active).length || 0
+    const totalActivations = activations?.length || 0
+    const usedActivations = activations?.filter(a => a.is_used).length || 0
+    
+    const couponMap = new Map()
+    activations?.forEach(a => {
+      const title = a.coupons?.title || 'Unbekannt'
+      if (!couponMap.has(title)) {
+        couponMap.set(title, { title, activated: 0, used: 0 })
+      }
+      const entry = couponMap.get(title)
+      entry.activated++
+      if (a.is_used) entry.used++
+    })
+    
+    const topCoupons = Array.from(couponMap.values())
+      .map(c => ({
+        ...c,
+        rate: c.activated > 0 ? Math.round((c.used / c.activated) * 100) : 0,
+        revenue: c.used * 6
+      }))
+      .sort((a, b) => b.activated - a.activated)
+      .slice(0, 5)
+    
+    const conversionRate = totalActivations > 0 ? Math.round((usedActivations / totalActivations) * 100) : 0
+    const revenue = usedActivations * 6
+    const avgIncrease = totalActivations > 0 ? (revenue / totalActivations).toFixed(2) : 0
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">🎟️ Coupon ROI Analyse</h3>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+        <strong style="color: #1e40af;">🔍 Zeitraum:</strong> ${currentTimeRange.label}<br>
+        <span style="color: #1e3a8a;">Gesamt: ${allCount} | Nach Filter: ${totalActivations}</span>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #E31E24;">${totalCoupons}</div>
+          <div style="font-size: 13px; color: #6b7280;">Total Coupons</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #10b981;">${activeCoupons}</div>
+          <div style="font-size: 13px; color: #6b7280;">Aktive Coupons</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${totalActivations}</div>
+          <div style="font-size: 13px; color: #6b7280;">Aktivierungen</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${usedActivations}</div>
+          <div style="font-size: 13px; color: #6b7280;">Einlösungen</div>
+        </div>
+      </div>
+      
+      <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 16px;">
+        <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">💰 Performance</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 700; color: #10b981;">${conversionRate}%</div>
+            <div style="font-size: 12px; color: #6b7280;">Conversion</div>
+          </div>
+          <div style="background: #dcfce7; padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #22c55e;">
+            <div style="font-size: 24px; font-weight: 700; color: #166534;">${revenue}€</div>
+            <div style="font-size: 12px; color: #166534;">Umsatz</div>
+          </div>
+          <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 700; color: #F9A825;">+${avgIncrease}€</div>
+            <div style="font-size: 12px; color: #6b7280;">Ø pro Kunde</div>
+          </div>
+        </div>
+      </div>
+      
+      ${topCoupons.length > 0 ? `
+        <div style="background: white; padding: 20px; border-radius: 10px;">
+          <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">🏆 Top Coupons</div>
+          ${topCoupons.map((c, i) => `
+            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ${i === 0 ? '#F9A825' : '#e5e7eb'};">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-size: 14px; font-weight: 700; color: #111827;">${i + 1}. ${c.title}</div>
+                  <div style="font-size: 12px; color: #6b7280;">Aktiviert: ${c.activated}x | Eingelöst: ${c.used}x</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-size: 18px; font-weight: 700; color: ${c.rate >= 75 ? '#22c55e' : c.rate >= 50 ? '#f59e0b' : '#6b7280'};">${c.rate}%</div>
+                  <div style="font-size: 11px; color: #6b7280;">${c.revenue}€</div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : '<div style="text-align: center; padding: 20px; color: #6b7280;">Noch keine Coupon-Daten im gewählten Zeitraum</div>'}
+    `
+  } catch (e) {
+    console.error('❌ Fehler:', e)
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+async function loadRewardStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Prämien-Statistiken...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  document.getElementById('btn-rewards')?.classList.add('active')
+  
+  try {
+    // ✅ NEUE LOGIK: Lade ALLE Transaktionen und filtere dann
+    let { data: allTransactions, error: redeemsError } = await supabase
+      .from('transactions')
+      .select('points, created_at, type, notes')
+    
+    if (redeemsError) {
+      console.error('❌ Redeems error:', redeemsError)
+      throw redeemsError
+    }
+    
+    // ✅ FIX: Filtere Einlösungen (negative Punkte ODER type=redeem)
+    let redeems = allTransactions?.filter(tx => {
+      const isRedeem = tx.type === 'redeem' || 
+                       (tx.notes && tx.notes.includes('Code:')) ||
+                       (tx.points && tx.points < 0)
+      return isRedeem
+    }) || []
+    
+    const allCount = redeems?.length || 0
+    redeems = filterByTimeRange(redeems)
+    
+    const rewardMap = new Map()
+    redeems?.forEach(r => {
+      const points = Math.abs(r.points)  // ✅ FIX: use 'points' not 'amount'
+      if (!rewardMap.has(points)) {
+        rewardMap.set(points, 0)
+      }
+      rewardMap.set(points, rewardMap.get(points) + 1)
+    })
+    
+    const rewards = Array.from(rewardMap.entries())
+      .map(([points, count]) => ({
+        points,
+        count,
+        name: points >= 1000 ? 'Große Prämie' : points >= 500 ? 'Mittlere Prämie' : 'Kleine Prämie',
+        emoji: points >= 1000 ? '🥙' : points >= 500 ? '🍟' : '🥤'
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+    
+    const totalRedeems = redeems?.length || 0
+    const totalPoints = redeems?.reduce((sum, r) => sum + Math.abs(r.points), 0) || 0  // ✅ FIX: use 'points'
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">🏆 Prämien-Ranking</h3>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+        <strong style="color: #1e40af;">🔍 Zeitraum:</strong> ${currentTimeRange.label}<br>
+        <span style="color: #1e3a8a;">Gesamt: ${allCount} | Nach Filter: ${totalRedeems}</span>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${totalRedeems}</div>
+          <div style="font-size: 13px; color: #6b7280;">Eingelöste Prämien</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #E31E24;">${totalPoints}</div>
+          <div style="font-size: 13px; color: #6b7280;">Verbrauchte Punkte</div>
+        </div>
+      </div>
+      
+      ${rewards.length > 0 ? rewards.map((r, i) => `
+        <div style="background: white; padding: 16px; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid ${i === 0 ? '#F9A825' : '#e5e7eb'};">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="font-size: 36px;">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🏅'}</div>
+            <div>
+              <div style="font-size: 18px; font-weight: 700; color: #111827;">${r.emoji} ${r.name}</div>
+              <div style="font-size: 13px; color: #6b7280;">${r.points} Punkte</div>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 28px; font-weight: 700; color: #F9A825;">${r.count}x</div>
+            <div style="font-size: 12px; color: #6b7280;">eingelöst</div>
+          </div>
+        </div>
+      `).join('') : '<div style="text-align: center; padding: 40px; color: #6b7280;">Noch keine Prämien eingelöst</div>'}
+    `
+  } catch (e) {
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+async function loadWeatherStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Wetter-Deal Statistiken...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  document.getElementById('btn-weather')?.classList.add('active')
+  
+  try {
+    const { data: coupons } = await supabase.from('coupons').select('*')
+    let { data: activations, error: activationsError } = await supabase
+      .from('activated_coupons')
+      .select('*, coupons(title, product)')
+    
+    if (activationsError) {
+      console.error('❌ Activations error:', activationsError)
+      throw activationsError
+    }
+    
+    const allCount = activations?.length || 0
+    activations = filterByTimeRange(activations, 'activated_at')
+    
+    const weatherDeals = coupons?.filter(c => 
+      c.title?.includes('3€') || c.title?.includes('4€') || c.title?.includes('4.50€') || c.title?.includes('5€')
+    ) || []
+    
+    const weatherActivations = activations?.filter(a => 
+      a.coupons?.title?.includes('3€') || a.coupons?.title?.includes('4€') || 
+      a.coupons?.title?.includes('4.50€') || a.coupons?.title?.includes('5€')
+    ) || []
+    
+    const totalActivated = weatherActivations.length
+    const totalUsed = weatherActivations.filter(a => a.is_used).length
+    const avgDiscount = 30
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">🌧️ Wetter-Döner-Deals Performance</h3>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+        <strong style="color: #1e40af;">🔍 Zeitraum:</strong> ${currentTimeRange.label}<br>
+        <span style="color: #1e3a8a;">Gesamt: ${allCount} | Weather-Activations: ${totalActivated}</span>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${weatherDeals.length}</div>
+          <div style="font-size: 13px; color: #6b7280;">Aktive Deals</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${totalActivated}</div>
+          <div style="font-size: 13px; color: #6b7280;">Aktivierungen</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #f59e0b;">-${avgDiscount}%</div>
+          <div style="font-size: 13px; color: #6b7280;">Ø Rabatt</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #10b981;">${totalUsed}</div>
+          <div style="font-size: 13px; color: #6b7280;">Bestellungen</div>
+        </div>
+      </div>
+      
+      <div style="background: #dcfce7; padding: 16px; border-radius: 10px; border: 2px solid #22c55e;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 14px; color: #166534;">Conversion Rate:</div>
+          <div style="font-size: 22px; font-weight: 900; color: #166534;">${totalActivated > 0 ? Math.round((totalUsed/totalActivated)*100) : 0}%</div>
+        </div>
+      </div>
+    `
+  } catch (e) {
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+async function loadChallengeStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Challenge-Statistiken...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  document.getElementById('btn-challenges')?.classList.add('active')
+  
+  try {
+    const { data: challenges } = await supabase.from('challenges').select('*')
+    let { data: progress } = await supabase.from('challenge_progress').select('*')
+    
+    const totalChallenges = challenges?.length || 0
+    const activeChallenges = challenges?.filter(c => c.is_active).length || 0
+    const totalParticipants = new Set(progress?.map(p => p.customer_id)).size
+    const completedChallenges = progress?.filter(p => p.is_completed).length || 0
+    const completionRate = progress?.length > 0 ? Math.round((completedChallenges / progress.length) * 100) : 0
+    
+    const challengeStats = challenges?.map(c => {
+      const participations = progress?.filter(p => p.challenge_id === c.id) || []
+      const completed = participations.filter(p => p.is_completed).length
+      return {
+        title: c.title,
+        participants: participations.length,
+        completed,
+        rate: participations.length > 0 ? Math.round((completed / participations.length) * 100) : 0,
+        reward: c.reward_points
+      }
+    }).sort((a, b) => b.participants - a.participants).slice(0, 3) || []
+    
+    const totalRevenueFromChallenges = completedChallenges * 6
+    const avgIncreasePerCustomer = totalParticipants > 0 ? (totalRevenueFromChallenges / totalParticipants).toFixed(2) : 0
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">⚡ Challenge Performance</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #E31E24;">${totalChallenges}</div>
+          <div style="font-size: 13px; color: #6b7280;">Total Challenges</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #10b981;">${activeChallenges}</div>
+          <div style="font-size: 13px; color: #6b7280;">Aktiv</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${totalParticipants}</div>
+          <div style="font-size: 13px; color: #6b7280;">Teilnehmer</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${completionRate}%</div>
+          <div style="font-size: 13px; color: #6b7280;">Erfolgsrate</div>
+        </div>
+      </div>
+      
+      ${challengeStats.length > 0 ? `
+        <div style="background: white; padding: 20px; border-radius: 10px;">
+          <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">🏆 Top Challenges</div>
+          ${challengeStats.map((c, i) => `
+            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ${i === 0 ? '#F9A825' : '#e5e7eb'};">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-size: 14px; font-weight: 700; color: #111827;">${c.title}</div>
+                  <div style="font-size: 12px; color: #6b7280;">Teilnehmer: ${c.participants} | Abgeschlossen: ${c.completed}</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-size: 18px; font-weight: 700; color: ${c.rate >= 75 ? '#22c55e' : c.rate >= 50 ? '#f59e0b' : '#6b7280'};">${c.rate}%</div>
+                  <div style="font-size: 11px; color: #6b7280;">${c.reward}P</div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : '<div style="text-align: center; padding: 20px; color: #6b7280;">Noch keine Challenges vorhanden</div>'}
+    `
+  } catch (e) {
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+async function loadSegmentStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Kunden-Segmente...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  document.getElementById('btn-segments')?.classList.add('active')
+  
+  try {
+    // ✅ NEUE LOGIK: Lade ALLE und filtere dann
+    let { data: allTransactions } = await supabase
+      .from('transactions')
+      .select('customer_id, created_at, amount, staff, notes')
+    
+    // ✅ FIX: Filtere echte Käufe (Betrag > 0 UND keine Wheel-Gewinne)
+    let transactions = allTransactions?.filter(tx => {
+      const hasAmount = tx.amount && parseFloat(tx.amount) > 0
+      const isWheelWin = tx.staff === 'WHEEL' || 
+                         (tx.notes && (tx.notes.includes('Wheel') || tx.notes.includes('Lucky')))
+      return hasAmount && !isWheelWin
+    }) || []
+    
+    const allCount = transactions?.length || 0
+    transactions = filterByTimeRange(transactions)
+    
+    const customerTxCount = new Map()
+    transactions?.forEach(t => {
+      customerTxCount.set(t.customer_id, (customerTxCount.get(t.customer_id) || 0) + 1)
+    })
+    
+    let vipCount = 0, stammCount = 0, regularCount = 0, gelegentlichCount = 0, einmaligCount = 0
+    
+    customerTxCount.forEach(count => {
+      if (count >= 20) vipCount++
+      else if (count >= 10) stammCount++
+      else if (count >= 5) regularCount++
+      else if (count >= 2) gelegentlichCount++
+      else einmaligCount++
+    })
+    
+    const totalCustomers = customerTxCount.size || 1
+    
+    const segments = [
+      { name: 'VIP', visits: '20+', count: vipCount, percent: Math.round((vipCount/totalCustomers)*100), color: '#dc2626' },
+      { name: 'Stamm', visits: '10-19', count: stammCount, percent: Math.round((stammCount/totalCustomers)*100), color: '#f59e0b' },
+      { name: 'Regular', visits: '5-9', count: regularCount, percent: Math.round((regularCount/totalCustomers)*100), color: '#3b82f6' },
+      { name: 'Gelegentlich', visits: '2-4', count: gelegentlichCount, percent: Math.round((gelegentlichCount/totalCustomers)*100), color: '#6b7280' },
+      { name: 'Einmalig', visits: '1', count: einmaligCount, percent: Math.round((einmaligCount/totalCustomers)*100), color: '#9ca3af' }
+    ]
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">👥 Kunden-Segmente</h3>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+        <strong style="color: #1e40af;">🔍 Zeitraum:</strong> ${currentTimeRange.label}<br>
+        <span style="color: #1e3a8a;">Käufe gesamt: ${allCount} | Nach Filter: ${transactions?.length || 0}</span>
+      </div>
+      
+      <div style="background: white; padding: 16px; border-radius: 10px; margin-bottom: 16px; text-align: center;">
+        <div style="font-size: 32px; font-weight: 700; color: #E31E24;">${totalCustomers}</div>
+        <div style="font-size: 13px; color: #6b7280;">Aktive Kunden</div>
+      </div>
+      
+      ${segments.map(s => `
+        <div style="background: white; padding: 16px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid ${s.color};">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 16px; font-weight: 700; color: #111827;">${s.name}</div>
+              <div style="font-size: 13px; color: #6b7280;">${s.visits} Käufe</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 28px; font-weight: 700; color: ${s.color};">${s.count}</div>
+              <div style="font-size: 13px; color: #6b7280;">${s.percent}%</div>
+            </div>
+          </div>
+          <div style="background: #f3f4f6; height: 8px; border-radius: 4px; margin-top: 12px; overflow: hidden;">
+            <div style="background: ${s.color}; height: 100%; width: ${s.percent}%; transition: width 0.3s;"></div>
+          </div>
+        </div>
+      `).join('')}
+    `
+  } catch (e) {
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+async function loadTrendStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Trend-Daten...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  document.getElementById('btn-trends')?.classList.add('active')
+  
+  try {
+    // ✅ NEUE LOGIK: Lade ALLE Transaktionen und filtere dann
+    let { data: allTransactions, error } = await supabase
+      .from('transactions')
+      .select('created_at, amount, points, staff, notes, type')
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    
+    console.log('📦 Alle Transaktionen geladen:', allTransactions?.length)
+    
+    // ✅ FIX: Filtere echte Käufe (Betrag > 0 UND keine Wheel-Gewinne)
+    let transactions = allTransactions?.filter(tx => {
+      const hasAmount = tx.amount && parseFloat(tx.amount) > 0
+      const isWheelWin = tx.staff === 'WHEEL' || 
+                         (tx.notes && (tx.notes.includes('Wheel') || tx.notes.includes('Lucky')))
+      return hasAmount && !isWheelWin
+    }) || []
+    
+    console.log('📦 Echte KÄUFE (Betrag > 0, kein Wheel):', transactions?.length)
+    
+    const allCount = transactions?.length || 0
+    transactions = filterByTimeRange(transactions)
+    console.log('✅ Nach Zeitfilter:', transactions?.length)
+    
+    const dayCount = new Map()
+    const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']
+    
+    transactions?.forEach(t => {
+      const date = new Date(t.created_at)
+      const dayIndex = date.getDay()
+      const dayName = dayNames[dayIndex]
+      dayCount.set(dayName, (dayCount.get(dayName) || 0) + 1)
+    })
+    
+    const totalTx = transactions?.length || 1
+    const days = dayNames
+      .map(name => ({
+        name,
+        orders: dayCount.get(name) || 0,
+        percent: Math.round(((dayCount.get(name) || 0) / totalTx) * 100)
+      }))
+      .sort((a, b) => b.orders - a.orders)
+    
+    const hourCount = new Map()
+    transactions?.forEach(t => {
+      const hour = new Date(t.created_at).getHours()
+      hourCount.set(hour, (hourCount.get(hour) || 0) + 1)
+    })
+    
+    const rushHours = []
+    if (hourCount.size > 0) {
+      const lunchCount = [11,12,13,14].reduce((sum, h) => sum + (hourCount.get(h) || 0), 0)
+      if (lunchCount > 0) rushHours.push({ time: '11-14 Uhr', count: lunchCount, percent: Math.round((lunchCount/totalTx)*100), color: '#dc2626' })
+      
+      const dinnerCount = [17,18,19,20].reduce((sum, h) => sum + (hourCount.get(h) || 0), 0)
+      if (dinnerCount > 0) rushHours.push({ time: '17-20 Uhr', count: dinnerCount, percent: Math.round((dinnerCount/totalTx)*100), color: '#f59e0b' })
+      
+      const afternoonCount = [14,15,16,17].reduce((sum, h) => sum + (hourCount.get(h) || 0), 0)
+      if (afternoonCount > 0) rushHours.push({ time: '14-17 Uhr', count: afternoonCount, percent: Math.round((afternoonCount/totalTx)*100), color: '#3b82f6' })
+    }
+    
+    rushHours.sort((a, b) => b.percent - a.percent)
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">📈 Zeitbasierte Trends (NUR Käufe)</h3>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+        <strong style="color: #1e40af;">🔍 Debug-Info:</strong><br>
+        <span style="color: #1e3a8a;">Gesamt Käufe in DB: ${allCount} | Nach Zeitfilter: ${totalTx}</span>
+      </div>
+      
+      <div style="margin-bottom: 24px;">
+        <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">📅 Beste Verkaufstage:</div>
+        ${days.slice(0, 7).map((d, i) => `
+          <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ${i === 0 ? '#F9A825' : i === 1 ? '#f59e0b' : i === 2 ? '#3b82f6' : '#e5e7eb'};">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="font-size: 20px;">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '📊'}</div>
+                <div style="font-size: 14px; font-weight: 600; color: #111827;">${d.name}</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="font-size: 20px; font-weight: 700; color: #F9A825;">${d.orders}</div>
+                <div style="font-size: 13px; color: #6b7280; min-width: 40px; text-align: right;">${d.percent}%</div>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      
+      ${rushHours.length > 0 ? `
+        <div style="margin-bottom: 20px;">
+          <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">🕐 Rush-Hours:</div>
+          ${rushHours.map(r => `
+            <div style="background: white; padding: 14px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ${r.color};">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 14px; font-weight: 600; color: #111827;">${r.time}</div>
+                <div>
+                  <span style="font-size: 18px; font-weight: 700; color: ${r.color};">${r.count}</span>
+                  <span style="font-size: 14px; color: #6b7280; margin-left: 8px;">(${r.percent}%)</span>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+    `
+  } catch (e) {
+    console.error('❌ Fehler:', e)
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+async function loadWheelStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Glücksrad-Statistiken...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  document.getElementById('btn-wheel')?.classList.add('active')
+  
+  try {
+    let { data: spins, error } = await supabase
+      .from('wheel_spins')
+      .select('*')
+      .order('spun_at', { ascending: false })
+    
+    if (error) throw error
+    
+    console.log('📦 Alle Spins geladen:', spins?.length)
+    const allCount = spins?.length || 0
+    spins = filterByTimeRange(spins, 'spun_at')
+    console.log('✅ Nach Filter:', spins?.length)
+    
+    const { data: unlocks } = await supabase.from('wheel_unlocks').select('*')
+    const totalSpins = spins?.length || 0
+    const totalUnlocks = unlocks?.length || 0
+    
+    const prizeMap = new Map()
+    spins?.forEach(s => {
+      const prize = s.prize_value || 'Unbekannt'
+      prizeMap.set(prize, (prizeMap.get(prize) || 0) + 1)
+    })
+    
+    const prizes = Array.from(prizeMap.entries())
+      .map(([prize, count]) => ({
+        prize: prize + ' Punkte',
+        count,
+        percent: totalSpins > 0 ? Math.round((count / totalSpins) * 100) : 0
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+    
+    const weekAgo = new Date()
+    weekAgo.setDate(weekAgo.getDate() - 7)
+    const spinsThisWeek = spins?.filter(s => new Date(s.spun_at) >= weekAgo).length || 0
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">🎡 Glücksrad Performance</h3>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+        <strong style="color: #1e40af;">🔍 Debug-Info:</strong><br>
+        <span style="color: #1e3a8a;">Gesamt Spins in DB: ${allCount} | Nach Zeitfilter: ${totalSpins}</span>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${totalSpins}</div>
+          <div style="font-size: 13px; color: #6b7280;">Gesamt Spins</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${spinsThisWeek}</div>
+          <div style="font-size: 13px; color: #6b7280;">Diese Woche</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #10b981;">${totalUnlocks}</div>
+          <div style="font-size: 13px; color: #6b7280;">Freischaltungen</div>
+        </div>
+      </div>
+      
+      ${prizes.length > 0 ? `
+        <div style="background: white; padding: 20px; border-radius: 10px;">
+          <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">🎁 Gewinn-Verteilung</div>
+          ${prizes.map(p => `
+            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 14px; font-weight: 600; color: #111827;">${p.prize}</div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="font-size: 18px; font-weight: 700; color: #F9A825;">${p.count}x</div>
+                  <div style="font-size: 14px; color: #6b7280;">(${p.percent}%)</div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : '<div style="text-align: center; padding: 20px; color: #6b7280;">Noch keine Gewinne</div>'}
+    `
+  } catch (e) {
+    console.error('❌ Fehler:', e)
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+  console.log('🚀 Stats Page geladen (Fixed)')
+  setTimeRange('7days', true)
+  setTimeout(() => {
+    console.log('📊 Lade erste Statistik...')
+    loadCouponStats()
+  }, 300)
+})
+
+// ✅ Make functions globally accessible for onclick handlers
+window.setTimeRange = setTimeRange
+window.applyCustomRange = applyCustomRange
+window.loadCouponStats = loadCouponStats
+window.loadRewardStats = loadRewardStats
+window.loadWeatherStats = loadWeatherStats
+window.loadWheelStats = loadWheelStats
+window.loadChallengeStats = loadChallengeStats
+window.loadSegmentStats = loadSegmentStats
+window.loadTrendStats = loadTrendStats
+
+console.log('✅ Business Intelligence geladen (FIXED)!')
+</script>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// TAB SWITCHING (NEU HINZUGEFÜGT)
+// ══════════════════════════════════════════════════════════
+function switchTab(tabName) {
+  // Hide all content sections
+  document.getElementById('admin-content').style.display = 'none'
+  document.getElementById('stats-content-section').style.display = 'none'
+  
+  // Reset all buttons
+  document.getElementById('tab-admin-btn').style.background = '#f3f4f6'
+  document.getElementById('tab-admin-btn').style.color = '#6b7280'
+  document.getElementById('tab-stats-btn').style.background = '#f3f4f6'
+  document.getElementById('tab-stats-btn').style.color = '#6b7280'
+  
+  // Show selected content and highlight button
+  if (tabName === 'admin') {
+    document.getElementById('admin-content').style.display = 'block'
+    document.getElementById('tab-admin-btn').style.background = 'linear-gradient(135deg, #E31E24, #F9A825)'
+    document.getElementById('tab-admin-btn').style.color = 'white'
+  } else if (tabName === 'stats') {
+    document.getElementById('stats-content-section').style.display = 'block'
+    document.getElementById('tab-stats-btn').style.background = 'linear-gradient(135deg, #E31E24, #F9A825)'
+    document.getElementById('tab-stats-btn').style.color = 'white'
+    
+    // Initialize stats if first time
+    if (typeof loadCouponStats === 'function' && !window.statsInitialized) {
+      setTimeout(() => {
+        setTimeRange('7days', true)
+        loadCouponStats()
+      }, 100)
+      window.statsInitialized = true
+    }
+  }
+}
+
+// Make function global
+window.switchTab = switchTab
+
+console.log('✅ Integrated Admin & Stats loaded!')
 </script>
 </body>
 </html>
