@@ -354,18 +354,23 @@ async function loadRewardStats() {
   document.getElementById('btn-rewards')?.classList.add('active')
   
   try {
-    // ✅ Detect action column
-    const actionCol = await detectActionColumn()
-    
-    let { data: redeems, error: redeemsError } = await supabase
+    // ✅ NEUE LOGIK: Lade ALLE Transaktionen und filtere dann
+    let { data: allTransactions, error: redeemsError } = await supabase
       .from('transactions')
-      .select('points, created_at')
-      .eq(actionCol, 'redeem')
+      .select('points, created_at, type, notes')
     
     if (redeemsError) {
       console.error('❌ Redeems error:', redeemsError)
       throw redeemsError
     }
+    
+    // ✅ FIX: Filtere Einlösungen (negative Punkte ODER type=redeem)
+    let redeems = allTransactions?.filter(tx => {
+      const isRedeem = tx.type === 'redeem' || 
+                       (tx.notes && tx.notes.includes('Code:')) ||
+                       (tx.points && tx.points < 0)
+      return isRedeem
+    }) || []
     
     const allCount = redeems?.length || 0
     redeems = filterByTimeRange(redeems)
@@ -588,14 +593,18 @@ async function loadSegmentStats() {
   document.getElementById('btn-segments')?.classList.add('active')
   
   try {
-    // ✅ Detect action column
-    const actionCol = await detectActionColumn()
-    
-    // ✅ FIX: Nur KÄUFE zählen
-    let { data: transactions } = await supabase
+    // ✅ NEUE LOGIK: Lade ALLE und filtere dann
+    let { data: allTransactions } = await supabase
       .from('transactions')
-      .select('customer_id, created_at')
-      .eq(actionCol, 'purchase')
+      .select('customer_id, created_at, amount, staff, notes')
+    
+    // ✅ FIX: Filtere echte Käufe (Betrag > 0 UND keine Wheel-Gewinne)
+    let transactions = allTransactions?.filter(tx => {
+      const hasAmount = tx.amount && parseFloat(tx.amount) > 0
+      const isWheelWin = tx.staff === 'WHEEL' || 
+                         (tx.notes && (tx.notes.includes('Wheel') || tx.notes.includes('Lucky')))
+      return hasAmount && !isWheelWin
+    }) || []
     
     const allCount = transactions?.length || 0
     transactions = filterByTimeRange(transactions)
@@ -668,23 +677,29 @@ async function loadTrendStats() {
   document.getElementById('btn-trends')?.classList.add('active')
   
   try {
-    // ✅ Detect action column
-    const actionCol = await detectActionColumn()
-    
-    let { data: transactions, error } = await supabase
+    // ✅ NEUE LOGIK: Lade ALLE Transaktionen und filtere dann
+    let { data: allTransactions, error } = await supabase
       .from('transactions')
-      .select('created_at, amount, points, staff, notes')
-      .eq(actionCol, 'purchase')  // ← NUR echte Käufe!
+      .select('created_at, amount, points, staff, notes, type')
       .order('created_at', { ascending: false })
     
     if (error) throw error
     
-    console.log('📦 Alle KÄUFE geladen:', transactions?.length)
-    console.log('🔍 Erste Käufe:', transactions?.slice(0, 5))
+    console.log('📦 Alle Transaktionen geladen:', allTransactions?.length)
+    
+    // ✅ FIX: Filtere echte Käufe (Betrag > 0 UND keine Wheel-Gewinne)
+    let transactions = allTransactions?.filter(tx => {
+      const hasAmount = tx.amount && parseFloat(tx.amount) > 0
+      const isWheelWin = tx.staff === 'WHEEL' || 
+                         (tx.notes && (tx.notes.includes('Wheel') || tx.notes.includes('Lucky')))
+      return hasAmount && !isWheelWin
+    }) || []
+    
+    console.log('📦 Echte KÄUFE (Betrag > 0, kein Wheel):', transactions?.length)
     
     const allCount = transactions?.length || 0
     transactions = filterByTimeRange(transactions)
-    console.log('✅ Nach Filter:', transactions?.length)
+    console.log('✅ Nach Zeitfilter:', transactions?.length)
     
     const dayCount = new Map()
     const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']
