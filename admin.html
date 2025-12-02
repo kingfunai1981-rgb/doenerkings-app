@@ -1057,7 +1057,10 @@ window.addEventListener('DOMContentLoaded', function() {
   // 🌧️ AUTO-CHECK beim Laden starten
   checkWeatherNow(false)
   
-  // 📊 Erste Statistik automatisch laden
+  // 📅 WICHTIG: Zeitraum ZUERST initialisieren (7 Tage = Standard)
+  setTimeRange('7days')
+  
+  // 📊 Erste Statistik automatisch laden (NACH Zeitraum-Init!)
   setTimeout(() => {
     const firstStatBtn = document.querySelector('.stat-btn[onclick^="loadCouponStats"]')
     if (firstStatBtn) firstStatBtn.click()
@@ -1802,8 +1805,11 @@ function setTimeRange(range) {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   
-  document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => btn.classList.remove('active'))
-  event.target.classList.add('active')
+  // Button-Highlighting (nur wenn von Button geklickt)
+  if (typeof event !== 'undefined' && event.target) {
+    document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => btn.classList.remove('active'))
+    event.target.classList.add('active')
+  }
   
   currentTimeRange.label = range
   
@@ -2453,9 +2459,6 @@ async function loadTrendStats() {
     content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
   }
 }
-
-// Zeitraum bei Page Load initialisieren
-setTimeRange('7days')
 
 // ═══════════════════════════════════════════════════════════════
 
