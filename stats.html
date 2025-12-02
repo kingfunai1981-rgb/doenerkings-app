@@ -90,6 +90,34 @@ const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
+// ✅ Auto-detect ob 'action' oder 'type' Spalte existiert
+let ACTION_COLUMN = null
+
+async function detectActionColumn() {
+  if (ACTION_COLUMN !== null) return ACTION_COLUMN
+  
+  try {
+    // Versuche 'action'
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('action')
+      .limit(1)
+    
+    if (!error) {
+      ACTION_COLUMN = 'action'
+      console.log('✅ Using column: action')
+      return 'action'
+    }
+  } catch (e) {
+    console.log('⚠️ Column "action" not found, trying "type"...')
+  }
+  
+  // Falls 'action' fehlschlägt, nutze 'type'
+  ACTION_COLUMN = 'type'
+  console.log('✅ Using column: type')
+  return 'type'
+}
+
 let currentTimeRange = { start: null, end: null, label: '7days' }
 
 function setTimeRange(range, skipReload = false) {
@@ -310,10 +338,13 @@ async function loadRewardStats() {
   event.target.classList.add('active')
   
   try {
+    // ✅ Detect action column
+    const actionCol = await detectActionColumn()
+    
     let { data: redeems, error: redeemsError } = await supabase
       .from('transactions')
       .select('points, created_at')
-      .eq('action', 'redeem')
+      .eq(actionCol, 'redeem')
     
     if (redeemsError) {
       console.error('❌ Redeems error:', redeemsError)
@@ -541,11 +572,14 @@ async function loadSegmentStats() {
   event.target.classList.add('active')
   
   try {
+    // ✅ Detect action column
+    const actionCol = await detectActionColumn()
+    
     // ✅ FIX: Nur KÄUFE zählen
     let { data: transactions } = await supabase
       .from('transactions')
-      .select('customer_id, action')
-      .eq('action', 'purchase')
+      .select('customer_id, created_at')
+      .eq(actionCol, 'purchase')
     
     const allCount = transactions?.length || 0
     transactions = filterByTimeRange(transactions)
@@ -618,18 +652,18 @@ async function loadTrendStats() {
   document.getElementById('btn-trends').classList.add('active')
   
   try {
-    // ✅ FIX: Lade NUR Käufe (action = 'purchase')
+    // ✅ Detect action column
+    const actionCol = await detectActionColumn()
+    
     let { data: transactions, error } = await supabase
       .from('transactions')
-      .select('created_at, action, amount, points, staff, notes')
-      .eq('action', 'purchase')  // ← NUR echte Käufe!
+      .select('created_at, amount, points, staff, notes')
+      .eq(actionCol, 'purchase')  // ← NUR echte Käufe!
       .order('created_at', { ascending: false })
     
     if (error) throw error
     
     console.log('📦 Alle KÄUFE geladen:', transactions?.length)
-    
-    // Debug: Zeige erste 5 Einträge
     console.log('🔍 Erste Käufe:', transactions?.slice(0, 5))
     
     const allCount = transactions?.length || 0
