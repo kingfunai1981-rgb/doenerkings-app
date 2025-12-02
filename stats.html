@@ -90,12 +90,13 @@ const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
-// ✅ Auto-detect ob 'action' oder 'type' Spalte existiert (ohne 400-Fehler)
+// ✅ Auto-detect ob 'action' oder 'type' Spalte existiert (OHNE 400-Fehler!)
 let ACTION_COLUMN = null
 
 async function detectActionColumn() {
   if (ACTION_COLUMN !== null) return ACTION_COLUMN
   
+  // Strategie: Hol einfach ALLE Spalten einer Zeile und schau was drin ist
   const { data, error } = await supabase
     .from('transactions')
     .select('*')
@@ -109,7 +110,14 @@ async function detectActionColumn() {
     return ACTION_COLUMN
   }
 
-  const row = data?.[0] || {}
+  // Wenn keine Daten vorhanden, prüfe Schema
+  if (!data || data.length === 0) {
+    console.log('⚠️ Keine Transaktionen in DB, nehme "type" als Default')
+    ACTION_COLUMN = 'type'
+    return ACTION_COLUMN
+  }
+
+  const row = data[0]
 
   if ('action' in row) {
     ACTION_COLUMN = 'action'
@@ -657,7 +665,7 @@ async function loadTrendStats() {
   const content = document.getElementById('stats-content')
   content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Trend-Daten...</div>'
   document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
-  document.getElementById('btn-trends').classList.add('active')
+  document.getElementById('btn-trends')?.classList.add('active')
   
   try {
     // ✅ Detect action column
