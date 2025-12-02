@@ -69,12 +69,12 @@ button.success:hover { background: #f59e0b; }
     <!-- Statistik-Navigation -->
     <div style="margin-bottom: 16px;">
       <button class="stat-btn active" id="btn-coupon" onclick="loadCouponStats()">🎟️ Coupon ROI</button>
-      <button class="stat-btn" onclick="loadRewardStats()">🏆 Prämien-Ranking</button>
-      <button class="stat-btn" onclick="loadWeatherStats()">🌧️ Wetter-Deals</button>
-      <button class="stat-btn" onclick="loadWheelStats()">🎡 Glücksrad</button>
-      <button class="stat-btn" onclick="loadChallengeStats()">⚡ Challenges</button>
-      <button class="stat-btn" onclick="loadSegmentStats()">👥 Segmente</button>
-      <button class="stat-btn" onclick="loadTrendStats()">📈 Trends</button>
+      <button class="stat-btn" id="btn-rewards" onclick="loadRewardStats()">🏆 Prämien-Ranking</button>
+      <button class="stat-btn" id="btn-weather" onclick="loadWeatherStats()">🌧️ Wetter-Deals</button>
+      <button class="stat-btn" id="btn-wheel" onclick="loadWheelStats()">🎡 Glücksrad</button>
+      <button class="stat-btn" id="btn-challenges" onclick="loadChallengeStats()">⚡ Challenges</button>
+      <button class="stat-btn" id="btn-segments" onclick="loadSegmentStats()">👥 Segmente</button>
+      <button class="stat-btn" id="btn-trends" onclick="loadTrendStats()">📈 Trends</button>
     </div>
     
     <!-- Stats Content -->
@@ -90,32 +90,40 @@ const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
-// ✅ Auto-detect ob 'action' oder 'type' Spalte existiert
+// ✅ Auto-detect ob 'action' oder 'type' Spalte existiert (ohne 400-Fehler)
 let ACTION_COLUMN = null
 
 async function detectActionColumn() {
   if (ACTION_COLUMN !== null) return ACTION_COLUMN
   
-  try {
-    // Versuche 'action'
-    const { data, error } = await supabase
-      .from('transactions')
-      .select('action')
-      .limit(1)
-    
-    if (!error) {
-      ACTION_COLUMN = 'action'
-      console.log('✅ Using column: action')
-      return 'action'
-    }
-  } catch (e) {
-    console.log('⚠️ Column "action" not found, trying "type"...')
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('*')
+    .limit(1)
+
+  if (error) {
+    console.error('❌ Fehler beim transactions-Check:', error)
+    // Fallback
+    ACTION_COLUMN = 'type'
+    console.log('⚠️ Fallback: Using column "type"')
+    return ACTION_COLUMN
   }
-  
-  // Falls 'action' fehlschlägt, nutze 'type'
-  ACTION_COLUMN = 'type'
-  console.log('✅ Using column: type')
-  return 'type'
+
+  const row = data?.[0] || {}
+
+  if ('action' in row) {
+    ACTION_COLUMN = 'action'
+    console.log('✅ Detected column: action')
+  } else if ('type' in row) {
+    ACTION_COLUMN = 'type'
+    console.log('✅ Detected column: type')
+  } else {
+    // Fallback, falls beides nicht existiert
+    ACTION_COLUMN = 'type'
+    console.log('⚠️ Neither "action" nor "type" found, using "type" as fallback')
+  }
+
+  return ACTION_COLUMN
 }
 
 let currentTimeRange = { start: null, end: null, label: '7days' }
@@ -335,7 +343,7 @@ async function loadRewardStats() {
   const content = document.getElementById('stats-content')
   content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Prämien-Statistiken...</div>'
   document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
-  event.target.classList.add('active')
+  document.getElementById('btn-rewards')?.classList.add('active')
   
   try {
     // ✅ Detect action column
@@ -420,7 +428,7 @@ async function loadWeatherStats() {
   const content = document.getElementById('stats-content')
   content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Wetter-Deal Statistiken...</div>'
   document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
-  event.target.classList.add('active')
+  document.getElementById('btn-weather')?.classList.add('active')
   
   try {
     const { data: coupons } = await supabase.from('coupons').select('*')
@@ -492,7 +500,7 @@ async function loadChallengeStats() {
   const content = document.getElementById('stats-content')
   content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Challenge-Statistiken...</div>'
   document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
-  event.target.classList.add('active')
+  document.getElementById('btn-challenges')?.classList.add('active')
   
   try {
     const { data: challenges } = await supabase.from('challenges').select('*')
@@ -569,7 +577,7 @@ async function loadSegmentStats() {
   const content = document.getElementById('stats-content')
   content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Kunden-Segmente...</div>'
   document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
-  event.target.classList.add('active')
+  document.getElementById('btn-segments')?.classList.add('active')
   
   try {
     // ✅ Detect action column
@@ -762,7 +770,7 @@ async function loadWheelStats() {
   const content = document.getElementById('stats-content')
   content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Glücksrad-Statistiken...</div>'
   document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
-  event.target.classList.add('active')
+  document.getElementById('btn-wheel')?.classList.add('active')
   
   try {
     let { data: spins, error } = await supabase
@@ -854,6 +862,17 @@ window.addEventListener('DOMContentLoaded', function() {
     loadCouponStats()
   }, 300)
 })
+
+// ✅ Make functions globally accessible for onclick handlers
+window.setTimeRange = setTimeRange
+window.applyCustomRange = applyCustomRange
+window.loadCouponStats = loadCouponStats
+window.loadRewardStats = loadRewardStats
+window.loadWeatherStats = loadWeatherStats
+window.loadWheelStats = loadWheelStats
+window.loadChallengeStats = loadChallengeStats
+window.loadSegmentStats = loadSegmentStats
+window.loadTrendStats = loadTrendStats
 
 console.log('✅ Business Intelligence geladen (FIXED)!')
 </script>
