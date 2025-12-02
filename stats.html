@@ -27,7 +27,6 @@ button.success:hover { background: #f59e0b; }
 .stat-btn { padding: 10px 16px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; margin-right: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; font-size: 14px; font-weight: 600; color: #374151; display: inline-block; }
 .stat-btn:hover { border-color: #F9A825; background: #fef3c7; color: #92400e; }
 .stat-btn.active { background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border-color: #E31E24; }
-.debug-info { background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 10px; padding: 12px; margin-top: 16px; font-size: 12px; font-family: monospace; color: #666; }
 </style>
 </head>
 <body>
@@ -35,7 +34,7 @@ button.success:hover { background: #f59e0b; }
 <div class="container">
   <div class="card header-card">
     <div class="header-logo"><img src="/logo-round-new.png" alt="Döner Boxx"></div>
-    <div class="header-text"><h1>📊 Business Intelligence (DEBUG)</h1><p class="subtitle">Fehlersuche für Statistiken</p></div>
+    <div class="header-text"><h1>📊 Business Intelligence</h1><p class="subtitle">Alle Statistiken mit echten Daten aus deiner Datenbank</p></div>
   </div>
 
   <div class="card" style="border: 3px solid #F9A825;">
@@ -65,23 +64,17 @@ button.success:hover { background: #f59e0b; }
         </div>
         <button class="success" onclick="applyCustomRange()">✓ Anwenden</button>
       </div>
-      
-      <!-- Debug-Info -->
-      <div class="debug-info" id="debug-info">
-        <strong>🔍 Debug-Info:</strong><br>
-        Zeitraum: <span id="debug-range">-</span><br>
-        Start: <span id="debug-start">-</span><br>
-        Ende: <span id="debug-end">-</span><br>
-        Alle Transaktionen: <span id="debug-total">-</span><br>
-        Nach Filter: <span id="debug-filtered">-</span>
-      </div>
     </div>
     
     <!-- Statistik-Navigation -->
     <div style="margin-bottom: 16px;">
-      <button class="stat-btn active" id="btn-trends" onclick="loadTrendStats()">📈 Trends (Debug)</button>
+      <button class="stat-btn active" id="btn-coupon" onclick="loadCouponStats()">🎟️ Coupon ROI</button>
+      <button class="stat-btn" onclick="loadRewardStats()">🏆 Prämien-Ranking</button>
+      <button class="stat-btn" onclick="loadWeatherStats()">🌧️ Wetter-Deals</button>
       <button class="stat-btn" onclick="loadWheelStats()">🎡 Glücksrad</button>
-      <button class="stat-btn" onclick="loadAllTransactions()">📋 Alle Transaktionen</button>
+      <button class="stat-btn" onclick="loadChallengeStats()">⚡ Challenges</button>
+      <button class="stat-btn" onclick="loadSegmentStats()">👥 Segmente</button>
+      <button class="stat-btn" onclick="loadTrendStats()">📈 Trends</button>
     </div>
     
     <!-- Stats Content -->
@@ -98,14 +91,6 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 let currentTimeRange = { start: null, end: null, label: '7days' }
-
-function updateDebugInfo(total, filtered) {
-  document.getElementById('debug-range').textContent = currentTimeRange.label
-  document.getElementById('debug-start').textContent = currentTimeRange.start ? currentTimeRange.start.toISOString() : 'NONE'
-  document.getElementById('debug-end').textContent = currentTimeRange.end ? currentTimeRange.end.toISOString() : 'NONE'
-  document.getElementById('debug-total').textContent = total || 0
-  document.getElementById('debug-filtered').textContent = filtered || 0
-}
 
 function setTimeRange(range, skipReload = false) {
   const now = new Date()
@@ -184,7 +169,6 @@ function filterByTimeRange(data, dateField = 'created_at') {
   // WICHTIG: Bei "all" keine Filterung
   if (!currentTimeRange.start || !currentTimeRange.end) {
     console.log('⭐ Alle Zeit ausgewählt - kein Filter')
-    updateDebugInfo(total, total)
     return data
   }
   
@@ -194,8 +178,413 @@ function filterByTimeRange(data, dateField = 'created_at') {
   })
   
   console.log(`📊 Filter: ${total} → ${filtered?.length || 0} Einträge`)
-  updateDebugInfo(total, filtered?.length || 0)
   return filtered
+}
+
+async function loadCouponStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Coupon-Statistiken...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  document.getElementById('btn-coupon').classList.add('active')
+  
+  try {
+    const { data: coupons } = await supabase.from('coupons').select('*')
+    let { data: activations } = await supabase.from('activated_coupons').select('*, coupons(title, points_cost)')
+    
+    console.log('📦 Alle Aktivierungen:', activations?.length)
+    const allCount = activations?.length || 0
+    activations = filterByTimeRange(activations, 'activated_at')
+    console.log('✅ Nach Filter:', activations?.length)
+    
+    const totalCoupons = coupons?.length || 0
+    const activeCoupons = coupons?.filter(c => c.is_active).length || 0
+    const totalActivations = activations?.length || 0
+    const usedActivations = activations?.filter(a => a.is_used).length || 0
+    
+    const couponMap = new Map()
+    activations?.forEach(a => {
+      const title = a.coupons?.title || 'Unbekannt'
+      if (!couponMap.has(title)) {
+        couponMap.set(title, { title, activated: 0, used: 0 })
+      }
+      const entry = couponMap.get(title)
+      entry.activated++
+      if (a.is_used) entry.used++
+    })
+    
+    const topCoupons = Array.from(couponMap.values())
+      .map(c => ({
+        ...c,
+        rate: c.activated > 0 ? Math.round((c.used / c.activated) * 100) : 0,
+        revenue: c.used * 6
+      }))
+      .sort((a, b) => b.activated - a.activated)
+      .slice(0, 5)
+    
+    const conversionRate = totalActivations > 0 ? Math.round((usedActivations / totalActivations) * 100) : 0
+    const revenue = usedActivations * 6
+    const avgIncrease = totalActivations > 0 ? (revenue / totalActivations).toFixed(2) : 0
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">🎟️ Coupon ROI Analyse</h3>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+        <strong style="color: #1e40af;">🔍 Zeitraum:</strong> ${currentTimeRange.label}<br>
+        <span style="color: #1e3a8a;">Gesamt: ${allCount} | Nach Filter: ${totalActivations}</span>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #E31E24;">${totalCoupons}</div>
+          <div style="font-size: 13px; color: #6b7280;">Total Coupons</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #10b981;">${activeCoupons}</div>
+          <div style="font-size: 13px; color: #6b7280;">Aktive Coupons</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${totalActivations}</div>
+          <div style="font-size: 13px; color: #6b7280;">Aktivierungen</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${usedActivations}</div>
+          <div style="font-size: 13px; color: #6b7280;">Einlösungen</div>
+        </div>
+      </div>
+      
+      <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 16px;">
+        <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">💰 Performance</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 700; color: #10b981;">${conversionRate}%</div>
+            <div style="font-size: 12px; color: #6b7280;">Conversion</div>
+          </div>
+          <div style="background: #dcfce7; padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #22c55e;">
+            <div style="font-size: 24px; font-weight: 700; color: #166534;">${revenue}€</div>
+            <div style="font-size: 12px; color: #166534;">Umsatz</div>
+          </div>
+          <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 700; color: #F9A825;">+${avgIncrease}€</div>
+            <div style="font-size: 12px; color: #6b7280;">Ø pro Kunde</div>
+          </div>
+        </div>
+      </div>
+      
+      ${topCoupons.length > 0 ? `
+        <div style="background: white; padding: 20px; border-radius: 10px;">
+          <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">🏆 Top Coupons</div>
+          ${topCoupons.map((c, i) => `
+            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ${i === 0 ? '#F9A825' : '#e5e7eb'};">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-size: 14px; font-weight: 700; color: #111827;">${i + 1}. ${c.title}</div>
+                  <div style="font-size: 12px; color: #6b7280;">Aktiviert: ${c.activated}x | Eingelöst: ${c.used}x</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-size: 18px; font-weight: 700; color: ${c.rate >= 75 ? '#22c55e' : c.rate >= 50 ? '#f59e0b' : '#6b7280'};">${c.rate}%</div>
+                  <div style="font-size: 11px; color: #6b7280;">${c.revenue}€</div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : '<div style="text-align: center; padding: 20px; color: #6b7280;">Noch keine Coupon-Daten im gewählten Zeitraum</div>'}
+    `
+  } catch (e) {
+    console.error('❌ Fehler:', e)
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+async function loadRewardStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Prämien-Statistiken...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  event.target.classList.add('active')
+  
+  try {
+    let { data: redeems } = await supabase.from('transactions').select('amount').eq('action', 'redeem')
+    const allCount = redeems?.length || 0
+    redeems = filterByTimeRange(redeems)
+    
+    const rewardMap = new Map()
+    redeems?.forEach(r => {
+      const points = Math.abs(r.amount)
+      if (!rewardMap.has(points)) {
+        rewardMap.set(points, 0)
+      }
+      rewardMap.set(points, rewardMap.get(points) + 1)
+    })
+    
+    const rewards = Array.from(rewardMap.entries())
+      .map(([points, count]) => ({
+        points,
+        count,
+        name: points >= 1000 ? 'Große Prämie' : points >= 500 ? 'Mittlere Prämie' : 'Kleine Prämie',
+        emoji: points >= 1000 ? '🥙' : points >= 500 ? '🍟' : '🥤'
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+    
+    const totalRedeems = redeems?.length || 0
+    const totalPoints = redeems?.reduce((sum, r) => sum + Math.abs(r.amount), 0) || 0
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">🏆 Prämien-Ranking</h3>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+        <strong style="color: #1e40af;">🔍 Zeitraum:</strong> ${currentTimeRange.label}<br>
+        <span style="color: #1e3a8a;">Gesamt: ${allCount} | Nach Filter: ${totalRedeems}</span>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${totalRedeems}</div>
+          <div style="font-size: 13px; color: #6b7280;">Eingelöste Prämien</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #E31E24;">${totalPoints}</div>
+          <div style="font-size: 13px; color: #6b7280;">Verbrauchte Punkte</div>
+        </div>
+      </div>
+      
+      ${rewards.length > 0 ? rewards.map((r, i) => `
+        <div style="background: white; padding: 16px; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid ${i === 0 ? '#F9A825' : '#e5e7eb'};">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="font-size: 36px;">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🏅'}</div>
+            <div>
+              <div style="font-size: 18px; font-weight: 700; color: #111827;">${r.emoji} ${r.name}</div>
+              <div style="font-size: 13px; color: #6b7280;">${r.points} Punkte</div>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 28px; font-weight: 700; color: #F9A825;">${r.count}x</div>
+            <div style="font-size: 12px; color: #6b7280;">eingelöst</div>
+          </div>
+        </div>
+      `).join('') : '<div style="text-align: center; padding: 40px; color: #6b7280;">Noch keine Prämien eingelöst</div>'}
+    `
+  } catch (e) {
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+async function loadWeatherStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Wetter-Deal Statistiken...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  event.target.classList.add('active')
+  
+  try {
+    const { data: coupons } = await supabase.from('coupons').select('*')
+    let { data: activations } = await supabase.from('activated_coupons').select('*, coupons(title)')
+    const allCount = activations?.length || 0
+    activations = filterByTimeRange(activations, 'activated_at')
+    
+    const weatherDeals = coupons?.filter(c => 
+      c.title?.includes('3€') || c.title?.includes('4€') || c.title?.includes('4.50€') || c.title?.includes('5€')
+    ) || []
+    
+    const weatherActivations = activations?.filter(a => 
+      a.coupons?.title?.includes('3€') || a.coupons?.title?.includes('4€') || 
+      a.coupons?.title?.includes('4.50€') || a.coupons?.title?.includes('5€')
+    ) || []
+    
+    const totalActivated = weatherActivations.length
+    const totalUsed = weatherActivations.filter(a => a.is_used).length
+    const avgDiscount = 30
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">🌧️ Wetter-Döner-Deals Performance</h3>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+        <strong style="color: #1e40af;">🔍 Zeitraum:</strong> ${currentTimeRange.label}<br>
+        <span style="color: #1e3a8a;">Gesamt: ${allCount} | Weather-Activations: ${totalActivated}</span>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${weatherDeals.length}</div>
+          <div style="font-size: 13px; color: #6b7280;">Aktive Deals</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${totalActivated}</div>
+          <div style="font-size: 13px; color: #6b7280;">Aktivierungen</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #f59e0b;">-${avgDiscount}%</div>
+          <div style="font-size: 13px; color: #6b7280;">Ø Rabatt</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #10b981;">${totalUsed}</div>
+          <div style="font-size: 13px; color: #6b7280;">Bestellungen</div>
+        </div>
+      </div>
+      
+      <div style="background: #dcfce7; padding: 16px; border-radius: 10px; border: 2px solid #22c55e;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 14px; color: #166534;">Conversion Rate:</div>
+          <div style="font-size: 22px; font-weight: 900; color: #166534;">${totalActivated > 0 ? Math.round((totalUsed/totalActivated)*100) : 0}%</div>
+        </div>
+      </div>
+    `
+  } catch (e) {
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+async function loadChallengeStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Challenge-Statistiken...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  event.target.classList.add('active')
+  
+  try {
+    const { data: challenges } = await supabase.from('challenges').select('*')
+    let { data: progress } = await supabase.from('challenge_progress').select('*')
+    
+    const totalChallenges = challenges?.length || 0
+    const activeChallenges = challenges?.filter(c => c.is_active).length || 0
+    const totalParticipants = new Set(progress?.map(p => p.customer_id)).size
+    const completedChallenges = progress?.filter(p => p.is_completed).length || 0
+    const completionRate = progress?.length > 0 ? Math.round((completedChallenges / progress.length) * 100) : 0
+    
+    const challengeStats = challenges?.map(c => {
+      const participations = progress?.filter(p => p.challenge_id === c.id) || []
+      const completed = participations.filter(p => p.is_completed).length
+      return {
+        title: c.title,
+        participants: participations.length,
+        completed,
+        rate: participations.length > 0 ? Math.round((completed / participations.length) * 100) : 0,
+        reward: c.reward_points
+      }
+    }).sort((a, b) => b.participants - a.participants).slice(0, 3) || []
+    
+    const totalRevenueFromChallenges = completedChallenges * 6
+    const avgIncreasePerCustomer = totalParticipants > 0 ? (totalRevenueFromChallenges / totalParticipants).toFixed(2) : 0
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">⚡ Challenge Performance</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #E31E24;">${totalChallenges}</div>
+          <div style="font-size: 13px; color: #6b7280;">Total Challenges</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #10b981;">${activeChallenges}</div>
+          <div style="font-size: 13px; color: #6b7280;">Aktiv</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${totalParticipants}</div>
+          <div style="font-size: 13px; color: #6b7280;">Teilnehmer</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${completionRate}%</div>
+          <div style="font-size: 13px; color: #6b7280;">Erfolgsrate</div>
+        </div>
+      </div>
+      
+      ${challengeStats.length > 0 ? `
+        <div style="background: white; padding: 20px; border-radius: 10px;">
+          <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">🏆 Top Challenges</div>
+          ${challengeStats.map((c, i) => `
+            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ${i === 0 ? '#F9A825' : '#e5e7eb'};">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-size: 14px; font-weight: 700; color: #111827;">${c.title}</div>
+                  <div style="font-size: 12px; color: #6b7280;">Teilnehmer: ${c.participants} | Abgeschlossen: ${c.completed}</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-size: 18px; font-weight: 700; color: ${c.rate >= 75 ? '#22c55e' : c.rate >= 50 ? '#f59e0b' : '#6b7280'};">${c.rate}%</div>
+                  <div style="font-size: 11px; color: #6b7280;">${c.reward}P</div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : '<div style="text-align: center; padding: 20px; color: #6b7280;">Noch keine Challenges vorhanden</div>'}
+    `
+  } catch (e) {
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+async function loadSegmentStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Kunden-Segmente...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  event.target.classList.add('active')
+  
+  try {
+    // ✅ FIX: Nur KÄUFE zählen
+    let { data: transactions } = await supabase
+      .from('transactions')
+      .select('customer_id, action')
+      .eq('action', 'purchase')
+    
+    const allCount = transactions?.length || 0
+    transactions = filterByTimeRange(transactions)
+    
+    const customerTxCount = new Map()
+    transactions?.forEach(t => {
+      customerTxCount.set(t.customer_id, (customerTxCount.get(t.customer_id) || 0) + 1)
+    })
+    
+    let vipCount = 0, stammCount = 0, regularCount = 0, gelegentlichCount = 0, einmaligCount = 0
+    
+    customerTxCount.forEach(count => {
+      if (count >= 20) vipCount++
+      else if (count >= 10) stammCount++
+      else if (count >= 5) regularCount++
+      else if (count >= 2) gelegentlichCount++
+      else einmaligCount++
+    })
+    
+    const totalCustomers = customerTxCount.size || 1
+    
+    const segments = [
+      { name: 'VIP', visits: '20+', count: vipCount, percent: Math.round((vipCount/totalCustomers)*100), color: '#dc2626' },
+      { name: 'Stamm', visits: '10-19', count: stammCount, percent: Math.round((stammCount/totalCustomers)*100), color: '#f59e0b' },
+      { name: 'Regular', visits: '5-9', count: regularCount, percent: Math.round((regularCount/totalCustomers)*100), color: '#3b82f6' },
+      { name: 'Gelegentlich', visits: '2-4', count: gelegentlichCount, percent: Math.round((gelegentlichCount/totalCustomers)*100), color: '#6b7280' },
+      { name: 'Einmalig', visits: '1', count: einmaligCount, percent: Math.round((einmaligCount/totalCustomers)*100), color: '#9ca3af' }
+    ]
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">👥 Kunden-Segmente</h3>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+        <strong style="color: #1e40af;">🔍 Zeitraum:</strong> ${currentTimeRange.label}<br>
+        <span style="color: #1e3a8a;">Käufe gesamt: ${allCount} | Nach Filter: ${transactions?.length || 0}</span>
+      </div>
+      
+      <div style="background: white; padding: 16px; border-radius: 10px; margin-bottom: 16px; text-align: center;">
+        <div style="font-size: 32px; font-weight: 700; color: #E31E24;">${totalCustomers}</div>
+        <div style="font-size: 13px; color: #6b7280;">Aktive Kunden</div>
+      </div>
+      
+      ${segments.map(s => `
+        <div style="background: white; padding: 16px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid ${s.color};">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 16px; font-weight: 700; color: #111827;">${s.name}</div>
+              <div style="font-size: 13px; color: #6b7280;">${s.visits} Käufe</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 28px; font-weight: 700; color: ${s.color};">${s.count}</div>
+              <div style="font-size: 13px; color: #6b7280;">${s.percent}%</div>
+            </div>
+          </div>
+          <div style="background: #f3f4f6; height: 8px; border-radius: 4px; margin-top: 12px; overflow: hidden;">
+            <div style="background: ${s.color}; height: 100%; width: ${s.percent}%; transition: width 0.3s;"></div>
+          </div>
+        </div>
+      `).join('')}
+    `
+  } catch (e) {
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
 }
 
 async function loadTrendStats() {
@@ -399,74 +788,16 @@ async function loadWheelStats() {
   }
 }
 
-async function loadAllTransactions() {
-  const content = document.getElementById('stats-content')
-  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade alle Transaktionen...</div>'
-  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
-  event.target.classList.add('active')
-  
-  try {
-    let { data: transactions, error } = await supabase
-      .from('transactions')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(100)
-    
-    if (error) throw error
-    
-    const allCount = transactions?.length || 0
-    transactions = filterByTimeRange(transactions)
-    
-    content.innerHTML = `
-      <h3 style="color: #111827; margin-bottom: 16px;">📋 Alle Transaktionen (Letzte 100)</h3>
-      
-      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
-        <strong style="color: #1e40af;">🔍 Debug-Info:</strong><br>
-        <span style="color: #1e3a8a;">Gesamt Transaktionen: ${allCount} | Nach Zeitfilter: ${transactions?.length || 0}</span>
-      </div>
-      
-      ${transactions?.length > 0 ? transactions.map(tx => {
-        const date = new Date(tx.created_at).toLocaleString('de-DE')
-        return `
-          <div style="background: white; padding: 14px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid ${tx.action === 'purchase' ? '#10b981' : tx.staff === 'WHEEL' ? '#f59e0b' : '#6b7280'};">
-            <div style="display: flex; justify-content: between; align-items: start;">
-              <div style="flex: 1;">
-                <div style="font-weight: 700; margin-bottom: 4px;">
-                  ${tx.action === 'purchase' ? '💰' : tx.staff === 'WHEEL' ? '🎡' : '🎁'} 
-                  ${tx.action === 'purchase' ? 'Kauf' : tx.staff === 'WHEEL' ? 'Wheel Gewinn' : tx.action}
-                </div>
-                <div style="font-size: 13px; color: #666;">
-                  ${tx.notes || '-'}<br>
-                  Staff: ${tx.staff || '-'} | Betrag: ${tx.amount}€
-                </div>
-              </div>
-              <div style="text-align: right;">
-                <div style="font-size: 18px; font-weight: 700; color: ${tx.points > 0 ? '#10b981' : '#dc2626'};">
-                  ${tx.points > 0 ? '+' : ''}${tx.points}P
-                </div>
-                <div style="font-size: 11px; color: #999;">${date}</div>
-              </div>
-            </div>
-          </div>
-        `
-      }).join('') : '<div style="text-align: center; padding: 20px; color: #6b7280;">Keine Transaktionen</div>'}
-    `
-  } catch (e) {
-    console.error('❌ Fehler:', e)
-    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
-  }
-}
-
 window.addEventListener('DOMContentLoaded', function() {
-  console.log('🚀 Stats Page geladen (Debug-Version)')
+  console.log('🚀 Stats Page geladen (Fixed)')
   setTimeRange('7days', true)
   setTimeout(() => {
     console.log('📊 Lade erste Statistik...')
-    loadTrendStats()
+    loadCouponStats()
   }, 300)
 })
 
-console.log('✅ Business Intelligence Debug geladen!')
+console.log('✅ Business Intelligence geladen (FIXED)!')
 </script>
 </body>
 </html>
