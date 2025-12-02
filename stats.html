@@ -189,7 +189,14 @@ async function loadCouponStats() {
   
   try {
     const { data: coupons } = await supabase.from('coupons').select('*')
-    let { data: activations } = await supabase.from('activated_coupons').select('*, coupons(title, points_cost)')
+    let { data: activations, error: activationsError } = await supabase
+      .from('activated_coupons')
+      .select('*, coupons(title, product, price)')
+    
+    if (activationsError) {
+      console.error('❌ Activations error:', activationsError)
+      throw activationsError
+    }
     
     console.log('📦 Alle Aktivierungen:', activations?.length)
     const allCount = activations?.length || 0
@@ -303,13 +310,22 @@ async function loadRewardStats() {
   event.target.classList.add('active')
   
   try {
-    let { data: redeems } = await supabase.from('transactions').select('amount').eq('action', 'redeem')
+    let { data: redeems, error: redeemsError } = await supabase
+      .from('transactions')
+      .select('points, created_at')
+      .eq('action', 'redeem')
+    
+    if (redeemsError) {
+      console.error('❌ Redeems error:', redeemsError)
+      throw redeemsError
+    }
+    
     const allCount = redeems?.length || 0
     redeems = filterByTimeRange(redeems)
     
     const rewardMap = new Map()
     redeems?.forEach(r => {
-      const points = Math.abs(r.amount)
+      const points = Math.abs(r.points)  // ✅ FIX: use 'points' not 'amount'
       if (!rewardMap.has(points)) {
         rewardMap.set(points, 0)
       }
@@ -327,7 +343,7 @@ async function loadRewardStats() {
       .slice(0, 5)
     
     const totalRedeems = redeems?.length || 0
-    const totalPoints = redeems?.reduce((sum, r) => sum + Math.abs(r.amount), 0) || 0
+    const totalPoints = redeems?.reduce((sum, r) => sum + Math.abs(r.points), 0) || 0  // ✅ FIX: use 'points'
     
     content.innerHTML = `
       <h3 style="color: #111827; margin-bottom: 16px;">🏆 Prämien-Ranking</h3>
@@ -377,7 +393,15 @@ async function loadWeatherStats() {
   
   try {
     const { data: coupons } = await supabase.from('coupons').select('*')
-    let { data: activations } = await supabase.from('activated_coupons').select('*, coupons(title)')
+    let { data: activations, error: activationsError } = await supabase
+      .from('activated_coupons')
+      .select('*, coupons(title, product)')
+    
+    if (activationsError) {
+      console.error('❌ Activations error:', activationsError)
+      throw activationsError
+    }
+    
     const allCount = activations?.length || 0
     activations = filterByTimeRange(activations, 'activated_at')
     
