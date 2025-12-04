@@ -903,8 +903,8 @@ input:focus, textarea:focus {
       <div id="qrCodeContainer" style="display: flex; justify-content: center; margin: 16px 0;">
         <!-- QR Code wird hier eingefügt -->
       </div>
-      <div style="font-size: 32px; font-weight: 700; color: #E31E24; font-family: 'Courier New', monospace; letter-spacing: 3px; text-align: center;" id="orderQRID">
-        000000
+      <div style="font-size: 36px; font-weight: 700; color: #E31E24; font-family: 'Courier New', monospace; letter-spacing: 4px; text-align: center;" id="orderQRID">
+        0000
       </div>
       <div style="font-size: 12px; color: #666; text-align: center; margin-top: 8px;">
         → Punkte werden automatisch gutgeschrieben
@@ -922,7 +922,23 @@ input:focus, textarea:focus {
 // WICHTIG: Ersetze diese Werte mit deinen echten Supabase-Credentials!
 const supabaseUrl = 'DEINE_SUPABASE_URL_HIER'
 const supabaseKey = 'DEIN_ANON_KEY_HIER'
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+
+// Prüfe ob echte Credentials vorhanden sind
+let supabase = null
+let isDemoMode = false
+
+if (supabaseUrl.startsWith('http') && !supabaseUrl.includes('DEINE')) {
+  try {
+    supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+    console.log('✅ Supabase verbunden')
+  } catch (error) {
+    console.error('❌ Supabase Fehler:', error)
+    isDemoMode = true
+  }
+} else {
+  console.warn('⚠️ DEMO-MODUS: Supabase Credentials fehlen. Bestellungen werden NICHT gespeichert.')
+  isDemoMode = true
+}
 
 // ===== PRODUKT-DATEN =====
 const products = [
@@ -1839,7 +1855,7 @@ async function placeOrder() {
   btn.innerHTML = '⏳ Bestellung wird verarbeitet...'
   
   try {
-    // Generiere eindeutige Order ID (6-stellig)
+    // Generiere eindeutige Order ID (4-stellig)
     const orderQRID = generateOrderQRID()
     const orderNumber = generateOrderNumber()
     
@@ -1854,7 +1870,7 @@ async function placeOrder() {
       }
     })
     
-    // Speichere Bestellung in Supabase
+    // Bestelldaten
     const orderData = {
       order_number: orderNumber,
       qr_id: orderQRID,
@@ -1872,17 +1888,24 @@ async function placeOrder() {
       created_at: new Date().toISOString()
     }
     
-    const { data, error } = await supabase
-      .from('orders')
-      .insert([orderData])
-      .select()
-    
-    if (error) {
-      console.error('Supabase Error:', error)
-      throw new Error('Bestellung konnte nicht gespeichert werden: ' + error.message)
+    // Speichere Bestellung in Supabase (nur wenn verfügbar)
+    if (!isDemoMode && supabase) {
+      const { data, error } = await supabase
+        .from('orders')
+        .insert([orderData])
+        .select()
+      
+      if (error) {
+        console.error('Supabase Error:', error)
+        throw new Error('Bestellung konnte nicht gespeichert werden: ' + error.message)
+      }
+      
+      console.log('✅ Bestellung erfolgreich in Datenbank gespeichert:', data)
+    } else {
+      // Demo-Modus: Nur Console-Log
+      console.log('📝 DEMO-MODUS - Bestellung:', orderData)
+      console.warn('⚠️ Bestellung wurde NICHT in Datenbank gespeichert (Supabase Credentials fehlen)')
     }
-    
-    console.log('✅ Bestellung erfolgreich gespeichert:', data)
     
     // PayPal Integration
     if (selectedPayment === 'paypal') {
@@ -1912,8 +1935,8 @@ function generateOrderNumber() {
 }
 
 function generateOrderQRID() {
-  // Generiere 6-stellige eindeutige ID
-  return Math.floor(100000 + Math.random() * 900000)
+  // Generiere 4-stellige eindeutige ID
+  return Math.floor(1000 + Math.random() * 9000)
 }
 
 function showSuccess(orderNumber, qrID) {
