@@ -795,7 +795,7 @@ const products = [
       rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
     },
     extras: [
-      { id: 'extraFleisch', name: 'Extra Dönerfleisch', price: 2.00 },
+      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
       { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
       { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
       { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
@@ -817,7 +817,7 @@ const products = [
       rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
     },
     extras: [
-      { id: 'extraFleisch', name: 'Extra Dönerfleisch', price: 2.00 },
+      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
       { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
       { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
       { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
@@ -831,11 +831,12 @@ const products = [
     defaultSauce: 2,
     options: {
       fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
+      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
       knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
       scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 }
     },
     extras: [
-      { id: 'extraFleisch', name: 'Extra Dönerfleisch', price: 2.00 },
+      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
       { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
       { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
       { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
@@ -857,7 +858,7 @@ const products = [
       rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
     },
     extras: [
-      { id: 'extraFleisch', name: 'Extra Dönerfleisch', price: 2.00 },
+      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
       { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
       { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
       { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
@@ -899,7 +900,7 @@ const products = [
       rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
     },
     extras: [
-      { id: 'extraFleisch', name: 'Extra Dönerfleisch', price: 2.00 },
+      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
       { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
       { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
       { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
@@ -922,7 +923,7 @@ const products = [
       rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
     },
     extras: [
-      { id: 'extraFleisch', name: 'Extra Dönerfleisch', price: 2.00 },
+      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
       { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
       { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
       { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
@@ -944,6 +945,7 @@ const products = [
     price: 6.90,
     description: 'Currywurst mit knusprigen Pommes',
     options: {
+      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
       currysauce: { label: 'Currysauce', choices: [0, 1], default: 1 },
       mayo: { label: 'Mayonnaise', choices: [0, 1], default: 0 }
     },
@@ -1001,6 +1003,7 @@ const products = [
     description: 'Knusprige Chicken Nuggets mit Pommes',
     options: {
       nuggets: { label: 'Chicken Nuggets', choices: [0, 1], default: 1 },
+      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
       ketchup: { label: 'Ketchup', choices: [0, 1], default: 1 },
       mayo: { label: 'Mayonnaise', choices: [0, 1], default: 0 }
     },
@@ -1026,8 +1029,7 @@ const products = [
     price: 3.50,
     description: 'Knusprige Pommes Frites',
     options: {
-      ketchup: { label: 'Ketchup', choices: [0, 1], default: 1 },
-      mayo: { label: 'Mayonnaise', choices: [0, 1], default: 0 }
+      sauce: { label: 'Sauce', choices: ['Ohne', 'Ketchup', 'Mayonnaise'], default: 'Ketchup' }
     },
     extras: [
       { id: 'extraKetchup', name: 'Extra Ketchup', price: 0.30 },
@@ -1039,6 +1041,7 @@ const products = [
     name: 'Ayran (0,25 l)',
     price: 1.50,
     description: 'Erfrischendes türkisches Joghurtgetränk',
+    vatRate: 19,
     options: {},
     extras: []
   },
@@ -1047,17 +1050,35 @@ const products = [
     name: 'Wasser still (0,5 l)',
     price: 1.50,
     description: 'Stilles Mineralwasser (inkl. Pfand)',
+    vatRate: 19,
     options: {},
     extras: []
   },
   {
-    id: 'softdrink',
-    name: 'Cola / Fanta / Cola Zero (0,33 l)',
+    id: 'cola',
+    name: 'Cola (0,33 l)',
     price: 2.00,
-    description: 'Softdrink nach Wahl (inkl. Pfand)',
-    options: {
-      drink: { label: 'Getränk', choices: ['Cola', 'Fanta', 'Cola Zero'], default: 'Cola' }
-    },
+    description: 'Coca Cola (inkl. Pfand)',
+    vatRate: 19,
+    options: {},
+    extras: []
+  },
+  {
+    id: 'fanta',
+    name: 'Fanta (0,33 l)',
+    price: 2.00,
+    description: 'Fanta Orange (inkl. Pfand)',
+    vatRate: 19,
+    options: {},
+    extras: []
+  },
+  {
+    id: 'cola-zero',
+    name: 'Cola Zero (0,33 l)',
+    price: 2.00,
+    description: 'Coca Cola Zero (inkl. Pfand)',
+    vatRate: 19,
+    options: {},
     extras: []
   }
 ]
@@ -1076,18 +1097,73 @@ function init() {
 // ===== PRODUKTE RENDERN =====
 function renderProducts() {
   const container = document.getElementById('products')
-  container.innerHTML = products.map(product => `
-    <div class="product-card" onclick="openCustomize('${product.id}')">
-      <div class="product-header">
-        <div class="product-name">${product.name}</div>
-        <div class="product-price">${formatPrice(product.price)}</div>
+  
+  // Gruppiere Produkte nach Kategorien
+  const categories = [
+    {
+      name: '🌯 Döner & Dürüm',
+      ids: ['doener', 'doener-xl', 'dueruem', 'doener-box', 'doener-teller']
+    },
+    {
+      name: '🥙 Lahmacun',
+      ids: ['lahmacun', 'lahmacun-spezial']
+    },
+    {
+      name: '🍖 Köfte',
+      ids: ['koefte-brot', 'koefte-teller']
+    },
+    {
+      name: '🌭 Wurst',
+      ids: ['rindswurst-broetchen', 'curry-rindswurst']
+    },
+    {
+      name: '🍗 Chicken',
+      ids: ['chicken-nuggets', 'crispy-chicken-burger']
+    },
+    {
+      name: '🍟 Beilagen',
+      ids: ['pommes']
+    },
+    {
+      name: '🥤 Getränke',
+      ids: ['ayran', 'wasser', 'cola', 'fanta', 'cola-zero']
+    }
+  ]
+  
+  let html = ''
+  
+  categories.forEach(category => {
+    const categoryProducts = products.filter(p => category.ids.includes(p.id))
+    if (categoryProducts.length === 0) return
+    
+    html += `
+      <div style="margin: 24px 0 12px 0; padding: 0 4px;">
+        <h3 style="font-size: 20px; font-weight: 700; color: #232122; margin-bottom: 12px;">
+          ${category.name}
+        </h3>
       </div>
-      <div class="product-desc">${product.description}</div>
-      <button class="add-btn" onclick="event.stopPropagation(); openCustomize('${product.id}')">
-        Anpassen & Bestellen
-      </button>
-    </div>
-  `).join('')
+    `
+    
+    html += categoryProducts.map(product => {
+      const hasOptions = Object.keys(product.options).length > 0 || product.extras.length > 0
+      const buttonText = hasOptions ? 'Anpassen & Bestellen' : 'Direkt bestellen'
+      
+      return `
+        <div class="product-card" onclick="openCustomize('${product.id}')">
+          <div class="product-header">
+            <div class="product-name">${product.name}</div>
+            <div class="product-price">${formatPrice(product.price)}</div>
+          </div>
+          <div class="product-desc">${product.description}</div>
+          <button class="add-btn" onclick="event.stopPropagation(); openCustomize('${product.id}')">
+            ${buttonText}
+          </button>
+        </div>
+      `
+    }).join('')
+  })
+  
+  container.innerHTML = html
 }
 
 // ===== ANPASSUNGS-MODAL ÖFFNEN =====
@@ -1216,6 +1292,14 @@ function selectOption(key, value) {
       // Zeige kurze Benachrichtigung
       showSauceNotification(value, maxOther, key === 'knoblauch')
     }
+  }
+  
+  // Spezielle Logik für Pommes-Produkt: Entweder Ketchup ODER Mayo
+  if (key === 'sauce' && currentProduct.id === 'pommes') {
+    // Sauce ist String-basiert: 'Ohne', 'Ketchup', 'Mayonnaise'
+    currentCustomization.options[key] = value
+    renderCustomizeModal()
+    return
   }
   
   currentCustomization.options[key] = value
@@ -1467,9 +1551,41 @@ function renderCheckout() {
     `
   }).join('')
   
+  // Berechne MwSt
+  let total7 = 0  // Lebensmittel 7%
+  let total19 = 0 // Getränke 19%
+  
+  cart.forEach(item => {
+    if (item.product.vatRate === 19) {
+      total19 += item.price
+    } else {
+      total7 += item.price
+    }
+  })
+  
+  const vat7 = total7 * 0.07 / 1.07
+  const vat19 = total19 * 0.19 / 1.19
+  const totalVat = vat7 + vat19
   const total = cart.reduce((sum, item) => sum + item.price, 0)
+  const netTotal = total - totalVat
   
   summary.innerHTML = items + `
+    <div class="summary-row" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 13px;">
+      <span>Netto</span>
+      <span>${formatPrice(netTotal)}</span>
+    </div>
+    ${total7 > 0 ? `
+      <div class="summary-row" style="font-size: 13px; color: #666;">
+        <span>MwSt. 7% (Speisen)</span>
+        <span>${formatPrice(vat7)}</span>
+      </div>
+    ` : ''}
+    ${total19 > 0 ? `
+      <div class="summary-row" style="font-size: 13px; color: #666;">
+        <span>MwSt. 19% (Getränke)</span>
+        <span>${formatPrice(vat19)}</span>
+      </div>
+    ` : ''}
     <div class="summary-row total">
       <span>Gesamt</span>
       <span>${formatPrice(total)}</span>
