@@ -831,7 +831,6 @@ const products = [
     defaultSauce: 2,
     options: {
       fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
-      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
       knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
       scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 }
     },
@@ -928,6 +927,138 @@ const products = [
       { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
       { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
     ]
+  },
+  {
+    id: 'rindswurst-broetchen',
+    name: 'Rindswurst im Brötchen',
+    price: 3.50,
+    description: 'Gegrillte Rindswurst im frischen Brötchen',
+    options: {
+      ketchup: { label: 'Ketchup', choices: [0, 1], default: 1 }
+    },
+    extras: []
+  },
+  {
+    id: 'curry-rindswurst',
+    name: 'Curry Rindswurst mit Pommes',
+    price: 6.90,
+    description: 'Currywurst mit knusprigen Pommes',
+    options: {
+      currysauce: { label: 'Currysauce', choices: [0, 1], default: 1 },
+      mayo: { label: 'Mayonnaise', choices: [0, 1], default: 0 }
+    },
+    extras: []
+  },
+  {
+    id: 'koefte-brot',
+    name: 'Köfte im Brot (5 Stk.)',
+    price: 6.00,
+    description: 'Gegrillte Hackfleischbällchen im Fladenbrot',
+    defaultSauce: 2,
+    options: {
+      koefte: { label: 'Köfte', choices: [0, 1], default: 1 },
+      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+    },
+    extras: [
+      { id: 'extraKoefte', name: 'Extra Köfte', price: 2.00 },
+      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
+      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+    ]
+  },
+  {
+    id: 'koefte-teller',
+    name: 'Köfte Teller (7 Stk.)',
+    price: 11.00,
+    description: 'Gegrillte Hackfleischbällchen mit Pommes und Salat',
+    defaultSauce: 2,
+    options: {
+      koefte: { label: 'Köfte', choices: [0, 1], default: 1 },
+      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
+      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+    },
+    extras: [
+      { id: 'extraKoefte', name: 'Extra Köfte', price: 2.00 },
+      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
+      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+    ]
+  },
+  {
+    id: 'chicken-nuggets',
+    name: 'Chicken Nuggets (6 Stk.)',
+    price: 6.00,
+    description: 'Knusprige Chicken Nuggets mit Pommes',
+    options: {
+      nuggets: { label: 'Chicken Nuggets', choices: [0, 1], default: 1 },
+      ketchup: { label: 'Ketchup', choices: [0, 1], default: 1 },
+      mayo: { label: 'Mayonnaise', choices: [0, 1], default: 0 }
+    },
+    extras: [
+      { id: 'extraNuggets', name: 'Extra Nuggets (3 Stk.)', price: 2.00 }
+    ]
+  },
+  {
+    id: 'crispy-chicken-burger',
+    name: 'Crispy Chicken Burger',
+    price: 4.00,
+    description: 'Knuspriger Chicken Burger',
+    options: {
+      mayo: { label: 'Mayonnaise', choices: [0, 1], default: 1 },
+      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
+      tomate: { label: 'Tomate', choices: [0, 1], default: 1 }
+    },
+    extras: []
+  },
+  {
+    id: 'pommes',
+    name: 'Pommes',
+    price: 3.50,
+    description: 'Knusprige Pommes Frites',
+    options: {
+      ketchup: { label: 'Ketchup', choices: [0, 1], default: 1 },
+      mayo: { label: 'Mayonnaise', choices: [0, 1], default: 0 }
+    },
+    extras: [
+      { id: 'extraKetchup', name: 'Extra Ketchup', price: 0.30 },
+      { id: 'extraMayo', name: 'Extra Mayonnaise', price: 0.30 }
+    ]
+  },
+  {
+    id: 'ayran',
+    name: 'Ayran (0,25 l)',
+    price: 1.50,
+    description: 'Erfrischendes türkisches Joghurtgetränk',
+    options: {},
+    extras: []
+  },
+  {
+    id: 'wasser',
+    name: 'Wasser still (0,5 l)',
+    price: 1.50,
+    description: 'Stilles Mineralwasser (inkl. Pfand)',
+    options: {},
+    extras: []
+  },
+  {
+    id: 'softdrink',
+    name: 'Cola / Fanta / Cola Zero (0,33 l)',
+    price: 2.00,
+    description: 'Softdrink nach Wahl (inkl. Pfand)',
+    options: {
+      drink: { label: 'Getränk', choices: ['Cola', 'Fanta', 'Cola Zero'], default: 'Cola' }
+    },
+    extras: []
   }
 ]
 
@@ -973,6 +1104,12 @@ function openCustomize(productId) {
     currentCustomization.options[key] = currentProduct.options[key].default
   })
   
+  // Wenn Produkt keine Optionen hat, direkt zum Warenkorb hinzufügen
+  if (Object.keys(currentProduct.options).length === 0 && currentProduct.extras.length === 0) {
+    addToCart()
+    return
+  }
+  
   renderCustomizeModal()
   document.getElementById('customizeModal').classList.add('active')
 }
@@ -998,6 +1135,7 @@ function renderCustomizeModal() {
   Object.keys(currentProduct.options).forEach(key => {
     const option = currentProduct.options[key]
     const isSauce = key === 'knoblauch' || key === 'scharf'
+    const hasStringChoices = Array.isArray(option.choices) && typeof option.choices[0] === 'string'
     
     optionsHtml += `
       <div class="option-group">
@@ -1008,19 +1146,33 @@ function renderCustomizeModal() {
         <div class="option-buttons">
           ${option.choices.map(choice => {
             let disabled = false
+            let displayText = ''
+            let isActive = false
             
-            // Disable Sauce-Buttons wenn Maximum überschritten würde
-            if (isSauce && choice > 0) {
-              const otherSauce = key === 'knoblauch' ? 'scharf' : 'knoblauch'
-              const otherValue = currentCustomization.options[otherSauce] || 0
-              disabled = (choice + otherValue > 2)
+            if (hasStringChoices) {
+              // String-basierte Auswahl (z.B. Cola, Fanta, etc.)
+              displayText = choice
+              isActive = currentCustomization.options[key] === choice
+            } else {
+              // Numerische Auswahl (0, 1, 2)
+              displayText = choice === 0 ? 'Ohne' : choice === 1 ? '1x' : '2x'
+              isActive = currentCustomization.options[key] === choice
+              
+              // Disable Sauce-Buttons wenn Maximum überschritten würde
+              if (isSauce && choice > 0) {
+                const otherSauce = key === 'knoblauch' ? 'scharf' : 'knoblauch'
+                const otherValue = currentCustomization.options[otherSauce] || 0
+                disabled = (choice + otherValue > 2)
+              }
             }
             
+            const choiceValue = hasStringChoices ? `'${choice}'` : choice
+            
             return `
-              <button class="option-btn ${currentCustomization.options[key] === choice ? 'active' : ''} ${disabled ? 'disabled' : ''}" 
-                      onclick="selectOption('${key}', ${choice})"
+              <button class="option-btn ${isActive ? 'active' : ''} ${disabled ? 'disabled' : ''}" 
+                      onclick="selectOption('${key}', ${choiceValue})"
                       ${disabled ? 'disabled' : ''}>
-                ${choice === 0 ? 'Ohne' : choice === 1 ? '1x' : '2x'}
+                ${displayText}
               </button>
             `
           }).join('')}
@@ -1192,6 +1344,13 @@ function renderCart() {
       .map(key => {
         const value = item.options[key]
         const label = item.product.options[key].label
+        
+        // String-Wert (z.B. "Cola")
+        if (typeof value === 'string') {
+          return `${label}: ${value}`
+        }
+        
+        // Numerischer Wert (0, 1, 2)
         return `${label}: ${value === 0 ? 'Ohne' : value === 1 ? '1x' : '2x'}`
       })
       .join(', ')
@@ -1209,10 +1368,12 @@ function renderCart() {
           <div class="cart-item-name">${item.product.name}</div>
           <div class="cart-item-price">${formatPrice(item.price)}</div>
         </div>
-        <div class="cart-item-options">
-          ${optionsText}
-          ${extrasText ? '<br>' + extrasText : ''}
-        </div>
+        ${optionsText || extrasText ? `
+          <div class="cart-item-options">
+            ${optionsText}
+            ${extrasText ? '<br>' + extrasText : ''}
+          </div>
+        ` : ''}
         <div class="cart-item-actions">
           <button class="cart-item-btn" onclick="editCartItem(${index})">✏️ Bearbeiten</button>
           <button class="cart-item-btn delete" onclick="deleteCartItem(${index})">🗑️ Löschen</button>
@@ -1273,10 +1434,22 @@ function renderCheckout() {
   
   const items = cart.map(item => {
     const optionsText = Object.keys(item.options)
-      .filter(key => item.options[key] !== item.product.options[key].default)
+      .filter(key => {
+        const value = item.options[key]
+        const defaultValue = item.product.options[key].default
+        // String-Vergleich oder numerischer Vergleich
+        return value !== defaultValue
+      })
       .map(key => {
         const value = item.options[key]
         const label = item.product.options[key].label
+        
+        // String-Wert (z.B. "Cola")
+        if (typeof value === 'string') {
+          return `${label}: ${value}`
+        }
+        
+        // Numerischer Wert (0, 1, 2)
         return `${label}: ${value === 0 ? 'Ohne' : value === 1 ? '1x' : '2x'}`
       })
       .join(', ')
