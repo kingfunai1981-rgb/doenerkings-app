@@ -118,16 +118,6 @@ body {
   line-height: 1.5;
 }
 
-.product-default {
-  background: #fef3c7;
-  border: 1px solid #f59e0b;
-  border-radius: 6px;
-  padding: 8px;
-  font-size: 12px;
-  color: #92400e;
-  font-weight: 600;
-}
-
 .add-btn {
   width: 100%;
   padding: 12px;
@@ -962,9 +952,6 @@ function renderProducts() {
         <div class="product-price">${formatPrice(product.price)}</div>
       </div>
       <div class="product-desc">${product.description}</div>
-      <div class="product-default">
-        ✅ Standard: 2x Sauce Knoblauch
-      </div>
       <button class="add-btn" onclick="event.stopPropagation(); openCustomize('${product.id}')">
         Anpassen & Bestellen
       </button>
