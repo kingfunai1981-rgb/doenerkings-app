@@ -34,112 +34,6 @@ body {
   min-height: 100vh;
   padding: 20px;
 }
-
-/* Login Bildschirm Styles */
-.login-container {
-  max-width: 400px;
-  margin: 100px auto;
-  background: white;
-  border-radius: 20px;
-  padding: 40px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  text-align: center;
-}
-.login-logo {
-  width: 100px;
-  height: 100px;
-  margin: 0 auto 30px;
-}
-.login-logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-.login-title {
-  color: #E31E24;
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 10px;
-}
-.login-subtitle {
-  color: #6b7280;
-  font-size: 16px;
-  margin-bottom: 30px;
-}
-.password-container {
-  position: relative;
-  margin-bottom: 20px;
-}
-.password-container input {
-  width: 100%;
-  padding: 16px 50px 16px 16px;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  font-size: 18px;
-  font-weight: 600;
-  letter-spacing: 4px;
-  transition: all 0.3s;
-}
-.password-container input:focus {
-  outline: none;
-  border-color: #E31E24;
-  box-shadow: 0 0 0 4px rgba(227, 30, 36, 0.1);
-}
-.toggle-password {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  font-size: 20px;
-  color: #6b7280;
-  transition: all 0.2s;
-}
-.toggle-password:hover {
-  color: #E31E24;
-}
-.login-btn {
-  width: 100%;
-  padding: 16px;
-  background: linear-gradient(135deg, #E31E24, #F9A825);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-.login-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(227, 30, 36, 0.3);
-}
-.login-error {
-  background: #fee2e2;
-  color: #991b1b;
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 16px;
-  font-size: 14px;
-  font-weight: 600;
-  display: none;
-}
-.daily-pass-badge {
-  background: #fef3c7;
-  border: 2px solid #f59e0b;
-  color: #92400e;
-  padding: 12px;
-  border-radius: 10px;
-  margin-top: 20px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-/* Haupt-App Styles (hidden initially) */
-#app {
-  display: none;
-}
-
 .container { max-width: 1200px; margin: 0 auto; }
 .card { background: white; border-radius: 20px; padding: 24px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 .header-card {
@@ -159,19 +53,6 @@ body {
 }
 .header-text {
   flex: 1;
-}
-.logout-btn {
-  padding: 10px 20px;
-  background: #dc2626;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.logout-btn:hover {
-  background: #b91c1c;
 }
 h1 { color: #E31E24; margin-bottom: 10px; font-size: 28px; }
 h2 { font-size: 18px; margin-bottom: 12px; color: #374151; }
@@ -239,409 +120,823 @@ canvas { display: none; }
 .wheel-badge {
   background: linear-gradient(135deg, #F9A825, #f59e0b);
   color: white;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: 16px;
+  border-radius: 12px;
+  margin: 16px 0;
+  font-size: 18px;
   font-weight: 700;
-  display: inline-block;
-  margin: 0 6px;
+  text-align: center;
+  animation: pulse 2s infinite;
+  box-shadow: 0 4px 12px rgba(249, 168, 37, 0.4);
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL STYLES für Bestätigungs-Dialoge
+   ═══════════════════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalIn 0.3s ease;
+}
+
+@keyframes modalIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-icon {
+  font-size: 60px;
+  margin-bottom: 20px;
+}
+
+.modal-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #E31E24;
+  margin-bottom: 10px;
+}
+
+.modal-amount {
+  font-size: 36px;
+  font-weight: 700;
+  color: #F9A825;
+  margin: 20px 0;
+}
+
+.modal-points {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.modal-warning {
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 20px;
+  color: #92400e;
+  font-size: 14px;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-buttons button {
+  flex: 1;
+  margin: 0;
+}
+
+.modal-pin-input {
+  width: 100%;
+  padding: 16px;
+  border: 3px solid #E31E24;
+  border-radius: 12px;
+  font-size: 24px;
+  text-align: center;
+  letter-spacing: 8px;
+  margin: 20px 0;
+  font-weight: 700;
+}
+
+.modal-pin-input:focus {
+  outline: none;
+  border-color: #F9A825;
 }
 </style>
 </head>
 <body>
 
-<!-- Login Bildschirm -->
-<div id="loginScreen" class="login-container">
-  <div class="login-logo">
-    <img src="/logo-round-new.png" alt="Döner Boxx">
-  </div>
-  <div class="login-title">Scanner Login</div>
-  <div class="login-subtitle">Tages-Passwort eingeben</div>
-  
-  <div class="password-container">
-    <input type="password" id="dailyPassword" placeholder="Passwort eingeben" autocomplete="off">
-    <span class="toggle-password" onclick="togglePasswordVisibility()">👁️</span>
-  </div>
-  
-  <button class="login-btn" onclick="handleLogin()">🔓 Anmelden</button>
-  
-  <div class="login-error" id="loginError">❌ Falsches Passwort!</div>
-  
-  <div class="daily-pass-badge">
-    🔒 Dieses Passwort ist nur heute gültig<br>
-    Hol dir das neue Passwort vom Admin-Bereich
-  </div>
-</div>
-
-<!-- Haupt-App (nach Login) -->
-<div id="app">
 <div class="container">
   <div class="card header-card">
-    <div class="header-logo"><img src="/logo-round-new.png" alt="Döner Boxx"></div>
-    <div class="header-text">
-      <h1>💳 Scanner</h1>
-      <p style="color: #6b7280; font-size: 14px;">QR-Codes scannen & Punkte vergeben</p>
+    <div class="header-logo">
+      <img src="/logo-round-new.png" alt="Döner Boxx">
     </div>
-    <button class="logout-btn" onclick="handleLogout()">🚪 Ausloggen</button>
+    <div class="header-text">
+      <h1>Scanner PRO</h1>
+      <div style="color: #666; font-size: 14px;">Status: <span id="status">Bereit ✅</span></div>
+    </div>
   </div>
 
   <div class="card">
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('scan')">📱 QR Scannen</button>
-      <button class="tab" onclick="switchTab('phone')">☎️ Telefon</button>
-      <button class="tab" onclick="switchTab('code')">🎟️ Code</button>
-      <button class="tab" onclick="switchTab('history')">📜 Historie</button>
-    </div>
-
-    <div id="tab-scan" class="tab-content active">
-      <h2>📱 QR-Code scannen</h2>
-      <button onclick="startScanner()" id="startBtn">📷 Kamera starten</button>
-      <button onclick="stopScanner()" id="stopBtn" style="background:#dc2626; display:none;">⏹️ Kamera stoppen</button>
-      <div class="video-container" id="videoContainer">
-        <video id="video" playsinline></video>
-        <div id="qr-shaded-region"></div>
-      </div>
-      <canvas id="canvas"></canvas>
-      <div id="result-scan" class="result" style="display:none;"></div>
-      <div id="customer-info" class="customer-info" style="display:none;"></div>
-    </div>
-
-    <div id="tab-phone" class="tab-content">
-      <h2>☎️ Telefonnummer eingeben</h2>
-      <input type="tel" id="phone" placeholder="z.B. 015712345678" maxlength="15">
-      <button onclick="verifyPhone()">🔍 Kunde suchen</button>
-      <div id="result-phone"></div>
-      <div id="customer-info-phone" class="customer-info" style="display:none;"></div>
-    </div>
-
-    <div id="tab-code" class="tab-content">
-      <h2>🎟️ Code eingeben</h2>
-      <p style="color:#6b7280;font-size:14px;margin-bottom:12px;">Coupon-Code oder Einlöse-Code scannen</p>
-      <input type="text" id="code" placeholder="4-stelliger Code" maxlength="4" style="text-transform:uppercase;letter-spacing:4px;font-weight:600;text-align:center;font-size:24px;">
-      <button onclick="verifyAnyCode()">✅ Code prüfen</button>
-      <div id="result-code"></div>
-      <div id="code-details" style="display:none;"></div>
-    </div>
-
-    <div id="tab-history" class="tab-content">
-      <h2>📜 Letzte Transaktionen</h2>
-      <p style="color:#6b7280;font-size:14px;margin-bottom:12px;">Letzte 20 Käufe und Einlösungen</p>
-      <button onclick="loadHistory()" class="secondary">🔄 Aktualisieren</button>
-      <div id="historyList" style="margin-top:16px;"></div>
+      <button class="tab active" onclick="showTab('phone')">📱 Handynummer</button>
+      <button class="tab" onclick="showTab('qr')">📸 QR-Scanner</button>
+      <button class="tab" onclick="showTab('history')">📋 Verlauf</button>
+      <button class="tab" onclick="showTab('code')">🎁 Code prüfen</button>
     </div>
   </div>
+
+  <div id="tab-phone" class="card tab-content active">
+    <h2>📱 Punkte per Handynummer oder QR-ID gutschreiben</h2>
+    <input id="phone" type="text" placeholder="Handynummer oder QR-ID">
+    <input id="amount" type="number" step="0.01" placeholder="Betrag in € (z.B. 10.00)">
+    <button onclick="addPointsByPhone()">💰 Punkte gutschreiben</button>
+    <div id="result-phone"></div>
+  </div>
+
+  <div id="tab-qr" class="card tab-content">
+    <h2>📸 QR-Code scannen</h2>
+    <button id="startBtn" onclick="startCamera()">📸 Kamera starten</button>
+    <button id="stopBtn" onclick="stopCamera()" class="danger" style="display:none;">⏹️ Stoppen</button>
+    
+    <div class="video-container" id="videoContainer">
+      <video id="video" autoplay playsinline></video>
+      <div id="qr-shaded-region">
+        <div class="corner-h-tl"></div>
+        <div class="corner-h-tr"></div>
+        <div class="corner-h-bl"></div>
+        <div class="corner-h-br"></div>
+        <div class="corner-v-tl"></div>
+        <div class="corner-v-bl"></div>
+        <div class="corner-v-tr"></div>
+        <div class="corner-v-br"></div>
+      </div>
+    </div>
+    <canvas id="canvas"></canvas>
+    
+    <div id="result-qr"></div>
+    
+    <div id="customerCard" style="display:none;">
+      <div class="customer-info">
+        <h3 id="custName">-</h3>
+        <p><strong>QR-ID:</strong> <span id="custQR">-</span></p>
+        <p><strong>Punkte:</strong> <span id="custPoints">-</span></p>
+        <div id="activeBonusBadge"></div>
+      </div>
+      
+      <h3>Betrag eingeben:</h3>
+      <input id="scannedAmount" type="number" step="0.01" placeholder="z.B. 7.50">
+      <button onclick="addPointsFromScan()" class="success">💰 Punkte gutschreiben</button>
+      <div id="result-scan"></div>
+    </div>
+  </div>
+
+  <div id="tab-history" class="card tab-content">
+    <h2>📋 Verlauf (Letzte 50 Transaktionen)</h2>
+    <button onclick="loadHistory()" class="secondary">🔄 Aktualisieren</button>
+    <div id="historyList" style="margin-top: 16px;">
+      <div style="text-align: center; padding: 20px; color: #666;">Noch keine Transaktionen</div>
+    </div>
+  </div>
+
+  <div id="tab-code" class="card tab-content">
+    <h2>🎁 Code prüfen & einlösen</h2>
+    <p style="color: #666; font-size: 14px; margin-bottom: 16px;">Prämien-Code oder Coupon-Code</p>
+    <input id="code" placeholder="4-stelliger Code" maxlength="4">
+    <button onclick="verifyAnyCode()">🔍 Code prüfen</button>
+    <div id="result-code"></div>
+    <div id="code-details" style="display: none; margin-top: 20px;"></div>
+  </div>
 </div>
-</div>
+
+<!-- Modal Container für Bestätigungs-Dialoge -->
+<div id="modalContainer"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
+
 <script>
-// 🔒 SUPABASE CONFIG
-const supabaseUrl = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
-
-// 🔐 Login System
-let isLoggedIn = false
-const SESSION_KEY = 'scanner_session'
-const SESSION_DURATION = 12 * 60 * 60 * 1000 // 12 Stunden
-
-// Check if already logged in
-function checkSession() {
-  const session = localStorage.getItem(SESSION_KEY)
-  if (session) {
-    const sessionData = JSON.parse(session)
-    const now = new Date().getTime()
-    
-    // Check if session is still valid and from today
-    const sessionDate = new Date(sessionData.timestamp).toDateString()
-    const today = new Date().toDateString()
-    
-    if (sessionDate === today && (now - sessionData.timestamp) < SESSION_DURATION) {
-      isLoggedIn = true
-      showApp()
-      return
-    } else {
-      localStorage.removeItem(SESSION_KEY)
-    }
-  }
-}
-
-async function handleLogin() {
-  const password = document.getElementById('dailyPassword').value.trim()
-  const errorDiv = document.getElementById('loginError')
+// ═══════════════════════════════════════════════════════════════
+// 🔐 LIZENZ & DOMAIN-SCHUTZ - NICHT ENTFERNEN!
+// ═══════════════════════════════════════════════════════════════
+(function() {
+  const _0xB = 'Döner Boxx';
+  const _0xL = 'DNBX-2025-LOYALTY-SYSTEM-PROTECTED';
+  const _0xD = ['localhost', 'doener-boxx.vercel.app', 'doenerboxx.de', 'www.doenerboxx.de'];
+  const _0xH = ['528de417', '88a8ce6b', 'a1f62429', '5da2c3a0'];
   
-  if (!password) {
-    errorDiv.textContent = '❌ Bitte Passwort eingeben!'
-    errorDiv.style.display = 'block'
-    return
+  const _0xHost = window.location.hostname;
+  
+  // Schritt 1: Domain-Whitelist prüfen
+  if (!_0xD.includes(_0xHost)) {
+    document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;background:#1a1a1a;min-height:100vh;color:#ff4444;display:flex;flex-direction:column;align-items:center;justify-content:center;"><h1 style="font-size:48px;margin-bottom:20px;">⛔</h1><h2>LIZENZ UNGÜLTIG</h2><p style="margin-top:15px;">Diese Software ist nicht für diese Domain lizenziert.</p><p style="font-size:12px;color:#666;margin-top:30px;">© Döner Boxx - Alle Rechte vorbehalten</p></div>';
+    throw new Error('Unauthorized domain');
   }
   
-  try {
-    // Get today's password from Supabase
-    const today = new Date().toISOString().split('T')[0]
-    const { data, error } = await supabase
-      .from('daily_passwords')
-      .select('password')
-      .eq('date', today)
-      .single()
-    
-    if (error) throw error
-    
-    if (data && data.password === password) {
-      // Correct password
-      isLoggedIn = true
-      const sessionData = {
-        timestamp: new Date().getTime(),
-        date: today
-      }
-      localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData))
-      errorDiv.style.display = 'none'
-      showApp()
-    } else {
-      // Wrong password
-      errorDiv.textContent = '❌ Falsches Passwort!'
-      errorDiv.style.display = 'block'
-      document.getElementById('dailyPassword').value = ''
+  // Schritt 2: Lizenz-Hash berechnen und prüfen
+  function _0xHash(s) {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) {
+      h = (h * 31 + s.charCodeAt(i)) & 0xffffffff;
     }
-  } catch (e) {
-    console.error('Login error:', e)
-    errorDiv.textContent = '❌ Fehler beim Login. Bitte Admin kontaktieren.'
-    errorDiv.style.display = 'block'
+    if (h < 0) h = h >>> 0;
+    return h.toString(16);
   }
-}
-
-function showApp() {
-  document.getElementById('loginScreen').style.display = 'none'
-  document.getElementById('app').style.display = 'block'
-}
-
-function handleLogout() {
-  localStorage.removeItem(SESSION_KEY)
-  isLoggedIn = false
-  document.getElementById('app').style.display = 'none'
-  document.getElementById('loginScreen').style.display = 'block'
-  document.getElementById('dailyPassword').value = ''
-  stopScanner()
-}
-
-function togglePasswordVisibility() {
-  const input = document.getElementById('dailyPassword')
-  const toggle = document.querySelector('.toggle-password')
-  if (input.type === 'password') {
-    input.type = 'text'
-    toggle.textContent = '🙈'
-  } else {
-    input.type = 'password'
-    toggle.textContent = '👁️'
+  
+  const _0xCalc = _0xHash(_0xB + '|' + _0xHost + '|' + _0xL);
+  
+  if (!_0xH.includes(_0xCalc)) {
+    document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;background:#1a1a1a;min-height:100vh;color:#ff4444;display:flex;flex-direction:column;align-items:center;justify-content:center;"><h1 style="font-size:48px;margin-bottom:20px;">⛔</h1><h2>LIZENZFEHLER</h2><p style="margin-top:15px;">Die Lizenzprüfung ist fehlgeschlagen.</p><p style="font-size:12px;color:#666;margin-top:30px;">© Döner Boxx - Alle Rechte vorbehalten</p></div>';
+    throw new Error('Invalid license');
   }
+})();
+// ═══════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════
+// 🔐 PASSWORT-SCHUTZ MIT 5-MINUTEN-SPERRE - NICHT ENTFERNEN!
+// ═══════════════════════════════════════════════════════════════
+const PASSWORT_HASH = 'efc68709a6bc20b7983129e56ce1d98739876e4274463aaece1a3edef374d47e';
+const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 Minuten in Millisekunden
+const MAX_VERSUCHE = 3;
+
+function getAuthState() {
+  const stored = localStorage.getItem('db_auth_state');
+  if (!stored) return { versuche: MAX_VERSUCHE, gesperrtBis: null };
+  try { return JSON.parse(stored); } catch(e) { return { versuche: MAX_VERSUCHE, gesperrtBis: null }; }
 }
 
-// Enter key to login
-document.getElementById('dailyPassword')?.addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') handleLogin()
-})
+function setAuthState(state) {
+  localStorage.setItem('db_auth_state', JSON.stringify(state));
+}
 
-// Check session on load
-checkSession()
+function clearAuthState() {
+  localStorage.removeItem('db_auth_state');
+}
 
-// BETRAGS-SICHERHEIT 🔒
-const BETRAG_WARNUNG_AB = 20
-const BETRAG_CHEF_PIN_AB = 50
-const CHEF_PIN = 'Ahmet00461963!'
+function isLocked() {
+  const state = getAuthState();
+  if (state.gesperrtBis && Date.now() < state.gesperrtBis) {
+    return true;
+  }
+  if (state.gesperrtBis && Date.now() >= state.gesperrtBis) {
+    clearAuthState();
+  }
+  return false;
+}
 
-// REST DER URSPRÜNGLICHEN FUNKTIONEN (Scanner, Telefon, Code, etc.)
-let stream = null
+function getRemainingLockTime() {
+  const state = getAuthState();
+  if (!state.gesperrtBis) return 0;
+  return Math.max(0, Math.ceil((state.gesperrtBis - Date.now()) / 1000));
+}
+
+async function sha256(text) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function showLockScreen() {
+  const updateTimer = () => {
+    const remaining = getRemainingLockTime();
+    if (remaining <= 0) {
+      clearAuthState();
+      location.reload();
+      return;
+    }
+    const minutes = Math.floor(remaining / 60);
+    const seconds = remaining % 60;
+    const timerEl = document.getElementById('lockTimer');
+    if (timerEl) timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+  
+  document.body.innerHTML = `
+    <div style="font-family:'Flame',system-ui,sans-serif;background:linear-gradient(135deg,#dc2626,#991b1b);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:white;border-radius:20px;padding:40px;max-width:400px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.3);text-align:center;">
+        <div style="font-size:60px;margin-bottom:20px;">🚫</div>
+        <h1 style="color:#dc2626;margin-bottom:10px;font-size:24px;">Zugriff gesperrt</h1>
+        <p style="color:#666;margin-bottom:20px;">Zu viele Fehlversuche!</p>
+        <div style="background:#fee2e2;border:2px solid #dc2626;border-radius:12px;padding:20px;margin-bottom:20px;">
+          <p style="color:#991b1b;font-size:14px;margin-bottom:10px;">Sperre endet in:</p>
+          <div id="lockTimer" style="font-size:36px;font-weight:700;color:#dc2626;">5:00</div>
+        </div>
+        <p style="color:#666;font-size:13px;">Die Seite wird automatisch entsperrt.</p>
+        <a href="/" style="display:inline-block;margin-top:20px;color:#dc2626;font-size:14px;">← Zurück zur Startseite</a>
+      </div>
+    </div>
+  `;
+  updateTimer();
+  setInterval(updateTimer, 1000);
+}
+
+function showLoginScreen() {
+  if (isLocked()) {
+    showLockScreen();
+    return;
+  }
+  
+  const state = getAuthState();
+  const versuche = state.versuche;
+  
+  document.body.innerHTML = `
+    <div style="font-family:'Flame',system-ui,sans-serif;background:linear-gradient(135deg,#E31E24,#F9A825);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:white;border-radius:20px;padding:40px;max-width:400px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.2);text-align:center;">
+        <div style="font-size:60px;margin-bottom:20px;">🔐</div>
+        <h1 style="color:#E31E24;margin-bottom:10px;font-size:24px;">Döner Boxx Admin</h1>
+        <p style="color:#666;margin-bottom:30px;">Bitte Passwort eingeben</p>
+        <input type="password" id="loginPassword" placeholder="Passwort" style="width:100%;padding:14px;border:2px solid #e5e7eb;border-radius:10px;font-size:16px;margin-bottom:15px;text-align:center;" onkeypress="if(event.key==='Enter')checkLogin()">
+        <button onclick="checkLogin()" style="width:100%;padding:14px;background:linear-gradient(135deg,#E31E24,#F9A825);color:white;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;">🔓 Einloggen</button>
+        <p id="loginError" style="color:#dc2626;margin-top:15px;font-size:14px;display:none;"></p>
+        <p id="loginVersuche" style="color:#666;margin-top:10px;font-size:12px;">${versuche} Versuche übrig</p>
+      </div>
+    </div>
+  `;
+  setTimeout(() => document.getElementById('loginPassword').focus(), 100);
+}
+
+async function checkLogin() {
+  if (isLocked()) {
+    showLockScreen();
+    return;
+  }
+  
+  const eingabe = document.getElementById('loginPassword').value;
+  const errorEl = document.getElementById('loginError');
+  const versucheEl = document.getElementById('loginVersuche');
+  
+  if (!eingabe) {
+    errorEl.textContent = '❌ Bitte Passwort eingeben!';
+    errorEl.style.display = 'block';
+    return;
+  }
+  
+  const hash = await sha256(eingabe);
+  
+  if (hash === PASSWORT_HASH) {
+    sessionStorage.setItem('db_auth', PASSWORT_HASH);
+    clearAuthState();
+    location.reload();
+    return;
+  }
+  
+  const state = getAuthState();
+  state.versuche--;
+  
+  if (state.versuche <= 0) {
+    state.gesperrtBis = Date.now() + LOCKOUT_DURATION;
+    state.versuche = 0;
+    setAuthState(state);
+    showLockScreen();
+    return;
+  }
+  
+  setAuthState(state);
+  
+  errorEl.textContent = '❌ Falsches Passwort!';
+  errorEl.style.display = 'block';
+  versucheEl.textContent = state.versuche + ' Versuche übrig';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginPassword').focus();
+}
+
+// Prüfe Session und Sperre beim Laden
+if (isLocked()) {
+  showLockScreen();
+  throw new Error('Zugriff gesperrt');
+}
+
+if (sessionStorage.getItem('db_auth') !== PASSWORT_HASH) {
+  showLoginScreen();
+  throw new Error('Login erforderlich');
+}
+// ═══════════════════════════════════════════════════════════════
+// 🔐 ENDE PASSWORT-SCHUTZ
+// ═══════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════
+// 🔒 BETRAGS-SICHERHEIT: Bestätigung ab 40€, Chef-PIN ab 100€
+// ═══════════════════════════════════════════════════════════════
+const BETRAG_WARNUNG_AB = 40;      // Ab diesem Betrag: Bestätigungsabfrage
+const BETRAG_CHEF_PIN_AB = 100;   // Ab diesem Betrag: zusätzlich Chef-PIN
+// Chef-PIN Hash (Standard: 1234 - BITTE ÄNDERN!)
+// Um einen neuen Hash zu generieren: In der Browser-Konsole sha256('DEIN_PIN') ausführen
+const CHEF_PIN_HASH = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'; // Hash für "1234"
+
+function showModal(html) {
+  document.getElementById('modalContainer').innerHTML = html;
+}
+
+function closeModal() {
+  document.getElementById('modalContainer').innerHTML = '';
+}
+
+// Bestätigungs-Dialog für hohe Beträge (40-99€)
+function showAmountConfirmation(amount, points, onConfirm, onCancel) {
+  const html = `
+    <div class="modal-overlay" onclick="event.target === this && closeModal()">
+      <div class="modal-content">
+        <div class="modal-icon">⚠️</div>
+        <div class="modal-title">Hoher Betrag!</div>
+        <div class="modal-amount">${amount.toFixed(2)} €</div>
+        <div class="modal-points">= ${points} Punkte</div>
+        <div class="modal-warning">
+          <strong>Achtung:</strong> Dieser Betrag ist ungewöhnlich hoch.<br>
+          Bitte überprüfen Sie die Eingabe!
+        </div>
+        <p style="margin-bottom: 20px; color: #666;">Ist dieser Betrag korrekt?</p>
+        <div class="modal-buttons">
+          <button class="secondary" onclick="window._modalCancel()">❌ Abbrechen</button>
+          <button onclick="window._modalConfirm()">✅ Ja, korrekt</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  window._modalConfirm = () => { closeModal(); onConfirm(); };
+  window._modalCancel = () => { closeModal(); onCancel(); };
+  
+  showModal(html);
+}
+
+// Chef-PIN Dialog für sehr hohe Beträge (ab 100€)
+function showChefPinDialog(amount, points, onSuccess, onCancel) {
+  const html = `
+    <div class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-icon">🔐</div>
+        <div class="modal-title">Chef-Freigabe erforderlich!</div>
+        <div class="modal-amount">${amount.toFixed(2)} €</div>
+        <div class="modal-points">= ${points} Punkte</div>
+        <div class="modal-warning" style="background: #fee2e2; border-color: #dc2626; color: #991b1b;">
+          <strong>⚠️ Sehr hoher Betrag!</strong><br>
+          Für Beträge ab ${BETRAG_CHEF_PIN_AB} € ist eine Chef-PIN erforderlich.
+        </div>
+        <input type="password" 
+               id="chefPinInput" 
+               class="modal-pin-input" 
+               placeholder="PIN" 
+               maxlength="6"
+               onkeypress="if(event.key==='Enter')window._checkChefPin()">
+        <p id="chefPinError" style="color: #dc2626; font-size: 14px; margin-bottom: 15px; display: none;">❌ Falscher PIN!</p>
+        <div class="modal-buttons">
+          <button class="danger" onclick="window._modalCancel()">❌ Abbrechen</button>
+          <button onclick="window._checkChefPin()">🔓 Freigeben</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  window._checkChefPin = async () => {
+    const pin = document.getElementById('chefPinInput').value;
+    if (!pin) {
+      document.getElementById('chefPinError').textContent = '❌ Bitte PIN eingeben!';
+      document.getElementById('chefPinError').style.display = 'block';
+      return;
+    }
+    
+    const hash = await sha256(pin);
+    if (hash === CHEF_PIN_HASH) {
+      closeModal();
+      onSuccess();
+    } else {
+      document.getElementById('chefPinError').textContent = '❌ Falscher PIN!';
+      document.getElementById('chefPinError').style.display = 'block';
+      document.getElementById('chefPinInput').value = '';
+      document.getElementById('chefPinInput').focus();
+    }
+  };
+  
+  window._modalCancel = () => { closeModal(); onCancel(); };
+  
+  showModal(html);
+  setTimeout(() => document.getElementById('chefPinInput').focus(), 100);
+}
+
+// Validierung mit Callback-System
+async function validateAmount(amount, onValid, onCancel, resultId) {
+  const points = Math.round(amount * 10);
+  
+  // Fall 1: Normaler Betrag (unter 40€) → direkt ausführen
+  if (amount < BETRAG_WARNUNG_AB) {
+    onValid();
+    return;
+  }
+  
+  // Fall 2: Hoher Betrag (40-99€) → Bestätigungsabfrage
+  if (amount < BETRAG_CHEF_PIN_AB) {
+    showAmountConfirmation(amount, points, onValid, () => {
+      showResult(resultId, '❌ Vorgang abgebrochen.', 'error');
+      onCancel();
+    });
+    return;
+  }
+  
+  // Fall 3: Sehr hoher Betrag (ab 100€) → Erst Bestätigung, dann Chef-PIN
+  showAmountConfirmation(amount, points, () => {
+    // Nach Bestätigung: Chef-PIN abfragen
+    showChefPinDialog(amount, points, onValid, () => {
+      showResult(resultId, '❌ Vorgang abgebrochen - Chef-PIN nicht eingegeben.', 'error');
+      onCancel();
+    });
+  }, () => {
+    showResult(resultId, '❌ Vorgang abgebrochen.', 'error');
+    onCancel();
+  });
+}
+// ═══════════════════════════════════════════════════════════════
+
+const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+let video = document.getElementById('video')
+let canvas = document.getElementById('canvas')
+let ctx = canvas.getContext('2d')
 let scanning = false
-let currentCustomerData = null
-let currentQrId = null
+let stream = null
+let currentCustomer = null
 let currentCodeData = null
 
-function switchTab(tabName) {
-  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'))
-  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'))
-  event.target.classList.add('active')
-  document.getElementById('tab-' + tabName).classList.add('active')
-  if (tabName !== 'scan') stopScanner()
-  if (tabName === 'history') loadHistory()
-}
-
-function showResult(id, message, type = 'info') {
-  const el = document.getElementById(id)
-  el.textContent = message
-  el.className = `result ${type}`
-  el.style.display = 'block'
-  setTimeout(() => el.style.display = 'none', 5000)
-}
-
-async function startScanner() {
+async function checkAndUpdateChallenges(customerId, amount) {
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-    const video = document.getElementById('video')
-    video.srcObject = stream
-    video.play()
-    document.getElementById('videoContainer').classList.add('active')
+    const now = new Date().toISOString().split('T')[0]
+    const { data: activeChallenges } = await supabase.from('challenges').select('*').eq('is_active', true).lte('start_date', now).gte('end_date', now)
+    if (!activeChallenges || activeChallenges.length === 0) return
+    
+    for (const challenge of activeChallenges) {
+      if (amount < challenge.min_order_amount) continue
+      
+      const { data: progressRows, error: progressError } = await supabase
+        .from('challenge_progress')
+        .select('*')
+        .eq('customer_id', customerId)
+        .eq('challenge_id', challenge.id)
+        .limit(1)
+      
+      if (progressError) {
+        console.error('Challenge progress error:', progressError)
+        continue
+      }
+      
+      const progress = (progressRows && progressRows.length > 0) ? progressRows[0] : null
+      
+      if (!progress) continue
+      if (progress.is_completed) continue
+      
+      const newOrders = progress.completed_orders + 1
+      if (newOrders >= challenge.required_orders) {
+        await supabase.from('challenge_progress').update({ completed_orders: newOrders, is_completed: true, completed_at: new Date().toISOString() }).eq('id', progress.id)
+        const { data: customer } = await supabase.from('customers').select('points').eq('id', customerId).single()
+        if (customer) {
+          await supabase.from('customers').update({ points: customer.points + challenge.bonus_points }).eq('id', customerId)
+          await supabase.from('transactions').insert({ customer_id: customerId, type: 'earn', amount: 0, points: challenge.bonus_points, staff: 'CHALLENGE', notes: `Challenge: ${challenge.bonus_points}P` })
+        }
+      } else {
+        await supabase.from('challenge_progress').update({ completed_orders: newOrders }).eq('id', progress.id)
+      }
+    }
+  } catch (e) { console.error('Challenge error:', e) }
+}
+
+async function checkAndUnlockWheel(customerId, amount) {
+  try {
+    const { data: config, error: configError } = await supabase.from('wheel_config').select('*').limit(1)
+    if (configError || !config || config.length === 0) { console.log('ℹ️ Wheel Config nicht gefunden'); return false }
+    const wheelConfig = config[0]
+    if (!wheelConfig.is_active) { return false }
+    if (wheelConfig.active_days && wheelConfig.active_days.length > 0) {
+      const now = new Date()
+      const currentDay = now.getDay()
+      if (!wheelConfig.active_days.includes(currentDay)) { console.log('ℹ️ Glücksrad heute nicht aktiv'); return false }
+    }
+    if (wheelConfig.start_time && wheelConfig.end_time) {
+      const now = new Date()
+      const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0')
+      const startTime = wheelConfig.start_time.substring(0, 5)
+      const endTime = wheelConfig.end_time.substring(0, 5)
+      if (currentTime < startTime || currentTime > endTime) { console.log('ℹ️ Außerhalb der Happy Hour'); return false }
+    }
+    if (amount < parseFloat(wheelConfig.min_order_amount)) { console.log('ℹ️ Betrag zu gering für Wheel'); return false }
+    await supabase.from('wheel_unlocks').insert({ customer_id: customerId, order_amount: amount, is_used: false, expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() })
+    console.log('✅ Glücksrad freigeschaltet!')
+    return true
+  } catch (e) { console.error('Wheel check error:', e); return false }
+}
+
+function normalizePhone(phone) {
+  let n = phone.replace(/[\s\-\(\)]/g, '')
+  if (n.startsWith('+')) n = n.substring(1)
+  if (n.startsWith('00')) n = n.substring(2)
+  if (n.startsWith('49') && n.length > 10) n = '0' + n.substring(2)
+  if (!n.startsWith('0') && n.length >= 10) n = '0' + n
+  return n
+}
+
+function showResult(id, msg, type) {
+  const el = document.getElementById(id)
+  if (!msg) { el.className = ''; el.innerHTML = ''; return }
+  el.className = `result ${type}`
+  el.innerHTML = msg
+}
+
+function showTab(name) {
+  if (name !== 'qr') stopCamera()
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'))
+  const tabs = ['phone', 'qr', 'history', 'code']
+  document.querySelectorAll('.tab')[tabs.indexOf(name)].classList.add('active')
+  document.getElementById(`tab-${name}`).classList.add('active')
+  if (name === 'history') loadHistory()
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GEÄNDERT: addPointsByPhone mit Betrags-Sicherheit
+// ═══════════════════════════════════════════════════════════════
+async function addPointsByPhone() {
+  const phoneOrId = document.getElementById('phone').value.trim()
+  const amount = parseFloat(document.getElementById('amount').value)
+  if (!phoneOrId) { showResult('result-phone', '❌ Handynummer/QR-ID eingeben!', 'error'); return }
+  if (!amount || amount <= 0) { showResult('result-phone', '❌ Gültigen Betrag eingeben!', 'error'); return }
+  
+  // Betrags-Validierung mit Callback
+  await validateAmount(amount, 
+    // onValid - Wird ausgeführt wenn Betrag bestätigt wurde
+    async () => {
+      showResult('result-phone', '🔍 Suche Kunde...', 'info')
+      try {
+        let customer = null
+        if (/^\d{4}$/.test(phoneOrId)) {
+          const { data } = await supabase.from('customers').select('*').eq('qr_id', phoneOrId).limit(1)
+          if (data && data.length > 0) customer = data[0]
+        }
+        if (!customer) {
+          const { data } = await supabase.from('customers').select('*').eq('phone', normalizePhone(phoneOrId)).limit(1)
+          if (data && data.length > 0) customer = data[0]
+        }
+        if (!customer) throw new Error('Kunde nicht gefunden')
+        const { data: activeGlobalBonuses } = await supabase.from('activated_global_bonuses').select('*, global_bonuses(*)').eq('customer_id', customer.id).eq('is_used', false)
+        const { data: activatedCoupons } = await supabase.from('activated_coupons').select('*, coupons(*)').eq('customer_id', customer.id).eq('is_used', false)
+        let pointsToAdd = Math.round(amount * 10)
+        let bonusApplied = null, bonusPointsAdded = 0, couponUsed = null
+        if (activeGlobalBonuses && activeGlobalBonuses.length > 0) {
+          const globalBonus = activeGlobalBonuses[0]
+          const bonus = globalBonus.global_bonuses
+          if (bonus.bonus_type === 'double_points') { bonusPointsAdded = pointsToAdd; pointsToAdd *= 2; bonusApplied = '⭐ Doppelte Punkte!' }
+          else if (bonus.bonus_type === 'bonus_points') { bonusPointsAdded = bonus.bonus_amount || 100; pointsToAdd += bonusPointsAdded; bonusApplied = `💰 +${bonusPointsAdded} Bonus!` }
+          await supabase.from('activated_global_bonuses').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', globalBonus.id)
+          console.log('✅ Globaler Bonus verwendet:', bonusApplied)
+        }
+        if (activatedCoupons && activatedCoupons.length > 0) {
+          const c = activatedCoupons[0]
+          await supabase.from('activated_coupons').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', c.id)
+          couponUsed = `🎟️ Coupon: ${c.coupons.product}`
+        }
+        const newTotal = customer.points + pointsToAdd
+        await supabase.from('transactions').insert({ customer_id: customer.id, type: 'earn', amount, points: pointsToAdd, staff: 'SCANNER' })
+        await supabase.from('customers').update({ points: newTotal }).eq('id', customer.id)
+        await checkAndUpdateChallenges(customer.id, amount)
+        const wheelUnlocked = await checkAndUnlockWheel(customer.id, amount)
+        let msg = `✅ <strong>ERFOLG!</strong><br>👤 ${customer.name}<br>💰 ${amount.toFixed(2)} €<br>⭐ +${Math.round(amount * 10)}P`
+        if (bonusApplied) msg += `<br>🎉 ${bonusApplied} (+${bonusPointsAdded}P)`
+        if (couponUsed) msg += `<br>✅ ${couponUsed}`
+        msg += `<br>📊 Neu: <strong>${newTotal}P</strong>`
+        if (wheelUnlocked) { msg += `<br><br><div class="wheel-badge">🎡 GLÜCKSRAD FREIGESCHALTET!</div>` }
+        showResult('result-phone', msg, 'success')
+        document.getElementById('phone').value = ''
+        document.getElementById('amount').value = ''
+      } catch (e) { showResult('result-phone', `❌ ${e.message}`, 'error'); console.error('Add points error:', e) }
+    },
+    // onCancel - Wird ausgeführt wenn abgebrochen wurde
+    () => {
+      // Nichts tun, Fehlermeldung wird bereits in validateAmount angezeigt
+    },
+    'result-phone'
+  );
+}
+
+async function startCamera() {
+  try {
     document.getElementById('startBtn').style.display = 'none'
     document.getElementById('stopBtn').style.display = 'block'
-    scanning = true
-    requestAnimationFrame(tick)
-  } catch (e) { showResult('result-scan', '❌ Kamera-Zugriff verweigert', 'error'); console.error('Camera error:', e) }
+    document.getElementById('videoContainer').classList.add('active')
+    document.getElementById('customerCard').style.display = 'none'
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } })
+    video.srcObject = stream
+    video.onloadedmetadata = () => {
+      video.play()
+      scanning = true
+      // Berechne Border dynamisch wie BonusQR
+      const videoWidth = video.offsetWidth
+      const videoHeight = video.offsetHeight
+      const scanBoxSize = 220
+      const borderH = (videoHeight - scanBoxSize) / 2
+      const borderW = (videoWidth - scanBoxSize) / 2
+      document.getElementById('qr-shaded-region').style.borderWidth = borderH + 'px ' + borderW + 'px'
+      scanQR()
+      showResult('result-qr', '📸 Kamera aktiv', 'success')
+    }
+  } catch (e) { showResult('result-qr', '❌ Kamera-Fehler: ' + e.message, 'error'); document.getElementById('startBtn').style.display = 'block'; document.getElementById('stopBtn').style.display = 'none'; console.error('Camera error:', e) }
 }
 
-function stopScanner() {
+function stopCamera() {
   scanning = false
-  if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null }
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null }
+  if (video) video.srcObject = null
   document.getElementById('videoContainer').classList.remove('active')
   document.getElementById('startBtn').style.display = 'block'
   document.getElementById('stopBtn').style.display = 'none'
 }
 
-function tick() {
-  if (!scanning) return
-  const video = document.getElementById('video'); const canvas = document.getElementById('canvas')
-  if (video.readyState === video.HAVE_ENOUGH_DATA) {
-    canvas.height = video.videoHeight; canvas.width = video.videoWidth
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' })
-    if (code) { handleQrCode(code.data); return }
-  }
-  requestAnimationFrame(tick)
+function scanQR() {
+  if (!scanning || !video) return
+  try {
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight
+      if (canvas.width > 0 && canvas.height > 0) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" })
+        if (code && code.data) { scanning = false; stopCamera(); onQRDetected(code.data); return }
+      }
+    }
+  } catch (e) { console.error('Scan error:', e) }
+  if (scanning) setTimeout(() => requestAnimationFrame(scanQR), 100)
 }
 
-async function handleQrCode(data) {
+async function onQRDetected(qrCode) {
+  showResult('result-qr', '✅ QR: ' + qrCode, 'success')
   try {
-    const match = data.match(/qr_id=([A-Z0-9]{8})/)
-    if (!match) throw new Error('Ungültiger QR-Code')
-    const qrId = match[1]; currentQrId = qrId
-    showResult('result-scan', '🔍 Lade Kundendaten...', 'info')
-    const { data: customer, error } = await supabase.from('customers').select('*').eq('qr_id', qrId).single()
+    const { data, error } = await supabase.from('customers').select('*').eq('qr_id', qrCode).limit(1)
     if (error) throw error
-    if (!customer) throw new Error('Kunde nicht gefunden')
-    currentCustomerData = customer
-    const activeBonus = await checkActiveBonus(customer.id)
-    let bonusHtml = ''
-    if (activeBonus) {
-      const endDate = new Date(activeBonus.end_date).toLocaleDateString('de-DE')
-      bonusHtml = activeBonus.type === 'bonus_points' ?
-        `<div class="bonus-badge">🎁 +${activeBonus.amount} Bonus-Punkte (bis ${endDate})</div>` :
-        `<div class="bonus-badge">⭐ Doppelte Punkte (bis ${endDate})</div>`
-    }
-    document.getElementById('customer-info').innerHTML = `<h3>${customer.name}</h3><p>📱 ${customer.phone}</p><p>🆔 ${customer.qr_id}</p><p style="font-size:20px;font-weight:700;color:#E31E24;margin-top:8px;">⭐ ${customer.points} Punkte</p>${bonusHtml}<input type="number" id="amount" placeholder="Betrag in € (z.B. 12.50)" step="0.01" style="margin-top:12px;"><button onclick="addPoints()">💰 Punkte hinzufügen</button>`
-    document.getElementById('customer-info').style.display = 'block'
-    showResult('result-scan', '✅ Kunde gefunden!', 'success')
-    stopScanner()
-  } catch (e) { showResult('result-scan', '❌ ' + e.message, 'error'); console.error('QR handle error:', e) }
+    if (!data || data.length === 0) throw new Error('Kunde nicht gefunden')
+    currentCustomer = data[0]
+    const whatsappBadge = currentCustomer.whatsapp_optin ? ' <span style="display: inline-block; background: #25D366; color: white; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;">📱 WA</span>' : ''
+    document.getElementById('custName').innerHTML = currentCustomer.name + whatsappBadge
+    document.getElementById('custQR').textContent = currentCustomer.qr_id
+    document.getElementById('custPoints').textContent = currentCustomer.points
+    const { data: globalBonuses } = await supabase.from('activated_global_bonuses').select('*, global_bonuses(*)').eq('customer_id', currentCustomer.id).eq('is_used', false)
+    const badge = document.getElementById('activeBonusBadge')
+    if (globalBonuses && globalBonuses.length > 0) { const b = globalBonuses[0].global_bonuses; badge.innerHTML = `<div class="bonus-badge">${b.bonus_type === 'double_points' ? '🔥 2x Punkte!' : `🎁 +${b.bonus_amount}P Bonus!`}</div>` }
+    else { badge.innerHTML = '' }
+    document.getElementById('customerCard').style.display = 'block'
+    document.getElementById('scannedAmount').value = ''
+    document.getElementById('scannedAmount').focus()
+  } catch (e) { showResult('result-qr', '❌ ' + e.message, 'error'); console.error('QR detection error:', e); setTimeout(() => { showResult('result-qr', '', 'info'); startCamera() }, 2000) }
 }
 
-async function verifyPhone() {
-  const phone = document.getElementById('phone').value.trim()
-  if (!phone) { showResult('result-phone', '❌ Telefonnummer eingeben!', 'error'); return }
-  showResult('result-phone', '🔍 Suche Kunde...', 'info')
-  try {
-    const { data: customer, error } = await supabase.from('customers').select('*').eq('phone', phone).single()
-    if (error) throw error
-    if (!customer) throw new Error('Kunde nicht gefunden')
-    currentCustomerData = customer; currentQrId = customer.qr_id
-    const activeBonus = await checkActiveBonus(customer.id)
-    let bonusHtml = ''
-    if (activeBonus) {
-      const endDate = new Date(activeBonus.end_date).toLocaleDateString('de-DE')
-      bonusHtml = activeBonus.type === 'bonus_points' ?
-        `<div class="bonus-badge">🎁 +${activeBonus.amount} Bonus-Punkte (bis ${endDate})</div>` :
-        `<div class="bonus-badge">⭐ Doppelte Punkte (bis ${endDate})</div>`
-    }
-    document.getElementById('customer-info-phone').innerHTML = `<h3>${customer.name}</h3><p>📱 ${customer.phone}</p><p>🆔 ${customer.qr_id}</p><p style="font-size:20px;font-weight:700;color:#E31E24;margin-top:8px;">⭐ ${customer.points} Punkte</p>${bonusHtml}<input type="number" id="amount-phone" placeholder="Betrag in € (z.B. 12.50)" step="0.01" style="margin-top:12px;"><button onclick="addPointsPhone()">💰 Punkte hinzufügen</button>`
-    document.getElementById('customer-info-phone').style.display = 'block'
-    showResult('result-phone', '✅ Kunde gefunden!', 'success')
-  } catch (e) { showResult('result-phone', '❌ ' + e.message, 'error'); console.error('Phone verification error:', e) }
-}
-
-async function checkActiveBonus(customerId) {
-  try {
-    const today = new Date().toISOString().split('T')[0]
-    const { data, error } = await supabase.from('global_bonuses').select('*').lte('start_date', today).gte('end_date', today).eq('is_active', true).limit(1)
-    if (error) throw error
-    return data && data[0] ? data[0] : null
-  } catch (e) { console.error('Bonus check error:', e); return null }
-}
-
-async function addPoints() {
-  const amount = parseFloat(document.getElementById('amount').value)
-  if (!amount || amount <= 0) { showResult('result-scan', '❌ Gültigen Betrag eingeben!', 'error'); return }
+// ═══════════════════════════════════════════════════════════════
+// GEÄNDERT: addPointsFromScan mit Betrags-Sicherheit
+// ═══════════════════════════════════════════════════════════════
+async function addPointsFromScan() {
+  const amount = parseFloat(document.getElementById('scannedAmount').value)
+  if (!amount || amount <= 0) { showResult('result-scan', '❌ Betrag eingeben!', 'error'); return }
   
-  // SICHERHEITSPRÜFUNG
-  if (amount >= BETRAG_WARNUNG_AB) {
-    const confirmMsg = amount >= BETRAG_CHEF_PIN_AB ?
-      `⚠️ HOHER BETRAG: ${amount}€!\n\nChef-PIN erforderlich:` :
-      `⚠️ WARNUNG: Betrag von ${amount}€ ist ungewöhnlich hoch!\n\nFortfahren?`
-    
-    if (amount >= BETRAG_CHEF_PIN_AB) {
-      const pin = prompt(confirmMsg)
-      if (pin !== CHEF_PIN) { alert('❌ Falsche PIN!'); return }
-    } else {
-      if (!confirm(confirmMsg)) return
-    }
-  }
-  
-  showResult('result-scan', '⏳ Speichere Punkte...', 'info')
-  try {
-    let points = Math.round(amount * 10)
-    const activeBonus = await checkActiveBonus(currentCustomerData.id)
-    let bonusNote = ''
-    if (activeBonus) {
-      if (activeBonus.type === 'bonus_points') { points += activeBonus.amount; bonusNote = ` (+${activeBonus.amount} Bonus)` }
-      else if (activeBonus.type === 'double_points') { points = points * 2; bonusNote = ' (Doppelt)' }
-    }
-    const newPoints = currentCustomerData.points + points
-    await supabase.from('transactions').insert({ customer_id: currentCustomerData.id, type: 'purchase', amount: amount, points: points, staff: 'Scanner', notes: `Kauf: ${amount.toFixed(2)}€${bonusNote}` })
-    await supabase.from('customers').update({ points: newPoints }).eq('id', currentCustomerData.id)
-    showResult('result-scan', `✅ ${points} Punkte hinzugefügt! (${bonusNote})`, 'success')
-    document.getElementById('customer-info').style.display = 'none'; document.getElementById('amount').value = ''
-    currentCustomerData = null; currentQrId = null
-  } catch (e) { showResult('result-scan', '❌ Fehler: ' + e.message, 'error'); console.error('Add points error:', e) }
-}
-
-async function addPointsPhone() {
-  const amount = parseFloat(document.getElementById('amount-phone').value)
-  if (!amount || amount <= 0) { showResult('result-phone', '❌ Gültigen Betrag eingeben!', 'error'); return }
-  
-  // SICHERHEITSPRÜFUNG
-  if (amount >= BETRAG_WARNUNG_AB) {
-    const confirmMsg = amount >= BETRAG_CHEF_PIN_AB ?
-      `⚠️ HOHER BETRAG: ${amount}€!\n\nChef-PIN erforderlich:` :
-      `⚠️ WARNUNG: Betrag von ${amount}€ ist ungewöhnlich hoch!\n\nFortfahren?`
-    
-    if (amount >= BETRAG_CHEF_PIN_AB) {
-      const pin = prompt(confirmMsg)
-      if (pin !== CHEF_PIN) { alert('❌ Falsche PIN!'); return }
-    } else {
-      if (!confirm(confirmMsg)) return
-    }
-  }
-  
-  showResult('result-phone', '⏳ Speichere Punkte...', 'info')
-  try {
-    let points = Math.round(amount * 10)
-    const activeBonus = await checkActiveBonus(currentCustomerData.id)
-    let bonusNote = ''
-    if (activeBonus) {
-      if (activeBonus.type === 'bonus_points') { points += activeBonus.amount; bonusNote = ` (+${activeBonus.amount} Bonus)` }
-      else if (activeBonus.type === 'double_points') { points = points * 2; bonusNote = ' (Doppelt)' }
-    }
-    const newPoints = currentCustomerData.points + points
-    await supabase.from('transactions').insert({ customer_id: currentCustomerData.id, type: 'purchase', amount: amount, points: points, staff: 'Scanner', notes: `Kauf: ${amount.toFixed(2)}€${bonusNote}` })
-    await supabase.from('customers').update({ points: newPoints }).eq('id', currentCustomerData.id)
-    showResult('result-phone', `✅ ${points} Punkte hinzugefügt!${bonusNote}`, 'success')
-    document.getElementById('customer-info-phone').style.display = 'none'; document.getElementById('amount-phone').value = ''; document.getElementById('phone').value = ''
-    currentCustomerData = null; currentQrId = null
-  } catch (e) { showResult('result-phone', '❌ Fehler: ' + e.message, 'error'); console.error('Add points error:', e) }
+  // Betrags-Validierung mit Callback
+  await validateAmount(amount,
+    // onValid
+    async () => {
+      try {
+        const { data: globalBonuses } = await supabase.from('activated_global_bonuses').select('*, global_bonuses(*)').eq('customer_id', currentCustomer.id).eq('is_used', false)
+        let pointsToAdd = Math.round(amount * 10)
+        let bonusApplied = null, bonusPointsAdded = 0
+        if (globalBonuses && globalBonuses.length > 0) {
+          const globalBonus = globalBonuses[0]; const b = globalBonus.global_bonuses
+          if (b.bonus_type === 'double_points') { bonusPointsAdded = pointsToAdd; pointsToAdd *= 2; bonusApplied = '⭐ 2x Punkte!' }
+          else { bonusPointsAdded = b.bonus_amount || 100; pointsToAdd += bonusPointsAdded; bonusApplied = `💰 +${bonusPointsAdded}P!` }
+          await supabase.from('activated_global_bonuses').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', globalBonus.id)
+        }
+        const newTotal = currentCustomer.points + pointsToAdd
+        await supabase.from('transactions').insert({ customer_id: currentCustomer.id, type: 'earn', amount, points: pointsToAdd, staff: 'SCANNER' })
+        await supabase.from('customers').update({ points: newTotal }).eq('id', currentCustomer.id)
+        await checkAndUpdateChallenges(currentCustomer.id, amount)
+        const wheelUnlocked = await checkAndUnlockWheel(currentCustomer.id, amount)
+        let msg = `✅ <strong>ERFOLG!</strong><br>👤 ${currentCustomer.name}<br>💰 ${amount.toFixed(2)} €<br>⭐ +${Math.round(amount * 10)}P`
+        if (bonusApplied) msg += `<br>🎉 ${bonusApplied} (+${bonusPointsAdded}P)`
+        msg += `<br>📊 Neu: <strong>${newTotal}P</strong>`
+        if (wheelUnlocked) { msg += `<br><br><div class="wheel-badge">🎡 GLÜCKSRAD FREIGESCHALTET!</div>` }
+        showResult('result-scan', msg, 'success')
+        setTimeout(() => { document.getElementById('customerCard').style.display = 'none'; showResult('result-qr', '', 'info'); document.getElementById('scannedAmount').value = ''; showResult('result-scan', '', 'info') }, 3000)
+      } catch (e) { showResult('result-scan', '❌ ' + e.message, 'error'); console.error('Scan points error:', e) }
+    },
+    // onCancel
+    () => {
+      // Nichts tun
+    },
+    'result-scan'
+  );
 }
 
 async function loadHistory() {
   try {
-    const { data, error } = await supabase.from('transactions').select('*, customers(name, phone, qr_id)').order('created_at', { ascending: false }).limit(20)
+    const { data, error } = await supabase.from('transactions').select('id, customer_id, type, amount, points, notes, staff, created_at, customers(name, phone, qr_id)').order('created_at', { ascending: false }).limit(50)
     if (error) throw error
     const list = document.getElementById('historyList')
     if (!data || data.length === 0) { list.innerHTML = '<div style="text-align:center;padding:20px;color:#666">Keine Transaktionen</div>'; return }
@@ -685,6 +980,7 @@ async function verifyAnyCode() {
 async function handleCouponCode(activation, code) {
   try {
     const coupon = activation.coupons; const customer = activation.customers
+    // Check expiry using end_date with end of day logic
     const endDate = coupon.end_date ? new Date(coupon.end_date) : new Date(coupon.expires_at)
     endDate.setHours(23, 59, 59, 999)
     if (endDate < new Date()) throw new Error('Coupon abgelaufen')
@@ -747,8 +1043,12 @@ async function deleteTransaction(txId, customerId, points) {
   } catch (e) { alert('❌ Fehler: ' + e.message); console.error('Delete transaction error:', e) }
 }
 
-console.log('✅ Döner Boxx Scanner PRO mit Daily Password System geladen!')
+console.log('✅ Döner Boxx Scanner PRO geladen!')
 console.log('🔒 Betrags-Sicherheit aktiv: Warnung ab ' + BETRAG_WARNUNG_AB + '€, Chef-PIN ab ' + BETRAG_CHEF_PIN_AB + '€')
+console.log('%c⚠️ COPYRIGHT WARNUNG', 'color: #E31E24; font-size: 20px; font-weight: bold; padding: 10px;')
+console.log('%c🔒 Dieser Code ist urheberrechtlich geschützt.', 'font-size: 14px; font-weight: bold;')
+console.log('%cUnerlaubtes Kopieren oder Verwenden ist illegal und wird verfolgt.', 'font-size: 12px; color: #666;')
+console.log('%c© 2024 Döner Boxx - Alle Rechte vorbehalten', 'font-size: 11px; color: #999;')
 </script>
 
 <footer style="text-align: center; padding: 20px 10px; color: #fff; font-size: 11px; margin-top: 40px; background: rgba(0,0,0,0.1); border-radius: 12px;">
