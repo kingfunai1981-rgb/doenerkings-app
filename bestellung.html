@@ -261,6 +261,21 @@ body {
   color: white;
 }
 
+.option-btn.disabled,
+.option-btn:disabled {
+  background: #f5f5f5;
+  border-color: #e5e7eb;
+  color: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.option-btn.disabled:hover,
+.option-btn:disabled:hover {
+  background: #f5f5f5;
+  transform: none;
+}
+
 .extra-item {
   background: #f9fafb;
   border: 2px solid #e5e7eb;
@@ -583,6 +598,11 @@ input:focus, textarea:focus {
 @keyframes scaleIn {
   from { transform: scale(0.8); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+  to { transform: translateX(-50%) translateY(0); opacity: 1; }
 }
 
 .success-icon {
@@ -982,19 +1002,41 @@ function renderCustomizeModal() {
   
   let optionsHtml = ''
   
+  // Berechne aktuelle Sauce-Summe für Sauce-Limit
+  const currentKnoblauch = currentCustomization.options['knoblauch'] || 0
+  const currentScharf = currentCustomization.options['scharf'] || 0
+  const totalSauce = currentKnoblauch + currentScharf
+  
   // Optionen rendern
   Object.keys(currentProduct.options).forEach(key => {
     const option = currentProduct.options[key]
+    const isSauce = key === 'knoblauch' || key === 'scharf'
+    
     optionsHtml += `
       <div class="option-group">
-        <label class="option-label">${option.label}</label>
+        <label class="option-label">
+          ${option.label}
+          ${isSauce ? '<span style="font-size: 12px; color: #666; font-weight: 400;"> (Max. 2 Portionen gesamt)</span>' : ''}
+        </label>
         <div class="option-buttons">
-          ${option.choices.map(choice => `
-            <button class="option-btn ${currentCustomization.options[key] === choice ? 'active' : ''}" 
-                    onclick="selectOption('${key}', ${choice})">
-              ${choice === 0 ? 'Ohne' : choice === 1 ? '1x' : '2x'}
-            </button>
-          `).join('')}
+          ${option.choices.map(choice => {
+            let disabled = false
+            
+            // Disable Sauce-Buttons wenn Maximum überschritten würde
+            if (isSauce && choice > 0) {
+              const otherSauce = key === 'knoblauch' ? 'scharf' : 'knoblauch'
+              const otherValue = currentCustomization.options[otherSauce] || 0
+              disabled = (choice + otherValue > 2)
+            }
+            
+            return `
+              <button class="option-btn ${currentCustomization.options[key] === choice ? 'active' : ''} ${disabled ? 'disabled' : ''}" 
+                      onclick="selectOption('${key}', ${choice})"
+                      ${disabled ? 'disabled' : ''}>
+                ${choice === 0 ? 'Ohne' : choice === 1 ? '1x' : '2x'}
+              </button>
+            `
+          }).join('')}
         </div>
       </div>
     `
@@ -1021,8 +1063,63 @@ function renderCustomizeModal() {
 }
 
 function selectOption(key, value) {
+  // Spezielle Logik für Saucen: Maximal 2 Portionen INSGESAMT
+  if (key === 'knoblauch' || key === 'scharf') {
+    const otherSauce = key === 'knoblauch' ? 'scharf' : 'knoblauch'
+    const otherValue = currentCustomization.options[otherSauce] || 0
+    
+    // Prüfe ob Gesamt-Saucen-Anzahl > 2 wäre
+    if (value + otherValue > 2) {
+      // Reduziere die andere Sauce automatisch
+      const maxOther = 2 - value
+      currentCustomization.options[otherSauce] = maxOther
+      
+      // Zeige kurze Benachrichtigung
+      showSauceNotification(value, maxOther, key === 'knoblauch')
+    }
+  }
+  
   currentCustomization.options[key] = value
   renderCustomizeModal()
+}
+
+function showSauceNotification(mainValue, otherValue, isKnoblauch) {
+  const mainName = isKnoblauch ? 'Knoblauch' : 'Scharf'
+  const otherName = isKnoblauch ? 'Scharf' : 'Knoblauch'
+  
+  // Erstelle Notification Element falls nicht vorhanden
+  let notification = document.getElementById('sauceNotification')
+  if (!notification) {
+    notification = document.createElement('div')
+    notification.id = 'sauceNotification'
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border: 2px solid #f59e0b;
+      color: #92400e;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 10001;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      animation: slideDown 0.3s ease-out;
+      max-width: 90%;
+      text-align: center;
+    `
+    document.body.appendChild(notification)
+  }
+  
+  notification.textContent = `💡 ${mainValue}x ${mainName}, ${otherValue}x ${otherName} (Max. 2 Portionen gesamt)`
+  notification.style.display = 'block'
+  
+  // Nach 2 Sekunden ausblenden
+  setTimeout(() => {
+    notification.style.display = 'none'
+  }, 2000)
 }
 
 function toggleExtra(extraId) {
