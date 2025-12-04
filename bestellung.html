@@ -6,6 +6,8 @@
 <title>Bestellung - Döner Boxx</title>
 <link rel="icon" href="/favicon-new.png" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon-new.png">
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 @font-face {
   font-family: 'Flame';
@@ -74,6 +76,65 @@ body {
 /* Produkt-Karten */
 .products {
   padding: 16px;
+}
+
+.category-section {
+  margin-bottom: 8px;
+}
+
+.category-header {
+  background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 0;
+}
+
+.category-header:hover {
+  border-color: #E31E24;
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+}
+
+.category-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #232122;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-count {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  background: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.category-arrow {
+  font-size: 16px;
+  color: #E31E24;
+  font-weight: 700;
+  transition: transform 0.3s;
+}
+
+.category-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  padding: 0 4px;
+}
+
+.category-content.open {
+  max-height: 5000px;
+  padding: 12px 4px 0;
 }
 
 .product-card {
@@ -512,6 +573,49 @@ input:focus, textarea:focus {
   color: #232122;
 }
 
+.pickup-time-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.pickup-time-btn {
+  padding: 16px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.pickup-time-btn:hover {
+  border-color: #E31E24;
+  background: #fef2f2;
+}
+
+.pickup-time-btn.active {
+  border-color: #E31E24;
+  background: linear-gradient(135deg, rgba(227, 30, 36, 0.1), rgba(249, 168, 37, 0.1));
+}
+
+.pickup-time-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.pickup-time-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #232122;
+  margin-bottom: 4px;
+}
+
+.pickup-time-desc {
+  font-size: 12px;
+  color: #666;
+}
+
 .order-summary {
   background: #f9fafb;
   border: 2px solid #e5e7eb;
@@ -726,6 +830,26 @@ input:focus, textarea:focus {
         <textarea id="customerNotes" placeholder="Anmerkungen zur Bestellung (optional)" rows="3"></textarea>
       </div>
 
+      <!-- Abholzeit -->
+      <div class="checkout-section">
+        <h3>🕐 Abholzeit</h3>
+        <div class="pickup-time-options">
+          <div class="pickup-time-btn active" id="pickupNow" onclick="selectPickupTime('now')">
+            <div class="pickup-time-icon">⚡</div>
+            <div class="pickup-time-name">Sofort</div>
+            <div class="pickup-time-desc">~15 Min.</div>
+          </div>
+          <div class="pickup-time-btn" id="pickupLater" onclick="selectPickupTime('later')">
+            <div class="pickup-time-icon">🕐</div>
+            <div class="pickup-time-name">Später</div>
+            <div class="pickup-time-desc">Uhrzeit wählen</div>
+          </div>
+        </div>
+        <div id="timePickerContainer" style="display: none; margin-top: 12px;">
+          <input type="time" id="pickupTimeInput" style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #e0e0e0; border-radius: 8px;">
+        </div>
+      </div>
+
       <!-- Bestellübersicht -->
       <div class="checkout-section">
         <h3>📦 Deine Bestellung</h3>
@@ -770,6 +894,23 @@ input:focus, textarea:focus {
       <div class="order-number-label">Bestellnummer</div>
       <div class="order-number-value" id="orderNumber">#0000</div>
     </div>
+    
+    <!-- QR Code Section -->
+    <div style="background: white; border: 3px solid #E31E24; border-radius: 16px; padding: 20px; margin: 20px 0;">
+      <div style="font-size: 14px; font-weight: 600; color: #666; margin-bottom: 12px;">
+        🎁 Zeige diesen Code beim Abholen
+      </div>
+      <div id="qrCodeContainer" style="display: flex; justify-content: center; margin: 16px 0;">
+        <!-- QR Code wird hier eingefügt -->
+      </div>
+      <div style="font-size: 32px; font-weight: 700; color: #E31E24; font-family: 'Courier New', monospace; letter-spacing: 3px; text-align: center;" id="orderQRID">
+        000000
+      </div>
+      <div style="font-size: 12px; color: #666; text-align: center; margin-top: 8px;">
+        → Punkte werden automatisch gutgeschrieben
+      </div>
+    </div>
+    
     <button class="add-btn" onclick="closeSuccess()">
       Neue Bestellung
     </button>
@@ -777,6 +918,12 @@ input:focus, textarea:focus {
 </div>
 
 <script>
+// ===== SUPABASE KONFIGURATION =====
+// WICHTIG: Ersetze diese Werte mit deinen echten Supabase-Credentials!
+const supabaseUrl = 'DEINE_SUPABASE_URL_HIER'
+const supabaseKey = 'DEIN_ANON_KEY_HIER'
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+
 // ===== PRODUKT-DATEN =====
 const products = [
   {
@@ -809,6 +956,7 @@ const products = [
     defaultSauce: 2,
     options: {
       fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
+      kaese: { label: 'Käse', choices: [0, 1], default: 0 },
       knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
       scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
       salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
@@ -1088,6 +1236,8 @@ let cart = []
 let currentProduct = null
 let currentCustomization = {}
 let selectedPayment = null
+let selectedPickupTime = 'now' // 'now' oder 'later'
+let selectedPickupTimeValue = null // Uhrzeit wenn 'later'
 
 // ===== INITIALISIERUNG =====
 function init() {
@@ -1102,68 +1252,95 @@ function renderProducts() {
   const categories = [
     {
       name: '🌯 Döner & Dürüm',
-      ids: ['doener', 'doener-xl', 'dueruem', 'doener-box', 'doener-teller']
+      ids: ['doener', 'doener-xl', 'dueruem', 'doener-box', 'doener-teller'],
+      open: true // Erste Kategorie standardmäßig offen
     },
     {
       name: '🥙 Lahmacun',
-      ids: ['lahmacun', 'lahmacun-spezial']
+      ids: ['lahmacun', 'lahmacun-spezial'],
+      open: false
     },
     {
       name: '🍖 Köfte',
-      ids: ['koefte-brot', 'koefte-teller']
+      ids: ['koefte-brot', 'koefte-teller'],
+      open: false
     },
     {
       name: '🌭 Wurst',
-      ids: ['rindswurst-broetchen', 'curry-rindswurst']
+      ids: ['rindswurst-broetchen', 'curry-rindswurst'],
+      open: false
     },
     {
       name: '🍗 Chicken',
-      ids: ['chicken-nuggets', 'crispy-chicken-burger']
+      ids: ['chicken-nuggets', 'crispy-chicken-burger'],
+      open: false
     },
     {
       name: '🍟 Beilagen',
-      ids: ['pommes']
+      ids: ['pommes'],
+      open: false
     },
     {
       name: '🥤 Getränke',
-      ids: ['ayran', 'wasser', 'cola', 'fanta', 'cola-zero']
+      ids: ['ayran', 'wasser', 'cola', 'fanta', 'cola-zero'],
+      open: false
     }
   ]
   
   let html = ''
   
-  categories.forEach(category => {
+  categories.forEach((category, index) => {
     const categoryProducts = products.filter(p => category.ids.includes(p.id))
     if (categoryProducts.length === 0) return
     
     html += `
-      <div style="margin: 24px 0 12px 0; padding: 0 4px;">
-        <h3 style="font-size: 20px; font-weight: 700; color: #232122; margin-bottom: 12px;">
-          ${category.name}
-        </h3>
+      <div class="category-section">
+        <div class="category-header" onclick="toggleCategory(${index})">
+          <h3 class="category-title">
+            ${category.name}
+            <span class="category-count">(${categoryProducts.length})</span>
+          </h3>
+          <span class="category-arrow" id="arrow-${index}">
+            ${category.open ? '▼' : '▶'}
+          </span>
+        </div>
+        <div class="category-content ${category.open ? 'open' : ''}" id="category-${index}">
+          ${categoryProducts.map(product => {
+            const hasOptions = Object.keys(product.options).length > 0 || product.extras.length > 0
+            const buttonText = hasOptions ? 'Anpassen & Bestellen' : 'In den Warenkorb'
+            
+            return `
+              <div class="product-card" onclick="openCustomize('${product.id}')">
+                <div class="product-header">
+                  <div class="product-name">${product.name}</div>
+                  <div class="product-price">${formatPrice(product.price)}</div>
+                </div>
+                <div class="product-desc">${product.description}</div>
+                <button class="add-btn" onclick="event.stopPropagation(); openCustomize('${product.id}')">
+                  ${buttonText}
+                </button>
+              </div>
+            `
+          }).join('')}
+        </div>
       </div>
     `
-    
-    html += categoryProducts.map(product => {
-      const hasOptions = Object.keys(product.options).length > 0 || product.extras.length > 0
-      const buttonText = hasOptions ? 'Anpassen & Bestellen' : 'Direkt bestellen'
-      
-      return `
-        <div class="product-card" onclick="openCustomize('${product.id}')">
-          <div class="product-header">
-            <div class="product-name">${product.name}</div>
-            <div class="product-price">${formatPrice(product.price)}</div>
-          </div>
-          <div class="product-desc">${product.description}</div>
-          <button class="add-btn" onclick="event.stopPropagation(); openCustomize('${product.id}')">
-            ${buttonText}
-          </button>
-        </div>
-      `
-    }).join('')
   })
   
   container.innerHTML = html
+}
+
+function toggleCategory(index) {
+  const content = document.getElementById(`category-${index}`)
+  const arrow = document.getElementById(`arrow-${index}`)
+  
+  if (content.classList.contains('open')) {
+    content.classList.remove('open')
+    arrow.textContent = '▶'
+  } else {
+    content.classList.add('open')
+    arrow.textContent = '▼'
+  }
 }
 
 // ===== ANPASSUNGS-MODAL ÖFFNEN =====
@@ -1605,6 +1782,30 @@ function selectPayment(type) {
   checkCheckoutReady()
 }
 
+function selectPickupTime(type) {
+  selectedPickupTime = type
+  
+  document.getElementById('pickupNow').classList.remove('active')
+  document.getElementById('pickupLater').classList.remove('active')
+  document.getElementById(`pickup${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('active')
+  
+  const timePickerContainer = document.getElementById('timePickerContainer')
+  if (type === 'later') {
+    timePickerContainer.style.display = 'block'
+    // Setze Default Zeit auf jetzt + 30 Minuten
+    const now = new Date()
+    now.setMinutes(now.getMinutes() + 30)
+    const hours = String(now.getHours()).padStart(2, '0')
+    const minutes = String(Math.round(now.getMinutes() / 15) * 15).padStart(2, '0')
+    document.getElementById('pickupTimeInput').value = `${hours}:${minutes}`
+  } else {
+    timePickerContainer.style.display = 'none'
+    selectedPickupTimeValue = null
+  }
+  
+  checkCheckoutReady()
+}
+
 function checkCheckoutReady() {
   const name = document.getElementById('customerName').value.trim()
   const phone = document.getElementById('customerPhone').value.trim()
@@ -1620,47 +1821,118 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 // ===== BESTELLUNG AUFGEBEN =====
-function placeOrder() {
+async function placeOrder() {
   const name = document.getElementById('customerName').value.trim()
   const phone = document.getElementById('customerPhone').value.trim()
   const notes = document.getElementById('customerNotes').value.trim()
   const total = cart.reduce((sum, item) => sum + item.price, 0)
   
-  const order = {
-    orderNumber: generateOrderNumber(),
-    customer: { name, phone, notes },
-    items: cart,
-    total: total,
-    payment: selectedPayment,
-    timestamp: new Date().toISOString()
+  // Abholzeit ermitteln
+  let pickupTime = null
+  if (selectedPickupTime === 'later') {
+    pickupTime = document.getElementById('pickupTimeInput').value
   }
   
-  console.log('Bestellung:', order)
+  // Button deaktivieren während Verarbeitung
+  const btn = document.getElementById('placeOrderBtn')
+  btn.disabled = true
+  btn.innerHTML = '⏳ Bestellung wird verarbeitet...'
   
-  // Hier würde normalerweise die Bestellung an Backend gesendet
-  // Für PayPal würde hier die PayPal-Integration starten
-  
-  if (selectedPayment === 'paypal') {
-    // PayPal Integration (Sandbox für Test)
-    alert('PayPal-Integration würde hier starten.\n\nFür die Produktion benötigst du:\n• PayPal Business Account\n• PayPal SDK Integration\n• Backend für Zahlungsabwicklung')
-    // In Produktion: PayPal Checkout SDK starten
+  try {
+    // Generiere eindeutige Order ID (6-stellig)
+    const orderQRID = generateOrderQRID()
+    const orderNumber = generateOrderNumber()
+    
+    // Berechne MwSt
+    let total7 = 0
+    let total19 = 0
+    cart.forEach(item => {
+      if (item.product.vatRate === 19) {
+        total19 += item.price
+      } else {
+        total7 += item.price
+      }
+    })
+    
+    // Speichere Bestellung in Supabase
+    const orderData = {
+      order_number: orderNumber,
+      qr_id: orderQRID,
+      customer_name: name,
+      customer_phone: phone,
+      notes: notes || null,
+      items: cart,
+      total: total,
+      total_7_percent: total7,
+      total_19_percent: total19,
+      payment_method: selectedPayment,
+      pickup_time: pickupTime,
+      pickup_type: selectedPickupTime,
+      status: 'pending',
+      created_at: new Date().toISOString()
+    }
+    
+    const { data, error } = await supabase
+      .from('orders')
+      .insert([orderData])
+      .select()
+    
+    if (error) {
+      console.error('Supabase Error:', error)
+      throw new Error('Bestellung konnte nicht gespeichert werden: ' + error.message)
+    }
+    
+    console.log('✅ Bestellung erfolgreich gespeichert:', data)
+    
+    // PayPal Integration
+    if (selectedPayment === 'paypal') {
+      alert('PayPal-Integration würde hier starten.\n\nFür die Produktion benötigst du:\n• PayPal Business Account\n• PayPal SDK Integration\n• Backend für Zahlungsabwicklung')
+    }
+    
+    // Zeige Erfolgs-Modal mit QR-Code
+    showSuccess(orderNumber, orderQRID)
+    
+    // Warenkorb leeren
+    cart = []
+    updateCartUI()
+    closeCheckout()
+    
+  } catch (error) {
+    console.error('❌ Fehler beim Aufgeben der Bestellung:', error)
+    alert('❌ Es gab einen Fehler beim Aufgeben deiner Bestellung. Bitte versuche es erneut oder kontaktiere uns direkt.')
+    
+    // Button wieder aktivieren
+    btn.disabled = false
+    btn.innerHTML = `Jetzt bestellen - ${formatPrice(total)}`
   }
-  
-  // Bestellung erfolgreich
-  showSuccess(order.orderNumber)
-  
-  // Warenkorb leeren
-  cart = []
-  updateCartUI()
-  closeCheckout()
 }
 
 function generateOrderNumber() {
   return Math.floor(1000 + Math.random() * 9000)
 }
 
-function showSuccess(orderNumber) {
+function generateOrderQRID() {
+  // Generiere 6-stellige eindeutige ID
+  return Math.floor(100000 + Math.random() * 900000)
+}
+
+function showSuccess(orderNumber, qrID) {
   document.getElementById('orderNumber').textContent = '#' + orderNumber
+  document.getElementById('orderQRID').textContent = qrID
+  
+  // Generiere QR-Code
+  const qrContainer = document.getElementById('qrCodeContainer')
+  qrContainer.innerHTML = '' // Leere vorherigen QR-Code
+  
+  new QRCode(qrContainer, {
+    text: String(qrID),
+    width: 200,
+    height: 200,
+    colorDark: '#E31E24',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  })
+  
   document.getElementById('successModal').classList.add('active')
 }
 
