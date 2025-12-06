@@ -2704,7 +2704,7 @@ function generateOrderNumber() {
   const timeStr = String(now.getHours()).padStart(2, '0') + 
                   String(now.getMinutes()).padStart(2, '0') + 
                   String(now.getSeconds()).padStart(2, '0')
-  return `O${dateStr}${timeStr}`
+  return `${dateStr}${timeStr}`  // ← Kein "O" mehr - nur Zahlen
 }
 
 function generateOrderQRID() {
