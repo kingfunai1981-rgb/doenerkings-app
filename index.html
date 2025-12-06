@@ -2641,7 +2641,7 @@ async function placeOrder() {
   btn.innerHTML = '⏳ Bestellung wird verarbeitet...'
   
   try {
-    const orderQRID = generateOrderQRID()
+    const orderQRID = currentCustomer.qr_id
     const orderNumber = generateOrderNumber()
     
 const orderData = {
