@@ -2722,10 +2722,24 @@ function closeSuccess() {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('customerName')?.addEventListener('input', checkCheckoutReady)
-  document.getElementById('customerPhone')?.addEventListener('input', checkCheckoutReady)
-  document.getElementById('pickupTimeInput')?.addEventListener('change', checkCheckoutReady)
+document.getElementById('customerName')?.addEventListener('input', checkCheckoutReady)
+document.getElementById('customerPhone')?.addEventListener('input', checkCheckoutReady)
+document.getElementById('pickupTimeInput')?.addEventListener('change', checkCheckoutReady)
 })
+
+// Override selectPayment to trigger validation
+const _originalSelectPayment = window.selectPayment
+window.selectPayment = function(type) {
+_originalSelectPayment(type)
+checkCheckoutReady()
+}
+
+// Override selectPickupTime to trigger validation  
+const _originalSelectPickupTime = window.selectPickupTime
+window.selectPickupTime = function(type) {
+_originalSelectPickupTime(type)
+checkCheckoutReady()
+}
 
 console.log('✅ Döner Boxx App mit Bestellung geladen!')
 </script>
