@@ -1917,7 +1917,41 @@ async function placeOrder() {
     
     // PayPal Integration
     if (selectedPayment === 'paypal') {
-      alert('PayPal-Integration würde hier starten.\n\nFür die Produktion benötigst du:\n• PayPal Business Account\n• PayPal SDK Integration\n• Backend für Zahlungsabwicklung')
+      // TEST-VERSION: PayPal.me Link öffnen
+      // ⚠️ NUR FÜR TESTS! Für Produktion siehe Dokumentation
+      const paypalEmail = 'ahmetdemirel@freenet.de'
+      const amount = total.toFixed(2)
+      const paypalUrl = `https://paypal.me/${paypalEmail.split('@')[0]}/${amount}EUR`
+      
+      // Zeige Info-Modal
+      const confirmPayment = confirm(
+        `💳 PayPal-Zahlung\n\n` +
+        `Betrag: ${amount} €\n` +
+        `Bestellung: #${orderNumber}\n\n` +
+        `⚠️ TEST-MODUS:\n` +
+        `Du wirst zu PayPal.me weitergeleitet.\n` +
+        `Bitte wähle "Freunde & Familie" für Tests.\n\n` +
+        `Weiter zu PayPal?`
+      )
+      
+      if (confirmPayment) {
+        // Öffne PayPal in neuem Tab
+        window.open(paypalUrl, '_blank')
+        
+        // Hinweis
+        alert(
+          `📱 PayPal wurde in neuem Tab geöffnet.\n\n` +
+          `Nach der Zahlung:\n` +
+          `✅ Notiere Bestellnummer: #${orderNumber}\n` +
+          `✅ Zeige QR-Code: ${orderQRID}\n\n` +
+          `Klicke OK um fortzufahren.`
+        )
+      } else {
+        // Abgebrochen
+        btn.disabled = false
+        btn.innerHTML = `Jetzt bestellen - ${formatPrice(total)}`
+        return
+      }
     }
     
     // Zeige Erfolgs-Modal mit QR-Code
