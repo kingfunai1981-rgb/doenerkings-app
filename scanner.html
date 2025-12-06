@@ -240,20 +240,9 @@ canvas { display: none; }
   transition: all 0.3s;
 }
 
-.order-card.pending {
-  border-left: 4px solid #ef4444;
-  background: #fef2f2;
-}
-
-.order-card.preparing {
-  border-left: 4px solid #f59e0b;
-  background: #fffbeb;
-}
-
-.order-card.ready {
-  border-left: 4px solid #10b981;
-  background: #f0fdf4;
-}
+.order-card.pending { border-left: 4px solid #ef4444; background: #fef2f2; }
+.order-card.preparing { border-left: 4px solid #f59e0b; background: #fffbeb; }
+.order-card.ready { border-left: 4px solid #10b981; background: #f0fdf4; }
 
 .order-header {
   display: flex;
@@ -262,156 +251,31 @@ canvas { display: none; }
   margin-bottom: 12px;
 }
 
-.order-number {
-  font-size: 20px;
-  font-weight: 700;
-  color: #E31E24;
-}
+.order-number { font-size: 20px; font-weight: 700; color: #E31E24; }
+.order-time { font-size: 13px; color: #666; }
+.order-customer { background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
+.order-customer p { margin: 4px 0; font-size: 14px; }
+.order-items { margin-bottom: 12px; }
+.order-item { padding: 8px; background: white; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 6px; font-size: 14px; }
+.order-item-name { font-weight: 600; color: #374151; }
+.order-item-options { font-size: 13px; color: #6b7280; margin-top: 4px; }
+.order-total { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f9fafb; border-radius: 8px; margin-bottom: 12px; font-size: 16px; font-weight: 700; }
+.order-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
-.order-time {
-  font-size: 13px;
-  color: #666;
-}
+.order-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 13px; font-weight: 600; }
+.order-badge.pending { background: #fee2e2; color: #991b1b; }
+.order-badge.preparing { background: #fef3c7; color: #92400e; }
+.order-badge.ready { background: #d1fae5; color: #065f46; }
 
-.order-customer {
-  background: #f9fafb;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 12px;
-}
+.payment-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-left: 8px; }
+.payment-badge.cash { background: #fef3c7; color: #92400e; }
+.payment-badge.paypal { background: #dbeafe; color: #1e40af; }
 
-.order-customer p {
-  margin: 4px 0;
-  font-size: 14px;
-}
-
-.order-items {
-  margin-bottom: 12px;
-}
-
-.order-item {
-  padding: 8px;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  margin-bottom: 6px;
-  font-size: 14px;
-}
-
-.order-item-name {
-  font-weight: 600;
-  color: #374151;
-}
-
-.order-item-options {
-  font-size: 13px;
-  color: #6b7280;
-  margin-top: 4px;
-}
-
-.order-total {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  background: #f9fafb;
-  border-radius: 8px;
-  margin-bottom: 12px;
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.order-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.order-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.order-badge.pending {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.order-badge.preparing {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.order-badge.ready {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.payment-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  margin-left: 8px;
-}
-
-.payment-badge.cash {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.payment-badge.paypal {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
-.wheel-modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  z-index: 10000;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.wheel-modal.active {
-  display: flex;
-}
-
-.wheel-modal-content {
-  background: white;
-  border-radius: 20px;
-  padding: 30px;
-  max-width: 500px;
-  width: 100%;
-  text-align: center;
-  animation: slideIn 0.3s;
-}
-
-@keyframes slideIn {
-  from {
-    transform: scale(0.9);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.wheel-modal h2 {
-  color: #E31E24;
-  margin-bottom: 16px;
-}
+.wheel-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); z-index: 10000; align-items: center; justify-content: center; padding: 20px; }
+.wheel-modal.active { display: flex; }
+.wheel-modal-content { background: white; border-radius: 20px; padding: 30px; max-width: 500px; width: 100%; text-align: center; animation: slideInWheel 0.3s; }
+@keyframes slideInWheel { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.wheel-modal h2 { color: #E31E24; margin-bottom: 16px; }
 
 </style>
 </head>
@@ -439,7 +303,7 @@ canvas { display: none; }
   </div>
 
   <!-- ====== BESTELLUNGEN TAB ====== -->
-  <div id="tab-orders" class="card tab-content active">
+  <div id="tab-orders" class="card tab-content">
     <h2>📦 Eingehende Bestellungen</h2>
     <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
       🔔 Neue Bestellungen werden automatisch angezeigt und mit Ton benachrichtigt
@@ -458,7 +322,7 @@ canvas { display: none; }
     </div>
   </div>
 
-  <div id="tab-phone" class="card tab-content">
+  <div id="tab-phone" class="card tab-content active">
     <h2>📱 Punkte per Handynummer oder QR-ID gutschreiben</h2>
     <input id="phone" type="text" placeholder="Handynummer oder QR-ID">
     <input id="amount" type="number" step="0.01" placeholder="Betrag in € (z.B. 10.00)">
@@ -861,393 +725,6 @@ async function validateAmount(amount, onValid, onCancel, resultId) {
 const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
-
-
-// ============================================
-// 📦 BESTELLUNGS-SYSTEM - SOUND & NOTIFICATIONS
-// ============================================
-
-let ordersSubscription = null
-let wheelConfig = null
-let notificationSound = null
-
-// Sound für Benachrichtigungen
-const NOTIFICATION_SOUND_BASE64 = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTQwOUKLe77JZGQg4kdv1sn0oRD8E'
-
-function initNotificationSound() {
-  notificationSound = new Audio(NOTIFICATION_SOUND_BASE64)
-  notificationSound.volume = 1.0
-}
-
-function playNotificationSound() {
-  if (notificationSound) {
-    notificationSound.currentTime = 0
-    notificationSound.play().catch(e => console.log('Sound play error:', e))
-  }
-}
-
-function showBrowserNotification(title, body) {
-  if (!('Notification' in window)) return
-  
-  if (Notification.permission === 'granted') {
-    new Notification(title, {
-      body: body,
-      icon: '/logo-round-new.png',
-      badge: '/favicon-new.png',
-      tag: 'doener-boxx-order',
-      requireInteraction: true
-    })
-  } else if (Notification.permission !== 'denied') {
-    Notification.requestPermission().then(permission => {
-      if (permission === 'granted') {
-        new Notification(title, { body: body, icon: '/logo-round-new.png' })
-      }
-    })
-  }
-}
-
-function requestNotificationPermission() {
-  if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission()
-  }
-}
-
-function testNotification() {
-  playNotificationSound()
-  showBrowserNotification('Test Benachrichtigung', 'Das Benachrichtigungssystem funktioniert! 🎉')
-  alert('✅ Test-Benachrichtigung wurde ausgelöst!')
-}
-
-// ============================================
-// 📦 BESTELLUNGS-STATUS FUNKTIONEN
-// ============================================
-
-async function markOrderPaid(orderId) {
-  if (!confirm('Bestellung als bar bezahlt markieren?')) return
-  
-  try {
-    // Update Order Status
-    const { error } = await supabase
-      .from('orders')
-      .update({ 
-        status: 'preparing',
-        paid_at: new Date().toISOString()
-      })
-      .eq('id', orderId)
-    
-    if (error) throw error
-    
-    // Hole Bestelldaten
-    const { data: order } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('id', orderId)
-      .single()
-    
-    if (!order) throw new Error('Bestellung nicht gefunden')
-    
-    // Punkte gutschreiben
-    await addPointsForOrder(order.qr_id, order.total)
-    
-    alert('✅ Bezahlung erfasst und Punkte gutgeschrieben!')
-    loadOrders()
-  } catch (e) {
-    console.error('Fehler:', e)
-    alert('❌ Fehler: ' + e.message)
-  }
-}
-
-async function markOrderPreparing(orderId) {
-  try {
-    const { error } = await supabase
-      .from('orders')
-      .update({ status: 'preparing' })
-      .eq('id', orderId)
-    
-    if (error) throw error
-    loadOrders()
-  } catch (e) {
-    console.error('Fehler:', e)
-    alert('❌ Fehler: ' + e.message)
-  }
-}
-
-async function markOrderReady(orderId) {
-  try {
-    const { error } = await supabase
-      .from('orders')
-      .update({ status: 'ready' })
-      .eq('id', orderId)
-    
-    if (error) throw error
-    loadOrders()
-  } catch (e) {
-    console.error('Fehler:', e)
-    alert('❌ Fehler: ' + e.message)
-  }
-}
-
-async function completeOrder(orderId, qrId, total, paymentMethod) {
-  try {
-    // Hole Kundendaten
-    const { data: customer } = await supabase
-      .from('customers')
-      .select('*')
-      .eq('qr_id', qrId)
-      .single()
-    
-    if (!customer) throw new Error('Kunde nicht gefunden')
-    
-    // Prüfe Lucky Wheel
-    const wheelAvailable = isWheelAvailable(total)
-    
-    if (wheelAvailable) {
-      // Zeige Lucky Wheel
-      showLuckyWheelModal(orderId, customer.id, qrId, total, paymentMethod)
-    } else {
-      // Kein Wheel - direkt abschließen
-      await finalizeOrder(orderId, customer.id, paymentMethod)
-    }
-    
-  } catch (e) {
-    console.error('Fehler:', e)
-    alert('❌ Fehler: ' + e.message)
-  }
-}
-
-async function finalizeOrder(orderId, customerId, paymentMethod) {
-  try {
-    // Update Order Status
-    const { error } = await supabase
-      .from('orders')
-      .update({ 
-        status: 'completed',
-        completed_at: new Date().toISOString()
-      })
-      .eq('id', orderId)
-    
-    if (error) throw error
-    
-    alert('✅ Bestellung abgeschlossen!')
-    loadOrders()
-  } catch (e) {
-    console.error('Fehler:', e)
-    alert('❌ Fehler: ' + e.message)
-  }
-}
-
-async function cancelOrder(orderId) {
-  if (!confirm('Bestellung wirklich stornieren?')) return
-  
-  try {
-    const { error } = await supabase
-      .from('orders')
-      .update({ 
-        status: 'cancelled',
-        cancelled_at: new Date().toISOString()
-      })
-      .eq('id', orderId)
-    
-    if (error) throw error
-    
-    alert('✅ Bestellung storniert')
-    loadOrders()
-  } catch (e) {
-    console.error('Fehler:', e)
-    alert('❌ Fehler: ' + e.message)
-  }
-}
-
-// Punkte für Bestellung gutschreiben
-async function addPointsForOrder(qrId, amount) {
-  try {
-    // Hole Kunde
-    const { data: customer } = await supabase
-      .from('customers')
-      .select('*')
-      .eq('qr_id', qrId)
-      .single()
-    
-    if (!customer) return
-    
-    // Berechne Punkte (1€ = 100 Punkte)
-    const points = Math.floor(amount * 100)
-    
-    // Update Punkte
-    const { error: updateError } = await supabase
-      .from('customers')
-      .update({ points: customer.points + points })
-      .eq('id', customer.id)
-    
-    if (updateError) throw updateError
-    
-    // Transaktion speichern
-    await supabase.from('transactions').insert({
-      customer_id: customer.id,
-      type: 'earn',
-      amount: amount,
-      points: points,
-      staff: 'ONLINE-ORDER',
-      notes: `Online-Bestellung: ${points}P`
-    })
-    
-    // Prüfe Challenges
-    await checkAndUpdateChallenges(customer.id, amount)
-    
-    console.log(`✅ ${points} Punkte gutgeschrieben für ${customer.name}`)
-  } catch (e) {
-    console.error('Fehler beim Gutschreiben der Punkte:', e)
-  }
-}
-
-// ============================================
-// 🎡 LUCKY WHEEL MODAL
-// ============================================
-
-function showLuckyWheelModal(orderId, customerId, qrId, total, paymentMethod) {
-  const modal = document.createElement('div')
-  modal.className = 'wheel-modal active'
-  modal.id = 'wheelModal'
-  
-  modal.innerHTML = `
-    <div class="wheel-modal-content">
-      <h2>🎡 Glücksrad verfügbar!</h2>
-      <p style="margin-bottom: 20px;">
-        Der Kunde hat über ${wheelConfig.min_order_amount.toFixed(2)}€ bestellt und kann am Glücksrad drehen!
-      </p>
-      
-      <div style="margin-bottom: 20px;">
-        <p style="font-size: 14px; color: #666;">Bestellsumme: <strong>${formatPrice(total)}</strong></p>
-        <p style="font-size: 14px; color: #666;">QR-ID: <strong>${qrId}</strong></p>
-      </div>
-      
-      <button onclick="triggerLuckyWheel('${orderId}', '${customerId}', '${paymentMethod}')" class="success" style="width: 100%; margin-bottom: 10px;">
-        🎡 Glücksrad aktivieren
-      </button>
-      <button onclick="skipLuckyWheel('${orderId}', '${customerId}', '${paymentMethod}')" class="secondary" style="width: 100%;">
-        ⏭️ Überspringen
-      </button>
-    </div>
-  `
-  
-  document.body.appendChild(modal)
-}
-
-function closeLuckyWheelModal() {
-  const modal = document.getElementById('wheelModal')
-  if (modal) modal.remove()
-}
-
-async function triggerLuckyWheel(orderId, customerId, paymentMethod) {
-  try {
-    // Hier würde der Mitarbeiter das Glücksrad für den Kunden aktivieren
-    // Du kannst hier das echte Wheel-Spin-System integrieren
-    
-    alert('🎡 Glücksrad wurde für den Kunden aktiviert! Der Kunde kann jetzt in der App drehen.')
-    
-    // Bestellung abschließen
-    await finalizeOrder(orderId, customerId, paymentMethod)
-    closeLuckyWheelModal()
-  } catch (e) {
-    console.error('Fehler:', e)
-    alert('❌ Fehler: ' + e.message)
-  }
-}
-
-async function skipLuckyWheel(orderId, customerId, paymentMethod) {
-  try {
-    await finalizeOrder(orderId, customerId, paymentMethod)
-    closeLuckyWheelModal()
-  } catch (e) {
-    console.error('Fehler:', e)
-    alert('❌ Fehler: ' + e.message)
-  }
-}
-
-// ============================================
-// 🔔 REALTIME SUBSCRIPTION
-// ============================================
-
-function setupRealtimeSubscription() {
-  // Cleanup existing subscription
-  if (ordersSubscription) {
-    ordersSubscription.unsubscribe()
-  }
-  
-  // Subscribe to new orders
-  ordersSubscription = supabase
-    .channel('orders_channel')
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'orders'
-    }, (payload) => {
-      console.log('🆕 Neue Bestellung:', payload.new)
-      handleNewOrder(payload.new)
-    })
-    .on('postgres_changes', {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'orders'
-    }, (payload) => {
-      console.log('📝 Bestellung aktualisiert:', payload.new)
-      loadOrders()
-    })
-    .subscribe()
-  
-  console.log('✅ Realtime Subscription aktiv')
-}
-
-function handleNewOrder(order) {
-  // Sound abspielen
-  playNotificationSound()
-  
-  // Browser-Benachrichtigung
-  showBrowserNotification(
-    `🆕 Neue Bestellung #${order.order_number}`,
-    `${order.customer_name} - ${formatPrice(order.total)} - ${order.payment_method === 'paypal' ? 'PayPal' : 'Bar'}`
-  )
-  
-  // Bestellungen neu laden
-  loadOrders()
-  
-  // Wenn PayPal: Automatisch Punkte gutschreiben
-  if (order.payment_method === 'paypal') {
-    setTimeout(() => {
-      addPointsForOrder(order.qr_id, order.total)
-    }, 1000)
-  }
-}
-
-// ============================================
-// 🚀 INITIALISIERUNG
-// ============================================
-
-function initOrderSystem() {
-  console.log('🚀 Initialisiere Bestellungs-System...')
-  
-  // Sound initialisieren
-  initNotificationSound()
-  
-  // Benachrichtigungs-Berechtigung anfragen
-  requestNotificationPermission()
-  
-  // Wheel Config laden
-  loadWheelConfig()
-  
-  // Realtime Subscription starten
-  setupRealtimeSubscription()
-  
-  // Bestellungen initial laden
-  loadOrders()
-  
-  console.log('✅ Bestellungs-System bereit!')
-}
-
-// System beim Laden initialisieren
-setTimeout(initOrderSystem, 1000)
-
-
 
 let video = document.getElementById('video')
 let canvas = document.getElementById('canvas')
@@ -1687,6 +1164,330 @@ async function deleteTransaction(txId, customerId, points) {
     loadHistory(); alert('✅ Transaktion gelöscht!')
   } catch (e) { alert('❌ Fehler: ' + e.message); console.error('Delete transaction error:', e) }
 }
+
+
+// ============================================
+// 📦 BESTELLUNGS-SYSTEM
+// ============================================
+
+let ordersSubscription = null
+let wheelConfig = null
+let notificationSound = null
+
+const NOTIFICATION_SOUND_BASE64 = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTQwOUKLe77JZGQg4kdv1sn0oRD8E'
+
+function initNotificationSound() {
+  notificationSound = new Audio(NOTIFICATION_SOUND_BASE64)
+  notificationSound.volume = 1.0
+}
+
+function playNotificationSound() {
+  if (notificationSound) {
+    notificationSound.currentTime = 0
+    notificationSound.play().catch(e => console.log('Sound play error:', e))
+  }
+}
+
+function showBrowserNotification(title, body) {
+  if (!('Notification' in window)) return
+  if (Notification.permission === 'granted') {
+    new Notification(title, { body: body, icon: '/logo-round-new.png', badge: '/favicon-new.png', tag: 'doener-boxx-order', requireInteraction: true })
+  } else if (Notification.permission !== 'denied') {
+    Notification.requestPermission().then(permission => {
+      if (permission === 'granted') new Notification(title, { body: body, icon: '/logo-round-new.png' })
+    })
+  }
+}
+
+function requestNotificationPermission() {
+  if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission()
+}
+
+function testNotification() {
+  playNotificationSound()
+  showBrowserNotification('Test Benachrichtigung', 'Das Benachrichtigungssystem funktioniert! 🎉')
+  alert('✅ Test-Benachrichtigung wurde ausgelöst!')
+}
+
+async function loadWheelConfig() {
+  try {
+    const { data, error } = await supabase.from('wheel_config').select('*').limit(1)
+    if (error) throw error
+    if (data && data.length > 0) {
+      wheelConfig = data[0]
+      console.log('✅ Wheel Config geladen:', wheelConfig)
+    }
+  } catch (e) {
+    console.error('Fehler beim Laden der Wheel Config:', e)
+    wheelConfig = null
+  }
+}
+
+function isWheelAvailable(orderAmount) {
+  if (!wheelConfig || !wheelConfig.is_active || orderAmount < wheelConfig.min_order_amount) return false
+  if (wheelConfig.active_days && wheelConfig.active_days.length > 0) {
+    const today = new Date().getDay()
+    if (!wheelConfig.active_days.includes(today)) return false
+  }
+  if (wheelConfig.start_time && wheelConfig.end_time) {
+    const now = new Date()
+    const currentTime = now.getHours() * 60 + now.getMinutes()
+    const [startH, startM] = wheelConfig.start_time.split(':').map(Number)
+    const [endH, endM] = wheelConfig.end_time.split(':').map(Number)
+    const startMinutes = startH * 60 + startM
+    const endMinutes = endH * 60 + endM
+    if (currentTime < startMinutes || currentTime > endMinutes) return false
+  }
+  return true
+}
+
+async function loadOrders() {
+  try {
+    const { data, error } = await supabase.from('orders').select('*').in('status', ['pending', 'preparing', 'ready']).order('created_at', { ascending: false })
+    if (error) throw error
+    renderOrders(data || [])
+    updateOrderBadge(data ? data.filter(o => o.status === 'pending').length : 0)
+  } catch (e) {
+    console.error('Fehler beim Laden der Bestellungen:', e)
+  }
+}
+
+function updateOrderBadge(count) {
+  const badge = document.getElementById('orderBadge')
+  if (badge) {
+    if (count > 0) {
+      badge.textContent = count
+      badge.style.display = 'inline-block'
+    } else {
+      badge.style.display = 'none'
+    }
+  }
+}
+
+function formatPrice(price) {
+  return price.toFixed(2).replace('.', ',') + ' €'
+}
+
+function getTimeAgo(date) {
+  const seconds = Math.floor((new Date() - date) / 1000)
+  if (seconds < 60) return 'Gerade eben'
+  if (seconds < 3600) return `vor ${Math.floor(seconds / 60)} Min`
+  if (seconds < 86400) return `vor ${Math.floor(seconds / 3600)} Std`
+  return `vor ${Math.floor(seconds / 86400)} Tagen`
+}
+
+function renderOrders(orders) {
+  const container = document.getElementById('ordersList')
+  if (!container) return
+  
+  if (!orders || orders.length === 0) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;"><div style="font-size: 48px; margin-bottom: 16px;">📦</div><p>Keine offenen Bestellungen</p></div>'
+    return
+  }
+  
+  container.innerHTML = orders.map(order => {
+    const createdAt = new Date(order.created_at)
+    const timeAgo = getTimeAgo(createdAt)
+    let statusText = 'Neu', statusClass = 'pending'
+    if (order.status === 'preparing') { statusText = 'In Vorbereitung'; statusClass = 'preparing' }
+    else if (order.status === 'ready') { statusText = 'Bereit zur Abholung'; statusClass = 'ready' }
+    const paymentText = order.payment_method === 'paypal' ? 'PayPal' : 'Bar'
+    const paymentClass = order.payment_method === 'paypal' ? 'paypal' : 'cash'
+    
+    const items = order.items.map(item => {
+      let optionsText = ''
+      if (item.options) {
+        const optionsList = Object.keys(item.options).filter(key => {
+          const value = item.options[key]
+          const defaultValue = item.product.options[key]?.default
+          return value !== defaultValue
+        }).map(key => {
+          const value = item.options[key]
+          const label = item.product.options[key]?.label || key
+          if (typeof value === 'string') return `${label}: ${value}`
+          return `${label}: ${value === 0 ? 'Ohne' : value === 1 ? '1x' : '2x'}`
+        })
+        const extrasList = item.extras?.map(extraId => {
+          const extra = item.product.extras?.find(e => e.id === extraId)
+          return extra ? `+ ${extra.name}` : ''
+        }).filter(Boolean) || []
+        const allOptions = [...optionsList, ...extrasList].filter(Boolean)
+        if (allOptions.length > 0) optionsText = `<div class="order-item-options">${allOptions.join(', ')}</div>`
+      }
+      return `<div class="order-item"><div class="order-item-name">${item.product.name} - ${formatPrice(item.price)}</div>${optionsText}</div>`
+    }).join('')
+    
+    const pickupInfo = order.pickup_type === 'later' && order.pickup_time ? `<p><strong>Abholzeit:</strong> ${order.pickup_time} Uhr</p>` : '<p><strong>Abholzeit:</strong> Sofort</p>'
+    
+    let actions = ''
+    if (order.status === 'pending') {
+      if (order.payment_method === 'cash') {
+        actions = `<button onclick="markOrderPaid('${order.id}')" class="success">💰 Bar bezahlt</button><button onclick="markOrderPreparing('${order.id}')" class="secondary">👨‍🍳 In Vorbereitung</button>`
+      } else {
+        actions = `<button onclick="markOrderPreparing('${order.id}')" class="success">👨‍🍳 In Vorbereitung</button><button onclick="cancelOrder('${order.id}')" class="danger">❌ Stornieren</button>`
+      }
+    } else if (order.status === 'preparing') {
+      actions = `<button onclick="markOrderReady('${order.id}')" class="success">✅ Bereit zur Abholung</button><button onclick="cancelOrder('${order.id}')" class="danger">❌ Stornieren</button>`
+    } else if (order.status === 'ready') {
+      actions = `<button onclick="completeOrder('${order.id}', '${order.qr_id}', ${order.total}, '${order.payment_method}')" class="success">🎉 Abgeholt & Abschließen</button><button onclick="cancelOrder('${order.id}')" class="danger">❌ Stornieren</button>`
+    }
+    
+    return `<div class="order-card ${statusClass}"><div class="order-header"><div><span class="order-number">#${order.order_number}</span><span class="order-badge ${statusClass}">${statusText}</span><span class="payment-badge ${paymentClass}">${paymentText}</span></div><div class="order-time">${timeAgo}</div></div><div class="order-customer"><p><strong>👤 ${order.customer_name}</strong></p><p>📱 ${order.customer_phone}</p><p>🎫 QR-ID: ${order.qr_id}</p>${pickupInfo}${order.notes ? `<p><strong>💬 Notiz:</strong> ${order.notes}</p>` : ''}</div><div class="order-items">${items}</div><div class="order-total"><span>Gesamt:</span><span style="color: #E31E24;">${formatPrice(order.total)}</span></div><div class="order-actions">${actions}</div></div>`
+  }).join('')
+}
+
+async function markOrderPaid(orderId) {
+  if (!confirm('Bestellung als bar bezahlt markieren?')) return
+  try {
+    const { error } = await supabase.from('orders').update({ status: 'preparing', paid_at: new Date().toISOString() }).eq('id', orderId)
+    if (error) throw error
+    const { data: order } = await supabase.from('orders').select('*').eq('id', orderId).single()
+    if (order) await addPointsForOrder(order.qr_id, order.total)
+    alert('✅ Bezahlung erfasst und Punkte gutgeschrieben!')
+    loadOrders()
+  } catch (e) {
+    console.error('Fehler:', e)
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+async function markOrderPreparing(orderId) {
+  try {
+    const { error } = await supabase.from('orders').update({ status: 'preparing' }).eq('id', orderId)
+    if (error) throw error
+    loadOrders()
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+async function markOrderReady(orderId) {
+  try {
+    const { error } = await supabase.from('orders').update({ status: 'ready' }).eq('id', orderId)
+    if (error) throw error
+    loadOrders()
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+async function completeOrder(orderId, qrId, total, paymentMethod) {
+  try {
+    const { data: customer } = await supabase.from('customers').select('*').eq('qr_id', qrId).single()
+    if (!customer) throw new Error('Kunde nicht gefunden')
+    const wheelAvailable = isWheelAvailable(total)
+    if (wheelAvailable) {
+      showLuckyWheelModal(orderId, customer.id, qrId, total, paymentMethod)
+    } else {
+      await finalizeOrder(orderId, customer.id, paymentMethod)
+    }
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+async function finalizeOrder(orderId, customerId, paymentMethod) {
+  try {
+    const { error } = await supabase.from('orders').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', orderId)
+    if (error) throw error
+    alert('✅ Bestellung abgeschlossen!')
+    loadOrders()
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+async function cancelOrder(orderId) {
+  if (!confirm('Bestellung wirklich stornieren?')) return
+  try {
+    const { error } = await supabase.from('orders').update({ status: 'cancelled', cancelled_at: new Date().toISOString() }).eq('id', orderId)
+    if (error) throw error
+    alert('✅ Bestellung storniert')
+    loadOrders()
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+async function addPointsForOrder(qrId, amount) {
+  try {
+    const { data: customer } = await supabase.from('customers').select('*').eq('qr_id', qrId).single()
+    if (!customer) return
+    const points = Math.floor(amount * 100)
+    await supabase.from('customers').update({ points: customer.points + points }).eq('id', customer.id)
+    await supabase.from('transactions').insert({ customer_id: customer.id, type: 'earn', amount: amount, points: points, staff: 'ONLINE-ORDER', notes: `Online-Bestellung: ${points}P` })
+    await checkAndUpdateChallenges(customer.id, amount)
+    console.log(`✅ ${points} Punkte gutgeschrieben für ${customer.name}`)
+  } catch (e) {
+    console.error('Fehler beim Gutschreiben der Punkte:', e)
+  }
+}
+
+function showLuckyWheelModal(orderId, customerId, qrId, total, paymentMethod) {
+  const modal = document.createElement('div')
+  modal.className = 'wheel-modal active'
+  modal.id = 'wheelModal'
+  modal.innerHTML = `<div class="wheel-modal-content"><h2>🎡 Glücksrad verfügbar!</h2><p style="margin-bottom: 20px;">Der Kunde hat über ${wheelConfig.min_order_amount.toFixed(2)}€ bestellt und kann am Glücksrad drehen!</p><div style="margin-bottom: 20px;"><p style="font-size: 14px; color: #666;">Bestellsumme: <strong>${formatPrice(total)}</strong></p><p style="font-size: 14px; color: #666;">QR-ID: <strong>${qrId}</strong></p></div><button onclick="triggerLuckyWheel('${orderId}', '${customerId}', '${paymentMethod}')" class="success" style="width: 100%; margin-bottom: 10px;">🎡 Glücksrad aktivieren</button><button onclick="skipLuckyWheel('${orderId}', '${customerId}', '${paymentMethod}')" class="secondary" style="width: 100%;">⏭️ Überspringen</button></div>`
+  document.body.appendChild(modal)
+}
+
+function closeLuckyWheelModal() {
+  const modal = document.getElementById('wheelModal')
+  if (modal) modal.remove()
+}
+
+async function triggerLuckyWheel(orderId, customerId, paymentMethod) {
+  try {
+    alert('🎡 Glücksrad wurde für den Kunden aktiviert!')
+    await finalizeOrder(orderId, customerId, paymentMethod)
+    closeLuckyWheelModal()
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+async function skipLuckyWheel(orderId, customerId, paymentMethod) {
+  try {
+    await finalizeOrder(orderId, customerId, paymentMethod)
+    closeLuckyWheelModal()
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+function setupRealtimeSubscription() {
+  if (ordersSubscription) ordersSubscription.unsubscribe()
+  ordersSubscription = supabase.channel('orders_channel')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
+      console.log('🆕 Neue Bestellung:', payload.new)
+      handleNewOrder(payload.new)
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, () => loadOrders())
+    .subscribe()
+  console.log('✅ Realtime Subscription aktiv')
+}
+
+function handleNewOrder(order) {
+  playNotificationSound()
+  showBrowserNotification(`🆕 Neue Bestellung #${order.order_number}`, `${order.customer_name} - ${formatPrice(order.total)} - ${order.payment_method === 'paypal' ? 'PayPal' : 'Bar'}`)
+  loadOrders()
+  if (order.payment_method === 'paypal') {
+    setTimeout(() => addPointsForOrder(order.qr_id, order.total), 1000)
+  }
+}
+
+function initOrderSystem() {
+  console.log('🚀 Initialisiere Bestellungs-System...')
+  initNotificationSound()
+  requestNotificationPermission()
+  loadWheelConfig()
+  setupRealtimeSubscription()
+  loadOrders()
+  console.log('✅ Bestellungs-System bereit!')
+}
+
+setTimeout(initOrderSystem, 1000)
+
 
 console.log('✅ Döner Boxx Scanner PRO geladen!')
 console.log('🔒 Betrags-Sicherheit aktiv: Warnung ab ' + BETRAG_WARNUNG_AB + '€, Chef-PIN ab ' + BETRAG_CHEF_PIN_AB + '€')
