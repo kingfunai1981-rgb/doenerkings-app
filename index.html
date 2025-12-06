@@ -2369,17 +2369,23 @@ function renderCustomizeModal() {
       <div class="option-buttons">`
     
     if (Array.isArray(option.choices)) {
-      option.choices.forEach(choice => {
-        const isActive = currentCustomization.options[key] === choice ? 'active' : ''
-        const label = choice === 0 ? 'Ohne' : choice === 1 ? '1x' : '2x'
-        html += `<button class="option-btn ${isActive}" onclick="selectOption('${key}', ${choice})">${label}</button>`
-      })
+  option.choices.forEach(choice => {
+    const isActive = currentCustomization.options[key] === choice ? 'active' : ''
+    
+    // Unterscheide zwischen Zahlen und Strings
+    let label
+    if (typeof choice === 'number') {
+      label = choice === 0 ? 'Ohne' : choice === 1 ? '1x' : '2x'
     } else {
-      option.choices.forEach(choice => {
-        const isActive = currentCustomization.options[key] === choice ? 'active' : ''
-        html += `<button class="option-btn ${isActive}" onclick="selectOption('${key}', '${choice}')">${choice}</button>`
-      })
+      label = choice  // Bei Strings direkt verwenden
     }
+    
+    // Bei Strings brauchen wir Anführungszeichen im onclick
+    const choiceValue = typeof choice === 'string' ? `'${choice}'` : choice
+    
+    html += `<button class="option-btn ${isActive}" onclick="selectOption('${key}', ${choiceValue})">${label}</button>`
+  })
+}
     
     html += `</div></div>`
   })
