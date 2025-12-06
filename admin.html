@@ -69,6 +69,49 @@ textarea { resize: vertical; min-height: 60px; }
     <div class="header-text"><h1>Kunden verwalten</h1><p class="subtitle">Verwalte alle Kunden, Transaktionen und Punkte</p></div>
   </div>
 
+  <!-- 🛒 NEU: ONLINE BESTELLUNGEN VERWALTUNG -->
+  <div class="card" style="border: 3px solid #E31E24;">
+    <h2>🛒 Online Bestellungen</h2>
+    <p class="subtitle">Verwalte alle Online-Bestellungen aus der Kunden-App</p>
+    
+    <!-- Statistiken -->
+    <div class="stats">
+      <div class="stat-item">
+        <div class="stat-value" id="stat-orders-total">0</div>
+        <div class="stat-label">Bestellungen gesamt</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="stat-orders-pending">0</div>
+        <div class="stat-label">Offen</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="stat-orders-paid">0</div>
+        <div class="stat-label">Bezahlt</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="stat-orders-completed">0</div>
+        <div class="stat-label">Abgeschlossen</div>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div style="margin-bottom: 16px;">
+      <button class="stat-btn active" onclick="filterOrders('all')" id="filter-all">Alle</button>
+      <button class="stat-btn" onclick="filterOrders('pending')" id="filter-pending">⏳ Offen</button>
+      <button class="stat-btn" onclick="filterOrders('paid')" id="filter-paid">💳 Bezahlt</button>
+      <button class="stat-btn" onclick="filterOrders('completed')" id="filter-completed">✅ Abgeschlossen</button>
+    </div>
+
+    <!-- Bestellungen Liste -->
+    <div id="orders-list" style="max-height: 600px; overflow-y: auto;">
+      <div style="text-align: center; padding: 40px; color: #666;">
+        🛒 Keine Bestellungen vorhanden
+      </div>
+    </div>
+
+    <div id="result-orders"></div>
+  </div>
+
   <div class="card">
     <h2>🎁 Globale Bonusse</h2>
     <p class="subtitle">Erstelle Bonusse, die sofort bei allen Kunden erscheinen</p>
@@ -2554,6 +2597,7 @@ window.addEventListener('DOMContentLoaded', function() {
   setTimeout(() => {
     console.log('📊 Lade erste Statistik...')
     loadCouponStats()
+    loadOrders()  // 🛒 Bestellungen laden
   }, 300)
 })
 
@@ -2567,6 +2611,243 @@ window.loadWheelStats = loadWheelStats
 window.loadChallengeStats = loadChallengeStats
 window.loadSegmentStats = loadSegmentStats
 window.loadTrendStats = loadTrendStats
+
+
+// ═══════════════════════════════════════════════════════════════
+// 🛒 ONLINE BESTELLUNGEN VERWALTUNG
+// ═══════════════════════════════════════════════════════════════
+
+let currentOrdersFilter = 'all'
+let allOrders = []
+
+async function loadOrders() {
+  try {
+    // HINWEIS FÜR PROGRAMMIERER:
+    // Hier muss die orders Tabelle aus Supabase geladen werden
+    // Tabelle muss erst erstellt werden (siehe INTEGRATION_ANLEITUNG.txt)
+    
+    // DEMO: Wenn Tabelle noch nicht existiert, zeige Hinweis
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*, customers(name, phone, qr_id)')
+      .order('created_at', { ascending: false })
+    
+    if (error) {
+      // Tabelle existiert noch nicht
+      document.getElementById('orders-list').innerHTML = `
+        <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 20px; text-align: center;">
+          <div style="font-size: 18px; font-weight: 700; color: #92400e; margin-bottom: 12px;">
+            ⚠️ Orders-Tabelle noch nicht erstellt
+          </div>
+          <div style="font-size: 14px; color: #92400e; margin-bottom: 16px;">
+            Die Supabase Tabelle "orders" existiert noch nicht.<br>
+            Bitte siehe INTEGRATION_ANLEITUNG.txt für SQL-Schema.
+          </div>
+          <div style="font-size: 13px; color: #666; background: white; padding: 12px; border-radius: 8px; font-family: monospace; text-align: left; margin-top: 16px;">
+            CREATE TABLE orders (<br>
+            &nbsp;&nbsp;id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),<br>
+            &nbsp;&nbsp;order_number TEXT UNIQUE NOT NULL,<br>
+            &nbsp;&nbsp;customer_id UUID REFERENCES customers(id),<br>
+            &nbsp;&nbsp;customer_name TEXT NOT NULL,<br>
+            &nbsp;&nbsp;customer_phone TEXT NOT NULL,<br>
+            &nbsp;&nbsp;items JSONB NOT NULL,<br>
+            &nbsp;&nbsp;total DECIMAL(10,2) NOT NULL,<br>
+            &nbsp;&nbsp;payment_method TEXT NOT NULL,<br>
+            &nbsp;&nbsp;payment_status TEXT DEFAULT 'pending',<br>
+            &nbsp;&nbsp;pickup_time TEXT,<br>
+            &nbsp;&nbsp;notes TEXT,<br>
+            &nbsp;&nbsp;status TEXT DEFAULT 'pending',<br>
+            &nbsp;&nbsp;qr_data TEXT,<br>
+            &nbsp;&nbsp;created_at TIMESTAMPTZ DEFAULT NOW(),<br>
+            &nbsp;&nbsp;updated_at TIMESTAMPTZ DEFAULT NOW()<br>
+            );
+          </div>
+        </div>
+      `
+      return
+    }
+    
+    allOrders = data || []
+    
+    // Statistiken aktualisieren
+    const totalOrders = allOrders.length
+    const pendingOrders = allOrders.filter(o => o.status === 'pending').length
+    const paidOrders = allOrders.filter(o => o.payment_status === 'paid' || o.status === 'paid').length
+    const completedOrders = allOrders.filter(o => o.status === 'completed').length
+    
+    document.getElementById('stat-orders-total').textContent = totalOrders
+    document.getElementById('stat-orders-pending').textContent = pendingOrders
+    document.getElementById('stat-orders-paid').textContent = paidOrders
+    document.getElementById('stat-orders-completed').textContent = completedOrders
+    
+    // Liste rendern
+    renderOrdersList()
+    
+  } catch (e) {
+    console.error('❌ Fehler beim Laden der Bestellungen:', e)
+    document.getElementById('orders-list').innerHTML = `
+      <div style="text-align: center; padding: 40px; color: #dc2626;">
+        ❌ Fehler: ${e.message}
+      </div>
+    `
+  }
+}
+
+function filterOrders(filter) {
+  currentOrdersFilter = filter
+  
+  // Filter-Buttons aktualisieren
+  document.querySelectorAll('.stat-btn').forEach(btn => btn.classList.remove('active'))
+  document.getElementById('filter-' + filter).classList.add('active')
+  
+  renderOrdersList()
+}
+
+function renderOrdersList() {
+  let filteredOrders = allOrders
+  
+  // Filter anwenden
+  if (currentOrdersFilter !== 'all') {
+    if (currentOrdersFilter === 'paid') {
+      filteredOrders = allOrders.filter(o => o.payment_status === 'paid' || o.status === 'paid')
+    } else {
+      filteredOrders = allOrders.filter(o => o.status === currentOrdersFilter)
+    }
+  }
+  
+  const list = document.getElementById('orders-list')
+  
+  if (filteredOrders.length === 0) {
+    list.innerHTML = `
+      <div style="text-align: center; padding: 40px; color: #666;">
+        🛒 Keine Bestellungen in dieser Kategorie
+      </div>
+    `
+    return
+  }
+  
+  list.innerHTML = filteredOrders.map(order => {
+    const date = new Date(order.created_at)
+    const dateStr = date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    const time = date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    
+    const statusColors = {
+      'pending': '#f59e0b',
+      'paid': '#3b82f6',
+      'completed': '#10b981',
+      'cancelled': '#dc2626'
+    }
+    
+    const statusLabels = {
+      'pending': '⏳ Offen',
+      'paid': '💳 Bezahlt',
+      'completed': '✅ Abgeschlossen',
+      'cancelled': '❌ Storniert'
+    }
+    
+    const customer = order.customers || {}
+    const itemsCount = Array.isArray(order.items) ? order.items.length : 0
+    
+    return `
+      <div style="background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+          <div>
+            <div style="font-size: 18px; font-weight: 700; color: #111827;">
+              🛒 ${order.order_number}
+            </div>
+            <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
+              ${dateStr} ${time}
+            </div>
+          </div>
+          <div style="background: ${statusColors[order.status]}; color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600;">
+            ${statusLabels[order.status]}
+          </div>
+        </div>
+        
+        <!-- Kunde -->
+        <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+          <div style="font-weight: 600; margin-bottom: 6px;">👤 ${order.customer_name}</div>
+          <div style="font-size: 13px; color: #666;">
+            📱 ${order.customer_phone} | 🆔 ${customer.qr_id || 'N/A'}
+          </div>
+        </div>
+        
+        <!-- Bestellung -->
+        <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+          <div style="font-weight: 600; margin-bottom: 8px;">📦 ${itemsCount} Artikel</div>
+          <div style="font-size: 20px; font-weight: 700; color: #E31E24;">
+            ${order.total.toFixed(2)} €
+          </div>
+          <div style="font-size: 13px; color: #666; margin-top: 6px;">
+            💳 ${order.payment_method === 'cash' ? '💵 Bar' : '💳 PayPal'}
+            ${order.payment_status === 'paid' ? ' • ✅ Bezahlt' : ' • ⏳ Ausstehend'}
+          </div>
+          ${order.pickup_time ? `
+            <div style="font-size: 13px; color: #666; margin-top: 4px;">
+              🕐 Abholung: ${order.pickup_time}
+            </div>
+          ` : ''}
+          ${order.notes ? `
+            <div style="font-size: 13px; color: #666; margin-top: 8px; background: #f9fafb; padding: 8px; border-radius: 6px;">
+              📝 ${order.notes}
+            </div>
+          ` : ''}
+        </div>
+        
+        <!-- Aktionen -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px;">
+          ${order.status === 'pending' ? `
+            <button onclick="updateOrderStatus('${order.id}', 'paid')" style="background: #3b82f6; color: white; padding: 10px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+              💳 Bezahlt
+            </button>
+          ` : ''}
+          ${order.status === 'paid' || order.payment_status === 'paid' ? `
+            <button onclick="updateOrderStatus('${order.id}', 'completed')" style="background: #10b981; color: white; padding: 10px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+              ✅ Abschließen
+            </button>
+          ` : ''}
+          ${order.status !== 'cancelled' && order.status !== 'completed' ? `
+            <button onclick="updateOrderStatus('${order.id}', 'cancelled')" style="background: #dc2626; color: white; padding: 10px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+              ❌ Stornieren
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `
+  }).join('')
+}
+
+async function updateOrderStatus(orderId, newStatus) {
+  try {
+    const { error } = await supabase
+      .from('orders')
+      .update({ 
+        status: newStatus,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', orderId)
+    
+    if (error) throw error
+    
+    // Liste neu laden
+    await loadOrders()
+    
+    const statusLabels = {
+      'paid': '💳 Bezahlt',
+      'completed': '✅ Abgeschlossen',
+      'cancelled': '❌ Storniert'
+    }
+    
+    alert(`✅ Status geändert: ${statusLabels[newStatus]}`)
+    
+  } catch (e) {
+    console.error('❌ Fehler:', e)
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
 
 console.log('✅ Business Intelligence geladen (FIXED)!')
 </script>
