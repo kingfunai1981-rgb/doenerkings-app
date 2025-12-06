@@ -2526,8 +2526,8 @@ function goToCheckout() {
   }
   
   closeCart()
-  renderCheckout()
-  document.getElementById('checkoutModal').classList.add('active')
+  document.getElementById('checkoutModal').classList.add('active')  // ✅ Modal ZUERST öffnen
+  renderCheckout()  // ✅ Dann erst rendern
   
   if (currentCustomer) {
     document.getElementById('customerName').value = currentCustomer.name
