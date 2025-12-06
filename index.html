@@ -1568,6 +1568,7 @@ const products = [
     name: 'Döner',
     price: 6.00,
     description: 'Klassischer Döner im Fladenbrot',
+    defaultSauce: 2,
     options: {
       fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
       knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
@@ -1586,10 +1587,167 @@ const products = [
     ]
   },
   {
+    id: 'doener-xl',
+    name: 'Döner XL',
+    price: 8.00,
+    description: 'Extra großer Döner für großen Hunger',
+    defaultSauce: 2,
+    options: {
+      fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
+      kaese: { label: 'Käse', choices: [0, 1], default: 0 },
+      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
+      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+    },
+    extras: [
+      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
+      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
+      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+    ]
+  },
+  {
+    id: 'doener-box',
+    name: 'Döner Box',
+    price: 7.00,
+    description: 'Dönerfleisch mit Pommes in der Box',
+    defaultSauce: 2,
+    options: {
+      fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
+      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
+      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 }
+    },
+    extras: [
+      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
+      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
+      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+    ]
+  },
+  {
+    id: 'dueruem',
+    name: 'Dürüm Döner',
+    price: 7.00,
+    description: 'Döner gerollt im dünnen Fladenbrot',
+    defaultSauce: 2,
+    options: {
+      fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
+      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
+      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+    },
+    extras: [
+      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
+      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
+      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+    ]
+  },
+  {
+    id: 'lahmacun',
+    name: 'Lahmacun',
+    price: 4.00,
+    description: 'Türkische Pizza',
+    defaultSauce: 2,
+    options: {
+      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
+      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+    },
+    extras: [
+      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
+      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+    ]
+  },
+  {
+    id: 'lahmacun-spezial',
+    name: 'Lahmacun Spezial',
+    price: 8.00,
+    description: 'Lahmacun mit Dönerfleisch',
+    defaultSauce: 2,
+    options: {
+      fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
+      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
+      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+    },
+    extras: [
+      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
+      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
+      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+    ]
+  },
+  {
+    id: 'doener-teller',
+    name: 'Döner Teller',
+    price: 10.00,
+    description: 'Dönerfleisch mit Pommes und Salat auf dem Teller',
+    defaultSauce: 2,
+    options: {
+      fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
+      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
+      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
+      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+    },
+    extras: [
+      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
+      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
+      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+    ]
+  },
+  {
+    id: 'rindswurst-broetchen',
+    name: 'Rindswurst im Brötchen',
+    price: 3.50,
+    description: 'Gegrillte Rindswurst im frischen Brötchen',
+    options: {
+      ketchup: { label: 'Ketchup', choices: [0, 1], default: 1 }
+    },
+    extras: []
+  },
+  {
+    id: 'curry-rindswurst',
+    name: 'Curry Rindswurst mit Pommes',
+    price: 6.90,
+    description: 'Currywurst mit knusprigen Pommes',
+    options: {
+      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
+      currysauce: { label: 'Currysauce', choices: [0, 1], default: 1 },
+      mayo: { label: 'Mayonnaise', choices: [0, 1], default: 0 }
+    },
+    extras: []
+  },
+  {
     id: 'koefte-brot',
     name: 'Köfte im Brot (5 Stk.)',
     price: 6.00,
     description: 'Gegrillte Hackfleischbällchen im Fladenbrot',
+    defaultSauce: 2,
     options: {
       koefte: { label: 'Köfte', choices: [0, 1], default: 1 },
       knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
@@ -1608,6 +1766,57 @@ const products = [
     ]
   },
   {
+    id: 'koefte-teller',
+    name: 'Köfte Teller (7 Stk.)',
+    price: 11.00,
+    description: 'Gegrillte Hackfleischbällchen mit Pommes und Salat',
+    defaultSauce: 2,
+    options: {
+      koefte: { label: 'Köfte', choices: [0, 1], default: 1 },
+      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
+      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
+      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+    },
+    extras: [
+      { id: 'extraKoefte', name: 'Extra Köfte', price: 2.00 },
+      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
+      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+    ]
+  },
+  {
+    id: 'chicken-nuggets',
+    name: 'Chicken Nuggets (6 Stk.)',
+    price: 6.00,
+    description: 'Knusprige Chicken Nuggets mit Pommes',
+    options: {
+      nuggets: { label: 'Chicken Nuggets', choices: [0, 1], default: 1 },
+      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
+      ketchup: { label: 'Ketchup', choices: [0, 1], default: 1 },
+      mayo: { label: 'Mayonnaise', choices: [0, 1], default: 0 }
+    },
+    extras: [
+      { id: 'extraNuggets', name: 'Extra Nuggets (3 Stk.)', price: 2.00 }
+    ]
+  },
+  {
+    id: 'crispy-chicken-burger',
+    name: 'Crispy Chicken Burger',
+    price: 4.00,
+    description: 'Knuspriger Chicken Burger',
+    options: {
+      mayo: { label: 'Mayonnaise', choices: [0, 1], default: 1 },
+      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
+      tomate: { label: 'Tomate', choices: [0, 1], default: 1 }
+    },
+    extras: []
+  },
+  {
     id: 'pommes',
     name: 'Pommes',
     price: 3.50,
@@ -1619,6 +1828,51 @@ const products = [
       { id: 'extraKetchup', name: 'Extra Ketchup', price: 0.30 },
       { id: 'extraMayo', name: 'Extra Mayonnaise', price: 0.30 }
     ]
+  },
+  {
+    id: 'ayran',
+    name: 'Ayran (0,25 l)',
+    price: 1.50,
+    description: 'Erfrischendes türkisches Joghurtgetränk',
+    vatRate: 19,
+    options: {},
+    extras: []
+  },
+  {
+    id: 'wasser',
+    name: 'Wasser still (0,5 l)',
+    price: 1.50,
+    description: 'Stilles Mineralwasser (inkl. Pfand)',
+    vatRate: 19,
+    options: {},
+    extras: []
+  },
+  {
+    id: 'cola',
+    name: 'Cola (0,33 l)',
+    price: 2.00,
+    description: 'Coca Cola (inkl. Pfand)',
+    vatRate: 19,
+    options: {},
+    extras: []
+  },
+  {
+    id: 'fanta',
+    name: 'Fanta (0,33 l)',
+    price: 2.00,
+    description: 'Fanta Orange (inkl. Pfand)',
+    vatRate: 19,
+    options: {},
+    extras: []
+  },
+  {
+    id: 'cola-zero',
+    name: 'Cola Zero (0,33 l)',
+    price: 2.00,
+    description: 'Coca Cola Zero (inkl. Pfand)',
+    vatRate: 19,
+    options: {},
+    extras: []
   }
 ]
 
@@ -1653,9 +1907,41 @@ function renderProducts() {
   const container = document.getElementById('products')
   
   const categories = [
-    { name: '🌯 Döner & Dürüm', ids: ['doener'], open: true },
-    { name: '🍖 Köfte', ids: ['koefte-brot'], open: false },
-    { name: '🍟 Beilagen', ids: ['pommes'], open: false }
+    {
+      name: '🌯 Döner & Dürüm',
+      ids: ['doener', 'doener-xl', 'dueruem', 'doener-box', 'doener-teller'],
+      open: true
+    },
+    {
+      name: '🥙 Lahmacun',
+      ids: ['lahmacun', 'lahmacun-spezial'],
+      open: false
+    },
+    {
+      name: '🍖 Köfte',
+      ids: ['koefte-brot', 'koefte-teller'],
+      open: false
+    },
+    {
+      name: '🌭 Wurst',
+      ids: ['rindswurst-broetchen', 'curry-rindswurst'],
+      open: false
+    },
+    {
+      name: '🍗 Chicken',
+      ids: ['chicken-nuggets', 'crispy-chicken-burger'],
+      open: false
+    },
+    {
+      name: '🍟 Beilagen',
+      ids: ['pommes'],
+      open: false
+    },
+    {
+      name: '🥤 Getränke',
+      ids: ['ayran', 'wasser', 'cola', 'fanta', 'cola-zero'],
+      open: false
+    }
   ]
   
   let html = ''
@@ -2030,7 +2316,7 @@ async function placeOrder() {
   
   try {
     const orderQRID = Math.floor(1000 + Math.random() * 9000).toString()
-    const orderNumber = Math.floor(100000 + Math.random() * 900000)
+    const orderNumber = Math.floor(1000 + Math.random() * 9000)
     
     const orderData = {
       order_number: orderNumber,
