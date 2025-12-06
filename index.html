@@ -2644,21 +2644,21 @@ async function placeOrder() {
     const orderQRID = generateOrderQRID()
     const orderNumber = generateOrderNumber()
     
-    const orderData = {
-      order_number: orderNumber,
-      qr_id: orderQRID,
-      customer_id: currentCustomer?.id || null,
-      customer_name: name,
-      customer_phone: phone,
-      notes: notes || null,
-      items: cart,
-      total: total,
-      payment_method: selectedPayment,
-      pickup_time: pickupTime,
-      pickup_type: selectedPickupTime,
-      status: 'pending',
-      created_at: new Date().toISOString()
-    }
+const orderData = {
+  order_number: orderNumber,
+  qr_id: orderQRID,
+  // customer_id removed - column doesn't exist in database
+  customer_name: name,
+  customer_phone: phone,
+  notes: notes || null,
+  items: cart,
+  total: total,
+  payment_method: selectedPayment,
+  pickup_time: pickupTime,
+  pickup_type: selectedPickupTime,
+  status: 'pending',
+  created_at: new Date().toISOString()
+}
     
     if (!isDemoMode && supabase) {
       const { error } = await supabase
