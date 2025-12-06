@@ -873,6 +873,58 @@ function scanQR() {
 
 async function onQRDetected(qrCode) {
   showResult('result-qr', '✅ QR: ' + qrCode, 'success')
+  
+  // ═══════════════════════════════════════════════════════════════
+  // 🛒 NEU: Prüfen ob es ein Order-QR ist
+  // ═══════════════════════════════════════════════════════════════
+  if (qrCode.startsWith('ORDER:')) {
+    try {
+      const parts = qrCode.split(':')
+      const customerQRID = parts[1]  // Kunden-Nummer
+      const orderNumber = parts[2]   // Bestellnummer
+      const orderTotal = parseFloat(parts[3])  // Betrag
+      
+      // Kunde finden
+      const { data: customerData, error: customerError } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('qr_id', customerQRID)
+        .limit(1)
+      
+      if (customerError) throw customerError
+      if (!customerData || customerData.length === 0) throw new Error('Kunde nicht gefunden')
+      
+      const customer = customerData[0]
+      currentCustomer = customer
+      
+      // Order-Bestätigungs-UI anzeigen
+      document.getElementById('customerCard').style.display = 'block'
+      const whatsappBadge = customer.whatsapp_optin ? ' <span style="display: inline-block; background: #25D366; color: white; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;">📱 WA</span>' : ''
+      document.getElementById('custName').innerHTML = customer.name + whatsappBadge + ' <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 12px; margin-top: 12px;"><div style="font-size: 14px; font-weight: 600; color: #92400e; margin-bottom: 8px;">🛒 ONLINE BESTELLUNG</div><div style="font-size: 12px; color: #92400e;">Bestellung: <strong>' + orderNumber + '</strong></div><div style="font-size: 16px; font-weight: 700; color: #E31E24; margin-top: 6px;">Betrag: ' + orderTotal.toFixed(2) + ' €</div></div>'
+      document.getElementById('custQR').textContent = customer.qr_id
+      document.getElementById('custPoints').textContent = customer.points
+      
+      // Spezial-Button für Zahlung bestätigen
+      document.getElementById('scannedAmount').value = orderTotal.toFixed(2)
+      document.getElementById('scannedAmount').readOnly = true
+      
+      showResult('result-qr', '🛒 Online-Bestellung erkannt! Betrag prüfen und Zahlung bestätigen.', 'info')
+      
+      return  // Fertig - normale QR-Verarbeitung überspringen
+      
+    } catch (e) {
+      showResult('result-qr', '❌ Fehler bei Order-QR: ' + e.message, 'error')
+      console.error('Order QR error:', e)
+      setTimeout(() => {
+        showResult('result-qr', '', 'info')
+        startCamera()
+      }, 2000)
+      return
+    }
+  }
+  // ═══════════════════════════════════════════════════════════════
+  
+  // Normale Kunden-QR Verarbeitung (Original Code)
   try {
     const { data, error } = await supabase.from('customers').select('*').eq('qr_id', qrCode).limit(1)
     if (error) throw error
@@ -888,6 +940,7 @@ async function onQRDetected(qrCode) {
     else { badge.innerHTML = '' }
     document.getElementById('customerCard').style.display = 'block'
     document.getElementById('scannedAmount').value = ''
+    document.getElementById('scannedAmount').readOnly = false
     document.getElementById('scannedAmount').focus()
   } catch (e) { showResult('result-qr', '❌ ' + e.message, 'error'); console.error('QR detection error:', e); setTimeout(() => { showResult('result-qr', '', 'info'); startCamera() }, 2000) }
 }
