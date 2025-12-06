@@ -3,11 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bestellung - Döner Boxx</title>
+<title>Döner Boxx Loyalty & Bestellung</title>
 <link rel="icon" href="/favicon-new.png" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon-new.png">
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 @font-face {
   font-family: 'Flame';
@@ -20,10 +18,11 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body { 
-  font-family: 'Flame', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Flame', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background: #f5f5f5;
   min-height: 100vh;
-  padding-bottom: 80px;
+  padding: 0 0 80px 0;
+  margin: 0;
 }
 
 .container { 
@@ -33,7 +32,256 @@ body {
   min-height: 100vh;
 }
 
-/* Header */
+.header-image {
+  background: linear-gradient(135deg, #E31E24 0%, #F9A825 100%);
+  padding: 20px 20px 24px;
+  text-align: center;
+  position: relative;
+}
+
+.header-logo {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 16px;
+  background: transparent;
+  border-radius: 50%;
+  padding: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  clip-path: circle(50%);
+}
+
+.header-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.header-image h1 {
+  color: white;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.header-image p {
+  color: white;
+  font-size: 16px;
+  opacity: 0.95;
+  margin-bottom: 4px;
+}
+
+.header-image p.small {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.header-qr-mini {
+  width: 60px;
+  height: 60px;
+  background: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+
+.header-qr-mini:hover { transform: scale(1.05); }
+.header-qr-mini img { width: 50px; height: 50px; border-radius: 6px; }
+
+.qr-modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.qr-modal.active { display: flex; }
+
+.qr-modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-50px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.qr-modal-close {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: #f5f5f5;
+  border: none;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.qr-modal-close:hover {
+  background: #e5e5e5;
+  transform: rotate(90deg);
+}
+
+.qr-modal-img {
+  width: 260px; height: 260px;
+  margin: 20px auto;
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  border: 3px solid #E31E24;
+}
+
+.qr-modal-id {
+  font-size: 42px;
+  font-weight: 700;
+  color: #E31E24;
+  letter-spacing: 5px;
+  margin: 16px 0;
+  font-family: 'Courier New', monospace;
+}
+
+.qr-modal-label { font-size: 14px; color: #666; margin-bottom: 8px; }
+
+.card {
+  background: white;
+  border-radius: 0;
+  padding: 24px 16px;
+  margin-bottom: 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+h2 { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #232122; }
+.subtitle { color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+
+input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  margin-bottom: 10px;
+  background: #fafafa;
+  transition: all 0.2s;
+  font-family: 'Flame', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+input:focus { outline: none; border-color: #E31E24; background: white; }
+
+button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: all 0.2s;
+  font-family: 'Flame', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+button:hover { opacity: 0.9; transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+button.secondary { background: #f5f5f5; color: #E31E24; border: 1px solid #e0e0e0; }
+button.secondary:hover { background: #ebebeb; }
+button.small { width: auto; padding: 8px 16px; font-size: 13px; margin: 4px; display: inline-block; }
+button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; transform: none; }
+
+.result {
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-top: 10px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.success { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
+.error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.info { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+
+.points-circle {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 4px 16px rgba(227, 30, 36, 0.25);
+  flex-shrink: 0;
+}
+
+.points-num { font-size: 36px; font-weight: 700; line-height: 1; }
+.points-label { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+
+.reward {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #f0f0f0;
+  transition: all 0.2s;
+}
+
+.reward:hover { background: #f5f5f5; border-color: #e0e0e0; }
+.reward-info h3 { font-size: 15px; font-weight: 600; margin: 0 0 4px 0; color: #232122; }
+.reward-info .pts { font-size: 13px; color: #E31E24; font-weight: 600; }
+.reward button { width: 100px !important; padding: 10px 12px !important; font-size: 13px !important; }
+
+.pending-code {
+  background: #fffbeb;
+  border: 2px solid #fbbf24;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 10px;
+}
+
+.pending-code h3 { color: #92400e; font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+.pending-code .code { font-size: 28px; font-weight: 700; color: #f59e0b; letter-spacing: 5px; margin: 10px 0; font-family: 'Courier New', monospace; }
+.pending-code .code-info { font-size: 12px; color: #92400e; margin-bottom: 10px; line-height: 1.5; }
+
+.screen { display: none; }
+.screen.active { display: block; }
+
 .header {
   background: linear-gradient(135deg, #E31E24 0%, #F9A825 100%);
   padding: 20px;
@@ -41,7 +289,7 @@ body {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.header-logo {
+.header-logo-order {
   width: 80px;
   height: 80px;
   margin: 0 auto 12px;
@@ -53,7 +301,7 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-.header-logo img {
+.header-logo-order img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -73,7 +321,6 @@ body {
   opacity: 0.9;
 }
 
-/* Produkt-Karten */
 .products {
   padding: 16px;
 }
@@ -198,7 +445,6 @@ body {
   transform: translateY(-1px);
 }
 
-/* Modal */
 .modal {
   display: none;
   position: fixed;
@@ -388,7 +634,6 @@ body {
   font-size: 24px;
 }
 
-/* Warenkorb */
 .cart-fixed {
   position: fixed;
   bottom: 0;
@@ -427,10 +672,6 @@ body {
   border-radius: 20px;
   font-size: 14px;
   font-weight: 700;
-}
-
-.cart-modal .modal-content {
-  border-radius: 20px 20px 0 0;
 }
 
 .cart-item {
@@ -506,7 +747,6 @@ body {
   opacity: 0.3;
 }
 
-/* Checkout */
 .checkout-section {
   margin-bottom: 20px;
 }
@@ -744,22 +984,160 @@ input:focus, textarea:focus {
 <body>
 
 <div class="container">
-  <!-- Header -->
-  <div class="header">
-    <div class="header-logo">
-      <img src="/logo-round-new.png" alt="Döner Boxx">
+  <div id="screen-start" class="screen active">
+    <div class="header-image">
+      <div class="header-logo">
+        <img src="/logo-round-new.png" alt="Döner Boxx">
+      </div>
+      <h1>Döner Boxx</h1>
+      <p>Treue wird belohnt!</p>
+      <p class="small">1 € = 10 Punkte</p>
     </div>
-    <h1>Online Bestellen</h1>
-    <p>Wähle deine Lieblingsgerichte</p>
+    
+    <div class="card">
+      <h2>Neu hier?</h2>
+      <p class="subtitle">Registriere dich jetzt und sammle Punkte bei jeder Bestellung!</p>
+      <button onclick="showScreen('register')">✨ Jetzt registrieren</button>
+      <button class="secondary" onclick="showScreen('login')">🔓 Ich habe schon einen Account</button>
+    </div>
   </div>
 
-  <!-- Produkte -->
-  <div class="products" id="products">
-    <!-- Wird dynamisch gefüllt -->
+  <div id="screen-register" class="screen">
+    <div class="header-image">
+      <div class="header-logo">
+        <img src="/logo-round-new.png" alt="Döner Boxx">
+      </div>
+      <h1>Döner Boxx</h1>
+    </div>
+    
+    <div class="card">
+      <h2>Jetzt registrieren</h2>
+      <input id="reg-name" type="text" placeholder="Dein Name">
+      <input id="reg-phone" type="tel" placeholder="Handynummer">
+      <button onclick="register()">✅ Registrieren</button>
+      <button class="secondary" onclick="showScreen('start')">↩️ Zurück</button>
+      <div id="reg-result"></div>
+    </div>
+  </div>
+
+  <div id="screen-login" class="screen">
+    <div class="header-image">
+      <div class="header-logo">
+        <img src="/logo-round-new.png" alt="Döner Boxx">
+      </div>
+      <h1>Döner Boxx</h1>
+    </div>
+    
+    <div class="card">
+      <h2>Anmelden</h2>
+      <input id="login-phone" type="tel" placeholder="Handynummer">
+      <button onclick="login()">🔓 Anmelden</button>
+      <button class="secondary" onclick="showScreen('start')">↩️ Zurück</button>
+      <div id="login-result"></div>
+    </div>
+  </div>
+
+  <div id="screen-app" class="screen">
+    <div class="header-image">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div class="header-logo" style="width: 60px; height: 60px; margin: 0;">
+          <img src="/logo-round-new.png" alt="Döner Boxx">
+        </div>
+        <button onclick="logout()" class="small secondary" style="margin: 0;">Abmelden</button>
+      </div>
+      
+      <div class="header-content">
+        <div class="points-circle">
+          <div class="points-num" id="app-points">0</div>
+          <div class="points-label">Punkte</div>
+        </div>
+        
+        <div class="header-qr-mini" onclick="openQRModal()">
+          <img id="header-qr-mini" alt="QR">
+        </div>
+      </div>
+      
+      <p style="font-size: 11px; margin-top: 10px; opacity: 0.9;">Tippe auf QR zum Vergrößern</p>
+    </div>
+
+    <div id="qr-modal" class="qr-modal" onclick="closeQRModal(event)">
+      <div class="qr-modal-content" onclick="event.stopPropagation()">
+        <button class="qr-modal-close" onclick="closeQRModal()">×</button>
+        <div class="qr-modal-label">Zeige diesen Code beim Bezahlen</div>
+        <img id="modal-qr" class="qr-modal-img" alt="QR">
+        <div class="qr-modal-label">Oder nenne diese ID:</div>
+        <div class="qr-modal-id" id="modal-qr-id">------</div>
+      </div>
+    </div>
+
+    <div class="card" style="padding: 12px; margin-bottom: 16px;">
+      <button onclick="openOrderModal()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <span style="font-size: 20px;">🛒</span>
+        <span>Jetzt online bestellen</span>
+      </button>
+    </div>
+
+    <div id="pending-section" style="display: none;">
+      <div class="card">
+        <h2>⏳ Wartet auf Bestätigung</h2>
+        <div id="pending-list"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🎁 Prämien einlösen</h2>
+      <div class="reward">
+        <div class="reward-info">
+          <h3>Ayran (0.25 l)</h3>
+          <div class="pts">250 Punkte</div>
+        </div>
+        <button onclick="redeem('Ayran (0.25 l)', 250)" id="btn-250">Einlösen</button>
+      </div>
+      <div class="reward">
+        <div class="reward-info">
+          <h3>Pommes</h3>
+          <div class="pts">500 Punkte</div>
+        </div>
+        <button onclick="redeem('Pommes', 500)" id="btn-500">Einlösen</button>
+      </div>
+      <div class="reward">
+        <div class="reward-info">
+          <h3>Döner Box</h3>
+          <div class="pts">750 Punkte</div>
+        </div>
+        <button onclick="redeem('Döner Box', 750)" id="btn-750">Einlösen</button>
+      </div>
+      <div class="reward">
+        <div class="reward-info">
+          <h3>Döner XL</h3>
+          <div class="pts">1000 Punkte</div>
+        </div>
+        <button onclick="redeem('Döner XL', 1000)" id="btn-1000">Einlösen</button>
+      </div>
+      <div class="reward">
+        <div class="reward-info">
+          <h3>Döner Teller</h3>
+          <div class="pts">1250 Punkte</div>
+        </div>
+        <button onclick="redeem('Döner Teller', 1250)" id="btn-1250">Einlösen</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="order-section" style="display: none;">
+    <div class="header">
+      <button onclick="closeOrderModal()" style="position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.3); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;">←</button>
+      <div class="header-logo-order">
+        <img src="/logo-round-new.png" alt="Döner Boxx">
+      </div>
+      <h1>Online Bestellen</h1>
+      <p>Wähle deine Lieblingsgerichte</p>
+    </div>
+
+    <div class="products" id="products"></div>
   </div>
 </div>
 
-<!-- Warenkorb Button (fixiert unten) -->
 <div class="cart-fixed" id="cartFixed" style="display: none;">
   <button class="cart-btn" onclick="openCart()">
     <span>🛒 Warenkorb ansehen</span>
@@ -770,38 +1148,30 @@ input:focus, textarea:focus {
   </button>
 </div>
 
-<!-- Produkt-Anpassung Modal -->
 <div class="modal" id="customizeModal">
   <div class="modal-content">
     <div class="modal-header">
       <h2 class="modal-title" id="modalTitle">Produkt anpassen</h2>
       <button class="modal-close" onclick="closeCustomizeModal()">✕</button>
     </div>
-    <div class="modal-body" id="modalBody">
-      <!-- Wird dynamisch gefüllt -->
-    </div>
+    <div class="modal-body" id="modalBody"></div>
     <div class="modal-footer">
       <div class="modal-total">
         <span>Gesamt:</span>
         <span class="modal-total-price" id="modalTotal">0,00 €</span>
       </div>
-      <button class="add-btn" onclick="addToCart()">
-        In den Warenkorb
-      </button>
+      <button class="add-btn" onclick="addToCart()">In den Warenkorb</button>
     </div>
   </div>
 </div>
 
-<!-- Warenkorb Modal -->
 <div class="modal cart-modal" id="cartModal">
   <div class="modal-content">
     <div class="modal-header">
       <h2 class="modal-title">Dein Warenkorb</h2>
       <button class="modal-close" onclick="closeCart()">✕</button>
     </div>
-    <div class="modal-body" id="cartItems">
-      <!-- Wird dynamisch gefüllt -->
-    </div>
+    <div class="modal-body" id="cartItems"></div>
     <div class="modal-footer">
       <div class="modal-total">
         <span>Gesamt:</span>
@@ -814,7 +1184,6 @@ input:focus, textarea:focus {
   </div>
 </div>
 
-<!-- Checkout Modal -->
 <div class="modal" id="checkoutModal">
   <div class="modal-content">
     <div class="modal-header">
@@ -822,7 +1191,6 @@ input:focus, textarea:focus {
       <button class="modal-close" onclick="closeCheckout()">✕</button>
     </div>
     <div class="modal-body">
-      <!-- Kontaktdaten -->
       <div class="checkout-section">
         <h3>📱 Kontaktdaten</h3>
         <input type="text" id="customerName" placeholder="Dein Name" required>
@@ -830,7 +1198,6 @@ input:focus, textarea:focus {
         <textarea id="customerNotes" placeholder="Anmerkungen zur Bestellung (optional)" rows="3"></textarea>
       </div>
 
-      <!-- Abholzeit -->
       <div class="checkout-section">
         <h3>🕐 Abholzeit</h3>
         <div class="pickup-time-options">
@@ -850,15 +1217,11 @@ input:focus, textarea:focus {
         </div>
       </div>
 
-      <!-- Bestellübersicht -->
       <div class="checkout-section">
         <h3>📦 Deine Bestellung</h3>
-        <div class="order-summary" id="checkoutSummary">
-          <!-- Wird dynamisch gefüllt -->
-        </div>
+        <div class="order-summary" id="checkoutSummary"></div>
       </div>
 
-      <!-- Zahlungsart -->
       <div class="checkout-section">
         <h3>💳 Zahlungsart</h3>
         <div class="payment-options">
@@ -881,7 +1244,6 @@ input:focus, textarea:focus {
   </div>
 </div>
 
-<!-- Erfolgs-Modal -->
 <div class="success-modal" id="successModal">
   <div class="success-content">
     <div class="success-icon">✅</div>
@@ -895,420 +1257,391 @@ input:focus, textarea:focus {
       <div class="order-number-value" id="orderNumber">#0000</div>
     </div>
     
-    <!-- QR Code Section -->
     <div style="background: white; border: 3px solid #E31E24; border-radius: 16px; padding: 20px; margin: 20px 0;">
       <div style="font-size: 14px; font-weight: 600; color: #666; margin-bottom: 12px;">
         🎁 Zeige diesen Code beim Abholen
       </div>
-      <div id="qrCodeContainer" style="display: flex; justify-content: center; margin: 16px 0;">
-        <!-- QR Code wird hier eingefügt -->
-      </div>
-      <div style="font-size: 36px; font-weight: 700; color: #E31E24; font-family: 'Courier New', monospace; letter-spacing: 4px; text-align: center;" id="orderQRID">
-        0000
-      </div>
+      <div id="qrCodeContainer" style="display: flex; justify-content: center; margin: 16px 0;"></div>
+      <div style="font-size: 36px; font-weight: 700; color: #E31E24; font-family: 'Courier New', monospace; letter-spacing: 4px; text-align: center;" id="orderQRID">0000</div>
       <div style="font-size: 12px; color: #666; text-align: center; margin-top: 8px;">
         → Punkte werden automatisch gutgeschrieben
       </div>
     </div>
     
-    <button class="add-btn" onclick="closeSuccess()">
-      Neue Bestellung
-    </button>
+    <button class="add-btn" onclick="closeSuccess()">Neue Bestellung</button>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ===== SUPABASE KONFIGURATION =====
-// WICHTIG: Ersetze diese Werte mit deinen echten Supabase-Credentials!
-const supabaseUrl = 'DEINE_SUPABASE_URL_HIER'
-const supabaseKey = 'DEIN_ANON_KEY_HIER'
+const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
-// Prüfe ob echte Credentials vorhanden sind
-let supabase = null
-let isDemoMode = false
+let currentCustomer = null
+let refreshInterval = null
+let refreshErrorCount = 0
+const MAX_REFRESH_ERRORS = 3
 
-if (supabaseUrl.startsWith('http') && !supabaseUrl.includes('DEINE')) {
-  try {
-    supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
-    console.log('✅ Supabase verbunden')
-  } catch (error) {
-    console.error('❌ Supabase Fehler:', error)
-    isDemoMode = true
-  }
-} else {
-  console.warn('⚠️ DEMO-MODUS: Supabase Credentials fehlen. Bestellungen werden NICHT gespeichert.')
-  isDemoMode = true
+function normalizePhone(phone) {
+  let normalized = phone.replace(/[\s\-\(\)]/g, '')
+  if (normalized.startsWith('+')) normalized = normalized.substring(1)
+  if (normalized.startsWith('00')) normalized = normalized.substring(2)
+  if (normalized.startsWith('49') && normalized.length > 10) normalized = '0' + normalized.substring(2)
+  if (!normalized.startsWith('0') && normalized.length >= 10) normalized = '0' + normalized
+  return normalized
 }
 
-// ===== PRODUKT-DATEN =====
-const products = [
-  {
-    id: 'doener',
-    name: 'Döner',
-    price: 6.00,
-    description: 'Klassischer Döner im Fladenbrot',
-    defaultSauce: 2, // 2x Knoblauch
-    options: {
-      fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
-      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
-      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
-    },
-    extras: [
-      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
-      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
-    ]
-  },
-  {
-    id: 'doener-xl',
-    name: 'Döner XL',
-    price: 8.00,
-    description: 'Extra großer Döner für großen Hunger',
-    defaultSauce: 2,
-    options: {
-      fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
-      kaese: { label: 'Käse', choices: [0, 1], default: 0 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
-      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
-      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
-    },
-    extras: [
-      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
-      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
-    ]
-  },
-  {
-    id: 'doener-box',
-    name: 'Döner Box',
-    price: 7.00,
-    description: 'Dönerfleisch mit Pommes in der Box',
-    defaultSauce: 2,
-    options: {
-      fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
-      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 }
-    },
-    extras: [
-      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
-      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
-    ]
-  },
-  {
-    id: 'dueruem',
-    name: 'Dürüm Döner',
-    price: 7.00,
-    description: 'Döner gerollt im dünnen Fladenbrot',
-    defaultSauce: 2,
-    options: {
-      fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
-      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
-      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
-    },
-    extras: [
-      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
-      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
-    ]
-  },
-  {
-    id: 'lahmacun',
-    name: 'Lahmacun',
-    price: 4.00,
-    description: 'Türkische Pizza',
-    defaultSauce: 2,
-    options: {
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
-      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
-      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
-    },
-    extras: [
-      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
-    ]
-  },
-  {
-    id: 'lahmacun-spezial',
-    name: 'Lahmacun Spezial',
-    price: 8.00,
-    description: 'Lahmacun mit Dönerfleisch',
-    defaultSauce: 2,
-    options: {
-      fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
-      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
-      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
-    },
-    extras: [
-      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
-      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
-    ]
-  },
-  {
-    id: 'doener-teller',
-    name: 'Döner Teller',
-    price: 10.00,
-    description: 'Dönerfleisch mit Pommes und Salat auf dem Teller',
-    defaultSauce: 2,
-    options: {
-      fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
-      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
-      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
-      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
-    },
-    extras: [
-      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
-      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
-    ]
-  },
-  {
-    id: 'rindswurst-broetchen',
-    name: 'Rindswurst im Brötchen',
-    price: 3.50,
-    description: 'Gegrillte Rindswurst im frischen Brötchen',
-    options: {
-      ketchup: { label: 'Ketchup', choices: [0, 1], default: 1 }
-    },
-    extras: []
-  },
-  {
-    id: 'curry-rindswurst',
-    name: 'Curry Rindswurst mit Pommes',
-    price: 6.90,
-    description: 'Currywurst mit knusprigen Pommes',
-    options: {
-      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
-      currysauce: { label: 'Currysauce', choices: [0, 1], default: 1 },
-      mayo: { label: 'Mayonnaise', choices: [0, 1], default: 0 }
-    },
-    extras: []
-  },
-  {
-    id: 'koefte-brot',
-    name: 'Köfte im Brot (5 Stk.)',
-    price: 6.00,
-    description: 'Gegrillte Hackfleischbällchen im Fladenbrot',
-    defaultSauce: 2,
-    options: {
-      koefte: { label: 'Köfte', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
-      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
-      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
-    },
-    extras: [
-      { id: 'extraKoefte', name: 'Extra Köfte', price: 2.00 },
-      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
-    ]
-  },
-  {
-    id: 'koefte-teller',
-    name: 'Köfte Teller (7 Stk.)',
-    price: 11.00,
-    description: 'Gegrillte Hackfleischbällchen mit Pommes und Salat',
-    defaultSauce: 2,
-    options: {
-      koefte: { label: 'Köfte', choices: [0, 1], default: 1 },
-      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
-      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
-      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
-    },
-    extras: [
-      { id: 'extraKoefte', name: 'Extra Köfte', price: 2.00 },
-      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
-    ]
-  },
-  {
-    id: 'chicken-nuggets',
-    name: 'Chicken Nuggets (6 Stk.)',
-    price: 6.00,
-    description: 'Knusprige Chicken Nuggets mit Pommes',
-    options: {
-      nuggets: { label: 'Chicken Nuggets', choices: [0, 1], default: 1 },
-      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
-      ketchup: { label: 'Ketchup', choices: [0, 1], default: 1 },
-      mayo: { label: 'Mayonnaise', choices: [0, 1], default: 0 }
-    },
-    extras: [
-      { id: 'extraNuggets', name: 'Extra Nuggets (3 Stk.)', price: 2.00 }
-    ]
-  },
-  {
-    id: 'crispy-chicken-burger',
-    name: 'Crispy Chicken Burger',
-    price: 4.00,
-    description: 'Knuspriger Chicken Burger',
-    options: {
-      mayo: { label: 'Mayonnaise', choices: [0, 1], default: 1 },
-      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
-      tomate: { label: 'Tomate', choices: [0, 1], default: 1 }
-    },
-    extras: []
-  },
-  {
-    id: 'pommes',
-    name: 'Pommes',
-    price: 3.50,
-    description: 'Knusprige Pommes Frites',
-    options: {
-      sauce: { label: 'Sauce', choices: ['Ohne', 'Ketchup', 'Mayonnaise'], default: 'Ketchup' }
-    },
-    extras: [
-      { id: 'extraKetchup', name: 'Extra Ketchup', price: 0.30 },
-      { id: 'extraMayo', name: 'Extra Mayonnaise', price: 0.30 }
-    ]
-  },
-  {
-    id: 'ayran',
-    name: 'Ayran (0,25 l)',
-    price: 1.50,
-    description: 'Erfrischendes türkisches Joghurtgetränk',
-    vatRate: 19,
-    options: {},
-    extras: []
-  },
-  {
-    id: 'wasser',
-    name: 'Wasser still (0,5 l)',
-    price: 1.50,
-    description: 'Stilles Mineralwasser (inkl. Pfand)',
-    vatRate: 19,
-    options: {},
-    extras: []
-  },
-  {
-    id: 'cola',
-    name: 'Cola (0,33 l)',
-    price: 2.00,
-    description: 'Coca Cola (inkl. Pfand)',
-    vatRate: 19,
-    options: {},
-    extras: []
-  },
-  {
-    id: 'fanta',
-    name: 'Fanta (0,33 l)',
-    price: 2.00,
-    description: 'Fanta Orange (inkl. Pfand)',
-    vatRate: 19,
-    options: {},
-    extras: []
-  },
-  {
-    id: 'cola-zero',
-    name: 'Cola Zero (0,33 l)',
-    price: 2.00,
-    description: 'Coca Cola Zero (inkl. Pfand)',
-    vatRate: 19,
-    options: {},
-    extras: []
+function showScreen(screenName) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
+  document.getElementById(`screen-${screenName}`).classList.add('active')
+}
+
+function showResult(elementId, message, type) {
+  const el = document.getElementById(elementId)
+  if (!message) { el.className = ''; el.innerHTML = ''; return }
+  el.className = `result ${type}`
+  el.innerHTML = message
+}
+
+async function generateUniqueCode(table, column) {
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const code = Math.floor(1000 + Math.random() * 9000).toString()
+    const { data, error } = await supabase.from(table).select(column).eq(column, code).limit(1)
+    if (error) { console.error('Code check error:', error); continue }
+    if (!data || data.length === 0) return code
+    console.log(`⚠️ Code ${code} existiert bereits, versuche neuen...`)
   }
+  return Date.now().toString().slice(-4)
+}
+
+async function register() {
+  const name = document.getElementById('reg-name').value.trim()
+  const phoneRaw = document.getElementById('reg-phone').value.trim()
+  
+  if (!name || !phoneRaw) { showResult('reg-result', '❌ Bitte Name und Handynummer eingeben!', 'error'); return }
+  
+  const phone = normalizePhone(phoneRaw)
+  
+  if (!/^\d+$/.test(phone)) { showResult('reg-result', '❌ Ungültige Handynummer!', 'error'); return }
+  if (phone.length < 10 || phone.length > 17) { showResult('reg-result', '❌ Telefonnummer muss 10-17 Ziffern haben!', 'error'); return }
+  
+  try {
+    showResult('reg-result', '⏳ Wird registriert...', 'info')
+    
+    const { data: existing } = await supabase.from('customers').select('*').eq('phone', phone).limit(1)
+    
+    if (existing && existing.length > 0) { showResult('reg-result', '❌ Diese Nummer ist bereits registriert!', 'error'); return }
+    
+    const qrId = Math.floor(100000 + Math.random() * 900000).toString()
+    
+    const { data, error } = await supabase.from('customers').insert({ qr_id: qrId, name: name, phone: phone, points: 0 }).select().single()
+    
+    if (error) throw error
+    
+    showResult('reg-result', '✅ Erfolgreich registriert!', 'success')
+    setTimeout(() => {
+      localStorage.setItem('customerData', JSON.stringify(data))
+      loadCustomer(data)
+    }, 1000)
+    
+  } catch (e) {
+    showResult('reg-result', '❌ Fehler: ' + e.message, 'error')
+    console.error('Registration error:', e)
+  }
+}
+
+async function login() {
+  const phoneRaw = document.getElementById('login-phone').value.trim()
+  if (!phoneRaw) { showResult('login-result', '❌ Bitte Handynummer eingeben!', 'error'); return }
+  
+  const phone = normalizePhone(phoneRaw)
+  
+  try {
+    showResult('login-result', '⏳ Suche Konto...', 'info')
+    const { data: customers, error } = await supabase.from('customers').select('*').eq('phone', phone).limit(1)
+    if (error) throw error
+    if (!customers || customers.length === 0) { showResult('login-result', '❌ Handynummer nicht gefunden!', 'error'); return }
+    
+    showResult('login-result', '✅ Erfolgreich angemeldet!', 'success')
+    setTimeout(() => {
+      localStorage.setItem('customerData', JSON.stringify(customers[0]))
+      loadCustomer(customers[0])
+    }, 500)
+    
+  } catch (e) {
+    showResult('login-result', '❌ Fehler: ' + e.message, 'error')
+    console.error('Login error:', e)
+  }
+}
+
+async function loadCustomer(customer) {
+  if (!customer || !customer.id) { console.error('❌ Ungültiger Kunde übergeben'); logout(); return }
+  
+  currentCustomer = customer
+  refreshErrorCount = 0
+  
+  try {
+    await refreshCustomerData()
+    
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${customer.qr_id}`
+    document.getElementById('header-qr-mini').src = qrUrl
+    document.getElementById('modal-qr').src = qrUrl
+    document.getElementById('modal-qr-id').textContent = customer.qr_id
+    
+    showScreen('app')
+    
+    if (refreshInterval) clearInterval(refreshInterval)
+    refreshInterval = setInterval(refreshCustomerData, 5000)
+    
+    loadPendingCodes()
+    
+  } catch (e) {
+    console.error('❌ Fehler beim Laden des Kunden:', e)
+    alert('❌ Fehler beim Laden. Bitte neu anmelden.')
+    logout()
+  }
+}
+
+async function refreshCustomerData() {
+  if (!currentCustomer || !currentCustomer.id) { console.error('❌ Kein currentCustomer oder ID fehlt'); return }
+  
+  try {
+    const { data, error } = await supabase.from('customers').select('*').eq('id', currentCustomer.id).maybeSingle()
+    
+    if (error) { 
+      console.error('❌ Supabase error:', error)
+      refreshErrorCount++
+      if (refreshErrorCount >= MAX_REFRESH_ERRORS) {
+        if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null }
+        alert('❌ Verbindungsfehler. Bitte neu anmelden.')
+        logout()
+      }
+      return
+    }
+    
+    if (!data) { 
+      console.error('❌ Kunde nicht mehr in Datenbank')
+      if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null }
+      alert('⚠️ Dein Account wurde gelöscht. Bitte neu registrieren.')
+      logout()
+      return
+    }
+    
+    refreshErrorCount = 0
+    currentCustomer = data
+    document.getElementById('app-points').textContent = data.points
+    updateRewardButtons(data.points)
+    localStorage.setItem('customerData', JSON.stringify(data))
+    
+  } catch (e) { 
+    console.error('❌ Refresh error:', e)
+    if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null }
+    alert('❌ Fehler beim Laden. Bitte neu anmelden.')
+    logout()
+  }
+}
+
+function openQRModal() {
+  document.getElementById('qr-modal').classList.add('active')
+  document.body.style.overflow = 'hidden'
+}
+
+function closeQRModal(event) {
+  if (!event || event.target.id === 'qr-modal') {
+    document.getElementById('qr-modal').classList.remove('active')
+    document.body.style.overflow = 'auto'
+  }
+}
+
+function updateRewardButtons(points) {
+  document.getElementById('btn-250').disabled = points < 250
+  document.getElementById('btn-500').disabled = points < 500
+  document.getElementById('btn-750').disabled = points < 750
+  document.getElementById('btn-1000').disabled = points < 1000
+  document.getElementById('btn-1250').disabled = points < 1250
+}
+
+let redeemInProgress = {}
+
+async function redeem(rewardName, cost) {
+  if (!currentCustomer || currentCustomer.points < cost) {
+    alert('❌ Nicht genug Punkte!')
+    return
+  }
+  
+  if (redeemInProgress['any']) {
+    console.log('⏳ Einlösung bereits in Bearbeitung...')
+    return
+  }
+  
+  try {
+    redeemInProgress['any'] = true
+    
+    const btn = document.getElementById(`btn-${cost}`)
+    if (btn) {
+      btn.disabled = true
+      btn.textContent = '⏳ Wird erstellt...'
+    }
+    
+    const { data: existingCodes } = await supabase
+      .from('redeem_codes')
+      .select('*')
+      .eq('customer_id', currentCustomer.id)
+      .eq('used', false)
+    
+    if (existingCodes && existingCodes.length > 0) {
+      alert(`❌ Du hast bereits wartende Codes! Bitte löse sie zuerst ein.`)
+      throw new Error('Existing pending codes')
+    }
+    
+    const code = await generateUniqueCode('redeem_codes', 'code')
+    const expires = new Date(Date.now() + 24*60*60*1000)
+    
+    const { error: insertError } = await supabase
+      .from('redeem_codes')
+      .insert({ 
+        code, 
+        customer_id: currentCustomer.id, 
+        reward_name: rewardName, 
+        points_cost: cost, 
+        valid_until: expires.toISOString(), 
+        used: false 
+      })
+    
+    if (insertError) throw insertError
+    
+    if (btn) btn.textContent = '✅ Code erstellt!'
+    
+    await loadPendingCodes()
+    await refreshCustomerData()
+    
+    setTimeout(() => {
+      if (btn) {
+        btn.disabled = false
+        btn.textContent = 'Einlösen'
+      }
+      redeemInProgress['any'] = false
+    }, 2000)
+    
+  } catch (e) {
+    console.error('❌ Redeem error:', e)
+    const btn = document.getElementById(`btn-${cost}`)
+    if (btn) {
+      btn.disabled = false
+      btn.textContent = 'Einlösen'
+    }
+    redeemInProgress['any'] = false
+    if (e.message !== 'Existing pending codes') {
+      alert('❌ Fehler beim Erstellen des Codes.')
+    }
+  }
+}
+
+async function loadPendingCodes() {
+  if (!currentCustomer) return
+  try {
+    const { data, error } = await supabase.from('redeem_codes').select('*').eq('customer_id', currentCustomer.id).eq('used', false).order('created_at', { ascending: false })
+    if (error) throw error
+    const section = document.getElementById('pending-section')
+    const list = document.getElementById('pending-list')
+    if (!data || data.length === 0) { section.style.display = 'none'; return }
+    section.style.display = 'block'
+    list.innerHTML = data.map(item => {
+      const expires = new Date(item.valid_until).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+      return `<div class="pending-code"><h3>🎁 ${item.reward_name}</h3><div class="code">${item.code}</div><div class="code-info">Gültig bis: ${expires}<br>Kosten: ${item.points_cost} Punkte</div><button class="small" style="background: #ef4444;" onclick="cancelCode('${item.code}')">🗑️ Stornieren</button></div>`
+    }).join('')
+  } catch (e) { console.error('Load pending error:', e) }
+}
+
+async function cancelCode(code) {
+  if (!confirm('Code wirklich stornieren?')) return
+  try { await supabase.from('redeem_codes').delete().eq('code', code).eq('used', false); loadPendingCodes() } catch (e) { console.error('Cancel error:', e) }
+}
+
+function logout() {
+  if (refreshInterval) clearInterval(refreshInterval)
+  refreshErrorCount = 0
+  currentCustomer = null
+  localStorage.removeItem('customerData')
+  showScreen('start')
+}
+
+window.onload = () => {
+  const stored = localStorage.getItem('customerData')
+  if (stored) {
+    try {
+      const customer = JSON.parse(stored)
+      if (customer && customer.id && customer.qr_id) {
+        loadCustomer(customer)
+      }
+    } catch (e) { 
+      console.error('❌ Fehler beim Laden:', e)
+      localStorage.removeItem('customerData')
+    }
+  }
+}
+
+const products = [
+  { id: 'doener', name: 'Döner', price: 6.00, description: 'Klassischer Döner im Fladenbrot', vatRate: 7, defaultSauce: 2, options: { fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 }, knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 }, scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 }, salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 }, tomate: { label: 'Tomate', choices: [0, 1], default: 1 }, zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 }, weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 }, rot: { label: 'Rotkraut', choices: [0, 1], default: 1 } }, extras: [ { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 }, { id: 'extraKaese', name: 'Extra Käse', price: 1.00 }, { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 }, { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 } ] },
+  { id: 'doener-xl', name: 'Döner XL', price: 8.00, description: 'Extra großer Döner für großen Hunger', vatRate: 7, defaultSauce: 2, options: { fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 }, kaese: { label: 'Käse', choices: [0, 1], default: 0 }, knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 }, scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 }, salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 }, tomate: { label: 'Tomate', choices: [0, 1], default: 1 }, zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 }, weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 }, rot: { label: 'Rotkraut', choices: [0, 1], default: 1 } }, extras: [ { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 }, { id: 'extraKaese', name: 'Extra Käse', price: 1.00 }, { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 }, { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 } ] },
+  { id: 'doener-box', name: 'Döner Box', price: 7.00, description: 'Dönerfleisch mit Pommes in der Box', vatRate: 7, defaultSauce: 2, options: { fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 }, pommes: { label: 'Pommes', choices: [0, 1], default: 1 }, knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 }, scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 } }, extras: [ { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 }, { id: 'extraKaese', name: 'Extra Käse', price: 1.00 }, { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 }, { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 } ] },
+  { id: 'dueruem', name: 'Dürüm Döner', price: 7.00, description: 'Döner gerollt im dünnen Fladenbrot', vatRate: 7, defaultSauce: 2, options: { fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 }, knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 }, scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 }, salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 }, tomate: { label: 'Tomate', choices: [0, 1], default: 1 }, zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 }, weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 }, rot: { label: 'Rotkraut', choices: [0, 1], default: 1 } }, extras: [ { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 }, { id: 'extraKaese', name: 'Extra Käse', price: 1.00 }, { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 }, { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 } ] },
+  { id: 'doener-teller', name: 'Döner Teller', price: 10.00, description: 'Dönerfleisch mit Pommes und Salat auf dem Teller', vatRate: 7, defaultSauce: 2, options: { fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 }, pommes: { label: 'Pommes', choices: [0, 1], default: 1 }, knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 }, scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 }, salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 }, tomate: { label: 'Tomate', choices: [0, 1], default: 1 }, zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 }, weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 }, rot: { label: 'Rotkraut', choices: [0, 1], default: 1 } }, extras: [ { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 }, { id: 'extraKaese', name: 'Extra Käse', price: 1.00 }, { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 }, { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 } ] },
+  { id: 'lahmacun', name: 'Lahmacun', price: 4.00, description: 'Türkische Pizza', vatRate: 7, defaultSauce: 2, options: { knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 }, scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 }, salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 }, tomate: { label: 'Tomate', choices: [0, 1], default: 1 }, zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 }, weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 }, rot: { label: 'Rotkraut', choices: [0, 1], default: 1 } }, extras: [ { id: 'extraKaese', name: 'Extra Käse', price: 1.00 }, { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 }, { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 } ] },
+  { id: 'lahmacun-spezial', name: 'Lahmacun Spezial', price: 8.00, description: 'Lahmacun mit Dönerfleisch', vatRate: 7, defaultSauce: 2, options: { fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 }, knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 }, scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 }, salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 }, tomate: { label: 'Tomate', choices: [0, 1], default: 1 }, zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 }, weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 }, rot: { label: 'Rotkraut', choices: [0, 1], default: 1 } }, extras: [ { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 }, { id: 'extraKaese', name: 'Extra Käse', price: 1.00 }, { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 }, { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 } ] },
+  { id: 'koefte-brot', name: 'Köfte im Brot (5 Stk.)', price: 6.00, description: 'Gegrillte Hackfleischbällchen im Fladenbrot', vatRate: 7, defaultSauce: 2, options: { koefte: { label: 'Köfte', choices: [0, 1], default: 1 }, knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 }, scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 }, salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 }, tomate: { label: 'Tomate', choices: [0, 1], default: 1 }, zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 }, weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 }, rot: { label: 'Rotkraut', choices: [0, 1], default: 1 } }, extras: [ { id: 'extraKoefte', name: 'Extra Köfte', price: 2.00 }, { id: 'extraKaese', name: 'Extra Käse', price: 1.00 }, { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 }, { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 } ] },
+  { id: 'koefte-teller', name: 'Köfte Teller (7 Stk.)', price: 11.00, description: 'Gegrillte Hackfleischbällchen mit Pommes und Salat', vatRate: 7, defaultSauce: 2, options: { koefte: { label: 'Köfte', choices: [0, 1], default: 1 }, pommes: { label: 'Pommes', choices: [0, 1], default: 1 }, knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 }, scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 }, salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 }, tomate: { label: 'Tomate', choices: [0, 1], default: 1 }, zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 }, weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 }, rot: { label: 'Rotkraut', choices: [0, 1], default: 1 } }, extras: [ { id: 'extraKoefte', name: 'Extra Köfte', price: 2.00 }, { id: 'extraKaese', name: 'Extra Käse', price: 1.00 }, { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 }, { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 } ] },
+  { id: 'rindswurst-broetchen', name: 'Rindswurst im Brötchen', price: 3.50, description: 'Gegrillte Rindswurst im frischen Brötchen', vatRate: 7, options: { ketchup: { label: 'Ketchup', choices: [0, 1], default: 1 } }, extras: [] },
+  { id: 'curry-rindswurst', name: 'Curry Rindswurst mit Pommes', price: 6.90, description: 'Currywurst mit knusprigen Pommes', vatRate: 7, options: { pommes: { label: 'Pommes', choices: [0, 1], default: 1 }, currysauce: { label: 'Currysauce', choices: [0, 1], default: 1 }, mayo: { label: 'Mayonnaise', choices: [0, 1], default: 0 } }, extras: [] },
+  { id: 'chicken-nuggets', name: 'Chicken Nuggets (6 Stk.)', price: 6.00, description: 'Knusprige Chicken Nuggets mit Pommes', vatRate: 7, options: { nuggets: { label: 'Chicken Nuggets', choices: [0, 1], default: 1 }, pommes: { label: 'Pommes', choices: [0, 1], default: 1 }, ketchup: { label: 'Ketchup', choices: [0, 1], default: 1 }, mayo: { label: 'Mayonnaise', choices: [0, 1], default: 0 } }, extras: [ { id: 'extraNuggets', name: 'Extra Nuggets (3 Stk.)', price: 2.00 } ] },
+  { id: 'crispy-chicken-burger', name: 'Crispy Chicken Burger', price: 4.00, description: 'Knuspriger Chicken Burger', vatRate: 7, options: { mayo: { label: 'Mayonnaise', choices: [0, 1], default: 1 }, salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 }, tomate: { label: 'Tomate', choices: [0, 1], default: 1 } }, extras: [] },
+  { id: 'pommes', name: 'Pommes', price: 3.50, description: 'Knusprige Pommes Frites', vatRate: 7, options: { sauce: { label: 'Sauce', choices: ['Ohne', 'Ketchup', 'Mayonnaise'], default: 'Ketchup' } }, extras: [ { id: 'extraKetchup', name: 'Extra Ketchup', price: 0.30 }, { id: 'extraMayo', name: 'Extra Mayonnaise', price: 0.30 } ] },
+  { id: 'ayran', name: 'Ayran (0,25 l)', price: 1.50, description: 'Erfrischendes türkisches Joghurtgetränk', vatRate: 19, options: {}, extras: [] },
+  { id: 'wasser', name: 'Wasser still (0,5 l)', price: 1.50, description: 'Stilles Mineralwasser (inkl. Pfand)', vatRate: 19, options: {}, extras: [] },
+  { id: 'cola', name: 'Cola (0,33 l)', price: 2.00, description: 'Coca Cola (inkl. Pfand)', vatRate: 19, options: {}, extras: [] },
+  { id: 'fanta', name: 'Fanta (0,33 l)', price: 2.00, description: 'Fanta Orange (inkl. Pfand)', vatRate: 19, options: {}, extras: [] },
+  { id: 'cola-zero', name: 'Cola Zero (0,33 l)', price: 2.00, description: 'Coca Cola Zero (inkl. Pfand)', vatRate: 19, options: {}, extras: [] }
 ]
 
-// ===== STATE =====
 let cart = []
 let currentProduct = null
 let currentCustomization = {}
 let selectedPayment = null
-let selectedPickupTime = 'now' // 'now' oder 'later'
-let selectedPickupTimeValue = null // Uhrzeit wenn 'later'
+let selectedPickupTime = 'now'
+let selectedPickupTimeValue = null
 
-// ===== INITIALISIERUNG =====
-function init() {
+function openOrderModal() {
+  if (!currentCustomer) {
+    alert('❌ Bitte melde dich erst an!')
+    return
+  }
+  
+  document.getElementById('order-section').style.display = 'block'
+  document.getElementById('screen-app').style.display = 'none'
+  document.body.style.overflow = 'auto'
+  window.scrollTo(0, 0)
+  
   renderProducts()
 }
 
-// ===== PRODUKTE RENDERN =====
+function closeOrderModal() {
+  document.getElementById('order-section').style.display = 'none'
+  document.getElementById('screen-app').style.display = 'block'
+  window.scrollTo(0, 0)
+}
+
 function renderProducts() {
   const container = document.getElementById('products')
   
-  // Gruppiere Produkte nach Kategorien
   const categories = [
-    {
-      name: '🌯 Döner & Dürüm',
-      ids: ['doener', 'doener-xl', 'dueruem', 'doener-box', 'doener-teller'],
-      open: true // Erste Kategorie standardmäßig offen
-    },
-    {
-      name: '🥙 Lahmacun',
-      ids: ['lahmacun', 'lahmacun-spezial'],
-      open: false
-    },
-    {
-      name: '🍖 Köfte',
-      ids: ['koefte-brot', 'koefte-teller'],
-      open: false
-    },
-    {
-      name: '🌭 Wurst',
-      ids: ['rindswurst-broetchen', 'curry-rindswurst'],
-      open: false
-    },
-    {
-      name: '🍗 Chicken',
-      ids: ['chicken-nuggets', 'crispy-chicken-burger'],
-      open: false
-    },
-    {
-      name: '🍟 Beilagen',
-      ids: ['pommes'],
-      open: false
-    },
-    {
-      name: '🥤 Getränke',
-      ids: ['ayran', 'wasser', 'cola', 'fanta', 'cola-zero'],
-      open: false
-    }
+    { name: '🌯 Döner & Dürüm', ids: ['doener', 'doener-xl', 'dueruem', 'doener-box', 'doener-teller'], open: true },
+    { name: '🥙 Lahmacun', ids: ['lahmacun', 'lahmacun-spezial'], open: false },
+    { name: '🍖 Köfte', ids: ['koefte-brot', 'koefte-teller'], open: false },
+    { name: '🌭 Wurst', ids: ['rindswurst-broetchen', 'curry-rindswurst'], open: false },
+    { name: '🍗 Chicken', ids: ['chicken-nuggets', 'crispy-chicken-burger'], open: false },
+    { name: '🍟 Beilagen', ids: ['pommes'], open: false },
+    { name: '🥤 Getränke', ids: ['ayran', 'wasser', 'cola', 'fanta', 'cola-zero'], open: false }
   ]
   
   let html = ''
@@ -1367,7 +1700,6 @@ function toggleCategory(index) {
   }
 }
 
-// ===== ANPASSUNGS-MODAL ÖFFNEN =====
 function openCustomize(productId) {
   currentProduct = products.find(p => p.id === productId)
   currentCustomization = {
@@ -1376,12 +1708,10 @@ function openCustomize(productId) {
     extras: []
   }
   
-  // Standardwerte setzen
   Object.keys(currentProduct.options).forEach(key => {
     currentCustomization.options[key] = currentProduct.options[key].default
   })
   
-  // Wenn Produkt keine Optionen hat, direkt zum Warenkorb hinzufügen
   if (Object.keys(currentProduct.options).length === 0 && currentProduct.extras.length === 0) {
     addToCart()
     return
@@ -1397,110 +1727,82 @@ function closeCustomizeModal() {
   currentCustomization = {}
 }
 
-// ===== ANPASSUNGS-MODAL RENDERN =====
 function renderCustomizeModal() {
   document.getElementById('modalTitle').textContent = currentProduct.name
   
-  let optionsHtml = ''
+  let html = ''
   
-  // Berechne aktuelle Sauce-Summe für Sauce-Limit
   const currentKnoblauch = currentCustomization.options['knoblauch'] || 0
   const currentScharf = currentCustomization.options['scharf'] || 0
   const totalSauce = currentKnoblauch + currentScharf
   
-  // Optionen rendern
   Object.keys(currentProduct.options).forEach(key => {
     const option = currentProduct.options[key]
     const isSauce = key === 'knoblauch' || key === 'scharf'
-    const hasStringChoices = Array.isArray(option.choices) && typeof option.choices[0] === 'string'
     
-    optionsHtml += `
-      <div class="option-group">
-        <label class="option-label">
-          ${option.label}
-          ${isSauce ? '<span style="font-size: 12px; color: #666; font-weight: 400;"> (Max. 2 Portionen gesamt)</span>' : ''}
-        </label>
-        <div class="option-buttons">
-          ${option.choices.map(choice => {
-            let disabled = false
-            let displayText = ''
-            let isActive = false
-            
-            if (hasStringChoices) {
-              // String-basierte Auswahl (z.B. Cola, Fanta, etc.)
-              displayText = choice
-              isActive = currentCustomization.options[key] === choice
-            } else {
-              // Numerische Auswahl (0, 1, 2)
-              displayText = choice === 0 ? 'Ohne' : choice === 1 ? '1x' : '2x'
-              isActive = currentCustomization.options[key] === choice
-              
-              // Disable Sauce-Buttons wenn Maximum überschritten würde
-              if (isSauce && choice > 0) {
-                const otherSauce = key === 'knoblauch' ? 'scharf' : 'knoblauch'
-                const otherValue = currentCustomization.options[otherSauce] || 0
-                disabled = (choice + otherValue > 2)
-              }
-            }
-            
-            const choiceValue = hasStringChoices ? `'${choice}'` : choice
-            
-            return `
-              <button class="option-btn ${isActive ? 'active' : ''} ${disabled ? 'disabled' : ''}" 
-                      onclick="selectOption('${key}', ${choiceValue})"
-                      ${disabled ? 'disabled' : ''}>
-                ${displayText}
-              </button>
-            `
-          }).join('')}
-        </div>
-      </div>
-    `
+    html += `<div class="option-group">
+      <label class="option-label">
+        ${option.label}
+        ${isSauce ? '<span style="font-size: 12px; color: #666; font-weight: 400;"> (Max. 2 Portionen gesamt)</span>' : ''}
+      </label>
+      <div class="option-buttons">`
+    
+    if (Array.isArray(option.choices)) {
+      option.choices.forEach(choice => {
+        const isActive = currentCustomization.options[key] === choice ? 'active' : ''
+        
+        let label, choiceValue, disabled = false
+        if (typeof choice === 'number') {
+          label = choice === 0 ? 'Ohne' : choice === 1 ? '1x' : '2x'
+          choiceValue = choice
+          
+          if (isSauce && choice > 0) {
+            const otherSauce = key === 'knoblauch' ? 'scharf' : 'knoblauch'
+            const otherValue = currentCustomization.options[otherSauce] || 0
+            disabled = (choice + otherValue > 2)
+          }
+        } else {
+          label = choice
+          choiceValue = `'${choice}'`
+        }
+        
+        html += `<button class="option-btn ${isActive} ${disabled ? 'disabled' : ''}" 
+                        onclick="selectOption('${key}', ${choiceValue})"
+                        ${disabled ? 'disabled' : ''}>${label}</button>`
+      })
+    }
+    
+    html += `</div></div>`
   })
   
-  // Extras rendern
-  optionsHtml += `
-    <div class="option-group">
-      <label class="option-label">Extras hinzufügen</label>
-      ${currentProduct.extras.map(extra => `
-        <div class="extra-item ${currentCustomization.extras.includes(extra.id) ? 'selected' : ''}" 
-             onclick="toggleExtra('${extra.id}')">
-          <div class="extra-info">
-            <div class="extra-name">${extra.name}</div>
-          </div>
-          <div class="extra-price">+ ${formatPrice(extra.price)}</div>
+  if (currentProduct.extras.length > 0) {
+    html += `<div class="option-group"><label class="option-label">Extras hinzufügen</label>`
+    currentProduct.extras.forEach(extra => {
+      const isSelected = currentCustomization.extras.includes(extra.id) ? 'selected' : ''
+      html += `<div class="extra-item ${isSelected}" onclick="toggleExtra('${extra.id}')">
+        <div class="extra-info">
+          <div class="extra-name">${extra.name}</div>
         </div>
-      `).join('')}
-    </div>
-  `
+        <div class="extra-price">+ ${formatPrice(extra.price)}</div>
+      </div>`
+    })
+    html += `</div>`
+  }
   
-  document.getElementById('modalBody').innerHTML = optionsHtml
-  updateModalTotal()
+  document.getElementById('modalBody').innerHTML = html
+  updateCustomizePrice()
 }
 
 function selectOption(key, value) {
-  // Spezielle Logik für Saucen: Maximal 2 Portionen INSGESAMT
   if (key === 'knoblauch' || key === 'scharf') {
     const otherSauce = key === 'knoblauch' ? 'scharf' : 'knoblauch'
     const otherValue = currentCustomization.options[otherSauce] || 0
     
-    // Prüfe ob Gesamt-Saucen-Anzahl > 2 wäre
     if (value + otherValue > 2) {
-      // Reduziere die andere Sauce automatisch
       const maxOther = 2 - value
       currentCustomization.options[otherSauce] = maxOther
-      
-      // Zeige kurze Benachrichtigung
       showSauceNotification(value, maxOther, key === 'knoblauch')
     }
-  }
-  
-  // Spezielle Logik für Pommes-Produkt: Entweder Ketchup ODER Mayo
-  if (key === 'sauce' && currentProduct.id === 'pommes') {
-    // Sauce ist String-basiert: 'Ohne', 'Ketchup', 'Mayonnaise'
-    currentCustomization.options[key] = value
-    renderCustomizeModal()
-    return
   }
   
   currentCustomization.options[key] = value
@@ -1511,7 +1813,6 @@ function showSauceNotification(mainValue, otherValue, isKnoblauch) {
   const mainName = isKnoblauch ? 'Knoblauch' : 'Scharf'
   const otherName = isKnoblauch ? 'Scharf' : 'Knoblauch'
   
-  // Erstelle Notification Element falls nicht vorhanden
   let notification = document.getElementById('sauceNotification')
   if (!notification) {
     notification = document.createElement('div')
@@ -1540,7 +1841,6 @@ function showSauceNotification(mainValue, otherValue, isKnoblauch) {
   notification.textContent = `💡 ${mainValue}x ${mainName}, ${otherValue}x ${otherName} (Max. 2 Portionen gesamt)`
   notification.style.display = 'block'
   
-  // Nach 2 Sekunden ausblenden
   setTimeout(() => {
     notification.style.display = 'none'
   }, 2000)
@@ -1556,42 +1856,34 @@ function toggleExtra(extraId) {
   renderCustomizeModal()
 }
 
-function updateModalTotal() {
-  let total = currentProduct.price
+function updateCustomizePrice() {
+  let price = currentProduct.price
   currentCustomization.extras.forEach(extraId => {
     const extra = currentProduct.extras.find(e => e.id === extraId)
-    if (extra) total += extra.price
+    if (extra) price += extra.price
   })
-  document.getElementById('modalTotal').textContent = formatPrice(total)
+  document.getElementById('modalTotal').textContent = formatPrice(price)
 }
 
-// ===== WARENKORB =====
 function addToCart() {
-  const item = {
-    id: Date.now(),
-    ...currentCustomization,
-    price: calculateItemPrice(currentCustomization)
-  }
-  cart.push(item)
-  updateCartUI()
-  closeCustomizeModal()
-  
-  // Animation
-  const cartBtn = document.getElementById('cartFixed')
-  cartBtn.style.transform = 'scale(1.1)'
-  setTimeout(() => cartBtn.style.transform = 'scale(1)', 200)
-}
-
-function calculateItemPrice(item) {
-  let total = item.product.price
-  item.extras.forEach(extraId => {
-    const extra = item.product.extras.find(e => e.id === extraId)
-    if (extra) total += extra.price
+  let price = currentProduct.price
+  currentCustomization.extras.forEach(extraId => {
+    const extra = currentProduct.extras.find(e => e.id === extraId)
+    if (extra) price += extra.price
   })
-  return total
+  
+  cart.push({
+    product: currentProduct,
+    options: { ...currentCustomization.options },
+    extras: [...currentCustomization.extras],
+    price: price
+  })
+  
+  updateCart()
+  closeCustomizeModal()
 }
 
-function updateCartUI() {
+function updateCart() {
   const count = cart.length
   const total = cart.reduce((sum, item) => sum + item.price, 0)
   
@@ -1613,39 +1905,27 @@ function renderCart() {
   const container = document.getElementById('cartItems')
   
   if (cart.length === 0) {
-    container.innerHTML = `
-      <div class="cart-empty">
-        <div class="cart-empty-icon">🛒</div>
-        <p>Dein Warenkorb ist leer</p>
-      </div>
-    `
+    container.innerHTML = '<div class="cart-empty"><div class="cart-empty-icon">🛒</div><p>Dein Warenkorb ist leer</p></div>'
     document.getElementById('cartModalTotal').textContent = '0,00 €'
     document.getElementById('cartModalCount').textContent = '0'
     return
   }
   
-  container.innerHTML = cart.map((item, index) => {
+  const html = cart.map((item, index) => {
     const optionsText = Object.keys(item.options)
       .map(key => {
         const value = item.options[key]
         const label = item.product.options[key].label
         
-        // String-Wert (z.B. "Cola")
-        if (typeof value === 'string') {
-          return `${label}: ${value}`
-        }
-        
-        // Numerischer Wert (0, 1, 2)
+        if (typeof value === 'string') return `${label}: ${value}`
         return `${label}: ${value === 0 ? 'Ohne' : value === 1 ? '1x' : '2x'}`
       })
       .join(', ')
     
-    const extrasText = item.extras.length > 0
-      ? item.extras.map(extraId => {
-          const extra = item.product.extras.find(e => e.id === extraId)
-          return extra ? `+ ${extra.name}` : ''
-        }).join(', ')
-      : ''
+    const extrasText = item.extras.map(extraId => {
+      const extra = item.product.extras.find(e => e.id === extraId)
+      return extra ? `+ ${extra.name}` : ''
+    }).join(', ')
     
     return `
       <div class="cart-item">
@@ -1653,52 +1933,27 @@ function renderCart() {
           <div class="cart-item-name">${item.product.name}</div>
           <div class="cart-item-price">${formatPrice(item.price)}</div>
         </div>
-        ${optionsText || extrasText ? `
-          <div class="cart-item-options">
-            ${optionsText}
-            ${extrasText ? '<br>' + extrasText : ''}
-          </div>
-        ` : ''}
+        ${optionsText || extrasText ? `<div class="cart-item-options">${[optionsText, extrasText].filter(Boolean).join(', ')}</div>` : ''}
         <div class="cart-item-actions">
-          <button class="cart-item-btn" onclick="editCartItem(${index})">✏️ Bearbeiten</button>
-          <button class="cart-item-btn delete" onclick="deleteCartItem(${index})">🗑️ Löschen</button>
+          <button class="cart-item-btn delete" onclick="removeFromCart(${index})">🗑️ Entfernen</button>
         </div>
       </div>
     `
   }).join('')
+  
+  container.innerHTML = html
   
   const total = cart.reduce((sum, item) => sum + item.price, 0)
   document.getElementById('cartModalTotal').textContent = formatPrice(total)
   document.getElementById('cartModalCount').textContent = cart.length
 }
 
-function editCartItem(index) {
-  const item = cart[index]
-  currentProduct = item.product
-  currentCustomization = {
-    product: item.product,
-    options: {...item.options},
-    extras: [...item.extras]
-  }
-  
-  // Item aus Warenkorb entfernen
+function removeFromCart(index) {
   cart.splice(index, 1)
-  updateCartUI()
-  
-  closeCart()
-  renderCustomizeModal()
-  document.getElementById('customizeModal').classList.add('active')
+  updateCart()
+  renderCart()
 }
 
-function deleteCartItem(index) {
-  if (confirm('Artikel wirklich aus dem Warenkorb entfernen?')) {
-    cart.splice(index, 1)
-    updateCartUI()
-    renderCart()
-  }
-}
-
-// ===== CHECKOUT =====
 function goToCheckout() {
   if (cart.length === 0) {
     alert('Dein Warenkorb ist leer!')
@@ -1706,8 +1961,15 @@ function goToCheckout() {
   }
   
   closeCart()
-  renderCheckout()
   document.getElementById('checkoutModal').classList.add('active')
+  renderCheckout()
+  
+  if (currentCustomer) {
+    document.getElementById('customerName').value = currentCustomer.name
+    document.getElementById('customerPhone').value = currentCustomer.phone
+  }
+  
+  checkCheckoutReady()
 }
 
 function closeCheckout() {
@@ -1722,19 +1984,13 @@ function renderCheckout() {
       .filter(key => {
         const value = item.options[key]
         const defaultValue = item.product.options[key].default
-        // String-Vergleich oder numerischer Vergleich
         return value !== defaultValue
       })
       .map(key => {
         const value = item.options[key]
         const label = item.product.options[key].label
         
-        // String-Wert (z.B. "Cola")
-        if (typeof value === 'string') {
-          return `${label}: ${value}`
-        }
-        
-        // Numerischer Wert (0, 1, 2)
+        if (typeof value === 'string') return `${label}: ${value}`
         return `${label}: ${value === 0 ? 'Ohne' : value === 1 ? '1x' : '2x'}`
       })
       .join(', ')
@@ -1752,9 +2008,8 @@ function renderCheckout() {
     `
   }).join('')
   
-  // Berechne MwSt
-  let total7 = 0  // Lebensmittel 7%
-  let total19 = 0 // Getränke 19%
+  let total7 = 0
+  let total19 = 0
   
   cart.forEach(item => {
     if (item.product.vatRate === 19) {
@@ -1816,7 +2071,6 @@ function selectPickupTime(type) {
   const timePickerContainer = document.getElementById('timePickerContainer')
   if (type === 'later') {
     timePickerContainer.style.display = 'block'
-    // Setze Default Zeit auf jetzt + 30 Minuten
     const now = new Date()
     now.setMinutes(now.getMinutes() + 30)
     const hours = String(now.getHours()).padStart(2, '0')
@@ -1838,36 +2092,25 @@ function checkCheckoutReady() {
   document.getElementById('placeOrderBtn').disabled = !ready
 }
 
-// Event Listeners für Checkout-Inputs
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('customerName')?.addEventListener('input', checkCheckoutReady)
-  document.getElementById('customerPhone')?.addEventListener('input', checkCheckoutReady)
-})
-
-// ===== BESTELLUNG AUFGEBEN =====
 async function placeOrder() {
   const name = document.getElementById('customerName').value.trim()
   const phone = document.getElementById('customerPhone').value.trim()
   const notes = document.getElementById('customerNotes').value.trim()
   const total = cart.reduce((sum, item) => sum + item.price, 0)
   
-  // Abholzeit ermitteln
   let pickupTime = null
   if (selectedPickupTime === 'later') {
     pickupTime = document.getElementById('pickupTimeInput').value
   }
   
-  // Button deaktivieren während Verarbeitung
   const btn = document.getElementById('placeOrderBtn')
   btn.disabled = true
   btn.innerHTML = '⏳ Bestellung wird verarbeitet...'
   
   try {
-    // Generiere eindeutige Order ID (4-stellig)
-    const orderQRID = generateOrderQRID()
-    const orderNumber = generateOrderNumber()
+    const orderQRID = Math.floor(1000 + Math.random() * 9000).toString()
+    const orderNumber = Math.floor(100000 + Math.random() * 900000)
     
-    // Berechne MwSt
     let total7 = 0
     let total19 = 0
     cart.forEach(item => {
@@ -1878,7 +2121,6 @@ async function placeOrder() {
       }
     })
     
-    // Bestelldaten
     const orderData = {
       order_number: orderNumber,
       qr_id: orderQRID,
@@ -1896,127 +2138,53 @@ async function placeOrder() {
       created_at: new Date().toISOString()
     }
     
-    // Speichere Bestellung in Supabase (nur wenn verfügbar)
-    if (!isDemoMode && supabase) {
-      const { data, error } = await supabase
-        .from('orders')
-        .insert([orderData])
-        .select()
-      
-      if (error) {
-        console.error('Supabase Error:', error)
-        throw new Error('Bestellung konnte nicht gespeichert werden: ' + error.message)
-      }
-      
-      console.log('✅ Bestellung erfolgreich in Datenbank gespeichert:', data)
-    } else {
-      // Demo-Modus: Nur Console-Log
-      console.log('📝 DEMO-MODUS - Bestellung:', orderData)
-      console.warn('⚠️ Bestellung wurde NICHT in Datenbank gespeichert (Supabase Credentials fehlen)')
+    const { error } = await supabase
+      .from('orders')
+      .insert([orderData])
+    
+    if (error) {
+      console.error('Supabase error:', error)
+      throw new Error('Bestellung konnte nicht gespeichert werden')
     }
     
-    // PayPal Integration
-    if (selectedPayment === 'paypal') {
-      // TEST-VERSION: PayPal.me Link öffnen
-      // ⚠️ NUR FÜR TESTS! Für Produktion siehe Dokumentation
-      const paypalEmail = 'ahmetdemirel@freenet.de'
-      const amount = total.toFixed(2)
-      const paypalUrl = `https://paypal.me/${paypalEmail.split('@')[0]}/${amount}EUR`
-      
-      // Zeige Info-Modal
-      const confirmPayment = confirm(
-        `💳 PayPal-Zahlung\n\n` +
-        `Betrag: ${amount} €\n` +
-        `Bestellung: #${orderNumber}\n\n` +
-        `⚠️ TEST-MODUS:\n` +
-        `Du wirst zu PayPal.me weitergeleitet.\n` +
-        `Bitte wähle "Freunde & Familie" für Tests.\n\n` +
-        `Weiter zu PayPal?`
-      )
-      
-      if (confirmPayment) {
-        // Öffne PayPal in neuem Tab
-        window.open(paypalUrl, '_blank')
-        
-        // Hinweis
-        alert(
-          `📱 PayPal wurde in neuem Tab geöffnet.\n\n` +
-          `Nach der Zahlung:\n` +
-          `✅ Notiere Bestellnummer: #${orderNumber}\n` +
-          `✅ Zeige QR-Code: ${orderQRID}\n\n` +
-          `Klicke OK um fortzufahren.`
-        )
-      } else {
-        // Abgebrochen
-        btn.disabled = false
-        btn.innerHTML = `Jetzt bestellen - ${formatPrice(total)}`
-        return
-      }
-    }
+    const qrData = `ORDER:${orderQRID}:${orderNumber}:${total.toFixed(2)}`
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`
     
-    // Zeige Erfolgs-Modal mit QR-Code
-    showSuccess(orderNumber, orderQRID)
+    document.getElementById('qrCodeContainer').innerHTML = `<img src="${qrUrl}" style="width: 200px; height: 200px;">`
+    document.getElementById('orderQRID').textContent = orderQRID
+    document.getElementById('orderNumber').textContent = orderNumber
     
-    // Warenkorb leeren
-    cart = []
-    updateCartUI()
     closeCheckout()
+    document.getElementById('successModal').classList.add('active')
+    
+    cart = []
+    updateCart()
     
   } catch (error) {
-    console.error('❌ Fehler beim Aufgeben der Bestellung:', error)
-    alert('❌ Es gab einen Fehler beim Aufgeben deiner Bestellung. Bitte versuche es erneut oder kontaktiere uns direkt.')
-    
-    // Button wieder aktivieren
+    console.error('Error:', error)
+    alert('❌ Fehler bei der Bestellung: ' + error.message)
     btn.disabled = false
-    btn.innerHTML = `Jetzt bestellen - ${formatPrice(total)}`
+    btn.innerHTML = 'Jetzt bestellen - <span id="finalTotal">0,00 €</span>'
+    renderCheckout()
   }
 }
 
-function generateOrderNumber() {
-  return Math.floor(1000 + Math.random() * 9000)
-}
-
-function generateOrderQRID() {
-  // Generiere 4-stellige eindeutige ID
-  return Math.floor(1000 + Math.random() * 9000)
-}
-
-function showSuccess(orderNumber, qrID) {
-  document.getElementById('orderNumber').textContent = '#' + orderNumber
-  document.getElementById('orderQRID').textContent = qrID
-  
-  // Generiere QR-Code
-  const qrContainer = document.getElementById('qrCodeContainer')
-  qrContainer.innerHTML = '' // Leere vorherigen QR-Code
-  
-  new QRCode(qrContainer, {
-    text: String(qrID),
-    width: 200,
-    height: 200,
-    colorDark: '#E31E24',
-    colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.H
-  })
-  
-  document.getElementById('successModal').classList.add('active')
-}
-
-function closeSuccess() {
-  document.getElementById('successModal').classList.remove('active')
-  // Seite neu laden für neue Bestellung
-  location.reload()
-}
-
-// ===== HILFSFUNKTIONEN =====
 function formatPrice(price) {
   return price.toFixed(2).replace('.', ',') + ' €'
 }
 
-// ===== START =====
-init()
+function closeSuccess() {
+  document.getElementById('successModal').classList.remove('active')
+  closeOrderModal()
+}
 
-console.log('✅ Döner Boxx Bestellseite geladen!')
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('customerName')?.addEventListener('input', checkCheckoutReady)
+  document.getElementById('customerPhone')?.addEventListener('input', checkCheckoutReady)
+  document.getElementById('pickupTimeInput')?.addEventListener('change', checkCheckoutReady)
+})
+
+console.log('✅ Döner Boxx App geladen!')
 </script>
-
 </body>
 </html>
