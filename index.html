@@ -1072,7 +1072,24 @@ input:focus, textarea:focus {
       </button>
     </div>
 
-    <div id="pending-section" style="display: none;">
+    
+  <!-- WhatsApp Benachrichtigungen -->
+  <div class="card">
+    <h2>📱 WhatsApp Benachrichtigungen</h2>
+    <p class="subtitle">Erhalte exklusive Angebote und Deals per WhatsApp</p>
+    
+    <label style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f9fafb; border-radius: 8px; cursor: pointer;">
+      <input type="checkbox" id="whatsappOptin" style="width: auto; margin: 0; transform: scale(1.5);">
+      <div>
+        <div style="font-weight: 600; color: #232122;">WhatsApp Benachrichtigungen aktivieren</div>
+        <div style="font-size: 13px; color: #666; margin-top: 4px;">Erhalte Sonderangebote, Deals und Aktionen direkt auf dein Handy</div>
+      </div>
+    </label>
+    
+    <div id="whatsapp-result"></div>
+  </div>
+
+  <div id="pending-section" style="display: none;">
       <div class="card">
         <h2>⏳ Wartet auf Bestätigung</h2>
         <div id="pending-list"></div>
@@ -1390,6 +1407,7 @@ async function loadCustomer(customer) {
     refreshInterval = setInterval(refreshCustomerData, 5000)
     
     loadPendingCodes()
+    loadWhatsAppStatus()
     
   } catch (e) {
     console.error('❌ Fehler beim Laden des Kunden:', e)
@@ -2402,6 +2420,13 @@ async function placeOrder() {
     closeCheckout()
     document.getElementById('successModal').classList.add('active')
     
+    // Lucky Wheel Check
+    if (checkWheelEligibility(total)) {
+      setTimeout(() => {
+        showLuckyWheelNotification(total)
+      }, 500)
+    }
+    
     cart = []
     updateCart()
     
@@ -2429,7 +2454,134 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('pickupTimeInput')?.addEventListener('change', checkCheckoutReady)
 })
 
+
+// ============================================
+// 📱 WHATSAPP OPT-IN
+// ============================================
+
+async function loadWhatsAppStatus() {
+  if (!currentCustomer) return
+  try {
+    const { data, error } = await supabase.from('customers').select('whatsapp_optin').eq('id', currentCustomer.id).single()
+    if (error) throw error
+    const checkbox = document.getElementById('whatsappOptin')
+    if (checkbox && data) checkbox.checked = data.whatsapp_optin || false
+  } catch (e) {
+    console.error('WhatsApp Status laden fehlgeschlagen:', e)
+  }
+}
+
+async function toggleWhatsAppOptin() {
+  if (!currentCustomer) return
+  const checkbox = document.getElementById('whatsappOptin')
+  const isOptedIn = checkbox.checked
+  try {
+    const { error } = await supabase.from('customers').update({ whatsapp_optin: isOptedIn }).eq('id', currentCustomer.id)
+    if (error) throw error
+    const resultDiv = document.getElementById('whatsapp-result')
+    if (isOptedIn) {
+      resultDiv.innerHTML = '<div class="result success">✅ WhatsApp Benachrichtigungen aktiviert!</div>'
+    } else {
+      resultDiv.innerHTML = '<div class="result info">ℹ️ WhatsApp Benachrichtigungen deaktiviert</div>'
+    }
+    setTimeout(() => { resultDiv.innerHTML = '' }, 3000)
+  } catch (e) {
+    console.error('WhatsApp Opt-In Fehler:', e)
+    checkbox.checked = !isOptedIn
+    document.getElementById('whatsapp-result').innerHTML = '<div class="result error">❌ Fehler beim Speichern</div>'
+  }
+}
+
+// ============================================
+// 🎡 LUCKY WHEEL CHECK
+// ============================================
+
+let wheelConfigGlobal = null
+
+async function loadWheelConfigIndex() {
+  try {
+    const { data, error } = await supabase.from('wheel_config').select('*').limit(1)
+    if (error) throw error
+    if (data && data.length > 0) {
+      wheelConfigGlobal = data[0]
+      console.log('✅ Wheel Config geladen:', wheelConfigGlobal)
+    }
+  } catch (e) {
+    console.error('Wheel Config Fehler:', e)
+  }
+}
+
+function checkWheelEligibility(orderTotal) {
+  if (!wheelConfigGlobal || !wheelConfigGlobal.is_active || orderTotal < wheelConfigGlobal.min_order_amount) return false
+  if (wheelConfigGlobal.active_days && wheelConfigGlobal.active_days.length > 0) {
+    const today = new Date().getDay()
+    if (!wheelConfigGlobal.active_days.includes(today)) return false
+  }
+  if (wheelConfigGlobal.start_time && wheelConfigGlobal.end_time) {
+    const now = new Date()
+    const currentTime = now.getHours() * 60 + now.getMinutes()
+    const [startH, startM] = wheelConfigGlobal.start_time.split(':').map(Number)
+    const [endH, endM] = wheelConfigGlobal.end_time.split(':').map(Number)
+    const startMinutes = startH * 60 + startM
+    const endMinutes = endH * 60 + endM
+    if (currentTime < startMinutes || currentTime > endMinutes) return false
+  }
+  return true
+}
+
+function showLuckyWheelNotification(orderTotal) {
+  document.getElementById('wheelOrderTotal').textContent = orderTotal.toFixed(2).replace('.', ',') + ' €'
+  document.getElementById('luckyWheelModal').classList.add('active')
+  document.body.style.overflow = 'hidden'
+}
+
+function closeLuckyWheel() {
+  document.getElementById('luckyWheelModal').classList.remove('active')
+  document.body.style.overflow = 'auto'
+}
+
+// Initialisierung
+loadWheelConfigIndex()
+
+// WhatsApp Checkbox Event Listener
+setTimeout(() => {
+  const whatsappCheckbox = document.getElementById('whatsappOptin')
+  if (whatsappCheckbox) {
+    whatsappCheckbox.addEventListener('change', toggleWhatsAppOptin)
+  }
+}, 500)
+
+
 console.log('✅ Döner Boxx App geladen!')
 </script>
+
+<!-- Lucky Wheel Modal -->
+<div id="luckyWheelModal" class="modal">
+  <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-header">
+      <h2 class="modal-title">🎡 Glücksrad verfügbar!</h2>
+      <button class="modal-close" onclick="closeLuckyWheel()">✕</button>
+    </div>
+    <div class="modal-body" style="text-align: center; padding: 30px 20px;">
+      <div style="font-size: 80px; margin-bottom: 20px;">🎉</div>
+      <h3 style="color: #E31E24; margin-bottom: 16px;">Herzlichen Glückwunsch!</h3>
+      <p style="font-size: 16px; margin-bottom: 24px;">
+        Du hast dich für das Glücksrad qualifiziert!<br>
+        Zeige diesen Screen beim Abholen deiner Bestellung.
+      </p>
+      <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #f59e0b; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+        <div style="font-size: 14px; color: #92400e; margin-bottom: 8px;">Deine Bestellsumme:</div>
+        <div style="font-size: 32px; font-weight: 700; color: #E31E24;" id="wheelOrderTotal">0,00 €</div>
+      </div>
+      <p style="font-size: 14px; color: #666;">
+        🎰 Drehe am Glücksrad und gewinne zusätzliche Punkte!
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeLuckyWheel()" style="width: 100%;">Verstanden</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
