@@ -1428,7 +1428,7 @@ function showLuckyWheelModal(orderId, customerId, qrId, total, paymentMethod) {
   const modal = document.createElement('div')
   modal.className = 'wheel-modal active'
   modal.id = 'wheelModal'
-  modal.innerHTML = `<div class="wheel-modal-content"><h2>🎡 Glücksrad verfügbar!</h2><p style="margin-bottom: 20px;">Der Kunde hat über ${wheelConfig.min_order_amount.toFixed(2)}€ bestellt und kann am Glücksrad drehen!</p><div style="margin-bottom: 20px;"><p style="font-size: 14px; color: #666;">Bestellsumme: <strong>${formatPrice(total)}</strong></p><p style="font-size: 14px; color: #666;">QR-ID: <strong>${qrId}</strong></p></div><button onclick="triggerLuckyWheel('${orderId}', '${customerId}', '${paymentMethod}')" class="success" style="width: 100%; margin-bottom: 10px;">🎡 Glücksrad aktivieren</button><button onclick="skipLuckyWheel('${orderId}', '${customerId}', '${paymentMethod}')" class="secondary" style="width: 100%;">⏭️ Überspringen</button></div>`
+  modal.innerHTML = `<div class="wheel-modal-content"><h2>🎡 Glücksrad verfügbar!</h2><p style="margin-bottom: 20px;">Der Kunde hat über ${wheelConfig.min_order_amount.toFixed(2)}€ bestellt und kann am Glücksrad drehen!</p><div style="margin-bottom: 20px;"><p style="font-size: 14px; color: #666;">Bestellsumme: <strong>${formatPrice(total)}</strong></p><p style="font-size: 14px; color: #666;">QR-ID: <strong>${qrId}</strong></p></div><button onclick="triggerLuckyWheel('${orderId}', '${customerId}', '${paymentMethod}')" class="success" style="width: 100%; margin-bottom: 10px;">🎡 Glücksrad freischalten</button><button onclick="skipLuckyWheel('${orderId}', '${customerId}', '${paymentMethod}')" class="secondary" style="width: 100%;">⏭️ Überspringen</button></div>`
   document.body.appendChild(modal)
 }
 
@@ -1439,10 +1439,30 @@ function closeLuckyWheelModal() {
 
 async function triggerLuckyWheel(orderId, customerId, paymentMethod) {
   try {
-    alert('🎡 Glücksrad wurde für den Kunden aktiviert!')
+    // Erstelle wheel_unlock Eintrag für den Kunden
+    const expiresAt = new Date()
+    expiresAt.setDate(expiresAt.getDate() + 7) // 7 Tage gültig
+    
+    const { error: unlockError } = await supabase
+      .from('wheel_unlocks')
+      .insert({
+        customer_id: customerId,
+        order_id: orderId,
+        is_used: false,
+        expires_at: expiresAt.toISOString()
+      })
+    
+    if (unlockError) {
+      console.error('Wheel unlock error:', unlockError)
+      alert('⚠️ Warnung: Glücksrad konnte nicht freigeschaltet werden, aber Bestellung wird abgeschlossen.')
+    } else {
+      alert('✅ Glücksrad wurde freigeschaltet! Der Kunde kann jetzt in der App drehen.')
+    }
+    
     await finalizeOrder(orderId, customerId, paymentMethod)
     closeLuckyWheelModal()
   } catch (e) {
+    console.error('Fehler:', e)
     alert('❌ Fehler: ' + e.message)
   }
 }
