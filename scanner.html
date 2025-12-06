@@ -1340,7 +1340,7 @@ function renderOrders(orders) {
 async function markOrderPaid(orderId) {
   if (!confirm('Bestellung als bar bezahlt markieren?')) return
   try {
-    const { error } = await supabase.from('orders').update({ status: 'preparing', paid_at: new Date().toISOString() }).eq('id', orderId)
+    const { error } = await supabase.from('orders').update({ status: 'preparing' }).eq('id', orderId)
     if (error) throw error
     const { data: order } = await supabase.from('orders').select('*').eq('id', orderId).single()
     if (order) await addPointsForOrder(order.qr_id, order.total)
