@@ -21,7 +21,7 @@ body {
   font-family: 'Flame', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background: #f5f5f5;
   min-height: 100vh;
-  padding: 0 0 80px 0; /* unten Platz für Warenkorb der Bestellung */
+  padding: 0 0 80px 0;
   margin: 0;
 }
 
@@ -31,8 +31,6 @@ body {
   background: white;
   min-height: 100vh;
 }
-
-/* ------------- LOYALTY STYLES ------------- */
 
 .header-image {
   background: linear-gradient(135deg, #E31E24 0%, #F9A825 100%);
@@ -281,202 +279,9 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
 .pending-code .code { font-size: 28px; font-weight: 700; color: #f59e0b; letter-spacing: 5px; margin: 10px 0; font-family: 'Courier New', monospace; }
 .pending-code .code-info { font-size: 12px; color: #92400e; margin-bottom: 10px; line-height: 1.5; }
 
-.bonus-item {
-  background: linear-gradient(135deg, #F9A825, #f59e0b);
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 10px;
-  color: white;
-}
-
-.bonus-item h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-.bonus-item .bonus-desc { font-size: 13px; opacity: 0.9; margin-bottom: 12px; }
-.bonus-item .bonus-status { font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 6px; display: inline-block; background: rgba(255,255,255,0.2); margin-bottom: 8px; }
-.bonus-item.active { background: linear-gradient(135deg, #E31E24, #dc2626); }
-.bonus-item button { margin-top: 8px; background: white; color: #F9A825; }
-.bonus-item.active button { color: #E31E24; }
-
-.challenge-item {
-  background: linear-gradient(135deg, #2E86C1, #1a5490);
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 10px;
-  color: white;
-}
-
-.challenge-item h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-.challenge-item .challenge-desc { font-size: 13px; opacity: 0.9; margin-bottom: 12px; }
-.challenge-progress { background: rgba(255,255,255,0.2); border-radius: 8px; padding: 10px; margin: 10px 0; }
-.challenge-progress-bar { background: rgba(255,255,255,0.3); height: 8px; border-radius: 4px; overflow: hidden; margin-top: 6px; }
-.challenge-progress-fill { background: white; height: 100%; border-radius: 4px; transition: width 0.3s; }
-.challenge-date { font-size: 11px; opacity: 0.8; margin-top: 8px; }
-
-.coupon-item {
-  background: linear-gradient(135deg, #fef3c7, #fde68a);
-  border: 2px solid #f59e0b;
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 10px;
-}
-
-.coupon-item h3 { color: #92400e; font-size: 16px; font-weight: 600; margin-bottom: 6px; }
-.coupon-product { font-size: 15px; color: #78350f; font-weight: 600; margin-bottom: 6px; }
-.coupon-price { font-size: 20px; font-weight: 700; color: #d97706; margin: 6px 0; }
-.coupon-desc { font-size: 13px; color: #92400e; margin: 6px 0; }
-.coupon-code-display {
-  background: white;
-  border: 2px dashed #f59e0b;
-  border-radius: 8px;
-  padding: 10px;
-  text-align: center;
-  margin: 10px 0;
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: 4px;
-  font-family: monospace;
-  color: #92400e;
-}
-.coupon-expiry { font-size: 12px; color: #92400e; margin-top: 8px; font-weight: 600; }
-.coupon-expiry.warning { color: #dc2626; }
-.coupon-item button { background: #f59e0b; color: white; width: 100%; padding: 10px; border: none; margin-top: 10px; }
-.coupon-item button:hover { background: #d97706; }
-.coupon-item.activated { background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #F9A825; }
-.coupon-item.activated h3, .coupon-item.activated .coupon-product, .coupon-item.activated .coupon-desc, .coupon-item.activated .coupon-expiry { color: #92400e; }
-.coupon-item.activated .coupon-price { color: #E31E24; }
-.coupon-item.activated .coupon-code-display { border-color: #F9A825; color: #92400e; }
-.coupon-activated-badge { background: #F9A825; color: white; padding: 8px; border-radius: 6px; text-align: center; font-weight: 600; font-size: 13px; margin-top: 10px; }
-
 .screen { display: none; }
 .screen.active { display: block; }
 
-/* 🎡 Lucky Wheel Styles */
-.wheel-section {
-  display: none;
-}
-
-.wheel-section.active {
-  display: block;
-}
-
-.wheel-badge {
-  background: linear-gradient(135deg, #E31E24, #F9A825);
-  color: white;
-  padding: 12px 20px;
-  border-radius: 10px;
-  text-align: center;
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 12px rgba(227, 30, 36, 0.3);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-}
-
-.wheel-container {
-  position: relative;
-  width: 100%;
-  max-width: 350px;
-  margin: 0 auto 20px;
-}
-
-.wheel-wrapper {
-  position: relative;
-  width: 100%;
-  padding-bottom: 100%;
-}
-
-#wheelCanvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-}
-
-.wheel-pointer {
-  position: absolute;
-  top: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
-  border-top: 30px solid #E31E24;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-  z-index: 10;
-}
-
-.wheel-info-box {
-  background: #f9fafb;
-  border-radius: 10px;
-  padding: 16px;
-  text-align: center;
-  font-size: 14px;
-  color: #666;
-  margin-top: 20px;
-}
-
-.wheel-result-modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.8);
-  z-index: 10000;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.wheel-result-modal.active {
-  display: flex;
-}
-
-.wheel-result-content {
-  background: white;
-  border-radius: 20px;
-  padding: 40px;
-  max-width: 350px;
-  width: 100%;
-  text-align: center;
-  animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-@keyframes popIn {
-  0% { transform: scale(0.5); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-.wheel-result-icon {
-  font-size: 80px;
-  margin-bottom: 20px;
-}
-
-.wheel-result-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #E31E24;
-  margin-bottom: 12px;
-}
-
-.wheel-result-prize {
-  font-size: 20px;
-  color: #333;
-  margin-bottom: 24px;
-}
-
-/* ------------- BESTELL-SEITE STYLES ------------- */
-
-/* Header für Bestellseite */
 .header {
   background: linear-gradient(135deg, #E31E24 0%, #F9A825 100%);
   padding: 20px;
@@ -516,7 +321,6 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
   opacity: 0.9;
 }
 
-/* Produkt-Karten */
 .products {
   padding: 16px;
 }
@@ -641,7 +445,6 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
   transform: translateY(-1px);
 }
 
-/* Modal */
 .modal {
   display: none;
   position: fixed;
@@ -755,21 +558,6 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
   color: white;
 }
 
-.option-btn.disabled,
-.option-btn:disabled {
-  background: #f5f5f5;
-  border-color: #e5e7eb;
-  color: #d1d5db;
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.option-btn.disabled:hover,
-.option-btn:disabled:hover {
-  background: #f5f5f5;
-  transform: none;
-}
-
 .extra-item {
   background: #f9fafb;
   border: 2px solid #e5e7eb;
@@ -831,7 +619,6 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
   font-size: 24px;
 }
 
-/* Warenkorb */
 .cart-fixed {
   position: fixed;
   bottom: 0;
@@ -870,10 +657,6 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
   border-radius: 20px;
   font-size: 14px;
   font-weight: 700;
-}
-
-.cart-modal .modal-content {
-  border-radius: 20px 20px 0 0;
 }
 
 .cart-item {
@@ -949,7 +732,6 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
   opacity: 0.3;
 }
 
-/* Checkout */
 .checkout-section {
   margin-bottom: 20px;
 }
@@ -1090,7 +872,7 @@ input:focus, textarea:focus {
   color: white;
   border: none;
   border-radius: 12px;
-font-size: 16px;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
@@ -1182,7 +964,6 @@ font-size: 16px;
 <body>
 
 <div class="container">
-  <!-- LOYALTY APP SCREENS -->
   <div id="screen-start" class="screen active">
     <div class="header-image">
       <div class="header-logo">
@@ -1269,67 +1050,11 @@ font-size: 16px;
       </div>
     </div>
 
-    <!-- 🛒 Online Bestellen Button -->
     <div class="card" style="padding: 12px; margin-bottom: 16px;">
       <button onclick="openOrderModal()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
         <span style="font-size: 20px;">🛒</span>
         <span>Jetzt online bestellen</span>
       </button>
-    </div>
-
-    <div id="bonuses-section" style="display: none;">
-      <div class="card">
-        <h2>🎉 Meine Belohnungen</h2>
-        <div id="bonuses-list"></div>
-      </div>
-    </div>
-
-    <div id="challenges-section" style="display: none;">
-      <div class="card">
-        <h2>🎯 Aktuelle Challenges</h2>
-        <div id="challenges-list"></div>
-      </div>
-    </div>
-
-    <div id="coupons-section" style="display: none;">
-      <div class="card">
-        <h2>🎟️ Deal der Woche</h2>
-        <div id="coupons-list"></div>
-      </div>
-    </div>
-
-    <!-- 🎡 Lucky Wheel Section -->
-    <div id="wheel-section" class="wheel-section">
-      <div class="card">
-        <h2>🎡 Lucky Wheel</h2>
-        
-        <div id="wheel-available-badge" style="display: none;">
-          <div class="wheel-badge">
-            🎡 Du hast <span id="wheel-count">0</span> freie Drehung(en)!
-          </div>
-        </div>
-        
-        <div class="wheel-container">
-          <div class="wheel-wrapper">
-            <div class="wheel-pointer"></div>
-            <canvas id="wheelCanvas" width="400" height="400"></canvas>
-          </div>
-        </div>
-        
-        <div id="wheel-info" class="wheel-info-box">
-          🎉 Klicke auf das Logo zum Drehen!
-        </div>
-      </div>
-    </div>
-
-    <!-- Wheel Result Modal -->
-    <div id="wheel-result-modal" class="wheel-result-modal">
-      <div class="wheel-result-content">
-        <div class="wheel-result-icon" id="wheel-result-icon">⭐</div>
-        <div class="wheel-result-title" id="wheel-result-title">Glückwunsch!</div>
-        <div class="wheel-result-prize" id="wheel-result-prize">+100 Punkte</div>
-        <button onclick="closeWheelResult()">Weiter</button>
-      </div>
     </div>
 
     <div id="pending-section" style="display: none;">
@@ -1339,10 +1064,6 @@ font-size: 16px;
       </div>
     </div>
 
-    <!-- WhatsApp oben -->
-    <div id="whatsapp-section-top"></div>
-
-    <!-- Prämien -->
     <div class="card">
       <h2>🎁 Prämien einlösen</h2>
       <div class="reward">
@@ -1381,12 +1102,8 @@ font-size: 16px;
         <button onclick="redeem('Döner Teller', 1250)" id="btn-1250">Einlösen</button>
       </div>
     </div>
-
-    <!-- WhatsApp unten -->
-    <div id="whatsapp-section-bottom"></div>
   </div>
 
-  <!-- 🛒 BESTELLSEKTION -->
   <div id="order-section" style="display: none;">
     <div class="header">
       <button onclick="closeOrderModal()" style="position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.3); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;">←</button>
@@ -1397,14 +1114,10 @@ font-size: 16px;
       <p>Wähle deine Lieblingsgerichte</p>
     </div>
 
-    <!-- Produkte -->
-    <div class="products" id="products">
-      <!-- wird per JS gefüllt -->
-    </div>
+    <div class="products" id="products"></div>
   </div>
 </div>
 
-<!-- Warenkorb Button (fixiert unten) -->
 <div class="cart-fixed" id="cartFixed" style="display: none;">
   <button class="cart-btn" onclick="openCart()">
     <span>🛒 Warenkorb ansehen</span>
@@ -1415,38 +1128,30 @@ font-size: 16px;
   </button>
 </div>
 
-<!-- Produkt-Anpassung Modal -->
 <div class="modal" id="customizeModal">
   <div class="modal-content">
     <div class="modal-header">
       <h2 class="modal-title" id="modalTitle">Produkt anpassen</h2>
       <button class="modal-close" onclick="closeCustomizeModal()">✕</button>
     </div>
-    <div class="modal-body" id="modalBody">
-      <!-- dynamisch -->
-    </div>
+    <div class="modal-body" id="modalBody"></div>
     <div class="modal-footer">
       <div class="modal-total">
         <span>Gesamt:</span>
         <span class="modal-total-price" id="modalTotal">0,00 €</span>
       </div>
-      <button class="add-btn" onclick="addToCart()">
-        In den Warenkorb
-      </button>
+      <button class="add-btn" onclick="addToCart()">In den Warenkorb</button>
     </div>
   </div>
 </div>
 
-<!-- Warenkorb Modal -->
 <div class="modal cart-modal" id="cartModal">
   <div class="modal-content">
     <div class="modal-header">
       <h2 class="modal-title">Dein Warenkorb</h2>
       <button class="modal-close" onclick="closeCart()">✕</button>
     </div>
-    <div class="modal-body" id="cartItems">
-      <!-- dynamisch -->
-    </div>
+    <div class="modal-body" id="cartItems"></div>
     <div class="modal-footer">
       <div class="modal-total">
         <span>Gesamt:</span>
@@ -1459,7 +1164,6 @@ font-size: 16px;
   </div>
 </div>
 
-<!-- Checkout Modal -->
 <div class="modal" id="checkoutModal">
   <div class="modal-content">
     <div class="modal-header">
@@ -1467,7 +1171,6 @@ font-size: 16px;
       <button class="modal-close" onclick="closeCheckout()">✕</button>
     </div>
     <div class="modal-body">
-      <!-- Kontaktdaten -->
       <div class="checkout-section">
         <h3>📱 Kontaktdaten</h3>
         <input type="text" id="customerName" placeholder="Dein Name" required>
@@ -1475,7 +1178,6 @@ font-size: 16px;
         <textarea id="customerNotes" placeholder="Anmerkungen zur Bestellung (optional)" rows="3"></textarea>
       </div>
 
-      <!-- Abholzeit -->
       <div class="checkout-section">
         <h3>🕐 Abholzeit</h3>
         <div class="pickup-time-options">
@@ -1495,15 +1197,11 @@ font-size: 16px;
         </div>
       </div>
 
-      <!-- Bestellübersicht -->
       <div class="checkout-section">
         <h3>📦 Deine Bestellung</h3>
-        <div class="order-summary" id="checkoutSummary">
-          <!-- dynamisch -->
-        </div>
+        <div class="order-summary" id="checkoutSummary"></div>
       </div>
 
-      <!-- Zahlungsart -->
       <div class="checkout-section">
         <h3>💳 Zahlungsart</h3>
         <div class="payment-options">
@@ -1526,7 +1224,6 @@ font-size: 16px;
   </div>
 </div>
 
-<!-- Erfolgs-Modal -->
 <div class="success-modal" id="successModal">
   <div class="success-content">
     <div class="success-icon">✅</div>
@@ -1540,37 +1237,23 @@ font-size: 16px;
       <div class="order-number-value" id="orderNumber">#0000</div>
     </div>
     
-    <!-- QR Code Section -->
     <div style="background: white; border: 3px solid #E31E24; border-radius: 16px; padding: 20px; margin: 20px 0;">
       <div style="font-size: 14px; font-weight: 600; color: #666; margin-bottom: 12px;">
         🎁 Zeige diesen Code beim Abholen
       </div>
-      <div id="qrCodeContainer" style="display: flex; justify-content: center; margin: 16px 0;">
-        <!-- QR Code -->
-      </div>
-      <div style="font-size: 36px; font-weight: 700; color: #E31E24; font-family: 'Courier New', monospace; letter-spacing: 4px; text-align: center;" id="orderQRID">
-        0000
-      </div>
+      <div id="qrCodeContainer" style="display: flex; justify-content: center; margin: 16px 0;"></div>
+      <div style="font-size: 36px; font-weight: 700; color: #E31E24; font-family: 'Courier New', monospace; letter-spacing: 4px; text-align: center;" id="orderQRID">0000</div>
       <div style="font-size: 12px; color: #666; text-align: center; margin-top: 8px;">
         → Punkte werden automatisch gutgeschrieben
       </div>
     </div>
     
-    <button class="add-btn" onclick="closeSuccess()">
-      Neue Bestellung
-    </button>
+    <button class="add-btn" onclick="closeSuccess()">Neue Bestellung</button>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// WEITER IM NÄCHSTEN FILE...
-</script>
-</body>
-</html>
-<script>
-// SUPABASE CONFIG
 const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
@@ -1579,11 +1262,6 @@ let currentCustomer = null
 let refreshInterval = null
 let refreshErrorCount = 0
 const MAX_REFRESH_ERRORS = 3
-let isDemoMode = false
-
-// ═══════════════════════════════════════════════════════════
-// LOYALTY FUNCTIONS
-// ═══════════════════════════════════════════════════════════
 
 function normalizePhone(phone) {
   let normalized = phone.replace(/[\s\-\(\)]/g, '')
@@ -1697,9 +1375,6 @@ async function loadCustomer(customer) {
     refreshInterval = setInterval(refreshCustomerData, 5000)
     
     loadPendingCodes()
-    loadBonuses()
-    loadCoupons()
-    loadChallenges()
     
   } catch (e) {
     console.error('❌ Fehler beim Laden des Kunden:', e)
@@ -1864,30 +1539,6 @@ async function cancelCode(code) {
   try { await supabase.from('redeem_codes').delete().eq('code', code).eq('used', false); loadPendingCodes() } catch (e) { console.error('Cancel error:', e) }
 }
 
-async function loadBonuses() {
-  if (!currentCustomer) return
-  try {
-    const now = new Date().toISOString().split('T')[0]
-    const { data: bonuses, error } = await supabase.from('global_bonuses').select('*').eq('is_active', true).gte('expires_at', now).order('created_at', { ascending: false })
-    if (error) throw error
-    const section = document.getElementById('bonuses-section')
-    const list = document.getElementById('bonuses-list')
-    if (!bonuses || bonuses.length === 0) { section.style.display = 'none'; return }
-    section.style.display = 'block'
-    list.innerHTML = bonuses.map(bonus => `<div class="bonus-item"><h3>${bonus.title || '⭐ Bonus'}</h3><div class="bonus-desc">${bonus.description || 'Bonus verfügbar'}</div></div>`).join('')
-  } catch (e) { console.error('Load bonuses error:', e) }
-}
-
-async function loadChallenges() {
-  const section = document.getElementById('challenges-section')
-  section.style.display = 'none'
-}
-
-async function loadCoupons() {
-  const section = document.getElementById('coupons-section')
-  section.style.display = 'none'
-}
-
 function logout() {
   if (refreshInterval) clearInterval(refreshInterval)
   refreshErrorCount = 0
@@ -1911,151 +1562,12 @@ window.onload = () => {
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-// BESTELLUNG - PRODUKTE
-// ═══════════════════════════════════════════════════════════
-
 const products = [
   {
     id: 'doener',
     name: 'Döner',
     price: 6.00,
     description: 'Klassischer Döner im Fladenbrot',
-    defaultSauce: 2,
-    options: {
-      fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
-      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
-      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
-    },
-    extras: [
-      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
-      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
-    ]
-  },
-  {
-    id: 'doener-xl',
-    name: 'Döner XL',
-    price: 8.00,
-    description: 'Extra großer Döner für großen Hunger',
-    defaultSauce: 2,
-    options: {
-      fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
-      kaese: { label: 'Käse', choices: [0, 1], default: 0 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
-      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
-      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
-    },
-    extras: [
-      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
-      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
-    ]
-  },
-  {
-    id: 'dueruem',
-    name: 'Dürüm Döner',
-    price: 7.00,
-    description: 'Döner gerollt im dünnen Fladenbrot',
-    defaultSauce: 2,
-    options: {
-      fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
-      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
-      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
-    },
-    extras: [
-      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
-      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
-    ]
-  },
-  {
-    id: 'doener-box',
-    name: 'Döner Box',
-    price: 7.00,
-    description: 'Dönerfleisch mit Pommes in der Box',
-    defaultSauce: 2,
-    options: {
-      fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
-      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 }
-    },
-    extras: [
-      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
-      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
-    ]
-  },
-  {
-    id: 'doener-teller',
-    name: 'Döner Teller',
-    price: 10.00,
-    description: 'Dönerfleisch mit Pommes und Salat auf dem Teller',
-    defaultSauce: 2,
-    options: {
-      fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
-      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
-      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
-      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
-    },
-    extras: [
-      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
-      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
-    ]
-  },
-  {
-    id: 'lahmacun',
-    name: 'Lahmacun',
-    price: 4.00,
-    description: 'Türkische Pizza',
-    defaultSauce: 2,
-    options: {
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
-      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
-      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
-    },
-    extras: [
-      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
-    ]
-  },
-  {
-    id: 'lahmacun-spezial',
-    name: 'Lahmacun Spezial',
-    price: 8.00,
-    description: 'Lahmacun mit Dönerfleisch',
-    defaultSauce: 2,
     options: {
       fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
       knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
@@ -2078,7 +1590,6 @@ const products = [
     name: 'Köfte im Brot (5 Stk.)',
     price: 6.00,
     description: 'Gegrillte Hackfleischbällchen im Fladenbrot',
-    defaultSauce: 2,
     options: {
       koefte: { label: 'Köfte', choices: [0, 1], default: 1 },
       knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
@@ -2095,79 +1606,6 @@ const products = [
       { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
       { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
     ]
-  },
-  {
-    id: 'koefte-teller',
-    name: 'Köfte Teller (7 Stk.)',
-    price: 11.00,
-    description: 'Gegrillte Hackfleischbällchen mit Pommes und Salat',
-    defaultSauce: 2,
-    options: {
-      koefte: { label: 'Köfte', choices: [0, 1], default: 1 },
-      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
-      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
-      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
-    },
-    extras: [
-      { id: 'extraKoefte', name: 'Extra Köfte', price: 2.00 },
-      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
-    ]
-  },
-  {
-    id: 'rindswurst-broetchen',
-    name: 'Rindswurst im Brötchen',
-    price: 3.50,
-    description: 'Gegrillte Rindswurst im frischen Brötchen',
-    options: {
-      ketchup: { label: 'Ketchup', choices: [0, 1], default: 1 }
-    },
-    extras: []
-  },
-  {
-    id: 'curry-rindswurst',
-    name: 'Curry Rindswurst mit Pommes',
-    price: 6.90,
-    description: 'Currywurst mit knusprigen Pommes',
-    options: {
-      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
-      currysauce: { label: 'Currysauce', choices: [0, 1], default: 1 },
-      mayo: { label: 'Mayonnaise', choices: [0, 1], default: 0 }
-    },
-    extras: []
-  },
-  {
-    id: 'chicken-nuggets',
-    name: 'Chicken Nuggets (6 Stk.)',
-    price: 6.00,
-    description: 'Knusprige Chicken Nuggets mit Pommes',
-    options: {
-      nuggets: { label: 'Chicken Nuggets', choices: [0, 1], default: 1 },
-      pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
-      ketchup: { label: 'Ketchup', choices: [0, 1], default: 1 },
-      mayo: { label: 'Mayonnaise', choices: [0, 1], default: 0 }
-    },
-    extras: [
-      { id: 'extraNuggets', name: 'Extra Nuggets (3 Stk.)', price: 2.00 }
-    ]
-  },
-  {
-    id: 'crispy-chicken-burger',
-    name: 'Crispy Chicken Burger',
-    price: 4.00,
-    description: 'Knuspriger Chicken Burger',
-    options: {
-      mayo: { label: 'Mayonnaise', choices: [0, 1], default: 1 },
-      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
-      tomate: { label: 'Tomate', choices: [0, 1], default: 1 }
-    },
-    extras: []
   },
   {
     id: 'pommes',
@@ -2181,65 +1619,15 @@ const products = [
       { id: 'extraKetchup', name: 'Extra Ketchup', price: 0.30 },
       { id: 'extraMayo', name: 'Extra Mayonnaise', price: 0.30 }
     ]
-  },
-  {
-    id: 'ayran',
-    name: 'Ayran (0,25 l)',
-    price: 1.50,
-    description: 'Erfrischendes türkisches Joghurtgetränk',
-    vatRate: 19,
-    options: {},
-    extras: []
-  },
-  {
-    id: 'wasser',
-    name: 'Wasser still (0,5 l)',
-    price: 1.50,
-    description: 'Stilles Mineralwasser (inkl. Pfand)',
-    vatRate: 19,
-    options: {},
-    extras: []
-  },
-  {
-    id: 'cola',
-    name: 'Cola (0,33 l)',
-    price: 2.00,
-    description: 'Coca Cola (inkl. Pfand)',
-    vatRate: 19,
-    options: {},
-    extras: []
-  },
-  {
-    id: 'fanta',
-    name: 'Fanta (0,33 l)',
-    price: 2.00,
-    description: 'Fanta Orange (inkl. Pfand)',
-    vatRate: 19,
-    options: {},
-    extras: []
-  },
-  {
-    id: 'cola-zero',
-    name: 'Cola Zero (0,33 l)',
-    price: 2.00,
-    description: 'Coca Cola Zero (inkl. Pfand)',
-    vatRate: 19,
-    options: {},
-    extras: []
   }
 ]
 
-// STATE
 let cart = []
 let currentProduct = null
 let currentCustomization = {}
 let selectedPayment = null
 let selectedPickupTime = 'now'
 let selectedPickupTimeValue = null
-
-// ═══════════════════════════════════════════════════════════
-// BESTELLFUNKTIONEN
-// ═══════════════════════════════════════════════════════════
 
 function openOrderModal() {
   if (!currentCustomer) {
@@ -2265,13 +1653,9 @@ function renderProducts() {
   const container = document.getElementById('products')
   
   const categories = [
-    { name: '🌯 Döner & Dürüm', ids: ['doener', 'doener-xl', 'dueruem', 'doener-box', 'doener-teller'], open: true },
-    { name: '🥙 Lahmacun', ids: ['lahmacun', 'lahmacun-spezial'], open: false },
-    { name: '🍖 Köfte', ids: ['koefte-brot', 'koefte-teller'], open: false },
-    { name: '🌭 Wurst', ids: ['rindswurst-broetchen', 'curry-rindswurst'], open: false },
-    { name: '🍗 Chicken', ids: ['chicken-nuggets', 'crispy-chicken-burger'], open: false },
-    { name: '🍟 Beilagen', ids: ['pommes'], open: false },
-    { name: '🥤 Getränke', ids: ['ayran', 'wasser', 'cola', 'fanta', 'cola-zero'], open: false }
+    { name: '🌯 Döner & Dürüm', ids: ['doener'], open: true },
+    { name: '🍖 Köfte', ids: ['koefte-brot'], open: false },
+    { name: '🍟 Beilagen', ids: ['pommes'], open: false }
   ]
   
   let html = ''
@@ -2369,23 +1753,21 @@ function renderCustomizeModal() {
       <div class="option-buttons">`
     
     if (Array.isArray(option.choices)) {
-  option.choices.forEach(choice => {
-    const isActive = currentCustomization.options[key] === choice ? 'active' : ''
-    
-    // Unterscheide zwischen Zahlen und Strings
-    let label
-    if (typeof choice === 'number') {
-      label = choice === 0 ? 'Ohne' : choice === 1 ? '1x' : '2x'
-    } else {
-      label = choice  // Bei Strings direkt verwenden
+      option.choices.forEach(choice => {
+        const isActive = currentCustomization.options[key] === choice ? 'active' : ''
+        
+        let label
+        if (typeof choice === 'number') {
+          label = choice === 0 ? 'Ohne' : choice === 1 ? '1x' : '2x'
+        } else {
+          label = choice
+        }
+        
+        const choiceValue = typeof choice === 'string' ? `'${choice}'` : choice
+        
+        html += `<button class="option-btn ${isActive}" onclick="selectOption('${key}', ${choiceValue})">${label}</button>`
+      })
     }
-    
-    // Bei Strings brauchen wir Anführungszeichen im onclick
-    const choiceValue = typeof choice === 'string' ? `'${choice}'` : choice
-    
-    html += `<button class="option-btn ${isActive}" onclick="selectOption('${key}', ${choiceValue})">${label}</button>`
-  })
-}
     
     html += `</div></div>`
   })
@@ -2532,8 +1914,8 @@ function goToCheckout() {
   }
   
   closeCart()
-  document.getElementById('checkoutModal').classList.add('active')  // ✅ Modal ZUERST öffnen
-  renderCheckout()  // ✅ Dann erst rendern
+  document.getElementById('checkoutModal').classList.add('active')
+  renderCheckout()
   
   if (currentCustomer) {
     document.getElementById('customerName').value = currentCustomer.name
@@ -2647,43 +2029,37 @@ async function placeOrder() {
   btn.innerHTML = '⏳ Bestellung wird verarbeitet...'
   
   try {
-    const orderQRID = currentCustomer.qr_id
-    const orderNumber = generateOrderNumber()
+    const orderQRID = Math.floor(1000 + Math.random() * 9000).toString()
+    const orderNumber = Math.floor(100000 + Math.random() * 900000)
     
-const orderData = {
-  order_number: orderNumber,
-  qr_id: orderQRID,
-  // customer_id removed - column doesn't exist in database
-  customer_name: name,
-  customer_phone: phone,
-  notes: notes || null,
-  items: cart,
-  total: total,
-  payment_method: selectedPayment,
-  pickup_time: pickupTime,
-  pickup_type: selectedPickupTime,
-  status: 'pending',
-  created_at: new Date().toISOString()
-}
-    
-    if (!isDemoMode && supabase) {
-      const { error } = await supabase
-        .from('orders')
-        .insert([orderData])
-      
-      if (error) {
-        console.error('Supabase error:', error)
-        throw new Error('Bestellung konnte nicht gespeichert werden')
-      }
+    const orderData = {
+      order_number: orderNumber,
+      qr_id: orderQRID,
+      customer_name: name,
+      customer_phone: phone,
+      notes: notes || null,
+      items: cart,
+      total: total,
+      payment_method: selectedPayment,
+      pickup_time: pickupTime,
+      pickup_type: selectedPickupTime,
+      status: 'pending',
+      created_at: new Date().toISOString()
     }
     
-    // Order-QR generieren
-    const qrData = `ORDER:${currentCustomer.qr_id}:${orderNumber}:${total.toFixed(2)}`
-    const qrUrl = `https://api.qr-server.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`
+    const { error } = await supabase
+      .from('orders')
+      .insert([orderData])
     
-    document.getElementById('qrCodeContainer').innerHTML = `
-      <img src="${qrUrl}" style="width: 200px; height: 200px;">
-    `
+    if (error) {
+      console.error('Supabase error:', error)
+      throw new Error('Bestellung konnte nicht gespeichert werden')
+    }
+    
+    const qrData = `ORDER:${orderQRID}:${orderNumber}:${total.toFixed(2)}`
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`
+    
+    document.getElementById('qrCodeContainer').innerHTML = `<img src="${qrUrl}" style="width: 200px; height: 200px;">`
     document.getElementById('orderQRID').textContent = orderQRID
     document.getElementById('orderNumber').textContent = orderNumber
     
@@ -2702,19 +2078,6 @@ const orderData = {
   }
 }
 
-function generateOrderNumber() {
-  // 6-stellige Nummer: 100000 - 999999
-  return Math.floor(100000 + Math.random() * 900000)
-}
-
-function generateOrderQRID() {
-  return Math.floor(1000 + Math.random() * 9000).toString()
-}
-
-function generateOrderQRID() {
-  return Math.floor(1000 + Math.random() * 9000).toString()
-}
-
 function formatPrice(price) {
   return price.toFixed(2).replace('.', ',') + ' €'
 }
@@ -2724,28 +2087,13 @@ function closeSuccess() {
   closeOrderModal()
 }
 
-// Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
-document.getElementById('customerName')?.addEventListener('input', checkCheckoutReady)
-document.getElementById('customerPhone')?.addEventListener('input', checkCheckoutReady)
-document.getElementById('pickupTimeInput')?.addEventListener('change', checkCheckoutReady)
+  document.getElementById('customerName')?.addEventListener('input', checkCheckoutReady)
+  document.getElementById('customerPhone')?.addEventListener('input', checkCheckoutReady)
+  document.getElementById('pickupTimeInput')?.addEventListener('change', checkCheckoutReady)
 })
 
-// Override selectPayment to trigger validation
-const _originalSelectPayment = window.selectPayment
-window.selectPayment = function(type) {
-_originalSelectPayment(type)
-checkCheckoutReady()
-}
-
-// Override selectPickupTime to trigger validation  
-const _originalSelectPickupTime = window.selectPickupTime
-window.selectPickupTime = function(type) {
-_originalSelectPickupTime(type)
-checkCheckoutReady()
-}
-
-console.log('✅ Döner Boxx App mit Bestellung geladen!')
+console.log('✅ Döner Boxx App geladen!')
 </script>
 </body>
 </html>
