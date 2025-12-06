@@ -563,6 +563,14 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
       </div>
     </div>
 
+    <!-- 🛒 NEU: Online Bestellen Button -->
+    <div class="card" style="padding: 12px; margin-bottom: 16px;">
+      <button onclick="openOrderModal()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <span style="font-size: 20px;">🛒</span>
+        <span>Jetzt online bestellen</span>
+      </button>
+    </div>
+
     <div id="bonuses-section" style="display: none;">
       <div class="card">
         <h2>🎉 Meine Belohnungen</h2>
@@ -1937,6 +1945,39 @@ window.addEventListener('online', function() {
 window.addEventListener('offline', function() {
   console.log('📱 Internet-Verbindung verloren')
 })
+// ═══════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════
+// 🛒 ONLINE BESTELLUNG FUNKTIONEN
+// ═══════════════════════════════════════════════════════════════
+
+function openOrderModal() {
+  if (!currentCustomer) {
+    alert('❌ Bitte melde dich erst an!')
+    return
+  }
+  
+  alert('🛒 Bestellfunktion wird geöffnet...\n\nHinweis: Diese Funktion wird vom Programmierer integriert.\n\nEs wird ein Modal mit der kompletten Bestellung.html Oberfläche angezeigt.')
+  
+  // PROGRAMMIERER: Hier das Bestell-Modal öffnen
+  // Das Modal kommt aus bestellung.html
+  // Nach erfolgreicher Bestellung: generateOrderQR() aufrufen
+}
+
+async function generateOrderQR(orderNumber, total) {
+  // Order-QR Code generieren
+  // Format: ORDER:KundenNummer:Bestellnummer:Betrag
+  const qrData = `ORDER:${currentCustomer.qr_id}:${orderNumber}:${total}`
+  
+  // QR Code URL generieren
+  const qrUrl = `https://api.qr-server.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`
+  
+  return {
+    qrUrl: qrUrl,
+    qrData: qrData
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════
 
 console.log('✅ Döner Boxx Kunden-App geladen!')
