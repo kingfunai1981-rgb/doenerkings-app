@@ -1730,7 +1730,7 @@ async function addPointsForOrder(qrId, amount) {
     
     console.log('✅ Kunde gefunden:', customer.name)
     
-    const points = Math.floor(amount * 100)
+    const points = Math.floor(amount * 10) // 1€ = 10 Punkte
     
     // Update Punkte
     const { error: updateError } = await supabase
@@ -1796,7 +1796,7 @@ async function addPointsForCustomerId(customerId, amount) {
     const customer = customers[0]
     console.log('✅ Kunde gefunden:', customer.name)
     
-    const points = Math.floor(amount * 100)
+    const points = Math.floor(amount * 10) // 1€ = 10 Punkte
     
     // Update Punkte
     const { error: updateError } = await supabase
@@ -1857,7 +1857,7 @@ async function addPointsForPhone(phone, amount) {
     const customer = customers[0]
     console.log('✅ Kunde gefunden:', customer.name)
     
-    const points = Math.floor(amount * 100)
+    const points = Math.floor(amount * 10) // 1€ = 10 Punkte
     
     // Update Punkte
     const { error: updateError } = await supabase
