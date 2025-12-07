@@ -1479,11 +1479,6 @@ let refreshInterval = null
 let refreshErrorCount = 0
 const MAX_REFRESH_ERRORS = 3
 
-// 🎯 Throttle-Variablen für checkWheelAvailability
-let wheelCheckInProgress = false
-let lastWheelCheck = 0
-const WHEEL_CHECK_COOLDOWN = 3000  // Min. 3 Sekunden zwischen Checks
-
 function getRandomPrize() {
   const array = new Uint32Array(1)
   crypto.getRandomValues(array)
