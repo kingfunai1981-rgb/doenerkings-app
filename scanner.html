@@ -1592,12 +1592,22 @@ async function markPayPalPaid(orderId, customerId, total) {
   try {
     console.log('💳 Marking PayPal order as paid:', orderId)
     
-    // Update Status zu "preparing" UND payment_status zu "paid"
+    // Hole die Bestellung um an customer_phone zu kommen
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .single()
+    
+    if (orderError || !order) {
+      throw new Error('Bestellung nicht gefunden')
+    }
+    
+    // Update Status zu "preparing"
     const { error: updateError } = await supabase
       .from('orders')
       .update({ 
         status: 'preparing',
-        payment_status: 'paid',
         updated_at: new Date().toISOString()
       })
       .eq('id', orderId)
@@ -1607,8 +1617,11 @@ async function markPayPalPaid(orderId, customerId, total) {
       throw new Error('Status konnte nicht aktualisiert werden: ' + updateError.message)
     }
     
-    // Punkte gutschreiben
-    if (customerId && total) {
+    // Punkte gutschreiben - über Telefonnummer suchen
+    if (order.customer_phone && total) {
+      await addPointsForPhone(order.customer_phone, total)
+    } else if (customerId && total) {
+      // Fallback: wenn customer_id vorhanden ist
       await addPointsForCustomerId(customerId, total)
     }
     
@@ -1806,6 +1819,67 @@ async function addPointsForCustomerId(customerId, amount) {
         points: points,
         staff: 'ONLINE-ORDER',
         notes: `Online-Bestellung: ${points}P`
+      })
+    
+    // Challenges prüfen
+    await checkAndUpdateChallenges(customer.id, amount)
+    
+    console.log(`✅ ${points} Punkte gutgeschrieben für ${customer.name}`)
+  } catch (e) {
+    console.error('❌ Fehler beim Gutschreiben der Punkte:', e)
+  }
+}
+
+async function addPointsForPhone(phone, amount) {
+  try {
+    console.log('💰 Gutschreibe Punkte für Telefon:', phone, 'Betrag:', amount)
+    
+    // Normalisiere Telefonnummer
+    let normalized = phone.replace(/[\s\-\(\)]/g, '')
+    if (normalized.startsWith('+')) normalized = normalized.substring(1)
+    if (normalized.startsWith('00')) normalized = normalized.substring(2)
+    if (normalized.startsWith('49') && normalized.length > 10) normalized = '0' + normalized.substring(2)
+    if (!normalized.startsWith('0') && normalized.length >= 10) normalized = '0' + normalized
+    
+    // Hole Customer über Telefon
+    const { data: customers, error: lookupError } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('phone', normalized)
+      .limit(1)
+    
+    if (lookupError || !customers || customers.length === 0) {
+      console.error('❌ Kunde mit Telefon nicht gefunden:', phone, normalized)
+      alert('⚠️ Kunde nicht in System gefunden!\nTelefon: ' + phone + '\nKunde muss sich zuerst registrieren.')
+      return
+    }
+    
+    const customer = customers[0]
+    console.log('✅ Kunde gefunden:', customer.name)
+    
+    const points = Math.floor(amount * 100)
+    
+    // Update Punkte
+    const { error: updateError } = await supabase
+      .from('customers')
+      .update({ points: customer.points + points })
+      .eq('id', customer.id)
+    
+    if (updateError) {
+      console.error('❌ Fehler beim Update:', updateError)
+      return
+    }
+    
+    // Transaktion speichern
+    await supabase
+      .from('transactions')
+      .insert({
+        customer_id: customer.id,
+        type: 'earn',
+        amount: amount,
+        points: points,
+        staff: 'PAYPAL-ORDER',
+        notes: `PayPal-Bestellung: ${points}P`
       })
     
     // Challenges prüfen
