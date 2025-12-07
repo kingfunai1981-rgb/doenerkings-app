@@ -137,7 +137,7 @@ body {
 .qr-modal-close {
   position: absolute;
   top: 10px; right: 10px;
-  background: #f5f5f5;
+  background: linear-gradient(135deg, #E31E24, #F9A825);
   border: none;
   width: 40px; height: 40px;
   border-radius: 50%;
@@ -146,12 +146,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #666;
+  color: white;
   transition: all 0.2s;
 }
 
 .qr-modal-close:hover {
-  background: #e5e5e5;
+  opacity: 0.9;
   transform: rotate(90deg);
 }
 
@@ -221,6 +221,7 @@ button.secondary { background: #f5f5f5; color: #E31E24; border: 1px solid #e0e0e
 button.secondary:hover { background: #ebebeb; }
 button.small { width: auto; padding: 8px 16px; font-size: 13px; margin: 4px; display: inline-block; }
 button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; transform: none; }
+.option-btn:disabled { opacity: 0.4; background: #e5e7eb !important; color: #9ca3af !important; pointer-events: none; }
 
 .result {
   padding: 10px 12px;
@@ -1282,7 +1283,7 @@ input:focus, textarea:focus {
 
   <div id="order-section" style="display: none;">
     <div class="header">
-      <button onclick="closeOrderModal()" style="position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.3); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;">←</button>
+      <button onclick="closeOrderModal()" style="position: absolute; top: 20px; left: 20px; background: linear-gradient(135deg, #E31E24, #F9A825); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: all 0.2s;">←</button>
       <div class="header-logo-order">
         <img src="/logo-round-new.png" alt="Döner Boxx">
       </div>
@@ -2783,6 +2784,11 @@ function renderCustomizeModal() {
   
   let html = ''
   
+  // 🎯 Berechne aktuelle Saucen-Anzahl
+  const knoblauch = currentCustomization.options['knoblauch'] || 0
+  const scharf = currentCustomization.options['scharf'] || 0
+  const totalSauces = knoblauch + scharf
+  
   Object.keys(currentProduct.options).forEach(key => {
     const option = currentProduct.options[key]
     html += `<div class="option-group">
@@ -2802,7 +2808,21 @@ function renderCustomizeModal() {
         
         const choiceValue = typeof choice === 'string' ? `'${choice}'` : choice
         
-        html += `<button class="option-btn ${isActive}" onclick="selectOption('${key}', ${choiceValue})">${label}</button>`
+        // 🎯 SAUCEN-LOGIK: Buttons deaktivieren wenn zu viele Saucen
+        let isDisabled = false
+        if ((key === 'knoblauch' || key === 'scharf') && typeof choice === 'number') {
+          const otherSauce = key === 'knoblauch' ? scharf : knoblauch
+          const wouldBeTotalSauces = choice + otherSauce
+          
+          // Deaktiviere Button wenn Gesamtzahl > 2 wäre
+          if (wouldBeTotalSauces > 2) {
+            isDisabled = true
+          }
+        }
+        
+        const disabledAttr = isDisabled ? 'disabled' : ''
+        
+        html += `<button class="option-btn ${isActive}" ${disabledAttr} onclick="selectOption('${key}', ${choiceValue})">${label}</button>`
       })
     }
     
@@ -2829,6 +2849,23 @@ function renderCustomizeModal() {
 
 function selectOption(key, value) {
   currentCustomization.options[key] = value
+  
+  // 🎯 SAUCEN-LOGIK: Maximal 2 Saucen insgesamt (Knoblauch + Scharf)
+  if ((key === 'knoblauch' || key === 'scharf')) {
+    const knoblauch = currentCustomization.options['knoblauch'] || 0
+    const scharf = currentCustomization.options['scharf'] || 0
+    const totalSauces = knoblauch + scharf
+    
+    // Wenn zu viele Saucen, setze die andere Sauce zurück
+    if (totalSauces > 2) {
+      if (key === 'knoblauch') {
+        currentCustomization.options['scharf'] = 0
+      } else {
+        currentCustomization.options['knoblauch'] = 0
+      }
+    }
+  }
+  
   renderCustomizeModal()
 }
 
