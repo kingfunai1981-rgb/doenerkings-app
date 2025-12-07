@@ -1470,13 +1470,14 @@ async function markOrderPaid(orderId) {
   try {
     console.log('Marking order as paid:', orderId)
     
-    // Erst die Order holen
-    const { data: order, error: fetchError } = await supabase.from('orders').select('*').eq('id', orderId).single()
+    // Erst die Order holen - verwende limit(1) statt .single()
+    const { data: orders, error: fetchError } = await supabase.from('orders').select('*').eq('id', orderId).limit(1)
     if (fetchError) {
       console.error('Fetch error:', fetchError)
       throw new Error('Bestellung konnte nicht geladen werden: ' + fetchError.message)
     }
-    if (!order) throw new Error('Bestellung nicht gefunden')
+    if (!orders || orders.length === 0) throw new Error('Bestellung nicht gefunden')
+    const order = orders[0]
     
     // Update Status
     const { error: updateError } = await supabase.from('orders').update({ status: 'preparing' }).eq('id', orderId)
@@ -1530,12 +1531,15 @@ async function completeOrder(orderId, qrId, total, paymentMethod) {
   try {
     console.log('Completing order:', { orderId, qrId, total, paymentMethod })
     
-    const { data: customer, error: customerError } = await supabase.from('customers').select('*').eq('qr_id', qrId).single()
+    // Verwende limit(1) statt .single() um Fehler zu vermeiden
+    const { data: customers, error: customerError } = await supabase.from('customers').select('*').eq('qr_id', qrId).limit(1)
     if (customerError) {
       console.error('Customer lookup error:', customerError)
       throw new Error('Kunde konnte nicht geladen werden: ' + customerError.message)
     }
-    if (!customer) throw new Error('Kunde nicht gefunden')
+    if (!customers || customers.length === 0) throw new Error('Kunde nicht gefunden')
+    
+    const customer = customers[0]
     
     const wheelAvailable = isWheelAvailable(total)
     if (wheelAvailable) {
@@ -1579,8 +1583,18 @@ async function cancelOrder(orderId) {
 
 async function addPointsForOrder(qrId, amount) {
   try {
-    const { data: customer } = await supabase.from('customers').select('*').eq('qr_id', qrId).single()
-    if (!customer) return
+    // Hole Kunde - verwende limit(1) statt .single()
+    const { data: customers, error: lookupError } = await supabase.from('customers').select('*').eq('qr_id', qrId).limit(1)
+    if (lookupError) {
+      console.error('Customer lookup error:', lookupError)
+      return
+    }
+    if (!customers || customers.length === 0) {
+      console.log('Kunde nicht gefunden für QR-ID:', qrId)
+      return
+    }
+    const customer = customers[0]
+    
     const points = Math.floor(amount * 100)
     await supabase.from('customers').update({ points: customer.points + points }).eq('id', customer.id)
     await supabase.from('transactions').insert({ customer_id: customer.id, type: 'earn', amount: amount, points: points, staff: 'ONLINE-ORDER', notes: `Online-Bestellung: ${points}P` })
