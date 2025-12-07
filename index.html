@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Döner Boxx Loyalty</title>
+<title>Döner Boxx Loyalty & Bestellung</title>
 <link rel="icon" href="/favicon-new.png" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon-new.png">
 <style>
@@ -21,7 +21,7 @@ body {
   font-family: 'Flame', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background: #f5f5f5;
   min-height: 100vh;
-  padding: 0;
+  padding: 0 0 80px 0;
   margin: 0;
 }
 
@@ -279,155 +279,621 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
 .pending-code .code { font-size: 28px; font-weight: 700; color: #f59e0b; letter-spacing: 5px; margin: 10px 0; font-family: 'Courier New', monospace; }
 .pending-code .code-info { font-size: 12px; color: #92400e; margin-bottom: 10px; line-height: 1.5; }
 
-.bonus-item {
-  background: linear-gradient(135deg, #F9A825, #f59e0b);
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 10px;
-  color: white;
-}
-
-.bonus-item h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-.bonus-item .bonus-desc { font-size: 13px; opacity: 0.9; margin-bottom: 12px; }
-.bonus-item .bonus-status { font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 6px; display: inline-block; background: rgba(255,255,255,0.2); margin-bottom: 8px; }
-.bonus-item.active { background: linear-gradient(135deg, #E31E24, #dc2626); }
-.bonus-item button { margin-top: 8px; background: white; color: #F9A825; }
-.bonus-item.active button { color: #E31E24; }
-
-.challenge-item {
-  background: linear-gradient(135deg, #2E86C1, #1a5490);
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 10px;
-  color: white;
-}
-
-.challenge-item h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-.challenge-item .challenge-desc { font-size: 13px; opacity: 0.9; margin-bottom: 12px; }
-.challenge-progress { background: rgba(255,255,255,0.2); border-radius: 8px; padding: 10px; margin: 10px 0; }
-.challenge-progress-bar { background: rgba(255,255,255,0.3); height: 8px; border-radius: 4px; overflow: hidden; margin-top: 6px; }
-.challenge-progress-fill { background: white; height: 100%; border-radius: 4px; transition: width 0.3s; }
-.challenge-date { font-size: 11px; opacity: 0.8; margin-top: 8px; }
-
-.coupon-item {
-  background: linear-gradient(135deg, #fef3c7, #fde68a);
-  border: 2px solid #f59e0b;
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 10px;
-}
-
-.coupon-item h3 { color: #92400e; font-size: 16px; font-weight: 600; margin-bottom: 6px; }
-.coupon-product { font-size: 15px; color: #78350f; font-weight: 600; margin-bottom: 6px; }
-.coupon-price { font-size: 20px; font-weight: 700; color: #d97706; margin: 6px 0; }
-.coupon-desc { font-size: 13px; color: #92400e; margin: 6px 0; }
-.coupon-code-display {
-  background: white;
-  border: 2px dashed #f59e0b;
-  border-radius: 8px;
-  padding: 10px;
-  text-align: center;
-  margin: 10px 0;
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: 4px;
-  font-family: monospace;
-  color: #92400e;
-}
-.coupon-expiry { font-size: 12px; color: #92400e; margin-top: 8px; font-weight: 600; }
-.coupon-expiry.warning { color: #dc2626; }
-.coupon-item button { background: #f59e0b; color: white; width: 100%; padding: 10px; border: none; margin-top: 10px; }
-.coupon-item button:hover { background: #d97706; }
-.coupon-item.activated { background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #F9A825; }
-.coupon-item.activated h3, .coupon-item.activated .coupon-product, .coupon-item.activated .coupon-desc, .coupon-item.activated .coupon-expiry { color: #92400e; }
-.coupon-item.activated .coupon-price { color: #E31E24; }
-.coupon-item.activated .coupon-code-display { border-color: #F9A825; color: #92400e; }
-.coupon-activated-badge { background: #F9A825; color: white; padding: 8px; border-radius: 6px; text-align: center; font-weight: 600; font-size: 13px; margin-top: 10px; }
-
 .screen { display: none; }
 .screen.active { display: block; }
 
-/* 🎡 NEU: Lucky Wheel Styles */
-.wheel-section {
-  display: none; /* Standard: versteckt */
+.header {
+  background: linear-gradient(135deg, #E31E24 0%, #F9A825 100%);
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.wheel-section.active {
+.header-logo-order {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 12px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.header-logo-order img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.header h1 {
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.header p {
+  color: white;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.products {
+  padding: 16px;
+}
+
+.category-section {
+  margin-bottom: 8px;
+}
+
+.category-header {
+  background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 0;
+}
+
+.category-header:hover {
+  border-color: #E31E24;
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+}
+
+.category-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #232122;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-count {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  background: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.category-arrow {
+  font-size: 16px;
+  color: #E31E24;
+  font-weight: 700;
+  transition: transform 0.3s;
+}
+
+.category-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  padding: 0 4px;
+}
+
+.category-content.open {
+  max-height: 5000px;
+  padding: 12px 4px 0;
+}
+
+.product-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 2px solid #f0f0f0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.product-card:hover {
+  border-color: #E31E24;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(227, 30, 36, 0.15);
+}
+
+.product-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.product-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #232122;
+}
+
+.product-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: #E31E24;
+}
+
+.product-desc {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.add-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 9999;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal.active {
+  display: flex;
+  animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: white;
+  border-radius: 20px 20px 0 0;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #232122;
+}
+
+.modal-close {
+  background: #f5f5f5;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.option-group {
+  margin-bottom: 24px;
+}
+
+.option-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #232122;
+  margin-bottom: 12px;
   display: block;
 }
 
-.wheel-badge {
-  background: linear-gradient(135deg, #E31E24, #F9A825);
-  color: white;
-  padding: 12px 20px;
-  border-radius: 10px;
+.option-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.option-btn {
+  flex: 1;
+  min-width: 60px;
+  padding: 10px 16px;
+  background: #f5f5f5;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
   text-align: center;
+}
+
+.option-btn:hover {
+  background: #ebebeb;
+}
+
+.option-btn.active {
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  border-color: #E31E24;
+  color: white;
+}
+
+.extra-item {
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.extra-item:hover {
+  border-color: #E31E24;
+  background: #fef2f2;
+}
+
+.extra-item.selected {
+  border-color: #E31E24;
+  background: linear-gradient(135deg, rgba(227, 30, 36, 0.1), rgba(249, 168, 37, 0.1));
+}
+
+.extra-info {
+  flex: 1;
+}
+
+.extra-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #232122;
+}
+
+.extra-price {
   font-size: 16px;
   font-weight: 700;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 12px rgba(227, 30, 36, 0.3);
-  animation: pulse 2s ease-in-out infinite;
+  color: #E31E24;
 }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
+.modal-footer {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding: 16px 20px;
+  border-top: 1px solid #f0f0f0;
 }
 
-.wheel-container {
-  position: relative;
-  width: 100%;
-  max-width: 350px;
-  margin: 0 auto 20px;
+.modal-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 700;
 }
 
-.wheel-wrapper {
-  position: relative;
-  width: 100%;
-  padding-bottom: 100%;
+.modal-total-price {
+  color: #E31E24;
+  font-size: 24px;
 }
 
-#wheelCanvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-}
-
-.wheel-pointer {
-  position: absolute;
-  top: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
-  border-top: 30px solid #E31E24;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-  z-index: 10;
-}
-
-.wheel-info-box {
-  background: #f9fafb;
-  border-radius: 10px;
-  padding: 16px;
-  text-align: center;
-  font-size: 14px;
-  color: #666;
-  margin-top: 20px;
-}
-
-.wheel-result-modal {
-  display: none;
+.cart-fixed {
   position: fixed;
-  top: 0;
+  bottom: 0;
   left: 0;
   right: 0;
-  bottom: 0;
+  background: white;
+  padding: 12px 16px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  z-index: 999;
+}
+
+.cart-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.cart-btn:hover {
+  opacity: 0.9;
+}
+
+.cart-count {
+  background: white;
+  color: #E31E24;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.cart-item {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+  border: 2px solid #e5e7eb;
+}
+
+.cart-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.cart-item-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #232122;
+}
+
+.cart-item-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #E31E24;
+}
+
+.cart-item-options {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.cart-item-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.cart-item-btn {
+  flex: 1;
+  padding: 8px;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+}
+
+.cart-item-btn:hover {
+  background: #ebebeb;
+}
+
+.cart-item-btn.delete {
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.cart-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.cart-empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+
+.checkout-section {
+  margin-bottom: 20px;
+}
+
+.checkout-section h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #232122;
+  margin-bottom: 12px;
+}
+
+input[type="text"],
+input[type="tel"],
+textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: 'Flame', sans-serif;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: #E31E24;
+}
+
+.payment-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.payment-btn {
+  padding: 16px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.payment-btn:hover {
+  border-color: #E31E24;
+  background: #fef2f2;
+}
+
+.payment-btn.active {
+  border-color: #E31E24;
+  background: linear-gradient(135deg, rgba(227, 30, 36, 0.1), rgba(249, 168, 37, 0.1));
+}
+
+.payment-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.payment-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #232122;
+}
+
+.pickup-time-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.pickup-time-btn {
+  padding: 16px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.pickup-time-btn:hover {
+  border-color: #E31E24;
+  background: #fef2f2;
+}
+
+.pickup-time-btn.active {
+  border-color: #E31E24;
+  background: linear-gradient(135deg, rgba(227, 30, 36, 0.1), rgba(249, 168, 37, 0.1));
+}
+
+.pickup-time-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.pickup-time-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #232122;
+  margin-bottom: 4px;
+}
+
+.pickup-time-desc {
+  font-size: 12px;
+  color: #666;
+}
+
+.order-summary {
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.summary-row.total {
+  font-size: 18px;
+  font-weight: 700;
+  padding-top: 12px;
+  border-top: 2px solid #e5e7eb;
+  margin-top: 8px;
+  color: #E31E24;
+}
+
+.place-order-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.place-order-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.place-order-btn:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.success-modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.8);
   z-index: 10000;
   align-items: center;
@@ -435,43 +901,64 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
   padding: 20px;
 }
 
-.wheel-result-modal.active {
+.success-modal.active {
   display: flex;
 }
 
-.wheel-result-content {
+.success-content {
   background: white;
   border-radius: 20px;
-  padding: 40px;
-  max-width: 350px;
-  width: 100%;
+  padding: 40px 30px;
+  max-width: 400px;
   text-align: center;
-  animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  animation: scaleIn 0.5s;
 }
 
-@keyframes popIn {
-  0% { transform: scale(0.5); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+@keyframes scaleIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
-.wheel-result-icon {
+.success-icon {
   font-size: 80px;
   margin-bottom: 20px;
 }
 
-.wheel-result-title {
+.success-title {
   font-size: 24px;
   font-weight: 700;
-  color: #E31E24;
+  color: #232122;
   margin-bottom: 12px;
 }
 
-.wheel-result-prize {
-  font-size: 20px;
-  color: #333;
+.success-text {
+  font-size: 15px;
+  color: #666;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.order-number {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 16px;
   margin-bottom: 24px;
 }
 
+.order-number-label {
+  font-size: 13px;
+  color: #92400e;
+  margin-bottom: 4px;
+}
+
+.order-number-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #E31E24;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2px;
+}
 </style>
 </head>
 <body>
@@ -563,40 +1050,32 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
       </div>
     </div>
 
-    <div id="bonuses-section" style="display: none;">
+    <div class="card" style="padding: 12px; margin-bottom: 16px;">
+      <button onclick="openOrderModal()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <span style="font-size: 20px;">🛒</span>
+        <span>Jetzt online bestellen</span>
+      </button>
+    </div>
+
+    <div id="pending-section" style="display: none;">
       <div class="card">
-        <h2>🎉 Meine Belohnungen</h2>
-        <div id="bonuses-list"></div>
+        <h2>⏳ Wartet auf Bestätigung</h2>
+        <div id="pending-list"></div>
       </div>
     </div>
 
-    <div id="challenges-section" style="display: none;">
-      <div class="card">
-        <h2>🎯 Aktuelle Challenges</h2>
-        <div id="challenges-list"></div>
-      </div>
-    </div>
-
-    <div id="coupons-section" style="display: none;">
-      <div class="card">
-        <h2>🎟️ Deal der Woche</h2>
-        <div id="coupons-list"></div>
-      </div>
-    </div>
-
-    <!-- 🎡 NEU: Lucky Wheel Section (nur bei Freischaltung sichtbar) -->
+    
+    <!-- 🎡 Lucky Wheel Section -->
     <div id="wheel-section" class="wheel-section">
       <div class="card">
         <h2>🎡 Lucky Wheel</h2>
         
-        <!-- Badge wenn verfügbar -->
         <div id="wheel-available-badge" style="display: none;">
           <div class="wheel-badge">
             🎡 Du hast <span id="wheel-count">0</span> freie Drehung(en)!
           </div>
         </div>
         
-        <!-- Wheel Canvas -->
         <div class="wheel-container">
           <div class="wheel-wrapper">
             <div class="wheel-pointer"></div>
@@ -604,7 +1083,6 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
           </div>
         </div>
         
-        <!-- Info wenn nicht verfügbar -->
         <div id="wheel-info" class="wheel-info-box">
           🎉 Klicke auf das Logo zum Drehen!
         </div>
@@ -621,20 +1099,13 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
       </div>
     </div>
 
-    <div id="pending-section" style="display: none;">
-      <div class="card">
-        <h2>⏳ Wartet auf Bestätigung</h2>
-        <div id="pending-list"></div>
-      </div>
-    </div>
 
     <!-- 📱 WhatsApp-Benachrichtigungen Section (VOR Prämien - für NICHT aktiviert) -->
     <div id="whatsapp-section-top">
       <!-- Wird dynamisch geladen wenn NICHT aktiviert -->
     </div>
 
-    <!-- 🎁 Prämien einlösen Section -->
-    <div class="card">
+<div class="card">
       <h2>🎁 Prämien einlösen</h2>
       <div class="reward">
         <div class="reward-info">
@@ -672,11 +1143,153 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
         <button onclick="redeem('Döner Teller', 1250)" id="btn-1250">Einlösen</button>
       </div>
     </div>
+  </div>
 
-    <!-- 📱 WhatsApp-Benachrichtigungen Section (NACH Prämien - für aktiviert) -->
-    <div id="whatsapp-section-bottom">
-      <!-- Wird dynamisch geladen wenn aktiviert -->
+  <div id="order-section" style="display: none;">
+    <div class="header">
+      <button onclick="closeOrderModal()" style="position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.3); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;">←</button>
+      <div class="header-logo-order">
+        <img src="/logo-round-new.png" alt="Döner Boxx">
+      </div>
+      <h1>Online Bestellen</h1>
+      <p>Wähle deine Lieblingsgerichte</p>
     </div>
+
+    <div class="products" id="products"></div>
+  </div>
+</div>
+
+<div class="cart-fixed" id="cartFixed" style="display: none;">
+  <button class="cart-btn" onclick="openCart()">
+    <span>🛒 Warenkorb ansehen</span>
+    <div>
+      <span class="cart-count" id="cartCount">0</span>
+      <span id="cartTotal" style="margin-left: 8px;">0,00 €</span>
+    </div>
+  </button>
+</div>
+
+<div class="modal" id="customizeModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modalTitle">Produkt anpassen</h2>
+      <button class="modal-close" onclick="closeCustomizeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <div class="modal-total">
+        <span>Gesamt:</span>
+        <span class="modal-total-price" id="modalTotal">0,00 €</span>
+      </div>
+      <button class="add-btn" onclick="addToCart()">In den Warenkorb</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal cart-modal" id="cartModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">Dein Warenkorb</h2>
+      <button class="modal-close" onclick="closeCart()">✕</button>
+    </div>
+    <div class="modal-body" id="cartItems"></div>
+    <div class="modal-footer">
+      <div class="modal-total">
+        <span>Gesamt:</span>
+        <span class="modal-total-price" id="cartModalTotal">0,00 €</span>
+      </div>
+      <button class="add-btn" onclick="goToCheckout()">
+        Zur Kasse (🛒 <span id="cartModalCount">0</span>)
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="checkoutModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">Bestellung abschließen</h2>
+      <button class="modal-close" onclick="closeCheckout()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="checkout-section">
+        <h3>📱 Kontaktdaten</h3>
+        <input type="text" id="customerName" placeholder="Dein Name" required>
+        <input type="tel" id="customerPhone" placeholder="Telefonnummer" required>
+        <textarea id="customerNotes" placeholder="Anmerkungen zur Bestellung (optional)" rows="3"></textarea>
+      </div>
+
+      <div class="checkout-section">
+        <h3>🕐 Abholzeit</h3>
+        <div class="pickup-time-options">
+          <div class="pickup-time-btn active" id="pickupNow" onclick="selectPickupTime('now')">
+            <div class="pickup-time-icon">⚡</div>
+            <div class="pickup-time-name">Sofort</div>
+            <div class="pickup-time-desc">~15 Min.</div>
+          </div>
+          <div class="pickup-time-btn" id="pickupLater" onclick="selectPickupTime('later')">
+            <div class="pickup-time-icon">🕐</div>
+            <div class="pickup-time-name">Später</div>
+            <div class="pickup-time-desc">Uhrzeit wählen</div>
+          </div>
+        </div>
+        <div id="timePickerContainer" style="display: none; margin-top: 12px;">
+          <input type="time" id="pickupTimeInput" style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #e0e0e0; border-radius: 8px;">
+        </div>
+      </div>
+
+      <div class="checkout-section">
+        <h3>📦 Deine Bestellung</h3>
+        <div class="order-summary" id="checkoutSummary"></div>
+      </div>
+
+      <div class="checkout-section">
+        <h3>💳 Zahlungsart</h3>
+        <div class="payment-options">
+          <div class="payment-btn" id="paymentCash" onclick="selectPayment('cash')">
+            <div class="payment-icon">💵</div>
+            <div class="payment-name">Bar bezahlen</div>
+          </div>
+          <div class="payment-btn" id="paymentPaypal" onclick="selectPayment('paypal')">
+            <div class="payment-icon">💳</div>
+            <div class="payment-name">PayPal</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="place-order-btn" id="placeOrderBtn" onclick="placeOrder()" disabled>
+        Jetzt bestellen - <span id="finalTotal">0,00 €</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="success-modal" id="successModal">
+  <div class="success-content">
+    <div class="success-icon">✅</div>
+    <h2 class="success-title">Bestellung erfolgreich!</h2>
+    <p class="success-text">
+      Deine Bestellung wurde erfolgreich aufgegeben. 
+      Wir bereiten sie jetzt für dich zu!
+    </p>
+    <div class="order-number">
+      <div class="order-number-label">Bestellnummer</div>
+      <div class="order-number-value" id="orderNumber">#0000</div>
+    </div>
+    
+    <div style="background: white; border: 3px solid #E31E24; border-radius: 16px; padding: 20px; margin: 20px 0;">
+      <div style="font-size: 14px; font-weight: 600; color: #666; margin-bottom: 12px;">
+        🎁 Zeige diesen Code beim Abholen
+      </div>
+      <div id="qrCodeContainer" style="display: flex; justify-content: center; margin: 16px 0;"></div>
+      <div style="font-size: 36px; font-weight: 700; color: #E31E24; font-family: 'Courier New', monospace; letter-spacing: 4px; text-align: center;" id="orderQRID">0000</div>
+      <div style="font-size: 12px; color: #666; text-align: center; margin-top: 8px;">
+        → Punkte werden automatisch gutgeschrieben
+      </div>
+    </div>
+    
+    <button class="add-btn" onclick="closeSuccess()">Neue Bestellung</button>
   </div>
 </div>
 
@@ -685,6 +1298,7 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
 const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
 let currentCustomer = null
 let refreshInterval = null
 let refreshErrorCount = 0
@@ -740,7 +1354,7 @@ async function register() {
     
     if (existing && existing.length > 0) { showResult('reg-result', '❌ Diese Nummer ist bereits registriert!', 'error'); return }
     
-    const qrId = Math.floor(1000 + Math.random() * 9000).toString()
+    const qrId = Math.floor(100000 + Math.random() * 900000).toString()
     
     const { data, error } = await supabase.from('customers').insert({ qr_id: qrId, name: name, phone: phone, points: 0 }).select().single()
     
@@ -786,7 +1400,7 @@ async function loadCustomer(customer) {
   if (!customer || !customer.id) { console.error('❌ Ungültiger Kunde übergeben'); logout(); return }
   
   currentCustomer = customer
-  refreshErrorCount = 0  // Error-Counter zurücksetzen bei neuem Login
+  refreshErrorCount = 0
   
   try {
     await refreshCustomerData()
@@ -802,15 +1416,6 @@ async function loadCustomer(customer) {
     refreshInterval = setInterval(refreshCustomerData, 5000)
     
     loadPendingCodes()
-    loadBonuses()
-    loadCoupons()
-    loadChallenges()
-    
-    // 🎡 NEU: Prüfe Wheel-Verfügbarkeit
-    checkWheelAvailability()
-    
-    // 📱 NEU: Lade WhatsApp-Status
-    loadWhatsAppStatus()
     
   } catch (e) {
     console.error('❌ Fehler beim Laden des Kunden:', e)
@@ -828,41 +1433,30 @@ async function refreshCustomerData() {
     if (error) { 
       console.error('❌ Supabase error:', error)
       refreshErrorCount++
-      
-      // Nur bei dauerhaftem Fehler (nach 3 Versuchen) ausloggen
       if (refreshErrorCount >= MAX_REFRESH_ERRORS) {
         if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null }
         alert('❌ Verbindungsfehler. Bitte neu anmelden.')
         logout()
-      } else {
-        console.warn(`⚠️ Refresh-Fehler ${refreshErrorCount}/${MAX_REFRESH_ERRORS} - versuche weiter...`)
       }
       return
     }
     
     if (!data) { 
-      console.error('❌ Kunde nicht mehr in Datenbank - wurde gelöscht')
+      console.error('❌ Kunde nicht mehr in Datenbank')
       if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null }
       alert('⚠️ Dein Account wurde gelöscht. Bitte neu registrieren.')
       logout()
       return
     }
     
-    // Erfolg! Error-Counter zurücksetzen
     refreshErrorCount = 0
-    
     currentCustomer = data
     document.getElementById('app-points').textContent = data.points
     updateRewardButtons(data.points)
     localStorage.setItem('customerData', JSON.stringify(data))
-    loadBonuses()
-    loadCoupons()
-    loadPendingCodes()
-    loadChallenges()
-    // 🎡 NEU: Prüfe Wheel-Verfügbarkeit
-    checkWheelAvailability()
+    
   } catch (e) { 
-    console.error('❌ Refresh error:', e.message, e)
+    console.error('❌ Refresh error:', e)
     if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null }
     alert('❌ Fehler beim Laden. Bitte neu anmelden.')
     logout()
@@ -889,66 +1483,39 @@ function updateRewardButtons(points) {
   document.getElementById('btn-1250').disabled = points < 1250
 }
 
-// Tracking für Einlösungs-Requests (verhindert Doppelklicks)
 let redeemInProgress = {}
 
 async function redeem(rewardName, cost) {
-  // 1. Basis-Check
   if (!currentCustomer || currentCustomer.points < cost) {
     alert('❌ Nicht genug Punkte!')
     return
   }
   
-  // 2. Doppelklick-Schutz (global, nicht nur pro Prämie)
   if (redeemInProgress['any']) {
     console.log('⏳ Einlösung bereits in Bearbeitung...')
     return
   }
   
   try {
-    // 3. Markiere als "in Bearbeitung" (GLOBAL!)
     redeemInProgress['any'] = true
     
-    // 4. Button deaktivieren
     const btn = document.getElementById(`btn-${cost}`)
     if (btn) {
       btn.disabled = true
       btn.textContent = '⏳ Wird erstellt...'
-      btn.style.opacity = '0.5'
     }
     
-    // 5. KRITISCH: Prüfe ob IRGENDEIN PENDING Code existiert (nicht nur für diese Prämie!)
-    const { data: existingCodes, error: checkError } = await supabase
+    const { data: existingCodes } = await supabase
       .from('redeem_codes')
       .select('*')
       .eq('customer_id', currentCustomer.id)
       .eq('used', false)
     
-    if (checkError) throw checkError
-    
-    // NEU: Prüfe ALLE pending Codes, nicht nur für diese Prämie
     if (existingCodes && existingCodes.length > 0) {
-      const existingRewards = existingCodes.map(c => c.reward_name).join(', ')
-      alert(`❌ Du hast bereits ${existingCodes.length} wartende${existingCodes.length > 1 ? '' : 'n'} Code!\n\nBitte löse zuerst deine bestehenden Codes ein oder storniere sie:\n\n${existingRewards}\n\nDann kannst du eine neue Prämie einlösen.`)
+      alert(`❌ Du hast bereits wartende Codes! Bitte löse sie zuerst ein.`)
       throw new Error('Existing pending codes')
     }
     
-    // 6. Aktualisiere Kundenstand aus DB (verhindert veraltete Daten)
-    const { data: freshCustomer, error: customerError } = await supabase
-      .from('customers')
-      .select('points')
-      .eq('id', currentCustomer.id)
-      .single()
-    
-    if (customerError) throw customerError
-    
-    // 7. Finale Punkte-Prüfung mit aktuellen Daten
-    if (freshCustomer.points < cost) {
-      alert('❌ Nicht genug Punkte! (Aktueller Stand: ' + freshCustomer.points + ')')
-      throw new Error('Insufficient points')
-    }
-    
-    // 8. Erstelle Code
     const code = await generateUniqueCode('redeem_codes', 'code')
     const expires = new Date(Date.now() + 24*60*60*1000)
     
@@ -965,42 +1532,29 @@ async function redeem(rewardName, cost) {
     
     if (insertError) throw insertError
     
-    // 9. Erfolg!
-    if (btn) {
-      btn.textContent = '✅ Code erstellt!'
-      btn.style.background = '#22c55e'
-    }
+    if (btn) btn.textContent = '✅ Code erstellt!'
     
-    // 10. Lade pending codes + aktualisiere Anzeige
     await loadPendingCodes()
     await refreshCustomerData()
     
-    // 11. Button nach 2 Sekunden zurücksetzen
     setTimeout(() => {
       if (btn) {
         btn.disabled = false
         btn.textContent = 'Einlösen'
-        btn.style.opacity = '1'
-        btn.style.background = ''
       }
       redeemInProgress['any'] = false
     }, 2000)
     
   } catch (e) {
     console.error('❌ Redeem error:', e)
-    
-    // Button zurücksetzen bei Fehler
     const btn = document.getElementById(`btn-${cost}`)
     if (btn) {
       btn.disabled = false
       btn.textContent = 'Einlösen'
-      btn.style.opacity = '1'
     }
-    
     redeemInProgress['any'] = false
-    
-    if (e.message !== 'Existing pending codes' && e.message !== 'Insufficient points') {
-      alert('❌ Fehler beim Erstellen des Codes. Bitte nochmal versuchen.')
+    if (e.message !== 'Existing pending codes') {
+      alert('❌ Fehler beim Erstellen des Codes.')
     }
   }
 }
@@ -1012,7 +1566,7 @@ async function loadPendingCodes() {
     if (error) throw error
     const section = document.getElementById('pending-section')
     const list = document.getElementById('pending-list')
-    if (!data || data.length === 0) { section.style.display = 'none'; list.innerHTML = ''; return }
+    if (!data || data.length === 0) { section.style.display = 'none'; return }
     section.style.display = 'block'
     list.innerHTML = data.map(item => {
       const expires = new Date(item.valid_until).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
@@ -1023,210 +1577,12 @@ async function loadPendingCodes() {
 
 async function cancelCode(code) {
   if (!confirm('Code wirklich stornieren?')) return
-  try { await supabase.from('redeem_codes').delete().eq('code', code).eq('used', false); loadPendingCodes() } catch (e) { console.error('Cancel error:', e); loadPendingCodes() }
-}
-
-async function loadBonuses() {
-  if (!currentCustomer) return
-  try {
-    const now = new Date().toISOString().split('T')[0]
-    const { data: bonuses, error } = await supabase.from('global_bonuses').select('*').eq('is_active', true).gte('expires_at', now).order('created_at', { ascending: false })
-    if (error) throw error
-    const section = document.getElementById('bonuses-section')
-    const list = document.getElementById('bonuses-list')
-    if (!bonuses || bonuses.length === 0) { section.style.display = 'none'; return }
-    const { data: activatedBonuses } = await supabase.from('activated_global_bonuses').select('global_bonus_id, is_used').eq('customer_id', currentCustomer.id)
-    const activatedMap = new Map(activatedBonuses?.map(a => [a.global_bonus_id, a.is_used]) || [])
-    const availableBonuses = bonuses.filter(bonus => { const isUsed = activatedMap.get(bonus.id); return !isUsed })
-    if (availableBonuses.length === 0) { section.style.display = 'none'; return }
-    section.style.display = 'block'
-    list.innerHTML = availableBonuses.map(bonus => {
-      const bonusAmount = bonus.bonus_amount || 100
-      const isActivated = activatedMap.has(bonus.id)
-      let descText = ''
-      if (bonus.bonus_type === 'double_points') { descText = 'Bei der nächsten Bestellung bekommst du doppelte Punkte!' }
-      else { descText = `Bei der nächsten Bestellung erhältst du ${bonusAmount} Extra-Punkte!` }
-      if (bonus.description) { descText += `<br><small>${bonus.description}</small>` }
-      const expiry = new Date(bonus.expires_at)
-      const daysLeft = Math.ceil((expiry - new Date()) / (1000 * 60 * 60 * 24))
-      let statusText = '', buttonHTML = ''
-      if (isActivated) { statusText = '🔥 Aktiv für nächste Bestellung!' }
-      else { statusText = `⏳ Bereit zum Aktivieren (noch ${daysLeft} ${daysLeft === 1 ? 'Tag' : 'Tage'})`; buttonHTML = `<button onclick="activateBonus(${bonus.id})">🚀 Jetzt aktivieren</button>` }
-      return `<div class="bonus-item ${isActivated ? 'active' : ''}"><h3>${bonus.title || (bonus.bonus_type === 'double_points' ? '⭐ Doppelte Punkte' : `💰 +${bonusAmount} Bonus-Punkte`)}</h3><div class="bonus-desc">${descText}</div><div class="bonus-status">${statusText}</div>${buttonHTML}</div>`
-    }).join('')
-  } catch (e) { console.error('❌ Load bonuses error:', e) }
-}
-
-async function activateBonus(bonusId) {
-  try {
-    const { data: existingActive } = await supabase.from('activated_global_bonuses').select('*').eq('customer_id', currentCustomer.id).eq('is_used', false)
-    if (existingActive && existingActive.length > 0) { alert('❌ Du hast bereits einen aktiven Bonus! Bitte verwende ihn zuerst.'); return }
-    const { error } = await supabase.from('activated_global_bonuses').insert({ customer_id: currentCustomer.id, global_bonus_id: bonusId, activated_at: new Date().toISOString(), is_used: false })
-    if (error) throw error
-    loadBonuses()
-  } catch (e) { console.error('❌ Activate error:', e); alert('❌ Fehler beim Aktivieren: ' + e.message) }
-}
-
-async function loadChallenges() {
-  if (!currentCustomer) return
-  try {
-    const now = new Date()
-    const { data: challenges, error } = await supabase.from('challenges').select('*').eq('is_active', true).gte('end_date', now.toISOString().split('T')[0]).order('created_at', { ascending: false })
-    if (error) throw error
-    const section = document.getElementById('challenges-section')
-    const list = document.getElementById('challenges-list')
-    if (!challenges || challenges.length === 0) { section.style.display = 'none'; return }
-    const challengeHTML = []
-    for (const challenge of challenges) {
-      const { data: progressRows, error: progressError } = await supabase.from('challenge_progress').select('*').eq('customer_id', currentCustomer.id).eq('challenge_id', challenge.id).limit(1)
-      if (progressError) { console.error('Progress load error:', progressError); continue }
-      const progress = (progressRows && progressRows.length > 0) ? progressRows[0] : null
-      const isActivated = progress !== null
-      const completedOrders = progress?.completed_orders || 0
-      const isCompleted = progress?.is_completed || false
-      if (isCompleted) continue
-      const progressPercent = Math.min((completedOrders / challenge.required_orders) * 100, 100)
-      const startDate = new Date(challenge.start_date).toLocaleDateString('de-DE')
-      const endDate = new Date(challenge.end_date).toLocaleDateString('de-DE')
-      const remaining = challenge.required_orders - completedOrders
-      if (!isActivated) {
-        challengeHTML.push(`<div class="challenge-item"><h3>🎁 ${challenge.bonus_points} Extra-Punkte für ${challenge.required_orders} Bestellungen ab ${challenge.min_order_amount} €</h3><div class="challenge-desc">Aktiviere diese Challenge um teilzunehmen!</div><div class="challenge-date">📅 Gültig: ${startDate} - ${endDate}</div><button onclick="activateChallenge(${challenge.id})" style="margin-top: 12px;">🚀 Jetzt aktivieren</button></div>`)
-      } else {
-        challengeHTML.push(`<div class="challenge-item" style="background: linear-gradient(135deg, #F9A825, #f59e0b);"><h3>🎁 ${challenge.bonus_points} Extra-Punkte für ${challenge.required_orders} Bestellungen ab ${challenge.min_order_amount} €</h3><div class="challenge-desc">${remaining} ${remaining === 1 ? 'Bestellung' : 'Bestellungen'} offen</div><div class="challenge-progress"><div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600;"><span>${completedOrders} / ${challenge.required_orders} Bestellungen</span><span>${Math.round(progressPercent)}%</span></div><div class="challenge-progress-bar"><div class="challenge-progress-fill" style="width: ${progressPercent}%"></div></div></div><div class="challenge-date">📅 Gültig: ${startDate} - ${endDate}</div></div>`)
-      }
-    }
-    if (challengeHTML.length === 0) { section.style.display = 'none'; return }
-    section.style.display = 'block'
-    list.innerHTML = challengeHTML.join('')
-  } catch (e) { console.error('Load challenges error:', e) }
-}
-
-async function activateChallenge(challengeId) {
-  try { await supabase.from('challenge_progress').insert({ customer_id: currentCustomer.id, challenge_id: challengeId, completed_orders: 0, is_completed: false }); loadChallenges() } catch (e) { console.error('Activate challenge error:', e) }
-}
-
-async function loadCoupons() {
-  if (!currentCustomer) return
-  try {
-    const { data: coupons, error } = await supabase.from('coupons').select('*').eq('is_active', true).order('created_at', { ascending: false })
-    if (error) throw error
-    const section = document.getElementById('coupons-section')
-    const list = document.getElementById('coupons-list')
-    if (!coupons || coupons.length === 0) { section.style.display = 'none'; return }
-    const now = new Date()
-    // Filter active coupons: check if within date range (start_date to end_date)
-    const activeCoupons = coupons.filter(c => {
-      const startDate = c.start_date ? new Date(c.start_date) : new Date(c.created_at)
-      const endDate = c.end_date ? new Date(c.end_date) : new Date(c.expires_at)
-      // Set end date to end of day (23:59:59)
-      endDate.setHours(23, 59, 59, 999)
-      // Check if coupon is within valid date range
-      return now >= startDate && now <= endDate
-    })
-    if (activeCoupons.length === 0) { section.style.display = 'none'; return }
-    
-    // Get today's start and end times for checking daily usage
-    const todayStart = new Date()
-    todayStart.setHours(0, 0, 0, 0)
-    const todayEnd = new Date()
-    todayEnd.setHours(23, 59, 59, 999)
-    
-    // Get all activated coupons for this customer (used and unused)
-    const { data: allActivated } = await supabase
-      .from('activated_coupons')
-      .select('coupon_id, unique_code, activated_at, is_used')
-      .eq('customer_id', currentCustomer.id)
-    
-    // Create maps for current activations and today's usage
-    const activatedTodayMap = new Map()
-    const currentActivationMap = new Map()
-    
-    if (allActivated) {
-      allActivated.forEach(a => {
-        const activatedDate = new Date(a.activated_at)
-        // Check if activated today
-        if (activatedDate >= todayStart && activatedDate <= todayEnd) {
-          activatedTodayMap.set(a.coupon_id, a.is_used)
-        }
-        // Track current unused activations
-        if (!a.is_used) {
-          currentActivationMap.set(a.coupon_id, a.unique_code)
-        }
-      })
-    }
-    
-    section.style.display = 'block'
-    const couponItems = []
-    
-    activeCoupons.forEach(coupon => {
-      const endDate = coupon.end_date ? new Date(coupon.end_date) : new Date(coupon.expires_at)
-      endDate.setHours(23, 59, 59, 999)
-      const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
-      
-      const isUsedToday = activatedTodayMap.get(coupon.id) === true
-      const hasCurrentActivation = currentActivationMap.has(coupon.id)
-      const uniqueCode = currentActivationMap.get(coupon.id)
-      
-      // If used today and coupon expires today, don't show it at all
-      if (isUsedToday && daysLeft === 0) {
-        return // Skip this coupon completely
-      }
-      
-      // Check if coupon will still be valid tomorrow
-      const tomorrow = new Date(now)
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      tomorrow.setHours(0, 0, 0, 0)
-      const willBeValidTomorrow = tomorrow <= endDate
-      
-      let expiryText = ''
-      if (daysLeft === 0) { expiryText = '<span class="coupon-expiry warning">⚠️ Läuft heute ab!</span>' }
-      else if (daysLeft <= 3) { expiryText = `<span class="coupon-expiry warning">⏰ Läuft in ${daysLeft} Tagen ab</span>` }
-      else { expiryText = `<span class="coupon-expiry">⏰ Läuft in ${daysLeft} Tagen ab</span>` }
-      const formattedPrice = parseFloat(coupon.price || 0).toFixed(2).replace('.', ',') + ' €'
-      
-      // Show different states
-      if (hasCurrentActivation) {
-        // Currently activated (not yet used)
-        couponItems.push(`<div class="coupon-item activated"><h3>${coupon.title}</h3><div class="coupon-product">🍴 ${coupon.product}</div><div class="coupon-price">💰 ${formattedPrice}</div>${coupon.description ? `<div class="coupon-desc">📝 ${coupon.description}</div>` : ''}<div class="coupon-code-display">${uniqueCode}</div>${expiryText}<div class="coupon-activated-badge">✅ Aktiviert! Zeige Code beim Scannen</div><button onclick="deactivateCoupon(${coupon.id})" style="background: #ef4444; margin-top: 8px;">❌ Stornieren</button></div>`)
-      } else if (isUsedToday) {
-        // Already used today - show as unavailable only if will be valid tomorrow
-        if (willBeValidTomorrow) {
-          couponItems.push(`<div class="coupon-item" style="opacity: 0.6; background: #f3f4f6;"><h3>${coupon.title}</h3><div class="coupon-product">🍴 ${coupon.product}</div><div class="coupon-price">💰 ${formattedPrice}</div>${coupon.description ? `<div class="coupon-desc">📝 ${coupon.description}</div>` : ''}<div style="background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 8px; margin-top: 12px; font-weight: 600; text-align: center;">✅ Heute bereits eingelöst<br><span style="font-size: 13px; opacity: 0.8;">Morgen wieder verfügbar</span></div></div>`)
-        }
-        // If not valid tomorrow, don't show it (it will disappear)
-      } else {
-        // Available to activate
-        couponItems.push(`<div class="coupon-item"><h3>${coupon.title}</h3><div class="coupon-product">🍴 ${coupon.product}</div><div class="coupon-price">💰 ${formattedPrice}</div>${coupon.description ? `<div class="coupon-desc">📝 ${coupon.description}</div>` : ''}${expiryText}<button onclick="activateCoupon(${coupon.id})">🚀 Jetzt aktivieren</button></div>`)
-      }
-    })
-    
-    if (couponItems.length === 0) {
-      section.style.display = 'none'
-    } else {
-      list.innerHTML = couponItems.join('')
-    }
-  } catch (e) { console.error('Load coupons error:', e) }
-}
-
-async function activateCoupon(couponId) {
-  try {
-    const id = parseInt(couponId)
-    const { data: existing } = await supabase.from('activated_coupons').select('*').eq('customer_id', currentCustomer.id).eq('coupon_id', id).eq('is_used', false)
-    if (existing && existing.length > 0) { loadCoupons(); return }
-    const uniqueCode = await generateUniqueCode('activated_coupons', 'unique_code')
-    const { error } = await supabase.from('activated_coupons').insert({ customer_id: currentCustomer.id, coupon_id: id, unique_code: uniqueCode, activated_at: new Date().toISOString(), is_used: false })
-    if (error) { console.error('❌ Activate coupon error:', error); alert('❌ Fehler beim Aktivieren. Bitte nochmal versuchen.'); return }
-    loadCoupons()
-  } catch (e) { console.error('❌ Fehler beim Aktivieren:', e); alert('❌ Fehler: ' + e.message); loadCoupons() }
-}
-
-async function deactivateCoupon(couponId) {
-  try { const id = parseInt(couponId); await supabase.from('activated_coupons').delete().eq('customer_id', currentCustomer.id).eq('coupon_id', id).eq('is_used', false); loadCoupons() } catch (e) { console.error('Fehler beim Stornieren:', e.message); loadCoupons() }
+  try { await supabase.from('redeem_codes').delete().eq('code', code).eq('used', false); loadPendingCodes() } catch (e) { console.error('Cancel error:', e) }
 }
 
 function logout() {
   if (refreshInterval) clearInterval(refreshInterval)
-  refreshErrorCount = 0  // Error-Counter zurücksetzen
+  refreshErrorCount = 0
   currentCustomer = null
   localStorage.removeItem('customerData')
   showScreen('start')
@@ -1237,40 +1593,714 @@ window.onload = () => {
   if (stored) {
     try {
       const customer = JSON.parse(stored)
-      if (!customer || !customer.id || !customer.qr_id) { console.error('❌ Ungültige Kundendaten im localStorage'); localStorage.removeItem('customerData'); return }
-      loadCustomer(customer)
-    } catch (e) { console.error('❌ Fehler beim Laden:', e); localStorage.removeItem('customerData') }
+      if (customer && customer.id && customer.qr_id) {
+        loadCustomer(customer)
+      }
+    } catch (e) { 
+      console.error('❌ Fehler beim Laden:', e)
+      localStorage.removeItem('customerData')
+    }
   }
 }
 
-// 🎡 NEU: Lucky Wheel Functions
-let wheelRotation = 0
-let isSpinning = false
-let currentWheelUnlockId = null // Für Spin Again
-
-const anglePerSegment = (2 * Math.PI) / 18
-const WHEEL_OFFSET = -Math.PI / 2 - anglePerSegment / 2
-
-const wheelPrizes = [
-  { label: '500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },          // 1 - ROT
-  { label: '50', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },            // 2 - WEIß
-  { label: '100', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },          // 3 - SCHWARZ
-  { label: '25', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 25 },            // 4 - WEIß
-  { label: '75', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },            // 5 - SCHWARZ
-  { label: 'DREHE NOCHMAL!', color: '#FFFFFF', textColor: '#000000', type: 'spin_again', value: 0 }, // 6 - WEIß
-  { label: '50', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },            // 7 - SCHWARZ
-  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },          // 8 - WEIß
-  { label: '25', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25 },            // 9 - SCHWARZ
-  { label: '500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },          // 10 - ROT
-  { label: '75', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },            // 11 - SCHWARZ
-  { label: '50', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },            // 12 - WEIß
-  { label: 'DREHE NOCHMAL!', color: '#000000', textColor: '#FFFFFF', type: 'spin_again', value: 0 }, // 13 - SCHWARZ
-  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },          // 14 - WEIß
-  { label: '25', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25 },            // 15 - SCHWARZ
-  { label: '75', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 75 },            // 16 - WEIß
-  { label: '50', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },            // 17 - SCHWARZ
-  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 }           // 18 - WEIß
+const products = [
+  {
+    id: 'doener',
+    name: 'Döner',
+    price: 6.00,
+    description: 'Klassischer Döner im Fladenbrot',
+    options: {
+      fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
+      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
+      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+    },
+    extras: [
+      { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
+      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
+      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+    ]
+  },
+  {
+    id: 'koefte-brot',
+    name: 'Köfte im Brot (5 Stk.)',
+    price: 6.00,
+    description: 'Gegrillte Hackfleischbällchen im Fladenbrot',
+    options: {
+      koefte: { label: 'Köfte', choices: [0, 1], default: 1 },
+      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
+      tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+    },
+    extras: [
+      { id: 'extraKoefte', name: 'Extra Köfte', price: 2.00 },
+      { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
+      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+    ]
+  },
+  {
+    id: 'pommes',
+    name: 'Pommes',
+    price: 3.50,
+    description: 'Knusprige Pommes Frites',
+    options: {
+      sauce: { label: 'Sauce', choices: ['Ohne', 'Ketchup', 'Mayonnaise'], default: 'Ketchup' }
+    },
+    extras: [
+      { id: 'extraKetchup', name: 'Extra Ketchup', price: 0.30 },
+      { id: 'extraMayo', name: 'Extra Mayonnaise', price: 0.30 }
+    ]
+  }
 ]
+
+let cart = []
+let currentProduct = null
+let currentCustomization = {}
+let selectedPayment = null
+let selectedPickupTime = 'now'
+let selectedPickupTimeValue = null
+
+function openOrderModal() {
+  if (!currentCustomer) {
+    alert('❌ Bitte melde dich erst an!')
+    return
+  }
+  
+  document.getElementById('order-section').style.display = 'block'
+  document.getElementById('screen-app').style.display = 'none'
+  document.body.style.overflow = 'auto'
+  window.scrollTo(0, 0)
+  
+  renderProducts()
+}
+
+function closeOrderModal() {
+  document.getElementById('order-section').style.display = 'none'
+  document.getElementById('screen-app').style.display = 'block'
+  window.scrollTo(0, 0)
+}
+
+function renderProducts() {
+  const container = document.getElementById('products')
+  
+  const categories = [
+    { name: '🌯 Döner & Dürüm', ids: ['doener'], open: true },
+    { name: '🍖 Köfte', ids: ['koefte-brot'], open: false },
+    { name: '🍟 Beilagen', ids: ['pommes'], open: false }
+  ]
+  
+  let html = ''
+  
+  categories.forEach((category, index) => {
+    const categoryProducts = products.filter(p => category.ids.includes(p.id))
+    if (categoryProducts.length === 0) return
+    
+    html += `
+      <div class="category-section">
+        <div class="category-header" onclick="toggleCategory(${index})">
+          <h3 class="category-title">
+            ${category.name}
+            <span class="category-count">(${categoryProducts.length})</span>
+          </h3>
+          <span class="category-arrow" id="arrow-${index}">
+            ${category.open ? '▼' : '▶'}
+          </span>
+        </div>
+        <div class="category-content ${category.open ? 'open' : ''}" id="category-${index}">
+          ${categoryProducts.map(product => {
+            const hasOptions = Object.keys(product.options).length > 0 || product.extras.length > 0
+            const buttonText = hasOptions ? 'Anpassen & Bestellen' : 'In den Warenkorb'
+            
+            return `
+              <div class="product-card" onclick="openCustomize('${product.id}')">
+                <div class="product-header">
+                  <div class="product-name">${product.name}</div>
+                  <div class="product-price">${formatPrice(product.price)}</div>
+                </div>
+                <div class="product-desc">${product.description}</div>
+                <button class="add-btn" onclick="event.stopPropagation(); openCustomize('${product.id}')">
+                  ${buttonText}
+                </button>
+              </div>
+            `
+          }).join('')}
+        </div>
+      </div>
+    `
+  })
+  
+  container.innerHTML = html
+}
+
+function toggleCategory(index) {
+  const content = document.getElementById(`category-${index}`)
+  const arrow = document.getElementById(`arrow-${index}`)
+  
+  if (content.classList.contains('open')) {
+    content.classList.remove('open')
+    arrow.textContent = '▶'
+  } else {
+    content.classList.add('open')
+    arrow.textContent = '▼'
+  }
+}
+
+function openCustomize(productId) {
+  currentProduct = products.find(p => p.id === productId)
+  currentCustomization = {
+    product: currentProduct,
+    options: {},
+    extras: []
+  }
+  
+  Object.keys(currentProduct.options).forEach(key => {
+    currentCustomization.options[key] = currentProduct.options[key].default
+  })
+  
+  if (Object.keys(currentProduct.options).length === 0 && currentProduct.extras.length === 0) {
+    addToCart()
+    return
+  }
+  
+  renderCustomizeModal()
+  document.getElementById('customizeModal').classList.add('active')
+}
+
+function closeCustomizeModal() {
+  document.getElementById('customizeModal').classList.remove('active')
+  currentProduct = null
+  currentCustomization = {}
+}
+
+function renderCustomizeModal() {
+  document.getElementById('modalTitle').textContent = currentProduct.name
+  
+  let html = ''
+  
+  Object.keys(currentProduct.options).forEach(key => {
+    const option = currentProduct.options[key]
+    html += `<div class="option-group">
+      <label class="option-label">${option.label}</label>
+      <div class="option-buttons">`
+    
+    if (Array.isArray(option.choices)) {
+      option.choices.forEach(choice => {
+        const isActive = currentCustomization.options[key] === choice ? 'active' : ''
+        
+        let label
+        if (typeof choice === 'number') {
+          label = choice === 0 ? 'Ohne' : choice === 1 ? '1x' : '2x'
+        } else {
+          label = choice
+        }
+        
+        const choiceValue = typeof choice === 'string' ? `'${choice}'` : choice
+        
+        html += `<button class="option-btn ${isActive}" onclick="selectOption('${key}', ${choiceValue})">${label}</button>`
+      })
+    }
+    
+    html += `</div></div>`
+  })
+  
+  if (currentProduct.extras.length > 0) {
+    html += `<div class="option-group"><label class="option-label">Extras</label>`
+    currentProduct.extras.forEach(extra => {
+      const isSelected = currentCustomization.extras.includes(extra.id) ? 'selected' : ''
+      html += `<div class="extra-item ${isSelected}" onclick="toggleExtra('${extra.id}')">
+        <div class="extra-info">
+          <div class="extra-name">${extra.name}</div>
+        </div>
+        <div class="extra-price">${formatPrice(extra.price)}</div>
+      </div>`
+    })
+    html += `</div>`
+  }
+  
+  document.getElementById('modalBody').innerHTML = html
+  updateCustomizePrice()
+}
+
+function selectOption(key, value) {
+  currentCustomization.options[key] = value
+  renderCustomizeModal()
+}
+
+function toggleExtra(extraId) {
+  const index = currentCustomization.extras.indexOf(extraId)
+  if (index > -1) {
+    currentCustomization.extras.splice(index, 1)
+  } else {
+    currentCustomization.extras.push(extraId)
+  }
+  renderCustomizeModal()
+}
+
+function updateCustomizePrice() {
+  let price = currentProduct.price
+  currentCustomization.extras.forEach(extraId => {
+    const extra = currentProduct.extras.find(e => e.id === extraId)
+    if (extra) price += extra.price
+  })
+  document.getElementById('modalTotal').textContent = formatPrice(price)
+}
+
+function addToCart() {
+  let price = currentProduct.price
+  currentCustomization.extras.forEach(extraId => {
+    const extra = currentProduct.extras.find(e => e.id === extraId)
+    if (extra) price += extra.price
+  })
+  
+  cart.push({
+    product: currentProduct,
+    options: { ...currentCustomization.options },
+    extras: [...currentCustomization.extras],
+    price: price
+  })
+  
+  updateCart()
+  closeCustomizeModal()
+}
+
+function updateCart() {
+  const count = cart.length
+  const total = cart.reduce((sum, item) => sum + item.price, 0)
+  
+  document.getElementById('cartCount').textContent = count
+  document.getElementById('cartTotal').textContent = formatPrice(total)
+  document.getElementById('cartFixed').style.display = count > 0 ? 'block' : 'none'
+}
+
+function openCart() {
+  renderCart()
+  document.getElementById('cartModal').classList.add('active')
+}
+
+function closeCart() {
+  document.getElementById('cartModal').classList.remove('active')
+}
+
+function renderCart() {
+  const container = document.getElementById('cartItems')
+  
+  if (cart.length === 0) {
+    container.innerHTML = '<div class="cart-empty"><div class="cart-empty-icon">🛒</div><p>Dein Warenkorb ist leer</p></div>'
+    document.getElementById('cartModalTotal').textContent = '0,00 €'
+    document.getElementById('cartModalCount').textContent = '0'
+    return
+  }
+  
+  const html = cart.map((item, index) => {
+    const optionsText = Object.keys(item.options)
+      .filter(key => {
+        const value = item.options[key]
+        const defaultValue = item.product.options[key].default
+        return value !== defaultValue
+      })
+      .map(key => {
+        const value = item.options[key]
+        const label = item.product.options[key].label
+        if (typeof value === 'string') return `${label}: ${value}`
+        return `${label}: ${value === 0 ? 'Ohne' : value === 1 ? '1x' : '2x'}`
+      })
+      .join(', ')
+    
+    const extrasText = item.extras.map(extraId => {
+      const extra = item.product.extras.find(e => e.id === extraId)
+      return extra ? `+ ${extra.name}` : ''
+    }).join(', ')
+    
+    return `
+      <div class="cart-item">
+        <div class="cart-item-header">
+          <div class="cart-item-name">${item.product.name}</div>
+          <div class="cart-item-price">${formatPrice(item.price)}</div>
+        </div>
+        ${optionsText || extrasText ? `<div class="cart-item-options">${[optionsText, extrasText].filter(Boolean).join(', ')}</div>` : ''}
+        <div class="cart-item-actions">
+          <button class="cart-item-btn delete" onclick="removeFromCart(${index})">🗑️ Entfernen</button>
+        </div>
+      </div>
+    `
+  }).join('')
+  
+  container.innerHTML = html
+  
+  const total = cart.reduce((sum, item) => sum + item.price, 0)
+  document.getElementById('cartModalTotal').textContent = formatPrice(total)
+  document.getElementById('cartModalCount').textContent = cart.length
+}
+
+function removeFromCart(index) {
+  cart.splice(index, 1)
+  updateCart()
+  renderCart()
+}
+
+function goToCheckout() {
+  if (cart.length === 0) {
+    alert('Dein Warenkorb ist leer!')
+    return
+  }
+  
+  closeCart()
+  document.getElementById('checkoutModal').classList.add('active')
+  renderCheckout()
+  
+  if (currentCustomer) {
+    document.getElementById('customerName').value = currentCustomer.name
+    document.getElementById('customerPhone').value = currentCustomer.phone
+  }
+  
+  checkCheckoutReady()
+}
+
+function closeCheckout() {
+  document.getElementById('checkoutModal').classList.remove('active')
+}
+
+function renderCheckout() {
+  const summary = document.getElementById('checkoutSummary')
+  
+  const items = cart.map(item => {
+    const optionsText = Object.keys(item.options)
+      .filter(key => {
+        const value = item.options[key]
+        const defaultValue = item.product.options[key].default
+        return value !== defaultValue
+      })
+      .map(key => {
+        const value = item.options[key]
+        const label = item.product.options[key].label
+        if (typeof value === 'string') return `${label}: ${value}`
+        return `${label}: ${value === 0 ? 'Ohne' : value === 1 ? '1x' : '2x'}`
+      })
+      .join(', ')
+    
+    const extrasText = item.extras.map(extraId => {
+      const extra = item.product.extras.find(e => e.id === extraId)
+      return extra ? `+ ${extra.name}` : ''
+    }).join(', ')
+    
+    return `
+      <div class="summary-row">
+        <span>${item.product.name}${optionsText || extrasText ? ' (' + [optionsText, extrasText].filter(Boolean).join(', ') + ')' : ''}</span>
+        <span>${formatPrice(item.price)}</span>
+      </div>
+    `
+  }).join('')
+  
+  const total = cart.reduce((sum, item) => sum + item.price, 0)
+  
+  summary.innerHTML = items + `
+    <div class="summary-row total">
+      <span>Gesamt</span>
+      <span>${formatPrice(total)}</span>
+    </div>
+  `
+  
+  document.getElementById('finalTotal').textContent = formatPrice(total)
+}
+
+function selectPayment(type) {
+  selectedPayment = type
+  
+  document.getElementById('paymentCash').classList.remove('active')
+  document.getElementById('paymentPaypal').classList.remove('active')
+  document.getElementById(`payment${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('active')
+  
+  checkCheckoutReady()
+}
+
+function selectPickupTime(type) {
+  selectedPickupTime = type
+  
+  document.getElementById('pickupNow').classList.remove('active')
+  document.getElementById('pickupLater').classList.remove('active')
+  document.getElementById(`pickup${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('active')
+  
+  const timePickerContainer = document.getElementById('timePickerContainer')
+  if (type === 'later') {
+    timePickerContainer.style.display = 'block'
+    const now = new Date()
+    now.setMinutes(now.getMinutes() + 30)
+    const hours = String(now.getHours()).padStart(2, '0')
+    const minutes = String(Math.round(now.getMinutes() / 15) * 15).padStart(2, '0')
+    document.getElementById('pickupTimeInput').value = `${hours}:${minutes}`
+  } else {
+    timePickerContainer.style.display = 'none'
+    selectedPickupTimeValue = null
+  }
+  
+  checkCheckoutReady()
+}
+
+function checkCheckoutReady() {
+  const name = document.getElementById('customerName').value.trim()
+  const phone = document.getElementById('customerPhone').value.trim()
+  const ready = name && phone && selectedPayment
+  
+  document.getElementById('placeOrderBtn').disabled = !ready
+}
+
+async function placeOrder() {
+  const name = document.getElementById('customerName').value.trim()
+  const phone = document.getElementById('customerPhone').value.trim()
+  const notes = document.getElementById('customerNotes').value.trim()
+  const total = cart.reduce((sum, item) => sum + item.price, 0)
+  
+  let pickupTime = null
+  if (selectedPickupTime === 'later') {
+    pickupTime = document.getElementById('pickupTimeInput').value
+  }
+  
+  const btn = document.getElementById('placeOrderBtn')
+  btn.disabled = true
+  btn.innerHTML = '⏳ Bestellung wird verarbeitet...'
+  
+  try {
+    const orderQRID = Math.floor(1000 + Math.random() * 9000).toString()
+    const orderNumber = Math.floor(100000 + Math.random() * 900000)
+    
+    const orderData = {
+      order_number: orderNumber,
+      qr_id: orderQRID,
+      customer_name: name,
+      customer_phone: phone,
+      notes: notes || null,
+      items: cart,
+      total: total,
+      payment_method: selectedPayment,
+      pickup_time: pickupTime,
+      pickup_type: selectedPickupTime,
+      status: 'pending',
+      created_at: new Date().toISOString()
+    }
+    
+    const { error } = await supabase
+      .from('orders')
+      .insert([orderData])
+    
+    if (error) {
+      console.error('Supabase error:', error)
+      throw new Error('Bestellung konnte nicht gespeichert werden')
+    }
+    
+    const qrData = `ORDER:${orderQRID}:${orderNumber}:${total.toFixed(2)}`
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`
+    
+    document.getElementById('qrCodeContainer').innerHTML = `<img src="${qrUrl}" style="width: 200px; height: 200px;">`
+    document.getElementById('orderQRID').textContent = orderQRID
+    document.getElementById('orderNumber').textContent = orderNumber
+    
+    closeCheckout()
+    document.getElementById('successModal').classList.add('active')
+    
+    cart = []
+    updateCart()
+    
+  } catch (error) {
+    console.error('Error:', error)
+    alert('❌ Fehler bei der Bestellung: ' + error.message)
+    btn.disabled = false
+    btn.innerHTML = 'Jetzt bestellen - <span id="finalTotal">0,00 €</span>'
+    renderCheckout()
+  }
+}
+
+function formatPrice(price) {
+  return price.toFixed(2).replace('.', ',') + ' €'
+}
+
+function closeSuccess() {
+  document.getElementById('successModal').classList.remove('active')
+  closeOrderModal()
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('customerName')?.addEventListener('input', checkCheckoutReady)
+  document.getElementById('customerPhone')?.addEventListener('input', checkCheckoutReady)
+  document.getElementById('pickupTimeInput')?.addEventListener('change', checkCheckoutReady)
+})
+
+console.log('✅ Döner Boxx App geladen!')
+
+
+// ============================================
+// 📱 WHATSAPP FUNKTIONEN
+// ============================================
+
+async function loadWhatsAppStatus() {
+  if (!currentCustomer) return
+  
+  const topContainer = document.getElementById('whatsapp-section-top')
+  const bottomContainer = document.getElementById('whatsapp-section-bottom')
+  const isOptedIn = currentCustomer.whatsapp_optin === true
+  
+  if (!topContainer || !bottomContainer) return
+  
+  if (isOptedIn) {
+    // Aktiviert - zeige NACH Prämien
+    topContainer.innerHTML = ''
+    const optinDate = currentCustomer.whatsapp_optin_date ? 
+      new Date(currentCustomer.whatsapp_optin_date).toLocaleDateString('de-DE') : 'kürzlich'
+    
+    bottomContainer.innerHTML = `
+      <div class="card" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 2px solid #10b981;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <div style="background: white; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+            ✅
+          </div>
+          <div style="flex: 1;">
+            <div style="font-weight: 700; color: #166534; font-size: 15px;">WhatsApp aktiviert</div>
+            <div style="font-size: 13px; color: #15803d;">Seit ${optinDate}</div>
+          </div>
+        </div>
+        <div style="background: rgba(255,255,255,0.5); padding: 12px; border-radius: 8px; font-size: 13px; color: #065f46; margin-bottom: 12px;">
+          📱 Du erhältst jetzt exklusive Angebote, Happy Hour Alerts und Glücksrad-Erinnerungen per WhatsApp!
+        </div>
+        <button onclick="deactivateWhatsApp()" style="background: #6b7280; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%;">
+          Deaktivieren
+        </button>
+      </div>
+    `
+  } else {
+    // Nicht aktiviert - zeige VOR Prämien
+    bottomContainer.innerHTML = ''
+    topContainer.innerHTML = `
+      <div class="card" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #F9A825;">
+        <h2>📱 WhatsApp-Benachrichtigungen</h2>
+        <p style="color: #92400e; font-size: 14px; margin-bottom: 16px;">
+          Erhalte exklusive Angebote, Happy Hour Alerts & Glücksrad-Erinnerungen direkt per WhatsApp!
+        </p>
+        <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+            <div style="font-size: 32px;">🎁</div>
+            <div style="flex: 1;">
+              <div style="font-weight: 700; color: #92400e; font-size: 16px;">Aktiviere WhatsApp</div>
+              <div style="font-size: 13px; color: #78350f;">Verpasse keine Aktion mehr!</div>
+            </div>
+          </div>
+          <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; color: #92400e;">
+            <li style="margin-bottom: 6px;">✅ Exklusive Rabatte & Angebote</li>
+            <li style="margin-bottom: 6px;">⏰ Happy Hour Benachrichtigungen</li>
+            <li style="margin-bottom: 6px;">🎡 Glücksrad-Erinnerungen</li>
+          </ul>
+        
+    <!-- 📱 WhatsApp-Benachrichtigungen Section (NACH Prämien - für aktiviert) -->
+    <div id="whatsapp-section-bottom">
+      <!-- Wird dynamisch geladen wenn aktiviert -->
+    </div>
+
+  </div>
+        <button onclick="activateWhatsApp()" style="background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border: none; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%;">
+          📱 Jetzt aktivieren
+        </button>
+      </div>
+    `
+  }
+}
+
+async function activateWhatsApp() {
+  if (!currentCustomer || !currentCustomer.phone) {
+    alert('❌ Fehler: Kundendaten nicht geladen')
+    return
+  }
+  
+  const phone = currentCustomer.phone
+  const name = currentCustomer.name
+  
+  // WhatsApp Opt-In Text
+  const message = encodeURIComponent(
+    `Hallo Döner Boxx Team! 👋\n\n` +
+    `Ich möchte exklusive Angebote, Happy Hour Alerts und Glücksrad-Erinnerungen per WhatsApp erhalten.\n\n` +
+    `Name: ${name}\n` +
+    `Telefon: ${phone}\n\n` +
+    `Mit dieser Nachricht bestätige ich meine Einwilligung.\n\n` +
+    `📱 Abmeldung jederzeit über dein Kundenkonto möglich`
+  )
+  
+  // WhatsApp URL
+  const waNumber = '4915123456789' // ← ÄNDERE DIESE NUMMER!
+  const waUrl = `https://wa.me/${waNumber}?text=${message}`
+  
+  // In Datenbank markieren
+  try {
+    const { error } = await supabase
+      .from('customers')
+      .update({ 
+        whatsapp_optin: true,
+        whatsapp_optin_date: new Date().toISOString()
+      })
+      .eq('id', currentCustomer.id)
+    
+    if (error) throw error
+    
+    currentCustomer.whatsapp_optin = true
+    currentCustomer.whatsapp_optin_date = new Date().toISOString()
+    
+    loadWhatsAppStatus()
+    window.open(waUrl, '_blank')
+    
+  } catch (e) {
+    console.error('WhatsApp activation error:', e)
+    alert('❌ Fehler beim Aktivieren: ' + e.message)
+  }
+}
+
+async function deactivateWhatsApp() {
+  if (!confirm('Möchtest du WhatsApp-Benachrichtigungen wirklich deaktivieren?\n\nDu verpasst dann exklusive Angebote und Happy Hour Alerts! 😢')) {
+    return
+  }
+  
+  try {
+    const { error } = await supabase
+      .from('customers')
+      .update({ 
+        whatsapp_optin: false,
+        whatsapp_optout_date: new Date().toISOString()
+      })
+      .eq('id', currentCustomer.id)
+    
+    if (error) throw error
+    
+    currentCustomer.whatsapp_optin = false
+    loadWhatsAppStatus()
+    alert('✅ WhatsApp-Benachrichtigungen deaktiviert')
+    
+  } catch (e) {
+    console.error('WhatsApp deactivation error:', e)
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+
+
+// 🎡 Prüfe Wheel nach Bestellung
+function checkWheelAfterOrder(orderTotal) {
+  // Warte kurz damit Checkout-Animation fertig ist
+  setTimeout(() => {
+    // Prüfe ob Wheel verfügbar ist
+    checkWheelAvailability()
+  }, 500)
+}
+
+
+
+// ============================================
+// 🎡 LUCKY WHEEL KOMPLETT
+// ============================================
 
 let logoImg = null
 let wheelHandlersAttached = false  // ✅ Flag um mehrfache Handler zu verhindern
@@ -1734,218 +2764,6 @@ async function saveWheelSpin(unlockId, prize) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// WhatsApp-Benachrichtigungen Funktionen
-// ═══════════════════════════════════════════════════════════════
-async function loadWhatsAppStatus() {
-  if (!currentCustomer || !currentCustomer.id) return
-  
-  const topContainer = document.getElementById('whatsapp-section-top')
-  const bottomContainer = document.getElementById('whatsapp-section-bottom')
-  const isOptedIn = currentCustomer.whatsapp_optin === true
-  
-  if (isOptedIn) {
-    // ✅ AKTIVIERT → Block wandert NACH UNTEN (unter Prämien)
-    topContainer.innerHTML = '' // Oben leeren
-    
-    const optinDate = currentCustomer.whatsapp_optin_date ? 
-      new Date(currentCustomer.whatsapp_optin_date).toLocaleDateString('de-DE') : 'kürzlich'
-    
-    bottomContainer.innerHTML = `
-      <div class="card" style="margin-top: 16px;">
-        <div style="background: linear-gradient(135deg, #dcfce7, #d1fae5); border: 2px solid #25D366; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <div style="font-size: 24px;">✅</div>
-              <div>
-                <div style="font-weight: 700; color: #166534; font-size: 15px;">WhatsApp aktiviert</div>
-                <div style="font-size: 12px; color: #166534; opacity: 0.8;">Seit ${optinDate}</div>
-              </div>
-            </div>
-          </div>
-          <div style="font-size: 13px; color: #166534; margin-bottom: 10px;">
-            Du erhältst jetzt exklusive Angebote & Happy Hour Alerts! 🎉
-          </div>
-          <button onclick="deactivateWhatsApp()" style="background: #6b7280; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%;">
-            Deaktivieren
-          </button>
-        </div>
-      </div>
-    `
-  } else {
-    // ❌ NICHT AKTIVIERT → Block bleibt OBEN (prominent, vor Prämien)
-    bottomContainer.innerHTML = '' // Unten leeren
-    
-    topContainer.innerHTML = `
-      <div class="card" style="margin-top: 16px;">
-        <h2>📱 WhatsApp-Benachrichtigungen</h2>
-        <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
-          Erhalte exklusive Angebote, Happy Hour Alerts & Glücksrad-Erinnerungen direkt per WhatsApp!
-        </p>
-        
-        <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #f59e0b; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-            <div style="font-size: 32px;">📱</div>
-            <div>
-              <div style="font-weight: 700; color: #92400e; font-size: 16px;">Aktiviere WhatsApp</div>
-              <div style="font-size: 13px; color: #92400e;">Verpasse keine Angebote mehr!</div>
-            </div>
-          </div>
-          <div style="font-size: 13px; color: #92400e; margin-bottom: 12px;">
-            Erhalte:<br>
-            • 🔥 Happy Hour Alerts (2x Punkte!)<br>
-            • 🎡 Glücksrad-Erinnerungen<br>
-            • 🎯 Challenge-Updates<br>
-            • 🎁 Exklusive Deals
-          </div>
-          <button onclick="activateWhatsApp()" style="background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border: none; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%;">
-            📱 Jetzt aktivieren
-          </button>
-        </div>
-        <div style="font-size: 11px; color: #666; text-align: center; padding: 8px;">
-          Datenschutz: Deine Nummer wird nur für Angebote genutzt. Abmeldung jederzeit möglich.
-        </div>
-      </div>
-    `
-  }
-}
-
-async function activateWhatsApp() {
-  if (!currentCustomer || !currentCustomer.phone) {
-    alert('❌ Fehler: Kundendaten nicht geladen')
-    return
-  }
-  
-  const phone = currentCustomer.phone
-  const name = currentCustomer.name
-  
-  // WhatsApp Opt-In Text
-  const message = encodeURIComponent(
-    `Hallo Döner Boxx Team! 👋\n\n` +
-    `Ich möchte exklusive Angebote, Happy Hour Alerts und Glücksrad-Erinnerungen per WhatsApp erhalten.\n\n` +
-    `Name: ${name}\n` +
-    `Telefon: ${phone}\n\n` +
-    `Mit dieser Nachricht bestätige ich meine Einwilligung.\n\n` +
-    `📱 Abmeldung jederzeit über dein Kundenkonto möglich`
-  )
-  
-  // Öffne WhatsApp mit vorbefülltem Text
-  // WICHTIG: Hier musst du deine WhatsApp Business Nummer eintragen!
-  const waNumber = '4915123456789' // ← ÄNDERE DIESE NUMMER!
-  const waUrl = `https://wa.me/${waNumber}?text=${message}`
-  
-  // In Datenbank als "wartet auf Bestätigung" markieren
-  try {
-    const { error } = await supabase
-      .from('customers')
-      .update({ 
-        whatsapp_optin: true,
-        whatsapp_optin_date: new Date().toISOString()
-      })
-      .eq('id', currentCustomer.id)
-    
-    if (error) throw error
-    
-    // Update lokales Objekt
-    currentCustomer.whatsapp_optin = true
-    currentCustomer.whatsapp_optin_date = new Date().toISOString()
-    
-    // UI aktualisieren
-    loadWhatsAppStatus()
-    
-    // WhatsApp öffnen
-    window.open(waUrl, '_blank')
-    
-  } catch (e) {
-    console.error('WhatsApp activation error:', e)
-    alert('❌ Fehler beim Aktivieren: ' + e.message)
-  }
-}
-
-async function deactivateWhatsApp() {
-  if (!confirm('Möchtest du WhatsApp-Benachrichtigungen wirklich deaktivieren?\n\nDu verpasst dann exklusive Angebote und Happy Hour Alerts! 😢')) {
-    return
-  }
-  
-  try {
-    const { error } = await supabase
-      .from('customers')
-      .update({ 
-        whatsapp_optin: false,
-        whatsapp_optout_date: new Date().toISOString()
-      })
-      .eq('id', currentCustomer.id)
-    
-    if (error) throw error
-    
-    // Update lokales Objekt
-    currentCustomer.whatsapp_optin = false
-    currentCustomer.whatsapp_optout_date = new Date().toISOString()
-    
-    // UI aktualisieren
-    loadWhatsAppStatus()
-    
-    alert('✅ WhatsApp-Benachrichtigungen wurden deaktiviert.')
-    
-  } catch (e) {
-    console.error('WhatsApp deactivation error:', e)
-    alert('❌ Fehler beim Deaktivieren: ' + e.message)
-  }
-}
-// ═══════════════════════════════════════════════════════════════
-
-// ═══════════════════════════════════════════════════════════════
-// 📱 MOBILE FIX: Page Visibility API
-// Pausiert Refresh wenn App im Hintergrund (z.B. Tab gewechselt)
-// ═══════════════════════════════════════════════════════════════
-document.addEventListener('visibilitychange', function() {
-  if (document.hidden) {
-    // App ist im Hintergrund → Refresh pausieren
-    console.log('📱 App im Hintergrund - Refresh pausiert')
-    if (refreshInterval) {
-      clearInterval(refreshInterval)
-      refreshInterval = null
-    }
-  } else {
-    // App ist wieder aktiv → Refresh neu starten
-    console.log('📱 App wieder aktiv - Refresh gestartet')
-    
-    // Error-Counter zurücksetzen
-    refreshErrorCount = 0
-    
-    // Sofort aktualisieren
-    if (currentCustomer && currentCustomer.id) {
-      refreshCustomerData()
-    }
-    
-    // Dann Interval neu starten
-    if (currentCustomer && !refreshInterval) {
-      refreshInterval = setInterval(refreshCustomerData, 5000)
-    }
-  }
-})
-
-// 📱 MOBILE FIX: Auch bei Online/Offline Events reagieren
-window.addEventListener('online', function() {
-  console.log('📱 Internet-Verbindung wiederhergestellt')
-  refreshErrorCount = 0
-  if (currentCustomer && currentCustomer.id) {
-    refreshCustomerData()
-  }
-})
-
-window.addEventListener('offline', function() {
-  console.log('📱 Internet-Verbindung verloren')
-})
-// ═══════════════════════════════════════════════════════════════
-
-console.log('✅ Döner Boxx Kunden-App geladen!')
 </script>
-
-<footer style="text-align: center; padding: 20px 10px; color: #666; font-size: 11px; margin-top: 40px; background: #f5f5f5; border-top: 1px solid #e5e7eb;">
-  <div style="margin-bottom: 8px;">© 2024 Döner Boxx. Alle Rechte vorbehalten.</div>
-  <div style="font-size: 10px; opacity: 0.8;">Entwickelt exklusiv für Döner Boxx. Unerlaubte Nutzung verboten.</div>
-</footer>
-
 </body>
 </html>
