@@ -954,9 +954,30 @@ async function checkAndUpdateChallenges(customerId, amount) {
         continue
       }
       
-      const progress = (progressRows && progressRows.length > 0) ? progressRows[0] : null
+      let progress = (progressRows && progressRows.length > 0) ? progressRows[0] : null
       
-      if (!progress) continue
+      // ✅ FIX: Erstelle Progress wenn nicht vorhanden!
+      if (!progress) {
+        console.log('🎯 Erstelle neuen Challenge-Progress für Kunde:', customerId)
+        const { data: newProgress, error: createError } = await supabase
+          .from('challenge_progress')
+          .insert({
+            customer_id: customerId,
+            challenge_id: challenge.id,
+            completed_orders: 0,
+            is_completed: false
+          })
+          .select()
+          .single()
+        
+        if (createError) {
+          console.error('❌ Fehler beim Erstellen:', createError)
+          continue
+        }
+        
+        progress = newProgress
+      }
+      
       if (progress.is_completed) continue
       
       const newOrders = progress.completed_orders + 1
@@ -966,9 +987,11 @@ async function checkAndUpdateChallenges(customerId, amount) {
         if (customer) {
           await supabase.from('customers').update({ points: customer.points + challenge.bonus_points }).eq('id', customerId)
           await supabase.from('transactions').insert({ customer_id: customerId, type: 'earn', amount: 0, points: challenge.bonus_points, staff: 'CHALLENGE', notes: `Challenge: ${challenge.bonus_points}P` })
+          console.log(`🎉 Challenge abgeschlossen! +${challenge.bonus_points}P`)
         }
       } else {
         await supabase.from('challenge_progress').update({ completed_orders: newOrders }).eq('id', progress.id)
+        console.log(`🎯 Challenge-Fortschritt: ${newOrders}/${challenge.required_orders}`)
       }
     }
   } catch (e) { console.error('Challenge error:', e) }
