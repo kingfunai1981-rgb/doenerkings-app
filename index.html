@@ -3239,18 +3239,17 @@ async function placeOrder() {
         throw new Error('Bestellung konnte nicht gespeichert werden')
       }
       
-      // Öffne PayPal Freunde & Familie Link
+      // PayPal Zahlung - Direkt zu deinem PayPal.Me Link
       const paypalEmail = 'ahmetdemirel@freenet.de'
       const amount = total.toFixed(2)
-      const message = `Döner Boxx Bestellung #${orderNumber}`
       
-      // PayPal.Me Link für Freunde & Familie
-      const paypalUrl = `https://www.paypal.com/paypalme/ahmetdemirel/${amount}EUR`
+      // PayPal.Me Link zu DoenerBoxx mit Betrag
+      const paypalUrl = `https://paypal.me/DoenerBoxx/${amount}EUR`
       
-      // Info-Alert - KURZ!
-      alert(`💳 PayPal-Zahlung\n\n✅ Bestellung #${orderNumber} wurde erfasst!\n\n➡️ Du wirst jetzt zu PayPal weitergeleitet.\n\nBitte sende ${formatPrice(total)} an:\n${paypalEmail}`)
+      // Info-Alert - kompakt mit Freunde & Familie Hinweis
+      alert(`💳 PayPal-Zahlung\n\n✅ Bestellung #${orderNumber} wurde erfasst!\n\n➡️ Du wirst zu PayPal weitergeleitet.\n\n💰 Betrag: ${formatPrice(total)}\n⚠️ Bitte als "Freunde & Familie" senden (keine Gebühren!)`)
       
-      // Öffne PayPal in neuem Tab
+      // Öffne PayPal.Me Link mit Betrag
       window.open(paypalUrl, '_blank')
       
       // Zeige Erfolgs-Modal - NUR Bestellnummer
