@@ -1282,8 +1282,10 @@ input:focus, textarea:focus {
   </div>
 
   <div id="order-section" style="display: none;">
-    <div class="header">
-      <button onclick="closeOrderModal()" style="position: absolute; top: 20px; left: 20px; background: linear-gradient(135deg, #E31E24, #F9A825); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: all 0.2s;">←</button>
+    <div class="header" style="position: relative;">
+      <button onclick="closeOrderModal()" style="position: absolute; top: 30px; left: 20px; background: linear-gradient(135deg, #E31E24, #F9A825); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: all 0.2s; z-index: 10;">
+        <span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">←</span>
+      </button>
       <div class="header-logo-order">
         <img src="/logo-round-new.png" alt="Döner Boxx">
       </div>
@@ -1440,6 +1442,46 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 let wheelCheckInProgress = false
 let lastWheelCheck = 0
 const WHEEL_CHECK_COOLDOWN = 5000
+
+// 🎡 Lucky Wheel Variablen
+let logoImg = null
+let wheelHandlersAttached = false
+let isSpinning = false
+let wheelRotation = 0
+
+const WHEEL_OFFSET = 0.05  // Kleiner Offset zur besseren Ausrichtung
+
+const wheelPrizes = [
+  { label: '⭐', value: 10, color: '#E31E24', textColor: 'white' },
+  { label: '⭐⭐', value: 50, color: '#F9A825', textColor: 'white' },
+  { label: '⭐⭐⭐', value: 100, color: '#E31E24', textColor: 'white' },
+  { label: 'DREHE NOCHMAL!', value: 0, color: '#4CAF50', textColor: 'white', type: 'respin' },
+  { label: '⭐', value: 10, color: '#F9A825', textColor: 'white' },
+  { label: '⭐⭐', value: 50, color: '#E31E24', textColor: 'white' },
+  { label: '⭐⭐⭐', value: 100, color: '#F9A825', textColor: 'white' },
+  { label: '⭐', value: 10, color: '#E31E24', textColor: 'white' }
+]
+
+const anglePerSegment = (2 * Math.PI) / wheelPrizes.length
+
+function getRandomPrize() {
+  const weights = wheelPrizes.map(p => {
+    if (p.value === 0) return 5      // 5% "DREHE NOCHMAL"
+    if (p.value === 10) return 40    // 40% 10 Punkte
+    if (p.value === 50) return 30    // 30% 50 Punkte
+    if (p.value === 100) return 25   // 25% 100 Punkte
+  })
+  
+  const totalWeight = weights.reduce((a, b) => a + b, 0)
+  let random = Math.random() * totalWeight
+  
+  for (let i = 0; i < wheelPrizes.length; i++) {
+    random -= weights[i]
+    if (random <= 0) return wheelPrizes[i]
+  }
+  
+  return wheelPrizes[0]
+}
 
 let currentCustomer = null
 let refreshInterval = null
