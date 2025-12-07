@@ -745,6 +745,45 @@ async function throttledRequest(requestFn) {
 }
 
 
+// Flexible Customer Lookup - funktioniert mit String und Number
+async function findCustomerByQrId(qrId) {
+  console.log('🔍 Flexible Customer Lookup für:', qrId, 'Type:', typeof qrId)
+  
+  // Versuch 1: Direkte Suche mit Original-Wert
+  let { data: customers, error } = await supabase.from('customers').select('*').eq('qr_id', qrId).limit(1)
+  if (customers && customers.length > 0) {
+    console.log('✅ Kunde gefunden (direkte Suche)')
+    return customers[0]
+  }
+  
+  // Versuch 2: Als String
+  if (typeof qrId !== 'string') {
+    const qrIdStr = String(qrId)
+    console.log('🔄 Versuche als String:', qrIdStr)
+    const result = await supabase.from('customers').select('*').eq('qr_id', qrIdStr).limit(1)
+    if (result.data && result.data.length > 0) {
+      console.log('✅ Kunde gefunden (String-Suche)')
+      return result.data[0]
+    }
+  }
+  
+  // Versuch 3: Als Number (falls qr_id als Integer gespeichert)
+  if (typeof qrId === 'string' && !isNaN(qrId)) {
+    const qrIdNum = parseInt(qrId)
+    console.log('🔄 Versuche als Number:', qrIdNum)
+    const result = await supabase.from('customers').select('*').eq('qr_id', qrIdNum).limit(1)
+    if (result.data && result.data.length > 0) {
+      console.log('✅ Kunde gefunden (Number-Suche)')
+      return result.data[0]
+    }
+  }
+  
+  console.error('❌ Kunde nicht gefunden nach allen Versuchen')
+  return null
+}
+
+
+
 // ============================================
 // 🔍 DIAGNOSE & DEBUGGING
 // ============================================
@@ -1531,15 +1570,17 @@ async function completeOrder(orderId, qrId, total, paymentMethod) {
   try {
     console.log('Completing order:', { orderId, qrId, total, paymentMethod })
     
-    // Verwende limit(1) statt .single() um Fehler zu vermeiden
-    const { data: customers, error: customerError } = await supabase.from('customers').select('*').eq('qr_id', qrId).limit(1)
-    if (customerError) {
-      console.error('Customer lookup error:', customerError)
-      throw new Error('Kunde konnte nicht geladen werden: ' + customerError.message)
-    }
-    if (!customers || customers.length === 0) throw new Error('Kunde nicht gefunden')
+    // Verwende flexible Customer Lookup
+    const customer = await findCustomerByQrId(qrId)
     
-    const customer = customers[0]
+    if (!customer) {
+      // Zeige Beispiel-Kunden für Debugging
+      const { data: exampleCustomers } = await supabase.from('customers').select('qr_id, name').limit(5)
+      console.log('📋 Beispiel Kunden:', exampleCustomers)
+      throw new Error('Kunde nicht gefunden für QR-ID: ' + qrId)
+    }
+    
+    console.log('✅ Kunde gefunden:', customer.name, 'ID:', customer.id)
     
     const wheelAvailable = isWheelAvailable(total)
     if (wheelAvailable) {
@@ -1583,17 +1624,20 @@ async function cancelOrder(orderId) {
 
 async function addPointsForOrder(qrId, amount) {
   try {
-    // Hole Kunde - verwende limit(1) statt .single()
-    const { data: customers, error: lookupError } = await supabase.from('customers').select('*').eq('qr_id', qrId).limit(1)
-    if (lookupError) {
-      console.error('Customer lookup error:', lookupError)
+    console.log('💰 Gutschreibe Punkte für QR-ID:', qrId, 'Betrag:', amount)
+    
+    // Verwende flexible Customer Lookup
+    const customer = await findCustomerByQrId(qrId)
+    
+    if (!customer) {
+      console.error('❌ Kunde nicht gefunden für QR-ID:', qrId)
+      // Debug: Zeige Beispiel-Kunden
+      const { data: exampleCustomers } = await supabase.from('customers').select('id, qr_id, name').limit(5)
+      console.log('📋 Beispiel Kunden:', exampleCustomers)
       return
     }
-    if (!customers || customers.length === 0) {
-      console.log('Kunde nicht gefunden für QR-ID:', qrId)
-      return
-    }
-    const customer = customers[0]
+    
+    console.log('✅ Kunde gefunden:', customer.name, 'ID:', customer.id)
     
     const points = Math.floor(amount * 100)
     await supabase.from('customers').update({ points: customer.points + points }).eq('id', customer.id)
