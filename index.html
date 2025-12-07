@@ -1496,6 +1496,36 @@ function getRandomPrize() {
   return wheelPrizes[randomIndex]
 }
 
+// 🔒 Sichere localStorage Helper-Funktionen
+function safeSetItem(key, value) {
+  try {
+    localStorage.setItem(key, value)
+    return true
+  } catch (e) {
+    console.warn('⚠️ localStorage nicht verfügbar:', e.message)
+    return false
+  }
+}
+
+function safeGetItem(key) {
+  try {
+    return localStorage.getItem(key)
+  } catch (e) {
+    console.warn('⚠️ localStorage nicht verfügbar:', e.message)
+    return null
+  }
+}
+
+function safeRemoveItem(key) {
+  try {
+    localStorage.removeItem(key)
+    return true
+  } catch (e) {
+    console.warn('⚠️ localStorage nicht verfügbar:', e.message)
+    return false
+  }
+}
+
 function normalizePhone(phone) {
   let normalized = phone.replace(/[\s\-\(\)]/g, '')
   if (normalized.startsWith('+')) normalized = normalized.substring(1)
@@ -1554,7 +1584,7 @@ async function register() {
     
     showResult('reg-result', '✅ Erfolgreich registriert!', 'success')
     setTimeout(() => {
-      localStorage.setItem('customerData', JSON.stringify(data))
+      safeSetItem('customerData', JSON.stringify(data))
       loadCustomer(data)
     }, 1000)
     
@@ -1578,7 +1608,7 @@ async function login() {
     
     showResult('login-result', '✅ Erfolgreich angemeldet!', 'success')
     setTimeout(() => {
-      localStorage.setItem('customerData', JSON.stringify(customers[0]))
+      safeSetItem('customerData', JSON.stringify(customers[0]))
       loadCustomer(customers[0])
     }, 500)
     
@@ -1647,7 +1677,7 @@ async function refreshCustomerData() {
     updateRewardButtons(data.points)
     checkWheelAvailability()
     loadWhatsAppStatus()
-    localStorage.setItem('customerData', JSON.stringify(data))
+    safeSetItem('customerData', JSON.stringify(data))
     
   } catch (e) { 
     console.error('❌ Refresh error:', e)
@@ -2382,12 +2412,12 @@ function logout() {
   if (refreshInterval) clearInterval(refreshInterval)
   refreshErrorCount = 0
   currentCustomer = null
-  localStorage.removeItem('customerData')
+  safeRemoveItem('customerData')
   showScreen('start')
 }
 
 window.onload = () => {
-  const stored = localStorage.getItem('customerData')
+  const stored = safeGetItem('customerData')
   if (stored) {
     try {
       const customer = JSON.parse(stored)
@@ -2396,7 +2426,7 @@ window.onload = () => {
       }
     } catch (e) { 
       console.error('❌ Fehler beim Laden:', e)
-      localStorage.removeItem('customerData')
+      safeRemoveItem('customerData')
     }
   }
 }
