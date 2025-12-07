@@ -1587,27 +1587,24 @@ function renderOrders(orders) {
     let actions = ''
     if (order.status === 'pending') {
       if (order.payment_method === 'cash') {
-        actions = `<button onclick="markOrderPaid('${order.id}', '${order.customer_id}', ${order.total})" class="success">💰 Bar bezahlt</button><button onclick="markOrderPreparing('${order.id}')" class="secondary">👨‍🍳 In Vorbereitung</button>`
+        // Nur EIN Button - macht automatisch alles
+        actions = `<button onclick="markOrderPaid('${order.id}', '${order.customer_id}', ${order.total})" class="success">💰 Bar bezahlt ✅</button>`
       } else {
-        // PayPal: Mitarbeiter muss Zahlung bestätigen
-        actions = `<button onclick="markPayPalPaid('${order.id}', '${order.customer_id}', ${order.total})" class="success">💳 PayPal bezahlt</button><button onclick="cancelOrder('${order.id}')" class="danger">❌ Stornieren (nicht bezahlt)</button>`
+        // PayPal: Nur EIN Button - macht automatisch alles
+        actions = `<button onclick="markPayPalPaid('${order.id}', '${order.customer_id}', ${order.total})" class="success">💳 PayPal bezahlt ✅</button>`
       }
-    } else if (order.status === 'preparing') {
-      actions = `<button onclick="markOrderReady('${order.id}')" class="success">✅ Bereit zur Abholung</button><button onclick="cancelOrder('${order.id}')" class="danger">❌ Stornieren</button>`
-    } else if (order.status === 'ready') {
-      actions = `<button onclick="completeOrder('${order.id}', '${order.customer_id}', '${order.qr_id}', ${order.total}, '${order.payment_method}')" class="success">🎉 Abgeholt & Abschließen</button><button onclick="cancelOrder('${order.id}')" class="danger">❌ Stornieren</button>`
     }
+    // Alle anderen Status zeigen keine Buttons mehr - wird automatisch abgeschlossen!
     
     return `<div class="order-card ${statusClass}"><div class="order-header"><div><span class="order-number">#${order.order_number}</span><span class="order-badge ${statusClass}">${statusText}</span><span class="payment-badge ${paymentClass}">${paymentText}</span></div><div class="order-time">${timeAgo}</div></div><div class="order-customer"><p><strong>👤 ${order.customer_name}</strong></p><p>📱 ${order.customer_phone}</p><p>🎫 QR-ID: ${order.qr_id}</p>${pickupInfo}${order.notes ? `<p><strong>💬 Notiz:</strong> ${order.notes}</p>` : ''}</div><div class="order-items">${items}</div><div class="order-total"><span>Gesamt:</span><span style="color: #E31E24;">${formatPrice(order.total)}</span></div><div class="order-actions">${actions}</div></div>`
   }).join('')
 }
 
 async function markOrderPaid(orderId, customerId, total) {
-  if (!confirm('Bestellung als bar bezahlt markieren?')) return
   try {
-    console.log('💰 Marking order as paid:', orderId)
+    console.log('💰 Bar bezahlt - Auto-Workflow startet...')
     
-    // Hole die Bestellung um an customer_phone zu kommen
+    // Hole die Bestellung
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .select('*')
@@ -1618,38 +1615,42 @@ async function markOrderPaid(orderId, customerId, total) {
       throw new Error('Bestellung nicht gefunden')
     }
     
-    // Update Status
-    const { error: updateError } = await supabase.from('orders').update({ status: 'preparing' }).eq('id', orderId)
-    if (updateError) {
-      console.error('Update error:', updateError)
-      throw new Error('Status konnte nicht aktualisiert werden: ' + updateError.message)
-    }
+    // 1. Status: preparing
+    await supabase.from('orders').update({ status: 'preparing' }).eq('id', orderId)
     
-    // Punkte gutschreiben - über Telefonnummer suchen
+    // 2. Punkte gutschreiben
     if (order.customer_phone && total) {
       await addPointsForPhone(order.customer_phone, total)
     } else if (customerId && total) {
-      // Fallback: wenn customer_id vorhanden ist
       await addPointsForCustomerId(customerId, total)
     }
     
-    // 🤖 Telegram Benachrichtigung
-    await sendTelegramUpdate(order.order_number, order.customer_name, 'paid', '💰 Bar bezahlt - Wird vorbereitet')
+    // 3. Telegram: Bar bezahlt
+    await sendTelegramUpdate(order.order_number, order.customer_name, 'paid', '💰 Bar bezahlt')
     
-    alert('✅ Bezahlung erfasst und Punkte gutgeschrieben!')
+    // 4. Status: ready
+    await supabase.from('orders').update({ status: 'ready' }).eq('id', orderId)
+    await sendTelegramUpdate(order.order_number, order.customer_name, 'ready', '📦 Bereit zur Abholung!')
+    
+    // 5. Status: completed
+    await supabase.from('orders').update({ 
+      status: 'completed', 
+      completed_at: new Date().toISOString() 
+    }).eq('id', orderId)
+    await sendTelegramUpdate(order.order_number, order.customer_name, 'completed', '✅ Abgeschlossen!')
+    
+    console.log('✅ Bestellung komplett abgewickelt!')
     loadOrders()
   } catch (e) {
     console.error('markOrderPaid Fehler:', e)
-    alert('❌ Fehler: ' + e.message)
   }
 }
 
 async function markPayPalPaid(orderId, customerId, total) {
-  if (!confirm('⚠️ PayPal-Zahlung erhalten?\n\nBestätige nur wenn du die Zahlung in deinem PayPal-Konto siehst!')) return
   try {
-    console.log('💳 Marking PayPal order as paid:', orderId)
+    console.log('💳 PayPal bezahlt - Auto-Workflow startet...')
     
-    // Hole die Bestellung um an customer_phone zu kommen
+    // Hole die Bestellung
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .select('*')
@@ -1660,36 +1661,34 @@ async function markPayPalPaid(orderId, customerId, total) {
       throw new Error('Bestellung nicht gefunden')
     }
     
-    // Update Status zu "preparing"
-    const { error: updateError } = await supabase
-      .from('orders')
-      .update({ 
-        status: 'preparing',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', orderId)
-      
-    if (updateError) {
-      console.error('Update error:', updateError)
-      throw new Error('Status konnte nicht aktualisiert werden: ' + updateError.message)
-    }
+    // 1. Status: preparing
+    await supabase.from('orders').update({ status: 'preparing' }).eq('id', orderId)
     
-    // Punkte gutschreiben - über Telefonnummer suchen
+    // 2. Punkte gutschreiben
     if (order.customer_phone && total) {
       await addPointsForPhone(order.customer_phone, total)
     } else if (customerId && total) {
-      // Fallback: wenn customer_id vorhanden ist
       await addPointsForCustomerId(customerId, total)
     }
     
-    // 🤖 Telegram Benachrichtigung
-    await sendTelegramUpdate(order.order_number, order.customer_name, 'paid', '💳 PayPal bezahlt - Wird vorbereitet')
+    // 3. Telegram: PayPal bezahlt
+    await sendTelegramUpdate(order.order_number, order.customer_name, 'paid', '💳 PayPal bezahlt')
     
-    alert('✅ PayPal-Zahlung bestätigt und Punkte gutgeschrieben!')
+    // 4. Status: ready
+    await supabase.from('orders').update({ status: 'ready' }).eq('id', orderId)
+    await sendTelegramUpdate(order.order_number, order.customer_name, 'ready', '📦 Bereit zur Abholung!')
+    
+    // 5. Status: completed
+    await supabase.from('orders').update({ 
+      status: 'completed', 
+      completed_at: new Date().toISOString() 
+    }).eq('id', orderId)
+    await sendTelegramUpdate(order.order_number, order.customer_name, 'completed', '✅ Abgeschlossen!')
+    
+    console.log('✅ Bestellung komplett abgewickelt!')
     loadOrders()
   } catch (e) {
     console.error('markPayPalPaid Fehler:', e)
-    alert('❌ Fehler: ' + e.message)
   }
 }
 
@@ -1769,18 +1768,16 @@ async function finalizeOrder(orderId, customerId, paymentMethod) {
     
     // 🤖 Telegram Benachrichtigung
     if (order) {
-      await sendTelegramUpdate(order.order_number, order.customer_name, 'completed', '✅ Abgeholt - Bestellung abgeschlossen!')
+      await sendTelegramUpdate(order.order_number, order.customer_name, 'completed', '✅ Abgeschlossen!')
     }
     
-    alert('✅ Bestellung abgeschlossen!')
     loadOrders()
   } catch (e) {
-    alert('❌ Fehler: ' + e.message)
+    console.error('Fehler:', e)
   }
 }
 
 async function cancelOrder(orderId) {
-  if (!confirm('Bestellung wirklich stornieren?')) return
   try {
     console.log('Cancelling order:', orderId)
     const { error } = await supabase.from('orders').update({ status: 'cancelled', cancelled_at: new Date().toISOString() }).eq('id', orderId)
@@ -1788,11 +1785,9 @@ async function cancelOrder(orderId) {
       console.error('Cancel error:', error)
       throw error
     }
-    alert('✅ Bestellung storniert')
     loadOrders()
   } catch (e) {
     console.error('cancelOrder Fehler:', e)
-    alert('❌ Fehler: ' + e.message)
   }
 }
 
