@@ -959,6 +959,133 @@ input:focus, textarea:focus {
   font-family: 'Courier New', monospace;
   letter-spacing: 2px;
 }
+
+/* 🎡 NEU: Lucky Wheel Styles */
+.wheel-section {
+  display: none; /* Standard: versteckt */
+}
+
+.wheel-section.active {
+  display: block;
+}
+
+.wheel-badge {
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(227, 30, 36, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.wheel-container {
+  position: relative;
+  width: 100%;
+  max-width: 350px;
+  margin: 0 auto 20px;
+}
+
+.wheel-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+}
+
+#wheelCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.wheel-pointer {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-top: 30px solid #E31E24;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  z-index: 10;
+}
+
+.wheel-info-box {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  margin-top: 20px;
+}
+
+.wheel-result-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.wheel-result-modal.active {
+  display: flex;
+}
+
+.wheel-result-content {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 350px;
+  width: 100%;
+  text-align: center;
+  animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.wheel-result-icon {
+  font-size: 80px;
+  margin-bottom: 20px;
+}
+
+.wheel-result-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #E31E24;
+  margin-bottom: 12px;
+}
+
+.wheel-result-prize {
+  font-size: 20px;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+
 </style>
 </head>
 <body>
@@ -1065,17 +1192,19 @@ input:focus, textarea:focus {
     </div>
 
     
-    <!-- 🎡 Lucky Wheel Section -->
+    <!-- 🎡 NEU: Lucky Wheel Section (nur bei Freischaltung sichtbar) -->
     <div id="wheel-section" class="wheel-section">
       <div class="card">
         <h2>🎡 Lucky Wheel</h2>
         
+        <!-- Badge wenn verfügbar -->
         <div id="wheel-available-badge" style="display: none;">
           <div class="wheel-badge">
             🎡 Du hast <span id="wheel-count">0</span> freie Drehung(en)!
           </div>
         </div>
         
+        <!-- Wheel Canvas -->
         <div class="wheel-container">
           <div class="wheel-wrapper">
             <div class="wheel-pointer"></div>
@@ -1083,6 +1212,7 @@ input:focus, textarea:focus {
           </div>
         </div>
         
+        <!-- Info wenn nicht verfügbar -->
         <div id="wheel-info" class="wheel-info-box">
           🎉 Klicke auf das Logo zum Drehen!
         </div>
@@ -1099,10 +1229,10 @@ input:focus, textarea:focus {
       </div>
     </div>
 
-
-    <!-- 📱 WhatsApp-Benachrichtigungen Section (VOR Prämien - für NICHT aktiviert) -->
+    
+    <!-- 📱 WhatsApp-Benachrichtigungen Section (VOR Prämien) -->
     <div id="whatsapp-section-top">
-      <!-- Wird dynamisch geladen wenn NICHT aktiviert -->
+      <!-- Wird dynamisch geladen -->
     </div>
 
 <div class="card">
@@ -1142,6 +1272,11 @@ input:focus, textarea:focus {
         </div>
         <button onclick="redeem('Döner Teller', 1250)" id="btn-1250">Einlösen</button>
       </div>
+    </div>
+
+    <!-- 📱 WhatsApp-Benachrichtigungen Section (NACH Prämien) -->
+    <div id="whatsapp-section-bottom">
+      <!-- Wird dynamisch geladen -->
     </div>
   </div>
 
@@ -1453,6 +1588,8 @@ async function refreshCustomerData() {
     currentCustomer = data
     document.getElementById('app-points').textContent = data.points
     updateRewardButtons(data.points)
+    checkWheelAvailability()
+    loadWhatsAppStatus()
     localStorage.setItem('customerData', JSON.stringify(data))
     
   } catch (e) { 
@@ -1484,6 +1621,573 @@ function updateRewardButtons(points) {
 }
 
 let redeemInProgress = {}
+
+async function checkWheelAvailability() {
+  if (!currentCustomer) return
+  
+  // Throttle: Verhindere zu häufige Checks
+  const now = Date.now()
+  if (wheelCheckInProgress || (now - lastWheelCheck < WHEEL_CHECK_COOLDOWN)) {
+    return  // Skip wenn Check bereits läuft oder zu kürzlich war
+  }
+  
+  wheelCheckInProgress = true
+  lastWheelCheck = now
+  
+  try {
+    const { data: unlocks, error } = await supabase
+      .from('wheel_unlocks')
+      .select('*')
+      .eq('customer_id', currentCustomer.id)
+      .eq('is_used', false)
+      .gt('expires_at', new Date().toISOString())
+    
+    if (error) {
+      console.log('⚠️ Wheel check error:', error)
+      // Bei Fehler: Wheel ausblenden
+      hideWheel()
+      return
+    }
+    
+    if (unlocks && unlocks.length > 0) {
+      // ✅ KUNDE HAT FREISCHALTUNG - ZEIGE WHEEL!
+      showWheel(unlocks.length)
+    } else {
+      // ❌ KEINE FREISCHALTUNG - VERSTECKE WHEEL!
+      hideWheel()
+    }
+  } catch (e) {
+    console.log('Wheel error:', e)
+    hideWheel()
+  } finally {
+    wheelCheckInProgress = false
+  }
+}
+
+
+function showWheel(count) {
+  const section = document.getElementById('wheel-section')
+  const badge = document.getElementById('wheel-available-badge')
+  // Spin button entfernt - Logo ist jetzt klickbar
+  const wheelInfo = document.getElementById('wheel-info')
+  const countSpan = document.getElementById('wheel-count')
+  
+  if (!section) return
+  
+  section.classList.add('active')  // Macht Sektion sichtbar
+  badge.style.display = 'block'
+  countSpan.textContent = count
+  wheelInfo.style.display = 'none'
+  
+  // Initialisiere Wheel Canvas
+  initWheel()
+  
+  console.log(`✅ Wheel angezeigt - ${count} Drehung(en) verfügbar`)
+}
+
+function hideWheel() {
+  const section = document.getElementById('wheel-section')
+  if (section) {
+    section.classList.remove('active')  // Macht Sektion unsichtbar
+    console.log('🔒 Wheel versteckt - keine Freischaltung')
+  }
+}
+
+
+function initWheel() {
+  const canvas = document.getElementById('wheelCanvas')
+  if (!canvas) return
+
+  // Logo laden (nur einmal)
+  if (!logoImg) {
+    logoImg = new Image()
+    logoImg.src = '/logo-round-new.png'
+    logoImg.onload = () => drawWheel()
+  }
+
+  // ✅ Event-Handler nur EINMAL registrieren
+  if (!wheelHandlersAttached) {
+    canvas.addEventListener('click', (event) => {
+      const rect = canvas.getBoundingClientRect()
+      const x = event.clientX - rect.left
+      const y = event.clientY - rect.top
+
+      const centerX = rect.width / 2
+      const centerY = rect.height / 2
+
+      const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
+
+      // Nur wenn innerhalb des Logo-Bereichs (Radius 58)
+      if (distance <= 58) {
+        spinWheel()
+      }
+    })
+
+    canvas.addEventListener('mousemove', (event) => {
+      const rect = canvas.getBoundingClientRect()
+      const x = event.clientX - rect.left
+      const y = event.clientY - rect.top
+
+      const centerX = rect.width / 2
+      const centerY = rect.height / 2
+      const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
+
+      canvas.style.cursor = distance <= 58 ? 'pointer' : 'default'
+    })
+
+    wheelHandlersAttached = true
+    console.log('✅ Wheel Event-Handler registriert (einmalig)')
+  }
+
+  drawWheel()
+}
+
+function drawWheel() {
+  const canvas = document.getElementById('wheelCanvas')
+  if (!canvas) return
+
+  const ctx = canvas.getContext('2d')
+
+  // 📐 Aktuelle sichtbare Größe des Canvas (in CSS-Pixeln)
+  const rect = canvas.getBoundingClientRect()
+  const ratio = window.devicePixelRatio || 1
+
+  // Canvas-Auflösung an Bildschirmdichte anpassen (für Schärfe)
+  const targetWidth = rect.width * ratio
+  const targetHeight = rect.height * ratio
+
+  if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+    canvas.width = targetWidth
+    canvas.height = targetHeight
+  }
+
+  // Zeichenkoordinaten wieder auf CSS-Pixel normalisieren
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0)
+
+  const centerX = rect.width / 2
+  const centerY = rect.height / 2
+  const radius = rect.width / 2 - 5
+
+  // Canvas in CSS-Einheiten löschen
+  ctx.clearRect(0, 0, rect.width, rect.height)
+
+  // 🎡 Segmente zeichnen
+  ctx.save()
+  ctx.translate(centerX, centerY)
+  ctx.rotate(wheelRotation + WHEEL_OFFSET)
+
+  wheelPrizes.forEach((prize, i) => {
+    const startAngle = i * anglePerSegment
+    const endAngle = startAngle + anglePerSegment
+
+    ctx.beginPath()
+    ctx.moveTo(0, 0)
+    ctx.arc(0, 0, radius, startAngle, endAngle)
+    ctx.closePath()
+    ctx.fillStyle = prize.color
+    ctx.fill()
+
+    ctx.save()
+    ctx.rotate(startAngle + anglePerSegment / 2)
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillStyle = prize.textColor
+
+    if (prize.label === 'DREHE NOCHMAL!') {
+      ctx.font = 'bold 11px Flame, Arial'
+      ctx.fillText('DREHE', radius * 0.68, -8)
+      ctx.fillText('NOCHMAL!', radius * 0.68, 8)
+    } else {
+      ctx.font = 'bold 28px Flame, Arial'
+      ctx.fillText(prize.label, radius * 0.7, 0)
+    }
+    ctx.restore()
+  })
+
+  ctx.restore()
+
+  // 🧿 Logo mittig
+  ctx.save()
+  ctx.translate(centerX, centerY)
+
+  const logoRadius = 57.3  // Logo-Größe
+
+  // Logo scharf einzeichnen (ohne weißen Rahmen)
+  if (logoImg && logoImg.complete) {
+    ctx.save()
+    ctx.beginPath()
+    ctx.arc(0, 0, logoRadius, 0, 2 * Math.PI)
+    ctx.clip()
+    ctx.drawImage(logoImg, -logoRadius, -logoRadius, logoRadius * 2, logoRadius * 2)
+    ctx.restore()
+  }
+
+  ctx.restore()
+}
+
+async function spinWheel() {
+  if (isSpinning || !currentCustomer) return
+  
+  try {
+    const { data: unlocks, error } = await supabase
+      .from('wheel_unlocks')
+      .select('*')
+      .eq('customer_id', currentCustomer.id)
+      .eq('is_used', false)
+      .gt('expires_at', new Date().toISOString())
+      .limit(1)
+    
+    if (error || !unlocks || unlocks.length === 0) {
+      alert('❌ Du hast derzeit keine freie Drehung!')
+      return
+    }
+    
+    const unlock = unlocks[0]
+    isSpinning = true
+
+    const winningPrize = getRandomPrize()
+    const winningIndex = wheelPrizes.indexOf(winningPrize)
+    
+    const array = new Uint32Array(1)
+    crypto.getRandomValues(array)
+    const randomOffset = ((array[0] / 0xFFFFFFFF) - 0.5) * 0.6 * anglePerSegment
+    
+    // WICHTIG: Rotation auf 0 zurücksetzen für konsistente Startposition
+    wheelRotation = 0
+    
+    // 6-10 volle Drehungen (mehr für bessere Animation)
+    const spins = 6 + Math.floor((array[0] / 0xFFFFFFFF) * 5)
+    const baseRotation = spins * 2 * Math.PI
+    
+    // Berechne Zielfeld
+    const fieldMidAngle = winningIndex * anglePerSegment + anglePerSegment / 2 + randomOffset
+    const targetRotation = -Math.PI / 2 - WHEEL_OFFSET - fieldMidAngle
+    
+    // Normalisiere für positive Rotation
+    let normalizedTarget = targetRotation
+    while (normalizedTarget < 0) {
+      normalizedTarget += 2 * Math.PI
+    }
+    
+    const totalRotation = baseRotation + normalizedTarget
+
+    const startRotation = 0 // Immer von 0 starten
+    const startTime = Date.now()
+    const duration = 5000 + Math.floor((array[0] / 0xFFFFFFFF) * 1000) // 5-6 Sekunden
+
+    function animate() {
+      const elapsed = Date.now() - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const easeOut = 1 - Math.pow(1 - progress, 4)
+      
+      wheelRotation = startRotation + (easeOut * totalRotation)
+      drawWheel()
+
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      } else {
+        isSpinning = false
+        
+        let normalizedRotation = wheelRotation % (2 * Math.PI)
+        if (normalizedRotation > Math.PI) normalizedRotation -= 2 * Math.PI
+        if (normalizedRotation < -Math.PI) normalizedRotation += 2 * Math.PI
+        
+        let fieldAngle = -Math.PI / 2 - normalizedRotation - WHEEL_OFFSET
+        if (fieldAngle < 0) fieldAngle += 2 * Math.PI
+        
+        const fieldIndex = Math.floor(fieldAngle / anglePerSegment) % wheelPrizes.length
+        const actualPrize = wheelPrizes[fieldIndex]
+        
+        console.log('🎯 Gewonnen:', actualPrize.label, actualPrize.type, actualPrize.value)
+        
+        // Rotation auf 0 zurücksetzen für nächsten Spin
+        wheelRotation = 0
+        drawWheel()
+        
+        // Prüfe ob "Spin Again"
+        if (actualPrize.type === 'spin_again') {
+          showSpinAgainResult()
+        } else {
+          // Echte Punkte gewonnen
+          showWheelResult(actualPrize)
+          saveWheelSpin(unlock.id, actualPrize)
+          currentWheelUnlockId = null // Reset
+        }
+      }
+    }
+
+    animate()
+  } catch (e) {
+    console.error('❌ Spin error:', e)
+    isSpinning = false
+  }
+}
+
+function showWheelResult(prize) {
+  const modal = document.getElementById('wheel-result-modal')
+  const icon = document.getElementById('wheel-result-icon')
+  const title = document.getElementById('wheel-result-title')
+  const prizeText = document.getElementById('wheel-result-prize')
+
+  icon.textContent = '⭐'
+  title.textContent = 'Glückwunsch! 🎉'
+  prizeText.textContent = `+${prize.value} Punkte`
+
+  modal.classList.add('active')
+}
+
+function closeWheelResult() {
+  document.getElementById('wheel-result-modal').classList.remove('active')
+  // Spin button entfernt - Logo ist jetzt klickbar
+  document.getElementById('wheel-info').innerHTML = '✅ Punkte wurden gutgeschrieben!'
+  document.getElementById('wheel-info').style.display = 'block'
+  document.getElementById('wheel-available-badge').style.display = 'none'
+  
+  // Refresh customer data
+  if (currentCustomer) {
+    setTimeout(() => {
+      checkWheelAvailability()  // Prüfe ob weitere Drehungen verfügbar
+      refreshCustomerData()
+    }, 1000)
+  }
+}
+
+async function saveWheelSpin(unlockId, prize) {
+  try {
+    // Markiere unlock als verwendet
+    const { error: unlockError } = await supabase
+      .from('wheel_unlocks')
+      .update({ is_used: true })
+      .eq('id', unlockId)
+    
+    if (unlockError) {
+      console.error('❌ Fehler beim Markieren des Unlocks:', unlockError)
+      throw unlockError
+    }
+    
+    // Speichere Spin - mit Ihrem AKTUELLEN Schema
+    // Generiere einen KURZEN 4-stelligen Code (varchar(4))
+    const prizeCode = Math.random().toString(36).substr(2, 4).toUpperCase()
+    
+    const { error: spinError } = await supabase.from('wheel_spins').insert({
+      customer_id: currentCustomer.id,       // bigint ID
+      prize_type: prize.type,                // "points" oder "spin_again" (max 20 Zeichen)
+      prize_value: String(prize.value),      // "50" als String (max 100 Zeichen)
+      prize_code: prizeCode,                 // 4-stelliger Code: "A3X9"
+      prize_points: prize.value,             // 50 als Integer
+      is_redeemed: false                     // noch nicht eingelöst
+      // spun_at: wird automatisch gesetzt (DEFAULT now())
+      // created_at: wird automatisch gesetzt (DEFAULT now())
+      // expires_at: wird automatisch gesetzt (DEFAULT now() + 30 days)
+    })
+    
+    if (spinError) {
+      console.error('❌ Fehler beim Speichern des Spins:', spinError)
+      throw spinError
+    }
+    
+    // ✅ NUR bei Erfolg UND bei echten Punktgewinnen: Punkte gutschreiben
+    if (prize.type === 'points' && prize.value > 0) {
+      const newPoints = currentCustomer.points + prize.value
+      
+      const { error: pointsError } = await supabase
+        .from('customers')
+        .update({ points: newPoints })
+        .eq('id', currentCustomer.id)
+      
+      if (pointsError) {
+        console.error('❌ Fehler beim Gutschreiben der Punkte:', pointsError)
+        throw pointsError
+      }
+      
+      // ✅ Nach erfolgreichem Punkte-Update: Transaction-Eintrag erstellen
+      // Damit der Gewinn im Scanner-Verlauf sichtbar wird
+      const { error: transactionError } = await supabase
+        .from('transactions')
+        .insert({
+          customer_id: currentCustomer.id,
+          type: 'earn',
+          amount: 0,                              // Wheel-Gewinne kosten nichts
+          points: prize.value,                    // Gewonnene Punkte
+          staff: 'WHEEL',                         // Kennzeichnung für Scanner-Verlauf
+          notes: `Lucky Wheel: ${prize.value}P`   // Beschreibung
+        })
+      
+      if (transactionError) {
+        // Transaction-Fehler loggen, aber nicht blockieren (Punkte sind bereits gutgeschrieben)
+        console.warn('⚠️ Transaction-Eintrag konnte nicht erstellt werden:', transactionError)
+      } else {
+        console.log('✅ Transaction-Eintrag für Wheel-Gewinn erstellt')
+      }
+      
+      // Update local customer object
+      currentCustomer.points = newPoints
+      document.getElementById('app-points').textContent = newPoints
+    }
+    
+    console.log('✅ Spin gespeichert und Punkte gutgeschrieben!')
+  } catch (e) {
+    console.error('❌ Fehler beim Speichern des Wheel Spins:', e)
+    alert('⚠️ Es gab einen Fehler beim Speichern deines Gewinns. Bitte kontaktiere den Support.')
+    throw e  // Fehler weitergeben
+  }
+}
+
+async function loadWhatsAppStatus() {
+  if (!currentCustomer || !currentCustomer.id) return
+  
+  const topContainer = document.getElementById('whatsapp-section-top')
+  const bottomContainer = document.getElementById('whatsapp-section-bottom')
+  const isOptedIn = currentCustomer.whatsapp_optin === true
+  
+  if (isOptedIn) {
+    // ✅ AKTIVIERT → Block wandert NACH UNTEN (unter Prämien)
+    topContainer.innerHTML = '' // Oben leeren
+    
+    const optinDate = currentCustomer.whatsapp_optin_date ? 
+      new Date(currentCustomer.whatsapp_optin_date).toLocaleDateString('de-DE') : 'kürzlich'
+    
+    bottomContainer.innerHTML = `
+      <div class="card" style="margin-top: 16px;">
+        <div style="background: linear-gradient(135deg, #dcfce7, #d1fae5); border: 2px solid #25D366; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="font-size: 24px;">✅</div>
+              <div>
+                <div style="font-weight: 700; color: #166534; font-size: 15px;">WhatsApp aktiviert</div>
+                <div style="font-size: 12px; color: #166534; opacity: 0.8;">Seit ${optinDate}</div>
+              </div>
+            </div>
+          </div>
+          <div style="font-size: 13px; color: #166534; margin-bottom: 10px;">
+            Du erhältst jetzt exklusive Angebote & Happy Hour Alerts! 🎉
+          </div>
+          <button onclick="deactivateWhatsApp()" style="background: #6b7280; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%;">
+            Deaktivieren
+          </button>
+        </div>
+      </div>
+    `
+  } else {
+    // ❌ NICHT AKTIVIERT → Block bleibt OBEN (prominent, vor Prämien)
+    bottomContainer.innerHTML = '' // Unten leeren
+    
+    topContainer.innerHTML = `
+      <div class="card" style="margin-top: 16px;">
+        <h2>📱 WhatsApp-Benachrichtigungen</h2>
+        <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
+          Erhalte exklusive Angebote, Happy Hour Alerts & Glücksrad-Erinnerungen direkt per WhatsApp!
+        </p>
+        
+        <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #f59e0b; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+            <div style="font-size: 32px;">📱</div>
+            <div>
+              <div style="font-weight: 700; color: #92400e; font-size: 16px;">Aktiviere WhatsApp</div>
+              <div style="font-size: 13px; color: #92400e;">Verpasse keine Angebote mehr!</div>
+            </div>
+          </div>
+          <div style="font-size: 13px; color: #92400e; margin-bottom: 12px;">
+            Erhalte:<br>
+            • 🔥 Happy Hour Alerts (2x Punkte!)<br>
+            • 🎡 Glücksrad-Erinnerungen<br>
+            • 🎯 Challenge-Updates<br>
+            • 🎁 Exklusive Deals
+          </div>
+          <button onclick="activateWhatsApp()" style="background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border: none; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%;">
+            📱 Jetzt aktivieren
+          </button>
+        </div>
+        <div style="font-size: 11px; color: #666; text-align: center; padding: 8px;">
+          Datenschutz: Deine Nummer wird nur für Angebote genutzt. Abmeldung jederzeit möglich.
+        </div>
+      </div>
+    `
+  }
+}
+
+async function activateWhatsApp() {
+  if (!currentCustomer || !currentCustomer.phone) {
+    alert('❌ Fehler: Kundendaten nicht geladen')
+    return
+  }
+  
+  const phone = currentCustomer.phone
+  const name = currentCustomer.name
+  
+  // WhatsApp Opt-In Text
+  const message = encodeURIComponent(
+    `Hallo Döner Boxx Team! 👋\n\n` +
+    `Ich möchte exklusive Angebote, Happy Hour Alerts und Glücksrad-Erinnerungen per WhatsApp erhalten.\n\n` +
+    `Name: ${name}\n` +
+    `Telefon: ${phone}\n\n` +
+    `Mit dieser Nachricht bestätige ich meine Einwilligung.\n\n` +
+    `📱 Abmeldung jederzeit über dein Kundenkonto möglich`
+  )
+  
+  // Öffne WhatsApp mit vorbefülltem Text
+  // WICHTIG: Hier musst du deine WhatsApp Business Nummer eintragen!
+  const waNumber = '4915123456789' // ← ÄNDERE DIESE NUMMER!
+  const waUrl = `https://wa.me/${waNumber}?text=${message}`
+  
+  // In Datenbank als "wartet auf Bestätigung" markieren
+  try {
+    const { error } = await supabase
+      .from('customers')
+      .update({ 
+        whatsapp_optin: true,
+        whatsapp_optin_date: new Date().toISOString()
+      })
+      .eq('id', currentCustomer.id)
+    
+    if (error) throw error
+    
+    // Update lokales Objekt
+    currentCustomer.whatsapp_optin = true
+    currentCustomer.whatsapp_optin_date = new Date().toISOString()
+    
+    // UI aktualisieren
+    loadWhatsAppStatus()
+    
+    // WhatsApp öffnen
+    window.open(waUrl, '_blank')
+    
+  } catch (e) {
+    console.error('WhatsApp activation error:', e)
+    alert('❌ Fehler beim Aktivieren: ' + e.message)
+  }
+}
+
+async function deactivateWhatsApp() {
+  if (!confirm('Möchtest du WhatsApp-Benachrichtigungen wirklich deaktivieren?\n\nDu verpasst dann exklusive Angebote und Happy Hour Alerts! 😢')) {
+    return
+  }
+  
+  try {
+    const { error } = await supabase
+      .from('customers')
+      .update({ 
+        whatsapp_optin: false,
+        whatsapp_optout_date: new Date().toISOString()
+      })
+      .eq('id', currentCustomer.id)
+    
+    if (error) throw error
+    
+    // Update lokales Objekt
+    currentCustomer.whatsapp_optin = false
+    currentCustomer.whatsapp_optout_date = new Date().toISOString()
+    
+    // UI aktualisieren
+    loadWhatsAppStatus()
+    
+    alert('✅ WhatsApp-Benachrichtigungen wurden deaktiviert.')
+    
+  } catch (e) {
+    console.error('WhatsApp deactivation error:', e)
+    alert('❌ Fehler beim Deaktivieren: ' + e.message)
+  }
+}
 
 async function redeem(rewardName, cost) {
   if (!currentCustomer || currentCustomer.points < cost) {
@@ -2135,635 +2839,6 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 console.log('✅ Döner Boxx App geladen!')
-
-
-// ============================================
-// 📱 WHATSAPP FUNKTIONEN
-// ============================================
-
-async function loadWhatsAppStatus() {
-  if (!currentCustomer) return
-  
-  const topContainer = document.getElementById('whatsapp-section-top')
-  const bottomContainer = document.getElementById('whatsapp-section-bottom')
-  const isOptedIn = currentCustomer.whatsapp_optin === true
-  
-  if (!topContainer || !bottomContainer) return
-  
-  if (isOptedIn) {
-    // Aktiviert - zeige NACH Prämien
-    topContainer.innerHTML = ''
-    const optinDate = currentCustomer.whatsapp_optin_date ? 
-      new Date(currentCustomer.whatsapp_optin_date).toLocaleDateString('de-DE') : 'kürzlich'
-    
-    bottomContainer.innerHTML = `
-      <div class="card" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 2px solid #10b981;">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-          <div style="background: white; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
-            ✅
-          </div>
-          <div style="flex: 1;">
-            <div style="font-weight: 700; color: #166534; font-size: 15px;">WhatsApp aktiviert</div>
-            <div style="font-size: 13px; color: #15803d;">Seit ${optinDate}</div>
-          </div>
-        </div>
-        <div style="background: rgba(255,255,255,0.5); padding: 12px; border-radius: 8px; font-size: 13px; color: #065f46; margin-bottom: 12px;">
-          📱 Du erhältst jetzt exklusive Angebote, Happy Hour Alerts und Glücksrad-Erinnerungen per WhatsApp!
-        </div>
-        <button onclick="deactivateWhatsApp()" style="background: #6b7280; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%;">
-          Deaktivieren
-        </button>
-      </div>
-    `
-  } else {
-    // Nicht aktiviert - zeige VOR Prämien
-    bottomContainer.innerHTML = ''
-    topContainer.innerHTML = `
-      <div class="card" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #F9A825;">
-        <h2>📱 WhatsApp-Benachrichtigungen</h2>
-        <p style="color: #92400e; font-size: 14px; margin-bottom: 16px;">
-          Erhalte exklusive Angebote, Happy Hour Alerts & Glücksrad-Erinnerungen direkt per WhatsApp!
-        </p>
-        <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-            <div style="font-size: 32px;">🎁</div>
-            <div style="flex: 1;">
-              <div style="font-weight: 700; color: #92400e; font-size: 16px;">Aktiviere WhatsApp</div>
-              <div style="font-size: 13px; color: #78350f;">Verpasse keine Aktion mehr!</div>
-            </div>
-          </div>
-          <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; color: #92400e;">
-            <li style="margin-bottom: 6px;">✅ Exklusive Rabatte & Angebote</li>
-            <li style="margin-bottom: 6px;">⏰ Happy Hour Benachrichtigungen</li>
-            <li style="margin-bottom: 6px;">🎡 Glücksrad-Erinnerungen</li>
-          </ul>
-        
-    <!-- 📱 WhatsApp-Benachrichtigungen Section (NACH Prämien - für aktiviert) -->
-    <div id="whatsapp-section-bottom">
-      <!-- Wird dynamisch geladen wenn aktiviert -->
-    </div>
-
-  </div>
-        <button onclick="activateWhatsApp()" style="background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border: none; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%;">
-          📱 Jetzt aktivieren
-        </button>
-      </div>
-    `
-  }
-}
-
-async function activateWhatsApp() {
-  if (!currentCustomer || !currentCustomer.phone) {
-    alert('❌ Fehler: Kundendaten nicht geladen')
-    return
-  }
-  
-  const phone = currentCustomer.phone
-  const name = currentCustomer.name
-  
-  // WhatsApp Opt-In Text
-  const message = encodeURIComponent(
-    `Hallo Döner Boxx Team! 👋\n\n` +
-    `Ich möchte exklusive Angebote, Happy Hour Alerts und Glücksrad-Erinnerungen per WhatsApp erhalten.\n\n` +
-    `Name: ${name}\n` +
-    `Telefon: ${phone}\n\n` +
-    `Mit dieser Nachricht bestätige ich meine Einwilligung.\n\n` +
-    `📱 Abmeldung jederzeit über dein Kundenkonto möglich`
-  )
-  
-  // WhatsApp URL
-  const waNumber = '4915123456789' // ← ÄNDERE DIESE NUMMER!
-  const waUrl = `https://wa.me/${waNumber}?text=${message}`
-  
-  // In Datenbank markieren
-  try {
-    const { error } = await supabase
-      .from('customers')
-      .update({ 
-        whatsapp_optin: true,
-        whatsapp_optin_date: new Date().toISOString()
-      })
-      .eq('id', currentCustomer.id)
-    
-    if (error) throw error
-    
-    currentCustomer.whatsapp_optin = true
-    currentCustomer.whatsapp_optin_date = new Date().toISOString()
-    
-    loadWhatsAppStatus()
-    window.open(waUrl, '_blank')
-    
-  } catch (e) {
-    console.error('WhatsApp activation error:', e)
-    alert('❌ Fehler beim Aktivieren: ' + e.message)
-  }
-}
-
-async function deactivateWhatsApp() {
-  if (!confirm('Möchtest du WhatsApp-Benachrichtigungen wirklich deaktivieren?\n\nDu verpasst dann exklusive Angebote und Happy Hour Alerts! 😢')) {
-    return
-  }
-  
-  try {
-    const { error } = await supabase
-      .from('customers')
-      .update({ 
-        whatsapp_optin: false,
-        whatsapp_optout_date: new Date().toISOString()
-      })
-      .eq('id', currentCustomer.id)
-    
-    if (error) throw error
-    
-    currentCustomer.whatsapp_optin = false
-    loadWhatsAppStatus()
-    alert('✅ WhatsApp-Benachrichtigungen deaktiviert')
-    
-  } catch (e) {
-    console.error('WhatsApp deactivation error:', e)
-    alert('❌ Fehler: ' + e.message)
-  }
-}
-
-
-
-// 🎡 Prüfe Wheel nach Bestellung
-function checkWheelAfterOrder(orderTotal) {
-  // Warte kurz damit Checkout-Animation fertig ist
-  setTimeout(() => {
-    // Prüfe ob Wheel verfügbar ist
-    checkWheelAvailability()
-  }, 500)
-}
-
-
-
-// ============================================
-// 🎡 LUCKY WHEEL KOMPLETT
-// ============================================
-
-let logoImg = null
-let wheelHandlersAttached = false  // ✅ Flag um mehrfache Handler zu verhindern
-
-function initWheel() {
-  const canvas = document.getElementById('wheelCanvas')
-  if (!canvas) return
-
-  // Logo laden (nur einmal)
-  if (!logoImg) {
-    logoImg = new Image()
-    logoImg.src = '/logo-round-new.png'
-    logoImg.onload = () => drawWheel()
-  }
-
-  // ✅ Event-Handler nur EINMAL registrieren
-  if (!wheelHandlersAttached) {
-    canvas.addEventListener('click', (event) => {
-      const rect = canvas.getBoundingClientRect()
-      const x = event.clientX - rect.left
-      const y = event.clientY - rect.top
-
-      const centerX = rect.width / 2
-      const centerY = rect.height / 2
-
-      const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
-
-      // Nur wenn innerhalb des Logo-Bereichs (Radius 58)
-      if (distance <= 58) {
-        spinWheel()
-      }
-    })
-
-    canvas.addEventListener('mousemove', (event) => {
-      const rect = canvas.getBoundingClientRect()
-      const x = event.clientX - rect.left
-      const y = event.clientY - rect.top
-
-      const centerX = rect.width / 2
-      const centerY = rect.height / 2
-      const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2))
-
-      canvas.style.cursor = distance <= 58 ? 'pointer' : 'default'
-    })
-
-    wheelHandlersAttached = true
-    console.log('✅ Wheel Event-Handler registriert (einmalig)')
-  }
-
-  drawWheel()
-}
-
-function drawWheel() {
-  const canvas = document.getElementById('wheelCanvas')
-  if (!canvas) return
-
-  const ctx = canvas.getContext('2d')
-
-  // 📐 Aktuelle sichtbare Größe des Canvas (in CSS-Pixeln)
-  const rect = canvas.getBoundingClientRect()
-  const ratio = window.devicePixelRatio || 1
-
-  // Canvas-Auflösung an Bildschirmdichte anpassen (für Schärfe)
-  const targetWidth = rect.width * ratio
-  const targetHeight = rect.height * ratio
-
-  if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
-    canvas.width = targetWidth
-    canvas.height = targetHeight
-  }
-
-  // Zeichenkoordinaten wieder auf CSS-Pixel normalisieren
-  ctx.setTransform(ratio, 0, 0, ratio, 0, 0)
-
-  const centerX = rect.width / 2
-  const centerY = rect.height / 2
-  const radius = rect.width / 2 - 5
-
-  // Canvas in CSS-Einheiten löschen
-  ctx.clearRect(0, 0, rect.width, rect.height)
-
-  // 🎡 Segmente zeichnen
-  ctx.save()
-  ctx.translate(centerX, centerY)
-  ctx.rotate(wheelRotation + WHEEL_OFFSET)
-
-  wheelPrizes.forEach((prize, i) => {
-    const startAngle = i * anglePerSegment
-    const endAngle = startAngle + anglePerSegment
-
-    ctx.beginPath()
-    ctx.moveTo(0, 0)
-    ctx.arc(0, 0, radius, startAngle, endAngle)
-    ctx.closePath()
-    ctx.fillStyle = prize.color
-    ctx.fill()
-
-    ctx.save()
-    ctx.rotate(startAngle + anglePerSegment / 2)
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.fillStyle = prize.textColor
-
-    if (prize.label === 'DREHE NOCHMAL!') {
-      ctx.font = 'bold 11px Flame, Arial'
-      ctx.fillText('DREHE', radius * 0.68, -8)
-      ctx.fillText('NOCHMAL!', radius * 0.68, 8)
-    } else {
-      ctx.font = 'bold 28px Flame, Arial'
-      ctx.fillText(prize.label, radius * 0.7, 0)
-    }
-    ctx.restore()
-  })
-
-  ctx.restore()
-
-  // 🧿 Logo mittig
-  ctx.save()
-  ctx.translate(centerX, centerY)
-
-  const logoRadius = 57.3  // Logo-Größe
-
-  // Logo scharf einzeichnen (ohne weißen Rahmen)
-  if (logoImg && logoImg.complete) {
-    ctx.save()
-    ctx.beginPath()
-    ctx.arc(0, 0, logoRadius, 0, 2 * Math.PI)
-    ctx.clip()
-    ctx.drawImage(logoImg, -logoRadius, -logoRadius, logoRadius * 2, logoRadius * 2)
-    ctx.restore()
-  }
-
-  ctx.restore()
-}
-
-// 🎯 WICHTIG: Prüft ob Wheel freigeschaltet ist und zeigt/versteckt es
-// 🎯 Throttle-Variablen für checkWheelAvailability
-let wheelCheckInProgress = false
-let lastWheelCheck = 0
-const WHEEL_CHECK_COOLDOWN = 3000  // Min. 3 Sekunden zwischen Checks
-
-async function checkWheelAvailability() {
-  if (!currentCustomer) return
-  
-  // Throttle: Verhindere zu häufige Checks
-  const now = Date.now()
-  if (wheelCheckInProgress || (now - lastWheelCheck < WHEEL_CHECK_COOLDOWN)) {
-    return  // Skip wenn Check bereits läuft oder zu kürzlich war
-  }
-  
-  wheelCheckInProgress = true
-  lastWheelCheck = now
-  
-  try {
-    const { data: unlocks, error } = await supabase
-      .from('wheel_unlocks')
-      .select('*')
-      .eq('customer_id', currentCustomer.id)
-      .eq('is_used', false)
-      .gt('expires_at', new Date().toISOString())
-    
-    if (error) {
-      console.log('⚠️ Wheel check error:', error)
-      // Bei Fehler: Wheel ausblenden
-      hideWheel()
-      return
-    }
-    
-    if (unlocks && unlocks.length > 0) {
-      // ✅ KUNDE HAT FREISCHALTUNG - ZEIGE WHEEL!
-      showWheel(unlocks.length)
-    } else {
-      // ❌ KEINE FREISCHALTUNG - VERSTECKE WHEEL!
-      hideWheel()
-    }
-  } catch (e) {
-    console.log('Wheel error:', e)
-    hideWheel()
-  } finally {
-    wheelCheckInProgress = false
-  }
-}
-
-function showWheel(count) {
-  const section = document.getElementById('wheel-section')
-  const badge = document.getElementById('wheel-available-badge')
-  // Spin button entfernt - Logo ist jetzt klickbar
-  const wheelInfo = document.getElementById('wheel-info')
-  const countSpan = document.getElementById('wheel-count')
-  
-  if (!section) return
-  
-  section.classList.add('active')  // Macht Sektion sichtbar
-  badge.style.display = 'block'
-  countSpan.textContent = count
-  wheelInfo.style.display = 'none'
-  
-  // Initialisiere Wheel Canvas
-  initWheel()
-  
-  console.log(`✅ Wheel angezeigt - ${count} Drehung(en) verfügbar`)
-}
-
-function hideWheel() {
-  const section = document.getElementById('wheel-section')
-  if (section) {
-    section.classList.remove('active')  // Macht Sektion unsichtbar
-    console.log('🔒 Wheel versteckt - keine Freischaltung')
-  }
-}
-
-function getRandomPrize() {
-  const array = new Uint32Array(1)
-  crypto.getRandomValues(array)
-  const randomIndex = Math.floor((array[0] / (0xFFFFFFFF + 1)) * wheelPrizes.length)
-  return wheelPrizes[randomIndex]
-}
-
-async function spinWheel() {
-  if (isSpinning || !currentCustomer) return
-  
-  try {
-    const { data: unlocks, error } = await supabase
-      .from('wheel_unlocks')
-      .select('*')
-      .eq('customer_id', currentCustomer.id)
-      .eq('is_used', false)
-      .gt('expires_at', new Date().toISOString())
-      .limit(1)
-    
-    if (error || !unlocks || unlocks.length === 0) {
-      alert('❌ Du hast derzeit keine freie Drehung!')
-      return
-    }
-    
-    const unlock = unlocks[0]
-    isSpinning = true
-
-    const winningPrize = getRandomPrize()
-    const winningIndex = wheelPrizes.indexOf(winningPrize)
-    
-    const array = new Uint32Array(1)
-    crypto.getRandomValues(array)
-    const randomOffset = ((array[0] / 0xFFFFFFFF) - 0.5) * 0.6 * anglePerSegment
-    
-    // WICHTIG: Rotation auf 0 zurücksetzen für konsistente Startposition
-    wheelRotation = 0
-    
-    // 6-10 volle Drehungen (mehr für bessere Animation)
-    const spins = 6 + Math.floor((array[0] / 0xFFFFFFFF) * 5)
-    const baseRotation = spins * 2 * Math.PI
-    
-    // Berechne Zielfeld
-    const fieldMidAngle = winningIndex * anglePerSegment + anglePerSegment / 2 + randomOffset
-    const targetRotation = -Math.PI / 2 - WHEEL_OFFSET - fieldMidAngle
-    
-    // Normalisiere für positive Rotation
-    let normalizedTarget = targetRotation
-    while (normalizedTarget < 0) {
-      normalizedTarget += 2 * Math.PI
-    }
-    
-    const totalRotation = baseRotation + normalizedTarget
-
-    const startRotation = 0 // Immer von 0 starten
-    const startTime = Date.now()
-    const duration = 5000 + Math.floor((array[0] / 0xFFFFFFFF) * 1000) // 5-6 Sekunden
-
-    function animate() {
-      const elapsed = Date.now() - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      const easeOut = 1 - Math.pow(1 - progress, 4)
-      
-      wheelRotation = startRotation + (easeOut * totalRotation)
-      drawWheel()
-
-      if (progress < 1) {
-        requestAnimationFrame(animate)
-      } else {
-        isSpinning = false
-        
-        let normalizedRotation = wheelRotation % (2 * Math.PI)
-        if (normalizedRotation > Math.PI) normalizedRotation -= 2 * Math.PI
-        if (normalizedRotation < -Math.PI) normalizedRotation += 2 * Math.PI
-        
-        let fieldAngle = -Math.PI / 2 - normalizedRotation - WHEEL_OFFSET
-        if (fieldAngle < 0) fieldAngle += 2 * Math.PI
-        
-        const fieldIndex = Math.floor(fieldAngle / anglePerSegment) % wheelPrizes.length
-        const actualPrize = wheelPrizes[fieldIndex]
-        
-        console.log('🎯 Gewonnen:', actualPrize.label, actualPrize.type, actualPrize.value)
-        
-        // Rotation auf 0 zurücksetzen für nächsten Spin
-        wheelRotation = 0
-        drawWheel()
-        
-        // Prüfe ob "Spin Again"
-        if (actualPrize.type === 'spin_again') {
-          showSpinAgainResult()
-        } else {
-          // Echte Punkte gewonnen
-          showWheelResult(actualPrize)
-          saveWheelSpin(unlock.id, actualPrize)
-          currentWheelUnlockId = null // Reset
-        }
-      }
-    }
-
-    animate()
-  } catch (e) {
-    console.error('❌ Spin error:', e)
-    isSpinning = false
-  }
-}
-
-function showWheelResult(prize) {
-  const modal = document.getElementById('wheel-result-modal')
-  const icon = document.getElementById('wheel-result-icon')
-  const title = document.getElementById('wheel-result-title')
-  const prizeText = document.getElementById('wheel-result-prize')
-
-  icon.textContent = '⭐'
-  title.textContent = 'Glückwunsch! 🎉'
-  prizeText.textContent = `+${prize.value} Punkte`
-
-  modal.classList.add('active')
-}
-
-function showSpinAgainResult() {
-  const modal = document.getElementById('wheel-result-modal')
-  const icon = document.getElementById('wheel-result-icon')
-  const title = document.getElementById('wheel-result-title')
-  const prizeText = document.getElementById('wheel-result-prize')
-
-  icon.textContent = '🔄'
-  title.textContent = 'Drehe nochmal!'
-  prizeText.textContent = 'Du darfst nochmal drehen! 🎉'
-
-  modal.classList.add('active')
-  
-  // Button-Text ändern
-  const closeButton = modal.querySelector('.wheel-result-button')
-  if (closeButton) {
-    closeButton.textContent = '🎰 Nochmal drehen!'
-    closeButton.onclick = () => {
-      closeSpinAgainResult()
-    }
-  }
-}
-
-function closeSpinAgainResult() {
-  const modal = document.getElementById('wheel-result-modal')
-  modal.classList.remove('active')
-  
-  // Button zurücksetzen
-  const closeButton = modal.querySelector('.wheel-result-button')
-  if (closeButton) {
-    closeButton.textContent = 'Weiter'
-    closeButton.onclick = closeWheelResult
-  }
-  
-  // Button wieder aktivieren für nächsten Spin
-  // Spin button entfernt - Logo ist jetzt klickbar
-}
-
-function closeWheelResult() {
-  document.getElementById('wheel-result-modal').classList.remove('active')
-  // Spin button entfernt - Logo ist jetzt klickbar
-  document.getElementById('wheel-info').innerHTML = '✅ Punkte wurden gutgeschrieben!'
-  document.getElementById('wheel-info').style.display = 'block'
-  document.getElementById('wheel-available-badge').style.display = 'none'
-  
-  // Refresh customer data
-  if (currentCustomer) {
-    setTimeout(() => {
-      checkWheelAvailability()  // Prüfe ob weitere Drehungen verfügbar
-      refreshCustomerData()
-    }, 1000)
-  }
-}
-
-async function saveWheelSpin(unlockId, prize) {
-  try {
-    // Markiere unlock als verwendet
-    const { error: unlockError } = await supabase
-      .from('wheel_unlocks')
-      .update({ is_used: true })
-      .eq('id', unlockId)
-    
-    if (unlockError) {
-      console.error('❌ Fehler beim Markieren des Unlocks:', unlockError)
-      throw unlockError
-    }
-    
-    // Speichere Spin - mit Ihrem AKTUELLEN Schema
-    // Generiere einen KURZEN 4-stelligen Code (varchar(4))
-    const prizeCode = Math.random().toString(36).substr(2, 4).toUpperCase()
-    
-    const { error: spinError } = await supabase.from('wheel_spins').insert({
-      customer_id: currentCustomer.id,       // bigint ID
-      prize_type: prize.type,                // "points" oder "spin_again" (max 20 Zeichen)
-      prize_value: String(prize.value),      // "50" als String (max 100 Zeichen)
-      prize_code: prizeCode,                 // 4-stelliger Code: "A3X9"
-      prize_points: prize.value,             // 50 als Integer
-      is_redeemed: false                     // noch nicht eingelöst
-      // spun_at: wird automatisch gesetzt (DEFAULT now())
-      // created_at: wird automatisch gesetzt (DEFAULT now())
-      // expires_at: wird automatisch gesetzt (DEFAULT now() + 30 days)
-    })
-    
-    if (spinError) {
-      console.error('❌ Fehler beim Speichern des Spins:', spinError)
-      throw spinError
-    }
-    
-    // ✅ NUR bei Erfolg UND bei echten Punktgewinnen: Punkte gutschreiben
-    if (prize.type === 'points' && prize.value > 0) {
-      const newPoints = currentCustomer.points + prize.value
-      
-      const { error: pointsError } = await supabase
-        .from('customers')
-        .update({ points: newPoints })
-        .eq('id', currentCustomer.id)
-      
-      if (pointsError) {
-        console.error('❌ Fehler beim Gutschreiben der Punkte:', pointsError)
-        throw pointsError
-      }
-      
-      // ✅ Nach erfolgreichem Punkte-Update: Transaction-Eintrag erstellen
-      // Damit der Gewinn im Scanner-Verlauf sichtbar wird
-      const { error: transactionError } = await supabase
-        .from('transactions')
-        .insert({
-          customer_id: currentCustomer.id,
-          type: 'earn',
-          amount: 0,                              // Wheel-Gewinne kosten nichts
-          points: prize.value,                    // Gewonnene Punkte
-          staff: 'WHEEL',                         // Kennzeichnung für Scanner-Verlauf
-          notes: `Lucky Wheel: ${prize.value}P`   // Beschreibung
-        })
-      
-      if (transactionError) {
-        // Transaction-Fehler loggen, aber nicht blockieren (Punkte sind bereits gutgeschrieben)
-        console.warn('⚠️ Transaction-Eintrag konnte nicht erstellt werden:', transactionError)
-      } else {
-        console.log('✅ Transaction-Eintrag für Wheel-Gewinn erstellt')
-      }
-      
-      // Update local customer object
-      currentCustomer.points = newPoints
-      document.getElementById('app-points').textContent = newPoints
-    }
-    
-    console.log('✅ Spin gespeichert und Punkte gutgeschrieben!')
-  } catch (e) {
-    console.error('❌ Fehler beim Speichern des Wheel Spins:', e)
-    alert('⚠️ Es gab einen Fehler beim Speichern deines Gewinns. Bitte kontaktiere den Support.')
-    throw e  // Fehler weitergeben
-  }
-}
-
 </script>
 </body>
 </html>
