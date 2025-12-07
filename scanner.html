@@ -745,6 +745,60 @@ async function throttledRequest(requestFn) {
 }
 
 
+// ============================================
+// 🔍 DIAGNOSE & DEBUGGING
+// ============================================
+
+async function diagnoseSystem() {
+  console.log('🔍 System-Diagnose gestartet...')
+  
+  try {
+    // 1. Prüfe orders Tabelle
+    console.log('📋 Prüfe orders Tabelle...')
+    const { data: orders, error: ordersError } = await supabase.from('orders').select('*').limit(1)
+    if (ordersError) {
+      console.error('❌ Orders Tabelle Fehler:', ordersError)
+      console.log('💡 Tipp: Die orders Tabelle existiert möglicherweise noch nicht oder RLS blockiert den Zugriff')
+    } else {
+      console.log('✅ Orders Tabelle OK')
+      if (orders && orders.length > 0) {
+        console.log('📦 Beispiel Order:', orders[0])
+      }
+    }
+    
+    // 2. Prüfe customers Tabelle
+    console.log('👥 Prüfe customers Tabelle...')
+    const { data: customers, error: customersError } = await supabase.from('customers').select('id, name, qr_id').limit(1)
+    if (customersError) {
+      console.error('❌ Customers Tabelle Fehler:', customersError)
+    } else {
+      console.log('✅ Customers Tabelle OK')
+    }
+    
+    // 3. Prüfe wheel_config
+    console.log('🎡 Prüfe wheel_config...')
+    const { data: wheelConf, error: wheelError } = await supabase.from('wheel_config').select('*').limit(1)
+    if (wheelError) {
+      console.error('❌ Wheel Config Fehler:', wheelError)
+    } else {
+      console.log('✅ Wheel Config OK:', wheelConf)
+    }
+    
+    console.log('✅ System-Diagnose abgeschlossen')
+    
+  } catch (e) {
+    console.error('❌ Diagnose Fehler:', e)
+  }
+}
+
+// Diagnose beim Start ausführen
+setTimeout(() => {
+  console.log('🚀 Scanner.html geladen - starte Diagnose...')
+  diagnoseSystem()
+}, 2000)
+
+
+
 let video = document.getElementById('video')
 let canvas = document.getElementById('canvas')
 let ctx = canvas.getContext('2d')
@@ -1264,7 +1318,62 @@ function isWheelAvailable(orderAmount) {
 async function loadOrders() {
   try {
     const { data, error } = await supabase.from('orders').select('*').in('status', ['pending', 'preparing', 'ready']).order('created_at', { ascending: false })
-    if (error) throw error
+    
+    if (error) {
+      console.error('loadOrders Fehler:', error)
+      
+      // Zeige hilfreiche Fehlermeldung
+      const container = document.getElementById('ordersList')
+      if (container) {
+        if (error.code === 'PGRST116' || error.message.includes('does not exist')) {
+          // Tabelle existiert nicht
+          container.innerHTML = `
+            <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 12px; padding: 24px; text-align: center;">
+              <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+              <h3 style="color: #92400e; margin-bottom: 12px;">Orders-Tabelle fehlt</h3>
+              <p style="color: #78350f; margin-bottom: 16px;">
+                Die Supabase Tabelle "orders" existiert noch nicht.<br>
+                Bitte erstelle sie in der Supabase Console.
+              </p>
+              <details style="text-align: left; background: white; padding: 12px; border-radius: 8px; font-size: 13px;">
+                <summary style="cursor: pointer; font-weight: 600; margin-bottom: 8px;">📋 SQL Schema anzeigen</summary>
+                <pre style="overflow-x: auto; font-size: 11px;">CREATE TABLE orders (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  order_number TEXT UNIQUE NOT NULL,
+  customer_id UUID REFERENCES customers(id),
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
+  qr_id TEXT NOT NULL,
+  items JSONB NOT NULL,
+  total DECIMAL(10,2) NOT NULL,
+  payment_method TEXT NOT NULL,
+  payment_status TEXT DEFAULT 'pending',
+  pickup_type TEXT DEFAULT 'now',
+  pickup_time TEXT,
+  notes TEXT,
+  status TEXT DEFAULT 'pending',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  completed_at TIMESTAMPTZ,
+  cancelled_at TIMESTAMPTZ
+);</pre>
+              </details>
+            </div>
+          `
+        } else {
+          // Anderer Fehler
+          container.innerHTML = `
+            <div style="background: #fee2e2; border: 2px solid #ef4444; border-radius: 12px; padding: 24px; text-align: center;">
+              <div style="font-size: 48px; margin-bottom: 16px;">❌</div>
+              <h3 style="color: #991b1b; margin-bottom: 12px;">Fehler beim Laden</h3>
+              <p style="color: #7f1d1d;">${error.message}</p>
+            </div>
+          `
+        }
+      }
+      return
+    }
+    
     renderOrders(data || [])
     updateOrderBadge(data ? data.filter(o => o.status === 'pending').length : 0)
   } catch (e) {
@@ -1359,42 +1468,75 @@ function renderOrders(orders) {
 async function markOrderPaid(orderId) {
   if (!confirm('Bestellung als bar bezahlt markieren?')) return
   try {
-    const { error } = await supabase.from('orders').update({ status: 'preparing' }).eq('id', orderId)
-    if (error) throw error
-    const { data: order } = await supabase.from('orders').select('*').eq('id', orderId).single()
-    if (order) await addPointsForOrder(order.qr_id, order.total)
+    console.log('Marking order as paid:', orderId)
+    
+    // Erst die Order holen
+    const { data: order, error: fetchError } = await supabase.from('orders').select('*').eq('id', orderId).single()
+    if (fetchError) {
+      console.error('Fetch error:', fetchError)
+      throw new Error('Bestellung konnte nicht geladen werden: ' + fetchError.message)
+    }
+    if (!order) throw new Error('Bestellung nicht gefunden')
+    
+    // Update Status
+    const { error: updateError } = await supabase.from('orders').update({ status: 'preparing' }).eq('id', orderId)
+    if (updateError) {
+      console.error('Update error:', updateError)
+      throw new Error('Status konnte nicht aktualisiert werden: ' + updateError.message)
+    }
+    
+    // Punkte gutschreiben
+    await addPointsForOrder(order.qr_id, order.total)
+    
     alert('✅ Bezahlung erfasst und Punkte gutgeschrieben!')
     loadOrders()
   } catch (e) {
-    console.error('Fehler:', e)
+    console.error('markOrderPaid Fehler:', e)
     alert('❌ Fehler: ' + e.message)
   }
 }
 
 async function markOrderPreparing(orderId) {
   try {
+    console.log('Marking order as preparing:', orderId)
     const { error } = await supabase.from('orders').update({ status: 'preparing' }).eq('id', orderId)
-    if (error) throw error
+    if (error) {
+      console.error('Update error:', error)
+      throw error
+    }
     loadOrders()
   } catch (e) {
+    console.error('markOrderPreparing Fehler:', e)
     alert('❌ Fehler: ' + e.message)
   }
 }
 
 async function markOrderReady(orderId) {
   try {
+    console.log('Marking order as ready:', orderId)
     const { error } = await supabase.from('orders').update({ status: 'ready' }).eq('id', orderId)
-    if (error) throw error
+    if (error) {
+      console.error('Update error:', error)
+      throw error
+    }
     loadOrders()
   } catch (e) {
+    console.error('markOrderReady Fehler:', e)
     alert('❌ Fehler: ' + e.message)
   }
 }
 
 async function completeOrder(orderId, qrId, total, paymentMethod) {
   try {
-    const { data: customer } = await supabase.from('customers').select('*').eq('qr_id', qrId).single()
+    console.log('Completing order:', { orderId, qrId, total, paymentMethod })
+    
+    const { data: customer, error: customerError } = await supabase.from('customers').select('*').eq('qr_id', qrId).single()
+    if (customerError) {
+      console.error('Customer lookup error:', customerError)
+      throw new Error('Kunde konnte nicht geladen werden: ' + customerError.message)
+    }
     if (!customer) throw new Error('Kunde nicht gefunden')
+    
     const wheelAvailable = isWheelAvailable(total)
     if (wheelAvailable) {
       showLuckyWheelModal(orderId, customer.id, qrId, total, paymentMethod)
@@ -1402,6 +1544,7 @@ async function completeOrder(orderId, qrId, total, paymentMethod) {
       await finalizeOrder(orderId, customer.id, paymentMethod)
     }
   } catch (e) {
+    console.error('completeOrder Fehler:', e)
     alert('❌ Fehler: ' + e.message)
   }
 }
@@ -1420,11 +1563,16 @@ async function finalizeOrder(orderId, customerId, paymentMethod) {
 async function cancelOrder(orderId) {
   if (!confirm('Bestellung wirklich stornieren?')) return
   try {
+    console.log('Cancelling order:', orderId)
     const { error } = await supabase.from('orders').update({ status: 'cancelled', cancelled_at: new Date().toISOString() }).eq('id', orderId)
-    if (error) throw error
+    if (error) {
+      console.error('Cancel error:', error)
+      throw error
+    }
     alert('✅ Bestellung storniert')
     loadOrders()
   } catch (e) {
+    console.error('cancelOrder Fehler:', e)
     alert('❌ Fehler: ' + e.message)
   }
 }
