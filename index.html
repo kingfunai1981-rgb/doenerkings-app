@@ -1293,13 +1293,16 @@ input:focus, textarea:focus {
 
   <div id="order-section" style="display: none;">
     <div class="header" style="position: relative;">
-      <button onclick="closeOrderModal()" style="position: absolute; top: 20px; left: 20px; background: linear-gradient(135deg, #E31E24, #F9A825); border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 22px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(227, 30, 36, 0.3); transition: all 0.3s ease; z-index: 10; font-weight: bold;">
-        <span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; margin-left: -2px;">←</span>
+      <button onclick="closeOrderModal()" style="position: absolute; top: 20px; left: 20px; background: linear-gradient(135deg, #E31E24, #F9A825); border: none; width: 48px; height: 48px; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(227, 30, 36, 0.35); transition: all 0.3s ease; z-index: 10;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 2px;">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
       </button>
       <div class="header-logo-order">
         <img src="/logo-round-new.png" alt="Döner Boxx">
       </div>
-      <h1>Online Bestellen</h1>
+      <h1>Jetzt Bestellen</h1>
       <p>Wähle deine Lieblingsgerichte</p>
     </div>
 
@@ -3220,6 +3223,72 @@ async function placeOrder() {
   btn.innerHTML = '⏳ Bestellung wird verarbeitet...'
   
   try {
+    // 💳 PAYPAL: Wenn PayPal gewählt, öffne PayPal.Me Link
+    if (selectedPayment === 'paypal') {
+      const orderQRID = Math.floor(1000 + Math.random() * 9000).toString()
+      const orderNumber = Math.floor(100000 + Math.random() * 900000)
+      
+      // Speichere Bestellung zuerst
+      const orderData = {
+        order_number: orderNumber,
+        qr_id: orderQRID,
+        customer_name: name,
+        customer_phone: phone,
+        notes: notes || null,
+        items: cart,
+        total: total,
+        payment_method: 'paypal',
+        pickup_time: pickupTime,
+        pickup_type: selectedPickupTime,
+        status: 'pending',  // ⏳ Status "pending" - Punkte werden NICHT automatisch gutgeschrieben!
+        created_at: new Date().toISOString()
+        // ℹ️ WICHTIG: Punkte werden erst gutgeschrieben wenn Mitarbeiter im Scanner
+        // die Bestellung als "Abgeholt" markiert (Status: pending → completed)
+      }
+      
+      const { error } = await supabase
+        .from('orders')
+        .insert([orderData])
+      
+      if (error) {
+        console.error('Supabase error:', error)
+        throw new Error('Bestellung konnte nicht gespeichert werden')
+      }
+      
+      // Öffne PayPal Freunde & Familie Link
+      const paypalEmail = 'ahmetdemirel@freenet.de'
+      const amount = total.toFixed(2)
+      const message = `Döner Boxx Bestellung #${orderNumber}`
+      
+      // PayPal.Me Link für Freunde & Familie
+      const paypalUrl = `https://www.paypal.com/paypalme/ahmetdemirel/${amount}EUR`
+      
+      // Info-Alert
+      alert(`💳 PayPal-Zahlung\n\n✅ Bestellung #${orderNumber} wurde erfasst!\n\n➡️ Du wirst jetzt zu PayPal weitergeleitet.\n\n📱 Bitte sende ${formatPrice(total)} an:\n${paypalEmail}\n\nAls "Freunde & Familie" (keine Gebühren)\n\nVerwende als Betreff:\n"${message}"`)
+      
+      // Öffne PayPal in neuem Tab
+      window.open(paypalUrl, '_blank')
+      
+      // Zeige Erfolgs-Modal
+      const qrData = `ORDER:${orderQRID}:${orderNumber}:${total.toFixed(2)}`
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`
+      
+      document.getElementById('qrCodeContainer').innerHTML = `<img src="${qrUrl}" style="width: 200px; height: 200px;">`
+      document.getElementById('orderQRID').textContent = orderQRID
+      document.getElementById('orderNumber').textContent = orderNumber
+      
+      closeCheckout()
+      document.getElementById('successModal').classList.add('active')
+      
+      cart = []
+      updateCart()
+      
+      btn.disabled = false
+      btn.innerHTML = 'Jetzt bestellen - <span id="finalTotal">0,00 €</span>'
+      return
+    }
+    
+    // 💵 BAR-ZAHLUNG: Normale Bestellung ohne PayPal
     const orderQRID = Math.floor(1000 + Math.random() * 9000).toString()
     const orderNumber = Math.floor(100000 + Math.random() * 900000)
     
@@ -3234,8 +3303,10 @@ async function placeOrder() {
       payment_method: selectedPayment,
       pickup_time: pickupTime,
       pickup_type: selectedPickupTime,
-      status: 'pending',
+      status: 'pending',  // ⏳ Status "pending" - Punkte werden NICHT automatisch gutgeschrieben!
       created_at: new Date().toISOString()
+      // ℹ️ WICHTIG: Punkte werden erst gutgeschrieben wenn Mitarbeiter im Scanner
+      // die Bestellung als "Abgeholt" markiert (Status: pending → completed)
     }
     
     const { error } = await supabase
