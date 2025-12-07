@@ -1549,7 +1549,8 @@ function renderOrders(orders) {
       if (order.payment_method === 'cash') {
         actions = `<button onclick="markOrderPaid('${order.id}', '${order.customer_id}', ${order.total})" class="success">💰 Bar bezahlt</button><button onclick="markOrderPreparing('${order.id}')" class="secondary">👨‍🍳 In Vorbereitung</button>`
       } else {
-        actions = `<button onclick="markOrderPreparing('${order.id}')" class="success">👨‍🍳 In Vorbereitung</button><button onclick="cancelOrder('${order.id}')" class="danger">❌ Stornieren</button>`
+        // PayPal: Mitarbeiter muss Zahlung bestätigen
+        actions = `<button onclick="markPayPalPaid('${order.id}', '${order.customer_id}', ${order.total})" class="success">💳 PayPal bezahlt</button><button onclick="cancelOrder('${order.id}')" class="danger">❌ Stornieren (nicht bezahlt)</button>`
       }
     } else if (order.status === 'preparing') {
       actions = `<button onclick="markOrderReady('${order.id}')" class="success">✅ Bereit zur Abholung</button><button onclick="cancelOrder('${order.id}')" class="danger">❌ Stornieren</button>`
@@ -1585,6 +1586,40 @@ async function markOrderPaid(orderId, customerId, total) {
     alert('❌ Fehler: ' + e.message)
   }
 }
+
+async function markPayPalPaid(orderId, customerId, total) {
+  if (!confirm('⚠️ PayPal-Zahlung erhalten?\n\nBestätige nur wenn du die Zahlung in deinem PayPal-Konto siehst!')) return
+  try {
+    console.log('💳 Marking PayPal order as paid:', orderId)
+    
+    // Update Status zu "preparing" UND payment_status zu "paid"
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ 
+        status: 'preparing',
+        payment_status: 'paid',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', orderId)
+      
+    if (updateError) {
+      console.error('Update error:', updateError)
+      throw new Error('Status konnte nicht aktualisiert werden: ' + updateError.message)
+    }
+    
+    // Punkte gutschreiben
+    if (customerId && total) {
+      await addPointsForCustomerId(customerId, total)
+    }
+    
+    alert('✅ PayPal-Zahlung bestätigt und Punkte gutgeschrieben!')
+    loadOrders()
+  } catch (e) {
+    console.error('markPayPalPaid Fehler:', e)
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
 async function markOrderPreparing(orderId) {
   try {
     console.log('Marking order as preparing:', orderId)
@@ -1837,10 +1872,8 @@ function handleNewOrder(order) {
   playNotificationSound()
   showBrowserNotification(`🆕 Neue Bestellung #${order.order_number}`, `${order.customer_name} - ${formatPrice(order.total)} - ${order.payment_method === 'paypal' ? 'PayPal' : 'Bar'}`)
   loadOrders()
-  if (order.payment_method === 'paypal' && order.customer_id) {
-    console.log('💳 PayPal Bestellung - Punkte werden automatisch gutgeschrieben')
-    setTimeout(() => addPointsForCustomerId(order.customer_id, order.total), 1000)
-  }
+  // ⚠️ KEINE automatische Punkte-Gutschrift bei PayPal!
+  // Punkte werden erst gutgeschrieben wenn Mitarbeiter PayPal-Zahlung bestätigt
 }
 
 function initOrderSystem() {
@@ -1850,7 +1883,16 @@ function initOrderSystem() {
   loadWheelConfig()
   setupRealtimeSubscription()
   loadOrders()
+  
+  // 🔄 Auto-Refresh: Lade Bestellungen alle 15 Sekunden
+  // (Zusätzlich zu Realtime, falls Realtime ausfällt)
+  setInterval(() => {
+    console.log('🔄 Auto-Refresh: Lade Bestellungen...')
+    loadOrders()
+  }, 15000)
+  
   console.log('✅ Bestellungs-System bereit!')
+  console.log('🔄 Auto-Refresh aktiv: Alle 15 Sekunden')
 }
 
 setTimeout(initOrderSystem, 1000)
