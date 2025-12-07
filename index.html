@@ -223,6 +223,16 @@ button.small { width: auto; padding: 8px 16px; font-size: 13px; margin: 4px; dis
 button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; transform: none; }
 .option-btn:disabled { opacity: 0.4; background: #e5e7eb !important; color: #9ca3af !important; pointer-events: none; }
 
+/* 🔙 Zurück-Button Styling */
+.header button[onclick*="closeOrderModal"]:hover {
+  transform: scale(1.08) translateY(-1px);
+  box-shadow: 0 6px 16px rgba(227, 30, 36, 0.4) !important;
+}
+
+.header button[onclick*="closeOrderModal"]:active {
+  transform: scale(0.98);
+}
+
 .result {
   padding: 10px 12px;
   border-radius: 6px;
@@ -1283,8 +1293,8 @@ input:focus, textarea:focus {
 
   <div id="order-section" style="display: none;">
     <div class="header" style="position: relative;">
-      <button onclick="closeOrderModal()" style="position: absolute; top: 30px; left: 20px; background: linear-gradient(135deg, #E31E24, #F9A825); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: all 0.2s; z-index: 10;">
-        <span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">←</span>
+      <button onclick="closeOrderModal()" style="position: absolute; top: 20px; left: 20px; background: linear-gradient(135deg, #E31E24, #F9A825); border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 22px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(227, 30, 36, 0.3); transition: all 0.3s ease; z-index: 10; font-weight: bold;">
+        <span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; margin-left: -2px;">←</span>
       </button>
       <div class="header-logo-order">
         <img src="/logo-round-new.png" alt="Döner Boxx">
