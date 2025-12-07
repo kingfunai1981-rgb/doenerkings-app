@@ -2658,9 +2658,41 @@ function renderProducts() {
   const container = document.getElementById('products')
   
   const categories = [
-    { name: '🌯 Döner & Dürüm', ids: ['doener'], open: true },
-    { name: '🍖 Köfte', ids: ['koefte-brot'], open: false },
-    { name: '🍟 Beilagen', ids: ['pommes'], open: false }
+    {
+      name: '🌯 Döner & Dürüm',
+      ids: ['doener', 'doener-xl', 'dueruem', 'doener-box', 'doener-teller'],
+      open: true
+    },
+    {
+      name: '🥙 Lahmacun',
+      ids: ['lahmacun', 'lahmacun-spezial'],
+      open: false
+    },
+    {
+      name: '🍖 Köfte',
+      ids: ['koefte-brot', 'koefte-teller'],
+      open: false
+    },
+    {
+      name: '🌭 Wurst',
+      ids: ['rindswurst-broetchen', 'curry-rindswurst'],
+      open: false
+    },
+    {
+      name: '🍗 Chicken',
+      ids: ['chicken-nuggets', 'crispy-chicken-burger'],
+      open: false
+    },
+    {
+      name: '🍟 Beilagen',
+      ids: ['pommes'],
+      open: false
+    },
+    {
+      name: '🥤 Getränke',
+      ids: ['ayran', 'wasser', 'cola', 'fanta', 'cola-zero'],
+      open: false
+    }
   ]
   
   let html = ''
