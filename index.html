@@ -1191,7 +1191,7 @@ input:focus, textarea:focus {
     <div class="card" style="padding: 12px; margin-bottom: 16px;">
       <button onclick="openOrderModal()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
         <span style="font-size: 20px;">🛒</span>
-        <span>Jetzt online bestellen</span>
+        <span>Jetzt bestellen</span>
       </button>
     </div>
 
@@ -1420,26 +1420,10 @@ input:focus, textarea:focus {
   <div class="success-content">
     <div class="success-icon">✅</div>
     <h2 class="success-title">Bestellung erfolgreich!</h2>
-    <p class="success-text">
-      Deine Bestellung wurde erfolgreich aufgegeben. 
-      Wir bereiten sie jetzt für dich zu!
-    </p>
     <div class="order-number">
       <div class="order-number-label">Bestellnummer</div>
       <div class="order-number-value" id="orderNumber">#0000</div>
     </div>
-    
-    <div style="background: white; border: 3px solid #E31E24; border-radius: 16px; padding: 20px; margin: 20px 0;">
-      <div style="font-size: 14px; font-weight: 600; color: #666; margin-bottom: 12px;">
-        🎁 Zeige diesen Code beim Abholen
-      </div>
-      <div id="qrCodeContainer" style="display: flex; justify-content: center; margin: 16px 0;"></div>
-      <div style="font-size: 36px; font-weight: 700; color: #E31E24; font-family: 'Courier New', monospace; letter-spacing: 4px; text-align: center;" id="orderQRID">0000</div>
-      <div style="font-size: 12px; color: #666; text-align: center; margin-top: 8px;">
-        → Punkte werden automatisch gutgeschrieben
-      </div>
-    </div>
-    
     <button class="add-btn" onclick="closeSuccess()">Neue Bestellung</button>
   </div>
 </div>
@@ -3226,7 +3210,7 @@ async function placeOrder() {
     // 💳 PAYPAL: Wenn PayPal gewählt, öffne PayPal.Me Link
     if (selectedPayment === 'paypal') {
       const orderQRID = Math.floor(1000 + Math.random() * 9000).toString()
-      const orderNumber = Math.floor(100000 + Math.random() * 900000)
+      const orderNumber = Math.floor(1000 + Math.random() * 9000)
       
       // Speichere Bestellung zuerst
       const orderData = {
@@ -3263,18 +3247,13 @@ async function placeOrder() {
       // PayPal.Me Link für Freunde & Familie
       const paypalUrl = `https://www.paypal.com/paypalme/ahmetdemirel/${amount}EUR`
       
-      // Info-Alert
-      alert(`💳 PayPal-Zahlung\n\n✅ Bestellung #${orderNumber} wurde erfasst!\n\n➡️ Du wirst jetzt zu PayPal weitergeleitet.\n\n📱 Bitte sende ${formatPrice(total)} an:\n${paypalEmail}\n\nAls "Freunde & Familie" (keine Gebühren)\n\nVerwende als Betreff:\n"${message}"`)
+      // Info-Alert - KURZ!
+      alert(`💳 PayPal-Zahlung\n\n✅ Bestellung #${orderNumber} wurde erfasst!\n\n➡️ Du wirst jetzt zu PayPal weitergeleitet.\n\nBitte sende ${formatPrice(total)} an:\n${paypalEmail}`)
       
       // Öffne PayPal in neuem Tab
       window.open(paypalUrl, '_blank')
       
-      // Zeige Erfolgs-Modal
-      const qrData = `ORDER:${orderQRID}:${orderNumber}:${total.toFixed(2)}`
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`
-      
-      document.getElementById('qrCodeContainer').innerHTML = `<img src="${qrUrl}" style="width: 200px; height: 200px;">`
-      document.getElementById('orderQRID').textContent = orderQRID
+      // Zeige Erfolgs-Modal - NUR Bestellnummer
       document.getElementById('orderNumber').textContent = orderNumber
       
       closeCheckout()
@@ -3290,7 +3269,7 @@ async function placeOrder() {
     
     // 💵 BAR-ZAHLUNG: Normale Bestellung ohne PayPal
     const orderQRID = Math.floor(1000 + Math.random() * 9000).toString()
-    const orderNumber = Math.floor(100000 + Math.random() * 900000)
+    const orderNumber = Math.floor(1000 + Math.random() * 9000)
     
     const orderData = {
       order_number: orderNumber,
@@ -3318,11 +3297,7 @@ async function placeOrder() {
       throw new Error('Bestellung konnte nicht gespeichert werden')
     }
     
-    const qrData = `ORDER:${orderQRID}:${orderNumber}:${total.toFixed(2)}`
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`
-    
-    document.getElementById('qrCodeContainer').innerHTML = `<img src="${qrUrl}" style="width: 200px; height: 200px;">`
-    document.getElementById('orderQRID').textContent = orderQRID
+    // Zeige nur Bestellnummer - KEIN QR-Code
     document.getElementById('orderNumber').textContent = orderNumber
     
     closeCheckout()
