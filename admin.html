@@ -2597,7 +2597,7 @@ window.addEventListener('DOMContentLoaded', function() {
   setTimeout(() => {
     console.log('📊 Lade erste Statistik...')
     loadCouponStats()
-    loadOrders()  // 🛒 Bestellungen laden
+      // 🛒 Bestellungen laden
   }, 300)
 })
 
@@ -2620,78 +2620,6 @@ window.loadTrendStats = loadTrendStats
 let currentOrdersFilter = 'all'
 let allOrders = []
 
-async function loadOrders() {
-  try {
-    // HINWEIS FÜR PROGRAMMIERER:
-    // Hier muss die orders Tabelle aus Supabase geladen werden
-    // Tabelle muss erst erstellt werden (siehe INTEGRATION_ANLEITUNG.txt)
-    
-    // DEMO: Wenn Tabelle noch nicht existiert, zeige Hinweis
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*, customers(name, phone, qr_id)')
-      .order('created_at', { ascending: false })
-    
-    if (error) {
-      // Tabelle existiert noch nicht
-      document.getElementById('orders-list').innerHTML = `
-        <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 20px; text-align: center;">
-          <div style="font-size: 18px; font-weight: 700; color: #92400e; margin-bottom: 12px;">
-            ⚠️ Orders-Tabelle noch nicht erstellt
-          </div>
-          <div style="font-size: 14px; color: #92400e; margin-bottom: 16px;">
-            Die Supabase Tabelle "orders" existiert noch nicht.<br>
-            Bitte siehe INTEGRATION_ANLEITUNG.txt für SQL-Schema.
-          </div>
-          <div style="font-size: 13px; color: #666; background: white; padding: 12px; border-radius: 8px; font-family: monospace; text-align: left; margin-top: 16px;">
-            CREATE TABLE orders (<br>
-            &nbsp;&nbsp;id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),<br>
-            &nbsp;&nbsp;order_number TEXT UNIQUE NOT NULL,<br>
-            &nbsp;&nbsp;customer_id UUID REFERENCES customers(id),<br>
-            &nbsp;&nbsp;customer_name TEXT NOT NULL,<br>
-            &nbsp;&nbsp;customer_phone TEXT NOT NULL,<br>
-            &nbsp;&nbsp;items JSONB NOT NULL,<br>
-            &nbsp;&nbsp;total DECIMAL(10,2) NOT NULL,<br>
-            &nbsp;&nbsp;payment_method TEXT NOT NULL,<br>
-            &nbsp;&nbsp;payment_status TEXT DEFAULT 'pending',<br>
-            &nbsp;&nbsp;pickup_time TEXT,<br>
-            &nbsp;&nbsp;notes TEXT,<br>
-            &nbsp;&nbsp;status TEXT DEFAULT 'pending',<br>
-            &nbsp;&nbsp;qr_data TEXT,<br>
-            &nbsp;&nbsp;created_at TIMESTAMPTZ DEFAULT NOW(),<br>
-            &nbsp;&nbsp;updated_at TIMESTAMPTZ DEFAULT NOW()<br>
-            );
-          </div>
-        </div>
-      `
-      return
-    }
-    
-    allOrders = data || []
-    
-    // Statistiken aktualisieren
-    const totalOrders = allOrders.length
-    const pendingOrders = allOrders.filter(o => o.status === 'pending').length
-    const paidOrders = allOrders.filter(o => o.payment_status === 'paid' || o.status === 'paid').length
-    const completedOrders = allOrders.filter(o => o.status === 'completed').length
-    
-    document.getElementById('stat-orders-total').textContent = totalOrders
-    document.getElementById('stat-orders-pending').textContent = pendingOrders
-    document.getElementById('stat-orders-paid').textContent = paidOrders
-    document.getElementById('stat-orders-completed').textContent = completedOrders
-    
-    // Liste rendern
-    renderOrdersList()
-    
-  } catch (e) {
-    console.error('❌ Fehler beim Laden der Bestellungen:', e)
-    document.getElementById('orders-list').innerHTML = `
-      <div style="text-align: center; padding: 40px; color: #dc2626;">
-        ❌ Fehler: ${e.message}
-      </div>
-    `
-  }
-}
 
 function filterOrders(filter) {
   currentOrdersFilter = filter
@@ -2818,34 +2746,6 @@ function renderOrdersList() {
   }).join('')
 }
 
-async function updateOrderStatus(orderId, newStatus) {
-  try {
-    const { error } = await supabase
-      .from('orders')
-      .update({ 
-        status: newStatus,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', orderId)
-    
-    if (error) throw error
-    
-    // Liste neu laden
-    await loadOrders()
-    
-    const statusLabels = {
-      'paid': '💳 Bezahlt',
-      'completed': '✅ Abgeschlossen',
-      'cancelled': '❌ Storniert'
-    }
-    
-    alert(`✅ Status geändert: ${statusLabels[newStatus]}`)
-    
-  } catch (e) {
-    console.error('❌ Fehler:', e)
-    alert('❌ Fehler: ' + e.message)
-  }
-}
 
 // ═══════════════════════════════════════════════════════════════
 
