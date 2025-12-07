@@ -2400,6 +2400,26 @@ function logout() {
   refreshErrorCount = 0
   currentCustomer = null
   safeRemoveItem('customerData')
+  
+  // Schließe alle offenen Modals
+  document.getElementById('order-section').style.display = 'none'
+  document.getElementById('customizeModal')?.classList.remove('active')
+  document.getElementById('cartModal')?.classList.remove('active')
+  document.getElementById('checkoutModal')?.classList.remove('active')
+  document.getElementById('successModal')?.classList.remove('active')
+  
+  // Leere Warenkorb
+  cart = []
+  updateCart()
+  
+  // Resette Input-Felder
+  document.getElementById('reg-name').value = ''
+  document.getElementById('reg-phone').value = ''
+  document.getElementById('login-phone').value = ''
+  
+  // Scrolle nach oben
+  window.scrollTo(0, 0)
+  
   showScreen('start')
 }
 
