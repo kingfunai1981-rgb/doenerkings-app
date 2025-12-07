@@ -1921,7 +1921,6 @@ async function triggerLuckyWheel(orderId, customerId, paymentMethod) {
       .from('wheel_unlocks')
       .insert({
         customer_id: customerId,
-        order_id: orderId,
         is_used: false,
         expires_at: expiresAt.toISOString()
       })
