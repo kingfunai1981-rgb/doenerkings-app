@@ -723,10 +723,50 @@ const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
+// 🤖 Telegram Bot Konfiguration
+const TELEGRAM_BOT_TOKEN = '8216843337:AAGEHoVsQPW6f3zYw5jFhK61GPKIbgfnKZI'
+const TELEGRAM_CHAT_ID = '8253938141'
+
 // Request Throttling - verhindert zu viele parallele Supabase Requests
 let requestQueue = []
 let activeRequests = 0
 const MAX_CONCURRENT_REQUESTS = 3
+
+// 🤖 Telegram Benachrichtigungen
+async function sendTelegramUpdate(orderNumber, customerName, status, message) {
+  try {
+    const statusEmojis = {
+      'pending': '🆕',
+      'paid': '💰',
+      'preparing': '🍳',
+      'ready': '📦',
+      'completed': '✅'
+    }
+    
+    const emoji = statusEmojis[status] || '📋'
+    
+    const text = `${emoji} *BESTELLUNG #${orderNumber}*
+
+👤 ${customerName}
+📊 Status: ${message}
+
+⏰ ${new Date().toLocaleTimeString('de-DE')}`
+
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: text,
+        parse_mode: 'Markdown'
+      })
+    })
+    
+    console.log('✅ Telegram Update gesendet:', status)
+  } catch (error) {
+    console.error('❌ Telegram Fehler:', error)
+  }
+}
 
 async function throttledRequest(requestFn) {
   while (activeRequests >= MAX_CONCURRENT_REQUESTS) {
@@ -1593,6 +1633,9 @@ async function markOrderPaid(orderId, customerId, total) {
       await addPointsForCustomerId(customerId, total)
     }
     
+    // 🤖 Telegram Benachrichtigung
+    await sendTelegramUpdate(order.order_number, order.customer_name, 'paid', '💰 Bar bezahlt - Wird vorbereitet')
+    
     alert('✅ Bezahlung erfasst und Punkte gutgeschrieben!')
     loadOrders()
   } catch (e) {
@@ -1639,6 +1682,9 @@ async function markPayPalPaid(orderId, customerId, total) {
       await addPointsForCustomerId(customerId, total)
     }
     
+    // 🤖 Telegram Benachrichtigung
+    await sendTelegramUpdate(order.order_number, order.customer_name, 'paid', '💳 PayPal bezahlt - Wird vorbereitet')
+    
     alert('✅ PayPal-Zahlung bestätigt und Punkte gutgeschrieben!')
     loadOrders()
   } catch (e) {
@@ -1665,11 +1711,21 @@ async function markOrderPreparing(orderId) {
 async function markOrderReady(orderId) {
   try {
     console.log('Marking order as ready:', orderId)
+    
+    // Hole Bestellung für Telegram
+    const { data: order } = await supabase.from('orders').select('*').eq('id', orderId).single()
+    
     const { error } = await supabase.from('orders').update({ status: 'ready' }).eq('id', orderId)
     if (error) {
       console.error('Update error:', error)
       throw error
     }
+    
+    // 🤖 Telegram Benachrichtigung
+    if (order) {
+      await sendTelegramUpdate(order.order_number, order.customer_name, 'ready', '📦 Bereit zur Abholung!')
+    }
+    
     loadOrders()
   } catch (e) {
     console.error('markOrderReady Fehler:', e)
@@ -1693,7 +1749,8 @@ async function completeOrder(orderId, customerId, qrId, total, paymentMethod) {
     // Prüfe Wheel-Berechtigung
     const wheelAvailable = isWheelAvailable(total)
     if (wheelAvailable) {
-      showLuckyWheelModal(orderId, customerId, qrId, total, paymentMethod)
+      // Automatisch freischalten ohne Modal
+      await triggerLuckyWheel(orderId, customerId, paymentMethod)
     } else {
       await finalizeOrder(orderId, customerId, paymentMethod)
     }
@@ -1704,8 +1761,17 @@ async function completeOrder(orderId, customerId, qrId, total, paymentMethod) {
 }
 async function finalizeOrder(orderId, customerId, paymentMethod) {
   try {
+    // Hole Bestellung für Telegram
+    const { data: order } = await supabase.from('orders').select('*').eq('id', orderId).single()
+    
     const { error } = await supabase.from('orders').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', orderId)
     if (error) throw error
+    
+    // 🤖 Telegram Benachrichtigung
+    if (order) {
+      await sendTelegramUpdate(order.order_number, order.customer_name, 'completed', '✅ Abgeholt - Bestellung abgeschlossen!')
+    }
+    
     alert('✅ Bestellung abgeschlossen!')
     loadOrders()
   } catch (e) {
@@ -1927,16 +1993,13 @@ async function triggerLuckyWheel(orderId, customerId, paymentMethod) {
     
     if (unlockError) {
       console.error('Wheel unlock error:', unlockError)
-      alert('⚠️ Warnung: Glücksrad konnte nicht freigeschaltet werden, aber Bestellung wird abgeschlossen.')
     } else {
-      alert('✅ Glücksrad wurde freigeschaltet! Der Kunde kann jetzt in der App drehen.')
+      console.log('✅ Glücksrad automatisch freigeschaltet!')
     }
     
     await finalizeOrder(orderId, customerId, paymentMethod)
-    closeLuckyWheelModal()
   } catch (e) {
     console.error('Fehler:', e)
-    alert('❌ Fehler: ' + e.message)
   }
 }
 
