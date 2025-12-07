@@ -726,6 +726,25 @@ const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
+// Request Throttling - verhindert zu viele parallele Supabase Requests
+let requestQueue = []
+let activeRequests = 0
+const MAX_CONCURRENT_REQUESTS = 3
+
+async function throttledRequest(requestFn) {
+  while (activeRequests >= MAX_CONCURRENT_REQUESTS) {
+    await new Promise(resolve => setTimeout(resolve, 100))
+  }
+  
+  activeRequests++
+  try {
+    return await requestFn()
+  } finally {
+    activeRequests--
+  }
+}
+
+
 let video = document.getElementById('video')
 let canvas = document.getElementById('canvas')
 let ctx = canvas.getContext('2d')
@@ -1059,7 +1078,7 @@ async function addPointsFromScan() {
 
 async function loadHistory() {
   try {
-    const { data, error } = await supabase.from('transactions').select('id, customer_id, type, amount, points, notes, staff, created_at, customers(name, phone, qr_id)').order('created_at', { ascending: false }).limit(50)
+    const { data, error } = await supabase.from('transactions').select('id, customer_id, type, amount, points, notes, staff, created_at').order('created_at', { ascending: false }).limit(50)
     if (error) throw error
     const list = document.getElementById('historyList')
     if (!data || data.length === 0) { list.innerHTML = '<div style="text-align:center;padding:20px;color:#666">Keine Transaktionen</div>'; return }
