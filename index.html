@@ -1448,45 +1448,48 @@ let logoImg = null
 let wheelHandlersAttached = false
 let isSpinning = false
 let wheelRotation = 0
+let currentWheelUnlockId = null // Für Spin Again
 
-const WHEEL_OFFSET = 0.05  // Kleiner Offset zur besseren Ausrichtung
+const anglePerSegment = (2 * Math.PI) / 18
+const WHEEL_OFFSET = -Math.PI / 2 - anglePerSegment / 2
 
 const wheelPrizes = [
-  { label: '⭐', value: 10, color: '#E31E24', textColor: 'white' },
-  { label: '⭐⭐', value: 50, color: '#F9A825', textColor: 'white' },
-  { label: '⭐⭐⭐', value: 100, color: '#E31E24', textColor: 'white' },
-  { label: 'DREHE NOCHMAL!', value: 0, color: '#4CAF50', textColor: 'white', type: 'respin' },
-  { label: '⭐', value: 10, color: '#F9A825', textColor: 'white' },
-  { label: '⭐⭐', value: 50, color: '#E31E24', textColor: 'white' },
-  { label: '⭐⭐⭐', value: 100, color: '#F9A825', textColor: 'white' },
-  { label: '⭐', value: 10, color: '#E31E24', textColor: 'white' }
+  { label: '500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },          // 1 - ROT
+  { label: '50', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },            // 2 - WEIß
+  { label: '100', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 100 },          // 3 - SCHWARZ
+  { label: '25', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 25 },            // 4 - WEIß
+  { label: '75', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },            // 5 - SCHWARZ
+  { label: 'DREHE NOCHMAL!', color: '#FFFFFF', textColor: '#000000', type: 'spin_again', value: 0 }, // 6 - WEIß
+  { label: '50', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },            // 7 - SCHWARZ
+  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },          // 8 - WEIß
+  { label: '25', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25 },            // 9 - SCHWARZ
+  { label: '500', color: '#E31E24', textColor: '#FFFFFF', type: 'points', value: 500 },          // 10 - ROT
+  { label: '75', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 75 },            // 11 - SCHWARZ
+  { label: '50', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 50 },            // 12 - WEIß
+  { label: 'DREHE NOCHMAL!', color: '#000000', textColor: '#FFFFFF', type: 'spin_again', value: 0 }, // 13 - SCHWARZ
+  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 },          // 14 - WEIß
+  { label: '25', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 25 },            // 15 - SCHWARZ
+  { label: '75', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 75 },            // 16 - WEIß
+  { label: '50', color: '#000000', textColor: '#FFFFFF', type: 'points', value: 50 },            // 17 - SCHWARZ
+  { label: '100', color: '#FFFFFF', textColor: '#000000', type: 'points', value: 100 }           // 18 - WEIß
 ]
-
-const anglePerSegment = (2 * Math.PI) / wheelPrizes.length
-
-function getRandomPrize() {
-  const weights = wheelPrizes.map(p => {
-    if (p.value === 0) return 5      // 5% "DREHE NOCHMAL"
-    if (p.value === 10) return 40    // 40% 10 Punkte
-    if (p.value === 50) return 30    // 30% 50 Punkte
-    if (p.value === 100) return 25   // 25% 100 Punkte
-  })
-  
-  const totalWeight = weights.reduce((a, b) => a + b, 0)
-  let random = Math.random() * totalWeight
-  
-  for (let i = 0; i < wheelPrizes.length; i++) {
-    random -= weights[i]
-    if (random <= 0) return wheelPrizes[i]
-  }
-  
-  return wheelPrizes[0]
-}
 
 let currentCustomer = null
 let refreshInterval = null
 let refreshErrorCount = 0
 const MAX_REFRESH_ERRORS = 3
+
+// 🎯 Throttle-Variablen für checkWheelAvailability
+let wheelCheckInProgress = false
+let lastWheelCheck = 0
+const WHEEL_CHECK_COOLDOWN = 3000  // Min. 3 Sekunden zwischen Checks
+
+function getRandomPrize() {
+  const array = new Uint32Array(1)
+  crypto.getRandomValues(array)
+  const randomIndex = Math.floor((array[0] / (0xFFFFFFFF + 1)) * wheelPrizes.length)
+  return wheelPrizes[randomIndex]
+}
 
 function normalizePhone(phone) {
   let normalized = phone.replace(/[\s\-\(\)]/g, '')
@@ -1985,6 +1988,43 @@ function showWheelResult(prize) {
   modal.classList.add('active')
 }
 
+function showSpinAgainResult() {
+  const modal = document.getElementById('wheel-result-modal')
+  const icon = document.getElementById('wheel-result-icon')
+  const title = document.getElementById('wheel-result-title')
+  const prizeText = document.getElementById('wheel-result-prize')
+
+  icon.textContent = '🔄'
+  title.textContent = 'Drehe nochmal!'
+  prizeText.textContent = 'Du darfst nochmal drehen! 🎉'
+
+  modal.classList.add('active')
+  
+  // Button-Text ändern
+  const closeButton = modal.querySelector('button')
+  if (closeButton) {
+    closeButton.textContent = '🎰 Nochmal drehen!'
+    closeButton.onclick = () => {
+      closeSpinAgainResult()
+    }
+  }
+}
+
+function closeSpinAgainResult() {
+  const modal = document.getElementById('wheel-result-modal')
+  modal.classList.remove('active')
+  
+  // Button zurücksetzen
+  const closeButton = modal.querySelector('button')
+  if (closeButton) {
+    closeButton.textContent = 'Weiter'
+    closeButton.onclick = closeWheelResult
+  }
+  
+  // Button wieder aktivieren für nächsten Spin
+  // Spin button entfernt - Logo ist jetzt klickbar
+}
+
 function closeWheelResult() {
   document.getElementById('wheel-result-modal').classList.remove('active')
   // Spin button entfernt - Logo ist jetzt klickbar
@@ -1995,6 +2035,11 @@ function closeWheelResult() {
   // Refresh customer data
   if (currentCustomer) {
     setTimeout(() => {
+      checkWheelAvailability()  // Prüfe ob weitere Drehungen verfügbar
+      refreshCustomerData()
+    }, 1000)
+  }
+}
       checkWheelAvailability()  // Prüfe ob weitere Drehungen verfügbar
       refreshCustomerData()
     }, 1000)
