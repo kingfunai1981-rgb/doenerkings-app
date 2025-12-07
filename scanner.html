@@ -1540,33 +1540,24 @@ function renderOrders(orders) {
     let actions = ''
     if (order.status === 'pending') {
       if (order.payment_method === 'cash') {
-        actions = `<button onclick="markOrderPaid('${order.id}')" class="success">💰 Bar bezahlt</button><button onclick="markOrderPreparing('${order.id}')" class="secondary">👨‍🍳 In Vorbereitung</button>`
+        actions = `<button onclick="markOrderPaid('${order.id}', '${order.customer_id}', ${order.total})" class="success">💰 Bar bezahlt</button><button onclick="markOrderPreparing('${order.id}')" class="secondary">👨‍🍳 In Vorbereitung</button>`
       } else {
         actions = `<button onclick="markOrderPreparing('${order.id}')" class="success">👨‍🍳 In Vorbereitung</button><button onclick="cancelOrder('${order.id}')" class="danger">❌ Stornieren</button>`
       }
     } else if (order.status === 'preparing') {
       actions = `<button onclick="markOrderReady('${order.id}')" class="success">✅ Bereit zur Abholung</button><button onclick="cancelOrder('${order.id}')" class="danger">❌ Stornieren</button>`
     } else if (order.status === 'ready') {
-      actions = `<button onclick="completeOrder('${order.id}', '${order.qr_id}', ${order.total}, '${order.payment_method}')" class="success">🎉 Abgeholt & Abschließen</button><button onclick="cancelOrder('${order.id}')" class="danger">❌ Stornieren</button>`
+      actions = `<button onclick="completeOrder('${order.id}', '${order.customer_id}', '${order.qr_id}', ${order.total}, '${order.payment_method}')" class="success">🎉 Abgeholt & Abschließen</button><button onclick="cancelOrder('${order.id}')" class="danger">❌ Stornieren</button>`
     }
     
     return `<div class="order-card ${statusClass}"><div class="order-header"><div><span class="order-number">#${order.order_number}</span><span class="order-badge ${statusClass}">${statusText}</span><span class="payment-badge ${paymentClass}">${paymentText}</span></div><div class="order-time">${timeAgo}</div></div><div class="order-customer"><p><strong>👤 ${order.customer_name}</strong></p><p>📱 ${order.customer_phone}</p><p>🎫 QR-ID: ${order.qr_id}</p>${pickupInfo}${order.notes ? `<p><strong>💬 Notiz:</strong> ${order.notes}</p>` : ''}</div><div class="order-items">${items}</div><div class="order-total"><span>Gesamt:</span><span style="color: #E31E24;">${formatPrice(order.total)}</span></div><div class="order-actions">${actions}</div></div>`
   }).join('')
 }
 
-async function markOrderPaid(orderId) {
+async function markOrderPaid(orderId, customerId, total) {
   if (!confirm('Bestellung als bar bezahlt markieren?')) return
   try {
-    console.log('Marking order as paid:', orderId)
-    
-    // Erst die Order holen - verwende limit(1) statt .single()
-    const { data: orders, error: fetchError } = await supabase.from('orders').select('*').eq('id', orderId).limit(1)
-    if (fetchError) {
-      console.error('Fetch error:', fetchError)
-      throw new Error('Bestellung konnte nicht geladen werden: ' + fetchError.message)
-    }
-    if (!orders || orders.length === 0) throw new Error('Bestellung nicht gefunden')
-    const order = orders[0]
+    console.log('💰 Marking order as paid:', orderId)
     
     // Update Status
     const { error: updateError } = await supabase.from('orders').update({ status: 'preparing' }).eq('id', orderId)
@@ -1575,8 +1566,10 @@ async function markOrderPaid(orderId) {
       throw new Error('Status konnte nicht aktualisiert werden: ' + updateError.message)
     }
     
-    // Punkte gutschreiben
-    await addPointsForOrder(order.qr_id, order.total)
+    // Punkte gutschreiben - DIREKT mit customer_id
+    if (customerId && total) {
+      await addPointsForCustomerId(customerId, total)
+    }
     
     alert('✅ Bezahlung erfasst und Punkte gutgeschrieben!')
     loadOrders()
@@ -1585,7 +1578,6 @@ async function markOrderPaid(orderId) {
     alert('❌ Fehler: ' + e.message)
   }
 }
-
 async function markOrderPreparing(orderId) {
   try {
     console.log('Marking order as preparing:', orderId)
@@ -1616,54 +1608,25 @@ async function markOrderReady(orderId) {
   }
 }
 
-async function completeOrder(orderId, qrId, total, paymentMethod) {
+async function completeOrder(orderId, customerId, qrId, total, paymentMethod) {
   try {
-    console.log('🎉 Completing order:', { orderId, qrId, total, paymentMethod })
+    console.log('🎉 Completing order:', { orderId, customerId, qrId, total, paymentMethod })
     
-    // Robuste Customer Suche
-    let customer = await findCustomer(qrId, 'qr_id')
-    
-    // Falls nicht gefunden, versuche über Order-Tabelle
-    if (!customer) {
-      console.log('🔄 Versuche Customer über Order zu finden...')
-      const { data: order } = await supabase
-        .from('orders')
-        .select('customer_id, customer_name, customer_phone')
-        .eq('id', orderId)
-        .limit(1)
-      
-      if (order && order.length > 0 && order[0].customer_id) {
-        customer = await findCustomer(order[0].customer_id, 'id')
-      }
-      
-      // Fallback: Erstelle temporären Customer-Objekt aus Order-Daten
-      if (!customer && order && order.length > 0) {
-        console.log('⚠️ Verwende Order-Daten als Fallback')
-        customer = {
-          id: order[0].customer_id,
-          name: order[0].customer_name,
-          phone: order[0].customer_phone,
-          qr_id: qrId
-        }
-      }
+    // EINFACH: Verwende die customer_id die wir bereits haben!
+    if (!customerId) {
+      console.error('❌ Keine customer_id übergeben!')
+      alert('Fehler: Keine Kunden-ID vorhanden')
+      return
     }
     
-    if (!customer) {
-      console.error('❌ Kunde konnte nicht gefunden werden')
-      // Zeige verfügbare Kunden
-      const { data: examples } = await supabase.from('customers').select('id, qr_id, name').limit(5)
-      console.log('📋 Beispiel Kunden:', examples)
-      throw new Error('Kunde nicht gefunden')
-    }
-    
-    console.log('✅ Kunde gefunden:', customer.name)
+    console.log('✅ Verwende customer_id:', customerId)
     
     // Prüfe Wheel-Berechtigung
     const wheelAvailable = isWheelAvailable(total)
     if (wheelAvailable) {
-      showLuckyWheelModal(orderId, customer.id, qrId, total, paymentMethod)
+      showLuckyWheelModal(orderId, customerId, qrId, total, paymentMethod)
     } else {
-      await finalizeOrder(orderId, customer.id, paymentMethod)
+      await finalizeOrder(orderId, customerId, paymentMethod)
     }
   } catch (e) {
     console.error('❌ completeOrder Fehler:', e)
@@ -1758,6 +1721,60 @@ function closeLuckyWheelModal() {
   if (modal) modal.remove()
 }
 
+
+async function addPointsForCustomerId(customerId, amount) {
+  try {
+    console.log('💰 Gutschreibe Punkte für customer_id:', customerId, 'Betrag:', amount)
+    
+    // Hole Customer
+    const { data: customers, error: lookupError } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('id', customerId)
+      .limit(1)
+    
+    if (lookupError || !customers || customers.length === 0) {
+      console.error('❌ Kunde nicht gefunden:', lookupError)
+      return
+    }
+    
+    const customer = customers[0]
+    console.log('✅ Kunde gefunden:', customer.name)
+    
+    const points = Math.floor(amount * 100)
+    
+    // Update Punkte
+    const { error: updateError } = await supabase
+      .from('customers')
+      .update({ points: customer.points + points })
+      .eq('id', customer.id)
+    
+    if (updateError) {
+      console.error('❌ Fehler beim Update:', updateError)
+      return
+    }
+    
+    // Transaktion speichern
+    await supabase
+      .from('transactions')
+      .insert({
+        customer_id: customer.id,
+        type: 'earn',
+        amount: amount,
+        points: points,
+        staff: 'ONLINE-ORDER',
+        notes: `Online-Bestellung: ${points}P`
+      })
+    
+    // Challenges prüfen
+    await checkAndUpdateChallenges(customer.id, amount)
+    
+    console.log(`✅ ${points} Punkte gutgeschrieben für ${customer.name}`)
+  } catch (e) {
+    console.error('❌ Fehler beim Gutschreiben der Punkte:', e)
+  }
+}
+
 async function triggerLuckyWheel(orderId, customerId, paymentMethod) {
   try {
     // Erstelle wheel_unlock Eintrag für den Kunden
@@ -1813,8 +1830,9 @@ function handleNewOrder(order) {
   playNotificationSound()
   showBrowserNotification(`🆕 Neue Bestellung #${order.order_number}`, `${order.customer_name} - ${formatPrice(order.total)} - ${order.payment_method === 'paypal' ? 'PayPal' : 'Bar'}`)
   loadOrders()
-  if (order.payment_method === 'paypal') {
-    setTimeout(() => addPointsForOrder(order.qr_id, order.total), 1000)
+  if (order.payment_method === 'paypal' && order.customer_id) {
+    console.log('💳 PayPal Bestellung - Punkte werden automatisch gutgeschrieben')
+    setTimeout(() => addPointsForCustomerId(order.customer_id, order.total), 1000)
   }
 }
 
