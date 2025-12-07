@@ -745,41 +745,91 @@ async function throttledRequest(requestFn) {
 }
 
 
-// Flexible Customer Lookup - funktioniert mit String und Number
-async function findCustomerByQrId(qrId) {
-  console.log('🔍 Flexible Customer Lookup für:', qrId, 'Type:', typeof qrId)
+// ============================================
+// 🔍 ROBUSTE CUSTOMER LOOKUP FUNKTION
+// ============================================
+async function findCustomer(searchValue, searchType = 'qr_id') {
+  console.log(`🔍 Suche Customer: ${searchType} = "${searchValue}"`)
   
-  // Versuch 1: Direkte Suche mit Original-Wert
-  let { data: customers, error } = await supabase.from('customers').select('*').eq('qr_id', qrId).limit(1)
-  if (customers && customers.length > 0) {
-    console.log('✅ Kunde gefunden (direkte Suche)')
-    return customers[0]
+  if (!searchValue) {
+    console.error('❌ Kein Suchwert angegeben!')
+    return null
   }
   
-  // Versuch 2: Als String
-  if (typeof qrId !== 'string') {
-    const qrIdStr = String(qrId)
-    console.log('🔄 Versuche als String:', qrIdStr)
-    const result = await supabase.from('customers').select('*').eq('qr_id', qrIdStr).limit(1)
-    if (result.data && result.data.length > 0) {
-      console.log('✅ Kunde gefunden (String-Suche)')
-      return result.data[0]
+  try {
+    // Versuch 1: Direkte Suche
+    let { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq(searchType, searchValue)
+      .limit(1)
+    
+    if (data && data.length > 0) {
+      console.log('✅ Kunde gefunden (direkt):', data[0].name)
+      return data[0]
     }
-  }
-  
-  // Versuch 3: Als Number (falls qr_id als Integer gespeichert)
-  if (typeof qrId === 'string' && !isNaN(qrId)) {
-    const qrIdNum = parseInt(qrId)
-    console.log('🔄 Versuche als Number:', qrIdNum)
-    const result = await supabase.from('customers').select('*').eq('qr_id', qrIdNum).limit(1)
-    if (result.data && result.data.length > 0) {
-      console.log('✅ Kunde gefunden (Number-Suche)')
-      return result.data[0]
+    
+    // Versuch 2: Als String (falls Number übergeben wurde)
+    if (typeof searchValue !== 'string') {
+      const strValue = String(searchValue)
+      const result = await supabase
+        .from('customers')
+        .select('*')
+        .eq(searchType, strValue)
+        .limit(1)
+      
+      if (result.data && result.data.length > 0) {
+        console.log('✅ Kunde gefunden (als String):', result.data[0].name)
+        return result.data[0]
+      }
     }
+    
+    // Versuch 3: Als Number (falls String übergeben wurde)
+    if (typeof searchValue === 'string' && !isNaN(searchValue)) {
+      const numValue = parseInt(searchValue)
+      const result = await supabase
+        .from('customers')
+        .select('*')
+        .eq(searchType, numValue)
+        .limit(1)
+      
+      if (result.data && result.data.length > 0) {
+        console.log('✅ Kunde gefunden (als Number):', result.data[0].name)
+        return result.data[0]
+      }
+    }
+    
+    // Versuch 4: Suche in orders Tabelle nach customer_id
+    if (searchType === 'qr_id') {
+      console.log('🔄 Suche in orders Tabelle...')
+      const { data: orders } = await supabase
+        .from('orders')
+        .select('customer_id')
+        .eq('qr_id', searchValue)
+        .limit(1)
+      
+      if (orders && orders.length > 0 && orders[0].customer_id) {
+        console.log('📦 Customer ID aus Order gefunden:', orders[0].customer_id)
+        const { data: customer } = await supabase
+          .from('customers')
+          .select('*')
+          .eq('id', orders[0].customer_id)
+          .limit(1)
+        
+        if (customer && customer.length > 0) {
+          console.log('✅ Kunde über Order gefunden:', customer[0].name)
+          return customer[0]
+        }
+      }
+    }
+    
+    console.error('❌ Kunde nicht gefunden nach allen Versuchen')
+    return null
+    
+  } catch (e) {
+    console.error('❌ Fehler bei Customer Lookup:', e)
+    return null
   }
-  
-  console.error('❌ Kunde nicht gefunden nach allen Versuchen')
-  return null
 }
 
 
@@ -1568,20 +1618,47 @@ async function markOrderReady(orderId) {
 
 async function completeOrder(orderId, qrId, total, paymentMethod) {
   try {
-    console.log('Completing order:', { orderId, qrId, total, paymentMethod })
+    console.log('🎉 Completing order:', { orderId, qrId, total, paymentMethod })
     
-    // Verwende flexible Customer Lookup
-    const customer = await findCustomerByQrId(qrId)
+    // Robuste Customer Suche
+    let customer = await findCustomer(qrId, 'qr_id')
     
+    // Falls nicht gefunden, versuche über Order-Tabelle
     if (!customer) {
-      // Zeige Beispiel-Kunden für Debugging
-      const { data: exampleCustomers } = await supabase.from('customers').select('qr_id, name').limit(5)
-      console.log('📋 Beispiel Kunden:', exampleCustomers)
-      throw new Error('Kunde nicht gefunden für QR-ID: ' + qrId)
+      console.log('🔄 Versuche Customer über Order zu finden...')
+      const { data: order } = await supabase
+        .from('orders')
+        .select('customer_id, customer_name, customer_phone')
+        .eq('id', orderId)
+        .limit(1)
+      
+      if (order && order.length > 0 && order[0].customer_id) {
+        customer = await findCustomer(order[0].customer_id, 'id')
+      }
+      
+      // Fallback: Erstelle temporären Customer-Objekt aus Order-Daten
+      if (!customer && order && order.length > 0) {
+        console.log('⚠️ Verwende Order-Daten als Fallback')
+        customer = {
+          id: order[0].customer_id,
+          name: order[0].customer_name,
+          phone: order[0].customer_phone,
+          qr_id: qrId
+        }
+      }
     }
     
-    console.log('✅ Kunde gefunden:', customer.name, 'ID:', customer.id)
+    if (!customer) {
+      console.error('❌ Kunde konnte nicht gefunden werden')
+      // Zeige verfügbare Kunden
+      const { data: examples } = await supabase.from('customers').select('id, qr_id, name').limit(5)
+      console.log('📋 Beispiel Kunden:', examples)
+      throw new Error('Kunde nicht gefunden')
+    }
     
+    console.log('✅ Kunde gefunden:', customer.name)
+    
+    // Prüfe Wheel-Berechtigung
     const wheelAvailable = isWheelAvailable(total)
     if (wheelAvailable) {
       showLuckyWheelModal(orderId, customer.id, qrId, total, paymentMethod)
@@ -1589,11 +1666,10 @@ async function completeOrder(orderId, qrId, total, paymentMethod) {
       await finalizeOrder(orderId, customer.id, paymentMethod)
     }
   } catch (e) {
-    console.error('completeOrder Fehler:', e)
+    console.error('❌ completeOrder Fehler:', e)
     alert('❌ Fehler: ' + e.message)
   }
 }
-
 async function finalizeOrder(orderId, customerId, paymentMethod) {
   try {
     const { error } = await supabase.from('orders').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', orderId)
@@ -1626,29 +1702,49 @@ async function addPointsForOrder(qrId, amount) {
   try {
     console.log('💰 Gutschreibe Punkte für QR-ID:', qrId, 'Betrag:', amount)
     
-    // Verwende flexible Customer Lookup
-    const customer = await findCustomerByQrId(qrId)
+    // Robuste Customer Suche
+    let customer = await findCustomer(qrId, 'qr_id')
     
     if (!customer) {
-      console.error('❌ Kunde nicht gefunden für QR-ID:', qrId)
-      // Debug: Zeige Beispiel-Kunden
-      const { data: exampleCustomers } = await supabase.from('customers').select('id, qr_id, name').limit(5)
-      console.log('📋 Beispiel Kunden:', exampleCustomers)
+      console.error('❌ Kunde nicht gefunden - Punkte können nicht gutgeschrieben werden')
       return
     }
     
-    console.log('✅ Kunde gefunden:', customer.name, 'ID:', customer.id)
+    console.log('✅ Kunde gefunden:', customer.name)
     
     const points = Math.floor(amount * 100)
-    await supabase.from('customers').update({ points: customer.points + points }).eq('id', customer.id)
-    await supabase.from('transactions').insert({ customer_id: customer.id, type: 'earn', amount: amount, points: points, staff: 'ONLINE-ORDER', notes: `Online-Bestellung: ${points}P` })
+    
+    // Update Punkte
+    const { error: updateError } = await supabase
+      .from('customers')
+      .update({ points: customer.points + points })
+      .eq('id', customer.id)
+    
+    if (updateError) {
+      console.error('❌ Fehler beim Update:', updateError)
+      return
+    }
+    
+    // Transaktion speichern
+    await supabase
+      .from('transactions')
+      .insert({
+        customer_id: customer.id,
+        type: 'earn',
+        amount: amount,
+        points: points,
+        staff: 'ONLINE-ORDER',
+        notes: `Online-Bestellung: ${points}P`
+      })
+    
+    // Challenges prüfen
     await checkAndUpdateChallenges(customer.id, amount)
+    
     console.log(`✅ ${points} Punkte gutgeschrieben für ${customer.name}`)
   } catch (e) {
-    console.error('Fehler beim Gutschreiben der Punkte:', e)
+    console.error('❌ Fehler beim Gutschreiben der Punkte:', e)
   }
 }
-
 function showLuckyWheelModal(orderId, customerId, qrId, total, paymentMethod) {
   const modal = document.createElement('div')
   modal.className = 'wheel-modal active'
