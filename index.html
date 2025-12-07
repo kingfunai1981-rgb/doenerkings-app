@@ -1202,6 +1202,14 @@ input:focus, textarea:focus {
       </div>
     </div>
 
+    <!-- 🎯 Challenge Section -->
+    <div id="challenge-section" style="display: none;">
+      <div class="card">
+        <h2>🎯 Aktive Challenges</h2>
+        <div id="challenge-list"></div>
+      </div>
+    </div>
+
     
     <!-- 🎡 NEU: Lucky Wheel Section (nur bei Freischaltung sichtbar) -->
     <div id="wheel-section" class="wheel-section">
@@ -1629,6 +1637,7 @@ async function loadCustomer(customer) {
     refreshInterval = setInterval(refreshCustomerData, 5000)
     
     loadPendingCodes()
+    loadActiveChallenges() // ✅ Lade Challenges beim Login
     
   } catch (e) {
     console.error('❌ Fehler beim Laden des Kunden:', e)
@@ -1668,6 +1677,8 @@ async function refreshCustomerData() {
     updateRewardButtons(data.points)
     checkWheelAvailability()
     loadWhatsAppStatus()
+    loadPendingCodes() // ✅ Auto-Refresh für "Wartet auf Bestätigung"
+    loadActiveChallenges() // ✅ Auto-Refresh für Challenges
     safeSetItem('customerData', JSON.stringify(data))
     
   } catch (e) { 
@@ -2392,6 +2403,74 @@ async function loadPendingCodes() {
       return `<div class="pending-code"><h3>🎁 ${item.reward_name}</h3><div class="code">${item.code}</div><div class="code-info">Gültig bis: ${expires}<br>Kosten: ${item.points_cost} Punkte</div><button class="small" style="background: #ef4444;" onclick="cancelCode('${item.code}')">🗑️ Stornieren</button></div>`
     }).join('')
   } catch (e) { console.error('Load pending error:', e) }
+}
+
+async function loadActiveChallenges() {
+  if (!currentCustomer) return
+  try {
+    const now = new Date().toISOString().split('T')[0]
+    
+    // Hole aktive Challenges
+    const { data: challenges, error: challengeError } = await supabase
+      .from('challenges')
+      .select('*')
+      .eq('is_active', true)
+      .lte('start_date', now)
+      .gte('end_date', now)
+    
+    if (challengeError) throw challengeError
+    
+    const section = document.getElementById('challenge-section')
+    const list = document.getElementById('challenge-list')
+    
+    if (!challenges || challenges.length === 0) {
+      section.style.display = 'none'
+      return
+    }
+    
+    // Hole Progress für Kunden
+    const { data: progress, error: progressError } = await supabase
+      .from('challenge_progress')
+      .select('*')
+      .eq('customer_id', currentCustomer.id)
+    
+    if (progressError) throw progressError
+    
+    section.style.display = 'block'
+    
+    list.innerHTML = challenges.map(challenge => {
+      const userProgress = progress?.find(p => p.challenge_id === challenge.id)
+      const completed = userProgress?.completed_orders || 0
+      const isCompleted = userProgress?.is_completed || false
+      const percentage = Math.min((completed / challenge.required_orders) * 100, 100)
+      
+      const endDate = new Date(challenge.end_date).toLocaleDateString('de-DE')
+      
+      return `
+        <div class="challenge-card" style="border: 2px solid ${isCompleted ? '#10b981' : '#f59e0b'}; border-radius: 12px; padding: 16px; margin-bottom: 12px; background: ${isCompleted ? '#d1fae5' : '#fef3c7'};">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="margin: 0; color: #1f2937;">🎯 ${challenge.bonus_points} Punkte Challenge</h3>
+            ${isCompleted ? '<span style="background: #10b981; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">✅ ABGESCHLOSSEN</span>' : ''}
+          </div>
+          <p style="margin: 8px 0; color: #4b5563; font-size: 14px;">
+            ${challenge.required_orders} Bestellungen ab ${challenge.min_order_amount.toFixed(2)}€
+          </p>
+          <div style="margin: 12px 0;">
+            <div style="background: #e5e7eb; border-radius: 8px; height: 24px; overflow: hidden;">
+              <div style="background: ${isCompleted ? '#10b981' : '#f59e0b'}; height: 100%; width: ${percentage}%; transition: width 0.3s; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600;">
+                ${completed}/${challenge.required_orders}
+              </div>
+            </div>
+          </div>
+          <p style="margin: 8px 0 0 0; color: #6b7280; font-size: 12px;">
+            📅 Gültig bis: ${endDate}
+          </p>
+        </div>
+      `
+    }).join('')
+  } catch (e) {
+    console.error('Load challenges error:', e)
+  }
 }
 
 async function cancelCode(code) {
