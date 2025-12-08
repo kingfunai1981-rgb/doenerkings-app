@@ -1938,9 +1938,19 @@ async function addPointsForCustomerId(customerId, amount) {
         console.log(`🎉 Global Bonus angewendet: +${bonus.bonus_amount}P`, points)
       }
       
-      // ✅ Lösche Bonus und setze last_global_bonus_used_at
+      // ═══════════════════════════════════════════════════════════════
+      // ✅ BONUS EINLÖSEN: Lösche aus activated_global_bonuses
+      // ✅ NEU: Speichere in used_global_bonuses_history für permanente Historie
+      // ═══════════════════════════════════════════════════════════════
       await supabase.from('activated_global_bonuses').delete().eq('id', globalBonus.id)
-      await supabase.from('customers').update({ last_global_bonus_used_at: new Date().toISOString() }).eq('id', customer.id)
+      
+      // ✅ NEU: Erstelle Eintrag in Historie - Kunde kann diesen Bonus nie wieder einlösen
+      await supabase.from('used_global_bonuses_history').insert({
+        customer_id: customer.id,
+        global_bonus_id: bonus.id  // WICHTIG: Die ID des global_bonuses, nicht der Aktivierung!
+      })
+      
+      console.log('✅ Bonus eingelöst und in Historie gespeichert')
     }
     
     // Update Punkte
@@ -2030,9 +2040,19 @@ async function addPointsForPhone(phone, amount) {
         console.log(`🎉 Global Bonus angewendet: +${bonus.bonus_amount}P`, points)
       }
       
-      // ✅ Lösche Bonus und setze last_global_bonus_used_at
+      // ═══════════════════════════════════════════════════════════════
+      // ✅ BONUS EINLÖSEN: Lösche aus activated_global_bonuses
+      // ✅ NEU: Speichere in used_global_bonuses_history für permanente Historie
+      // ═══════════════════════════════════════════════════════════════
       await supabase.from('activated_global_bonuses').delete().eq('id', globalBonus.id)
-      await supabase.from('customers').update({ last_global_bonus_used_at: new Date().toISOString() }).eq('id', customer.id)
+      
+      // ✅ NEU: Erstelle Eintrag in Historie - Kunde kann diesen Bonus nie wieder einlösen
+      await supabase.from('used_global_bonuses_history').insert({
+        customer_id: customer.id,
+        global_bonus_id: bonus.id  // WICHTIG: Die ID des global_bonuses, nicht der Aktivierung!
+      })
+      
+      console.log('✅ Bonus eingelöst und in Historie gespeichert')
     }
     
     // Update Punkte
