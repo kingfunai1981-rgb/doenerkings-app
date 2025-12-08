@@ -1074,7 +1074,20 @@ async function addPointsByPhone() {
           if (data && data.length > 0) customer = data[0]
         }
         if (!customer) throw new Error('Kunde nicht gefunden')
-        const { data: activeGlobalBonuses } = await supabase.from('activated_global_bonuses').select('*, global_bonuses(*)').eq('customer_id', customer.id).eq('is_used', false)
+        
+        console.log('🔍 Suche Global Bonusse für customer_id:', customer.id)
+        
+        const { data: activeGlobalBonuses, error: bonusError } = await supabase.from('activated_global_bonuses').select('*, global_bonuses(*)').eq('customer_id', customer.id).eq('is_used', false)
+        
+        console.log('📊 Global Bonusse Query Resultat:', activeGlobalBonuses)
+        console.log('📊 Global Bonusse Error:', bonusError)
+        console.log('📊 Anzahl gefunden:', activeGlobalBonuses?.length || 0)
+        
+        if (activeGlobalBonuses && activeGlobalBonuses.length > 0) {
+          console.log('🎯 Erster Bonus:', activeGlobalBonuses[0])
+          console.log('🎯 global_bonuses Objekt:', activeGlobalBonuses[0].global_bonuses)
+        }
+        
         const { data: activatedCoupons } = await supabase.from('activated_coupons').select('*, coupons(*)').eq('customer_id', customer.id).eq('is_used', false)
         let pointsToAdd = Math.round(amount * 10)
         let bonusApplied = null, bonusPointsAdded = 0, couponUsed = null
@@ -1894,7 +1907,37 @@ async function addPointsForCustomerId(customerId, amount) {
     const customer = customers[0]
     console.log('✅ Kunde gefunden:', customer.name)
     
-    const points = Math.floor(amount * 10) // 1€ = 10 Punkte
+    // ✅ Global Bonusse prüfen
+    const { data: activeGlobalBonuses } = await supabase
+      .from('activated_global_bonuses')
+      .select('*, global_bonuses(*)')
+      .eq('customer_id', customer.id)
+      .eq('is_used', false)
+    
+    let points = Math.floor(amount * 10) // 1€ = 10 Punkte
+    let bonusApplied = null
+    
+    if (activeGlobalBonuses && activeGlobalBonuses.length > 0) {
+      const globalBonus = activeGlobalBonuses[0]
+      const bonus = globalBonus.global_bonuses
+      
+      if (bonus.bonus_type === 'double_points') {
+        points *= 2  // Doppelte Punkte!
+        bonusApplied = '⭐ Doppelte Punkte!'
+        console.log('🎉 Global Bonus angewendet: Doppelte Punkte!', points)
+      }
+      else if (bonus.bonus_type === 'bonus_points') {
+        points += (bonus.bonus_amount || 100)
+        bonusApplied = `💰 +${bonus.bonus_amount}P Bonus!`
+        console.log(`🎉 Global Bonus angewendet: +${bonus.bonus_amount}P`, points)
+      }
+      
+      // Markiere als verwendet
+      await supabase
+        .from('activated_global_bonuses')
+        .update({ is_used: true, used_at: new Date().toISOString() })
+        .eq('id', globalBonus.id)
+    }
     
     // Update Punkte
     const { error: updateError } = await supabase
@@ -1916,7 +1959,7 @@ async function addPointsForCustomerId(customerId, amount) {
         amount: amount,
         points: points,
         staff: 'ONLINE-ORDER',
-        notes: `Online-Bestellung: ${points}P`
+        notes: bonusApplied ? `Online-Bestellung: ${points}P (${bonusApplied})` : `Online-Bestellung: ${points}P`
       })
     
     // Challenges prüfen
@@ -1958,7 +2001,37 @@ async function addPointsForPhone(phone, amount) {
     const customer = customers[0]
     console.log('✅ Kunde gefunden:', customer.name)
     
-    const points = Math.floor(amount * 10) // 1€ = 10 Punkte
+    // ✅ Global Bonusse prüfen
+    const { data: activeGlobalBonuses } = await supabase
+      .from('activated_global_bonuses')
+      .select('*, global_bonuses(*)')
+      .eq('customer_id', customer.id)
+      .eq('is_used', false)
+    
+    let points = Math.floor(amount * 10) // 1€ = 10 Punkte
+    let bonusApplied = null
+    
+    if (activeGlobalBonuses && activeGlobalBonuses.length > 0) {
+      const globalBonus = activeGlobalBonuses[0]
+      const bonus = globalBonus.global_bonuses
+      
+      if (bonus.bonus_type === 'double_points') {
+        points *= 2  // Doppelte Punkte!
+        bonusApplied = '⭐ Doppelte Punkte!'
+        console.log('🎉 Global Bonus angewendet: Doppelte Punkte!', points)
+      }
+      else if (bonus.bonus_type === 'bonus_points') {
+        points += (bonus.bonus_amount || 100)
+        bonusApplied = `💰 +${bonus.bonus_amount}P Bonus!`
+        console.log(`🎉 Global Bonus angewendet: +${bonus.bonus_amount}P`, points)
+      }
+      
+      // Markiere als verwendet
+      await supabase
+        .from('activated_global_bonuses')
+        .update({ is_used: true, used_at: new Date().toISOString() })
+        .eq('id', globalBonus.id)
+    }
     
     // Update Punkte
     const { error: updateError } = await supabase
@@ -1980,7 +2053,7 @@ async function addPointsForPhone(phone, amount) {
         amount: amount,
         points: points,
         staff: 'PAYPAL-ORDER',
-        notes: `PayPal-Bestellung: ${points}P`
+        notes: bonusApplied ? `PayPal-Bestellung: ${points}P (${bonusApplied})` : `PayPal-Bestellung: ${points}P`
       })
     
     // Challenges prüfen
