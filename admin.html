@@ -437,8 +437,16 @@ textarea { resize: vertical; min-height: 60px; }
     <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
       <h3 style="color: #92400e; margin-bottom: 12px;">Neuen Coupon erstellen</h3>
       <div class="form-grid">
-        <div><label class="form-label">🍴 Produktname</label><input type="text" id="couponProduct" placeholder="z.B. Lahmacun Spezial"></div>
-        <div><label class="form-label">💰 Preis</label><input type="text" id="couponPrice" placeholder="z.B. 7,50 €"></div>
+        <div>
+          <label class="form-label">🍴 Produkt aus Menü wählen</label>
+          <select id="couponProduct" onchange="onProductSelect()" style="font-size: 14px;">
+            <option value="">-- Bitte Produkt wählen --</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">💰 Coupon-Preis (automatisch gefüllt, kann geändert werden)</label>
+          <input type="text" id="couponPrice" placeholder="z.B. 5,50 €">
+        </div>
       </div>
       <div class="form-grid">
         <div><label class="form-label">📅 Start-Datum</label><input type="date" id="couponStart"></div>
@@ -825,6 +833,49 @@ const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
+// ═══════════════════════════════════════════════════════════════
+// 📦 MENÜ-PRODUKTE (19 Stück) - FÜR COUPON-DROPDOWN
+// ═══════════════════════════════════════════════════════════════
+const MENU_PRODUCTS = [
+  { name: 'Döner', price: 6.00 },
+  { name: 'Döner XL', price: 8.00 },
+  { name: 'Döner Box', price: 7.00 },
+  { name: 'Dürüm Döner', price: 7.00 },
+  { name: 'Döner Teller', price: 10.00 },
+  { name: 'Lahmacun', price: 4.00 },
+  { name: 'Lahmacun Spezial', price: 8.00 },
+  { name: 'Rindswurst im Brötchen', price: 3.50 },
+  { name: 'Curry Rindswurst mit Pommes', price: 6.90 },
+  { name: 'Köfte im Brot (5 Stk.)', price: 6.00 },
+  { name: 'Köfte Teller (7 Stk.)', price: 11.00 },
+  { name: 'Chicken Nuggets (6 Stk.)', price: 6.00 },
+  { name: 'Crispy Chicken Burger', price: 4.00 },
+  { name: 'Pommes', price: 3.50 },
+  { name: 'Ayran (0,25 l)', price: 1.50 },
+  { name: 'Wasser still (0,5 l)', price: 1.50 },
+  { name: 'Cola (0,33 l)', price: 2.00 },
+  { name: 'Fanta (0,33 l)', price: 2.00 },
+  { name: 'Cola Zero (0,33 l)', price: 2.00 }
+]
+
+// ✅ Funktion: Preis automatisch füllen wenn Produkt ausgewählt wird
+function onProductSelect() {
+  const select = document.getElementById('couponProduct')
+  const priceInput = document.getElementById('couponPrice')
+  
+  const selectedProduct = MENU_PRODUCTS.find(p => p.name === select.value)
+  
+  if (selectedProduct) {
+    // Setze Original-Preis (kann dann manuell geändert werden)
+    priceInput.value = selectedProduct.price.toFixed(2) + ' €'
+    priceInput.placeholder = 'Original: ' + selectedProduct.price.toFixed(2) + ' €'
+  } else {
+    priceInput.value = ''
+    priceInput.placeholder = 'z.B. 5,50 €'
+  }
+}
+
+
 function showResult(elementId, message, type) {
   const el = document.getElementById(elementId)
   if (!message) { el.className = ''; el.innerHTML = ''; return }
@@ -1112,6 +1163,18 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('globalBonusStart').value = todayStr; document.getElementById('globalBonusEnd').value = todayStr
   document.getElementById('challengeStart').value = todayStr; document.getElementById('challengeEnd').value = challenge20DaysStr
   document.getElementById('couponStart').value = todayStr; document.getElementById('couponEnd').value = todayStr
+
+  // ✅ DROPDOWN FÜLLEN: 19 Produkte ins Coupon-Dropdown laden
+  const productSelect = document.getElementById('couponProduct')
+  if (productSelect) {
+    MENU_PRODUCTS.forEach(product => {
+      const option = document.createElement('option')
+      option.value = product.name
+      option.textContent = `${product.name} (${product.price.toFixed(2)}€)`
+      productSelect.appendChild(option)
+    })
+    console.log('✅ Produkt-Dropdown gefüllt mit', MENU_PRODUCTS.length, 'Produkten')
+  }
 
 // 📊 Stats initialisieren
 setTimeout(() => {
