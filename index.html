@@ -1432,7 +1432,7 @@ input:focus, textarea:focus {
       <div class="order-number-label">Bestellnummer</div>
       <div class="order-number-value" id="orderNumber">#0000</div>
     </div>
-    <button class="add-btn" onclick="closeSuccess()">Neue Bestellung</button>
+    <button class="add-btn" onclick="closeSuccess()">🏠 Zurück zum Menü</button>
   </div>
 </div>
 
@@ -1638,6 +1638,7 @@ async function loadCustomer(customer) {
     
     loadPendingCodes()
     loadActiveChallenges() // ✅ Lade Challenges beim Login
+    loadActiveCoupons() // ✅ FIX 2: Lade Coupons beim Login
     
   } catch (e) {
     console.error('❌ Fehler beim Laden des Kunden:', e)
@@ -1679,6 +1680,7 @@ async function refreshCustomerData() {
     loadWhatsAppStatus()
     loadPendingCodes() // ✅ Auto-Refresh für "Wartet auf Bestätigung"
     loadActiveChallenges() // ✅ Auto-Refresh für Challenges
+    loadActiveCoupons() // ✅ FIX 2: Auto-Refresh für Coupons
     safeSetItem('customerData', JSON.stringify(data))
     
   } catch (e) { 
@@ -2438,26 +2440,37 @@ async function loadActiveChallenges() {
     
     section.style.display = 'block'
     
-    list.innerHTML = challenges.map(challenge => {
+    // ✅ FIX: Filtere abgeschlossene Challenges raus
+    const activeChallengesForUser = challenges.filter(challenge => {
+      const userProgress = progress?.find(p => p.challenge_id === challenge.id)
+      const isCompleted = userProgress?.is_completed || false
+      return !isCompleted // Nur nicht-abgeschlossene anzeigen
+    })
+    
+    // Wenn alle Challenges abgeschlossen sind, verstecke Section
+    if (activeChallengesForUser.length === 0) {
+      section.style.display = 'none'
+      return
+    }
+    
+    list.innerHTML = activeChallengesForUser.map(challenge => {
       const userProgress = progress?.find(p => p.challenge_id === challenge.id)
       const completed = userProgress?.completed_orders || 0
-      const isCompleted = userProgress?.is_completed || false
       const percentage = Math.min((completed / challenge.required_orders) * 100, 100)
       
       const endDate = new Date(challenge.end_date).toLocaleDateString('de-DE')
       
       return `
-        <div class="challenge-card" style="border: 2px solid ${isCompleted ? '#10b981' : '#f59e0b'}; border-radius: 12px; padding: 16px; margin-bottom: 12px; background: ${isCompleted ? '#d1fae5' : '#fef3c7'};">
+        <div class="challenge-card" style="border: 2px solid #f59e0b; border-radius: 12px; padding: 16px; margin-bottom: 12px; background: #fef3c7;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <h3 style="margin: 0; color: #1f2937;">🎯 ${challenge.bonus_points} Punkte Challenge</h3>
-            ${isCompleted ? '<span style="background: #10b981; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">✅ ABGESCHLOSSEN</span>' : ''}
           </div>
           <p style="margin: 8px 0; color: #4b5563; font-size: 14px;">
             ${challenge.required_orders} Bestellungen ab ${challenge.min_order_amount.toFixed(2)}€
           </p>
           <div style="margin: 12px 0;">
             <div style="background: #e5e7eb; border-radius: 8px; height: 24px; overflow: hidden;">
-              <div style="background: ${isCompleted ? '#10b981' : '#f59e0b'}; height: 100%; width: ${percentage}%; transition: width 0.3s; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600;">
+              <div style="background: #f59e0b; height: 100%; width: ${percentage}%; transition: width 0.3s; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600;">
                 ${completed}/${challenge.required_orders}
               </div>
             </div>
@@ -2862,6 +2875,63 @@ function closeOrderModal() {
   window.scrollTo(0, 0)
 }
 
+// ═══════════════════════════════════════════════════════════════
+// 🎟️ COUPON SYSTEM - FIX 2 & 4
+// ═══════════════════════════════════════════════════════════════
+let activeCoupons = []
+
+async function loadActiveCoupons() {
+  try {
+    const now = new Date()
+    const todayStr = now.toISOString().split('T')[0]
+    
+    const { data: coupons, error } = await supabase
+      .from('coupons')
+      .select('*')
+      .eq('is_active', true)
+      .lte('start_date', todayStr)
+      .gte('end_date', todayStr)
+    
+    if (error) throw error
+    
+    activeCoupons = coupons || []
+    console.log('✅ Aktive Coupons geladen:', activeCoupons.length)
+    
+    // Re-render products with coupon prices
+    renderProducts()
+    
+  } catch (e) {
+    console.error('❌ Fehler beim Laden von Coupons:', e)
+    activeCoupons = []
+  }
+}
+
+// ✅ FIX 4: Finde Coupon-Preis für Produkt
+function getCouponPrice(productName) {
+  const coupon = activeCoupons.find(c => {
+    // Vergleiche Produktnamen (case-insensitive, auch mit Varianten)
+    const couponProduct = c.product.toLowerCase().trim()
+    const checkName = productName.toLowerCase().trim()
+    
+    // Exakte Übereinstimmung oder enthält
+    return couponProduct === checkName || 
+           couponProduct.includes(checkName) || 
+           checkName.includes(couponProduct)
+  })
+  
+  if (coupon && coupon.price) {
+    // Parse Preis aus String wie "5.00 €" oder "5,00 €"
+    const priceStr = coupon.price.toString().replace('€', '').replace(',', '.').trim()
+    const price = parseFloat(priceStr)
+    if (!isNaN(price)) {
+      console.log(`💰 Coupon gefunden für "${productName}": ${price}€ (Original: ${products.find(p => p.name === productName)?.price}€)`)
+      return price
+    }
+  }
+  
+  return null
+}
+
 function renderProducts() {
   const container = document.getElementById('products')
   
@@ -2925,11 +2995,20 @@ function renderProducts() {
             const hasOptions = Object.keys(product.options).length > 0 || product.extras.length > 0
             const buttonText = hasOptions ? 'Anpassen & Bestellen' : 'In den Warenkorb'
             
+            // ✅ FIX 4: Check for coupon price
+            const couponPrice = getCouponPrice(product.name)
+            const finalPrice = couponPrice !== null ? couponPrice : product.price
+            const hasCoupon = couponPrice !== null
+            
             return `
               <div class="product-card" onclick="openCustomize('${product.id}')">
                 <div class="product-header">
                   <div class="product-name">${product.name}</div>
-                  <div class="product-price">${formatPrice(product.price)}</div>
+                  <div class="product-price">
+                    ${hasCoupon ? `<span style="text-decoration: line-through; color: #999; font-size: 14px;">${formatPrice(product.price)}</span> ` : ''}
+                    <span style="${hasCoupon ? 'color: #E31E24; font-weight: 700;' : ''}">${formatPrice(finalPrice)}</span>
+                    ${hasCoupon ? '<span style="background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 6px; font-weight: 600;">🎟️ Deal</span>' : ''}
+                  </div>
                 </div>
                 <div class="product-desc">${product.description}</div>
                 <button class="add-btn" onclick="event.stopPropagation(); openCustomize('${product.id}')">
@@ -3087,7 +3166,10 @@ function toggleExtra(extraId) {
 }
 
 function updateCustomizePrice() {
-  let price = currentProduct.price
+  // ✅ FIX 4: Nutze Coupon-Preis falls vorhanden
+  const couponPrice = getCouponPrice(currentProduct.name)
+  let price = couponPrice !== null ? couponPrice : currentProduct.price
+  
   currentCustomization.extras.forEach(extraId => {
     const extra = currentProduct.extras.find(e => e.id === extraId)
     if (extra) price += extra.price
@@ -3096,7 +3178,10 @@ function updateCustomizePrice() {
 }
 
 function addToCart() {
-  let price = currentProduct.price
+  // ✅ FIX 4: Nutze Coupon-Preis falls vorhanden
+  const couponPrice = getCouponPrice(currentProduct.name)
+  let price = couponPrice !== null ? couponPrice : currentProduct.price
+  
   currentCustomization.extras.forEach(extraId => {
     const extra = currentProduct.extras.find(e => e.id === extraId)
     if (extra) price += extra.price
