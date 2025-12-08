@@ -1293,6 +1293,15 @@ input:focus, textarea:focus {
       </div>
     </div>
 
+    <!-- ====== 🌟 GLOBALE BONUSSE ====== -->
+    <div class="card" id="globalBonusSection" style="display: none;">
+      <h2>🌟 Exklusive Angebote</h2>
+      <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
+        Aktiviere einen Bonus und erhalte extra Punkte bei deiner nächsten Bestellung!
+      </p>
+      <div id="globalBonusList"></div>
+    </div>
+
     <!-- 📱 WhatsApp-Benachrichtigungen Section (NACH Prämien) -->
     <div id="whatsapp-section-bottom">
       <!-- Wird dynamisch geladen -->
@@ -1639,6 +1648,7 @@ async function loadCustomer(customer) {
     loadPendingCodes()
     loadActiveChallenges() // ✅ Lade Challenges beim Login
     loadActiveCoupons() // ✅ FIX 2: Lade Coupons beim Login
+    loadGlobalBonuses() // ✅ Lade Global Bonusse beim Login
     
   } catch (e) {
     console.error('❌ Fehler beim Laden des Kunden:', e)
@@ -1681,6 +1691,7 @@ async function refreshCustomerData() {
     loadPendingCodes() // ✅ Auto-Refresh für "Wartet auf Bestätigung"
     loadActiveChallenges() // ✅ Auto-Refresh für Challenges
     loadActiveCoupons() // ✅ FIX 2: Auto-Refresh für Coupons
+    loadGlobalBonuses() // ✅ Auto-Refresh für Global Bonusse
     safeSetItem('customerData', JSON.stringify(data))
     
   } catch (e) { 
@@ -2969,6 +2980,126 @@ async function loadActiveCoupons() {
   } catch (e) {
     console.error('❌ Fehler beim Laden von Coupons:', e)
     activeCoupons = []
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🌟 GLOBALE BONUSSE LADEN
+// ═══════════════════════════════════════════════════════════════
+async function loadGlobalBonuses() {
+  try {
+    const now = new Date()
+    const todayStr = now.toISOString().split('T')[0]
+    
+    // Lade aktive globale Bonusse
+    const { data: bonuses, error } = await supabase
+      .from('global_bonuses')
+      .select('*')
+      .eq('is_active', true)
+      .lte('start_date', todayStr)
+      .gte('end_date', todayStr)
+    
+    if (error) throw error
+    
+    if (!bonuses || bonuses.length === 0) {
+      document.getElementById('globalBonusSection').style.display = 'none'
+      console.log('ℹ️ Keine aktiven Global Bonusse')
+      return
+    }
+    
+    console.log('✅ Aktive Global Bonusse geladen:', bonuses.length)
+    
+    // Prüfe welche der Kunde bereits aktiviert hat
+    const { data: activated, error: activatedError } = await supabase
+      .from('activated_global_bonuses')
+      .select('*')
+      .eq('customer_id', currentCustomer.id)
+      .eq('is_used', false)
+    
+    if (activatedError) throw activatedError
+    
+    const activatedIds = activated ? activated.map(a => a.global_bonus_id) : []
+    
+    // Rendere Bonusse
+    const section = document.getElementById('globalBonusSection')
+    const list = document.getElementById('globalBonusList')
+    
+    list.innerHTML = bonuses.map(bonus => {
+      const isActivated = activatedIds.includes(bonus.id)
+      const bonusText = bonus.bonus_type === 'double_points' 
+        ? '🔥 Doppelte Punkte!' 
+        : `💰 +${bonus.bonus_amount} Bonus-Punkte`
+      
+      if (isActivated) {
+        return `
+          <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #f59e0b; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="background: #10b981; color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700;">✅ AKTIV</span>
+              <span style="font-size: 12px; color: #92400e;">Gültig bis ${new Date(bonus.end_date).toLocaleDateString('de-DE')}</span>
+            </div>
+            <div style="font-size: 20px; font-weight: 700; color: #E31E24; margin: 8px 0;">${bonusText}</div>
+            <p style="font-size: 13px; color: #92400e; margin: 8px 0;">Bei deiner nächsten Bestellung einlösbar!</p>
+          </div>
+        `
+      } else {
+        return `
+          <div style="background: linear-gradient(135deg, #fff, #f9fafb); border: 2px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 12px; color: #666;">Gültig bis ${new Date(bonus.end_date).toLocaleDateString('de-DE')}</span>
+            </div>
+            <div style="font-size: 20px; font-weight: 700; color: #E31E24; margin: 8px 0;">${bonusText}</div>
+            <p style="font-size: 13px; color: #666; margin: 8px 0 12px 0;">Aktiviere diesen Bonus für deine nächste Bestellung!</p>
+            <button onclick="activateGlobalBonus('${bonus.id}')" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">
+              ⭐ Jetzt aktivieren
+            </button>
+          </div>
+        `
+      }
+    }).join('')
+    
+    section.style.display = 'block'
+    
+  } catch (e) {
+    console.error('❌ Fehler beim Laden von Global Bonussen:', e)
+    document.getElementById('globalBonusSection').style.display = 'none'
+  }
+}
+
+async function activateGlobalBonus(bonusId) {
+  try {
+    // Prüfe ob Kunde bereits einen aktiven Bonus hat
+    const { data: existing, error: checkError } = await supabase
+      .from('activated_global_bonuses')
+      .select('*')
+      .eq('customer_id', currentCustomer.id)
+      .eq('is_used', false)
+    
+    if (checkError) throw checkError
+    
+    if (existing && existing.length > 0) {
+      alert('⚠️ Du hast bereits einen aktiven Bonus!\n\nBitte löse ihn erst bei deiner nächsten Bestellung ein, bevor du einen neuen aktivierst.')
+      return
+    }
+    
+    // Aktiviere Bonus
+    const { error: insertError } = await supabase
+      .from('activated_global_bonuses')
+      .insert({
+        customer_id: currentCustomer.id,
+        global_bonus_id: bonusId,
+        is_used: false
+      })
+    
+    if (insertError) throw insertError
+    
+    alert('✅ Bonus aktiviert!\n\nDer Bonus wird bei deiner nächsten Bestellung automatisch eingelöst.')
+    
+    // Neu laden
+    loadGlobalBonuses()
+    
+  } catch (e) {
+    console.error('❌ Fehler beim Aktivieren:', e)
+    alert('❌ Fehler: ' + e.message)
   }
 }
 
