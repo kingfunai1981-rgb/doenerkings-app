@@ -3321,7 +3321,7 @@ function renderProducts() {
                   </div>
                 </div>
                 <div class="product-desc">${product.description}</div>
-                <button class="add-btn" onclick="event.stopPropagation(); openCustomize('${product.id}')">
+                <button class="add-btn" onclick="openCustomizeFromButton(this, '${product.id}')">
                   ${buttonText}
                 </button>
               </div>
@@ -3350,8 +3350,29 @@ function toggleCategory(index) {
   }
 }
 
+function openCustomizeFromButton(button, productId) {
+  // Stop event from bubbling to parent card
+  if (window.event) {
+    window.event.cancelBubble = true
+    if (window.event.stopPropagation) {
+      window.event.stopPropagation()
+    }
+  }
+  
+  console.log('🟢 Button clicked for product:', productId)
+  openCustomize(productId)
+}
+
+function handleProductClick(event, productId) {
+  if (event && event.stopPropagation) {
+    event.stopPropagation()
+  }
+  openCustomize(productId)
+}
+
 function openCustomize(productId) {
   console.log('🔵 openCustomize called with productId:', productId)
+  console.log('🔍 Event object:', event)  // Debug: check if event exists
   
   try {
     // Prüfe ob products existiert
