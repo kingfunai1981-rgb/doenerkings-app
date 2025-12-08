@@ -309,11 +309,7 @@ canvas { display: none; }
       🔔 Neue Bestellungen werden automatisch angezeigt und mit Ton benachrichtigt
     </p>
     
-    <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
-      <button onclick="loadOrders()" class="secondary">🔄 Aktualisieren</button>
-      <button onclick="window.open('bestellungen-verlauf.html', '_blank')" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">📊 Bestellverlauf anzeigen</button>
-      <button onclick="window.open('admin-bereinigen.html', '_blank')" style="background: linear-gradient(135deg, #f59e0b, #f97316);">🧹 Admin: Alte Bestellungen bereinigen</button>
-    </div>
+    <button onclick="loadOrders()" class="secondary" style="margin-bottom: 16px;">🔄 Aktualisieren</button>
     
     <div id="ordersList">
       <div style="text-align: center; padding: 40px; color: #666;">
@@ -2223,88 +2219,6 @@ function initOrderSystem() {
 }
 
 setTimeout(initOrderSystem, 1000)
-
-
-// ═══════════════════════════════════════════════════════════════
-// 🧹 AUTO-CLEANUP: Bereinigt automatisch alte "hängengebliebene" Bestellungen
-// ═══════════════════════════════════════════════════════════════
-/**
- * Bereinigt automatisch Bestellungen die älter als X Stunden sind
- * und noch nicht abgeschlossen wurden
- */
-async function autoCleanupOldOrders() {
-  try {
-    // ⚙️ Konfiguration
-    const MAX_ORDER_AGE_HOURS = 24  // Bestellungen älter als 24 Stunden werden bereinigt
-    const DRY_RUN = false  // Auf true setzen für Test-Modus (keine echten Änderungen)
-    
-    console.log('🧹 Auto-Cleanup: Prüfe alte Bestellungen...')
-    
-    // Berechne Zeitstempel für Grenze
-    const cutoffTime = new Date()
-    cutoffTime.setHours(cutoffTime.getHours() - MAX_ORDER_AGE_HOURS)
-    
-    // Hole alte, noch offene Bestellungen
-    const { data: oldOrders, error } = await supabase
-      .from('orders')
-      .select('*')
-      .in('status', ['pending', 'preparing', 'ready'])
-      .lt('created_at', cutoffTime.toISOString())
-    
-    if (error) {
-      console.error('❌ Auto-Cleanup Fehler:', error)
-      return
-    }
-    
-    if (!oldOrders || oldOrders.length === 0) {
-      console.log('✅ Auto-Cleanup: Keine alten Bestellungen gefunden')
-      return
-    }
-    
-    console.log(`⚠️ Auto-Cleanup: ${oldOrders.length} alte Bestellung(en) gefunden:`)
-    oldOrders.forEach(order => {
-      const age = Math.floor((new Date() - new Date(order.created_at)) / (1000 * 60 * 60))
-      console.log(`  - #${order.order_number} (${age}h alt, Status: ${order.status})`)
-    })
-    
-    if (DRY_RUN) {
-      console.log('🔍 DRY-RUN Modus: Keine Änderungen vorgenommen')
-      return
-    }
-    
-    // Setze alle auf "completed"
-    const orderIds = oldOrders.map(o => o.id)
-    const { error: updateError } = await supabase
-      .from('orders')
-      .update({ 
-        status: 'completed',
-        completed_at: new Date().toISOString()
-      })
-      .in('id', orderIds)
-    
-    if (updateError) {
-      console.error('❌ Auto-Cleanup Update-Fehler:', updateError)
-      return
-    }
-    
-    console.log(`✅ Auto-Cleanup: ${oldOrders.length} Bestellung(en) automatisch abgeschlossen`)
-    
-    // Lade Bestellungen neu
-    loadOrders()
-    
-  } catch (e) {
-    console.error('❌ Auto-Cleanup Fehler:', e)
-  }
-}
-
-// 🚀 Auto-Cleanup starten
-// Erste Ausführung nach 5 Minuten (damit System Zeit zum Laden hat)
-setTimeout(() => {
-  autoCleanupOldOrders()
-  console.log('✅ Auto-Cleanup aktiviert (läuft alle 60 Minuten)')
-  // Danach alle 60 Minuten wiederholen
-  setInterval(autoCleanupOldOrders, 60 * 60 * 1000)
-}, 5 * 60 * 1000)
 
 
 console.log('✅ Döner Boxx Scanner PRO geladen!')
