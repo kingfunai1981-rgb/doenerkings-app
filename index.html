@@ -1254,6 +1254,15 @@ input:focus, textarea:focus {
       <!-- Wird dynamisch geladen -->
     </div>
 
+    <!-- ====== 🌟 GLOBALE BONUSSE ====== -->
+    <div class="card" id="globalBonusSection" style="display: none;">
+      <h2>🌟 Exklusive Angebote</h2>
+      <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
+        Aktiviere einen Bonus und erhalte extra Punkte bei deiner nächsten Bestellung!
+      </p>
+      <div id="globalBonusList"></div>
+    </div>
+
 <div class="card">
       <h2>🎁 Prämien einlösen</h2>
       <div class="reward">
@@ -1291,15 +1300,6 @@ input:focus, textarea:focus {
         </div>
         <button onclick="redeem('Döner Teller', 1250)" id="btn-1250">Einlösen</button>
       </div>
-    </div>
-
-    <!-- ====== 🌟 GLOBALE BONUSSE ====== -->
-    <div class="card" id="globalBonusSection" style="display: none;">
-      <h2>🌟 Exklusive Angebote</h2>
-      <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
-        Aktiviere einen Bonus und erhalte extra Punkte bei deiner nächsten Bestellung!
-      </p>
-      <div id="globalBonusList"></div>
     </div>
 
     <!-- 📱 WhatsApp-Benachrichtigungen Section (NACH Prämien) -->
@@ -3092,7 +3092,7 @@ async function activateGlobalBonus(bonusId) {
     
     if (insertError) throw insertError
     
-    alert('✅ Bonus aktiviert!\n\nDer Bonus wird bei deiner nächsten Bestellung automatisch eingelöst.')
+    console.log('✅ Bonus aktiviert!')
     
     // Neu laden
     loadGlobalBonuses()
