@@ -317,6 +317,31 @@ canvas { display: none; }
         <p>Keine offenen Bestellungen</p>
       </div>
     </div>
+    
+    <!-- ====== BESTELLVERLAUF SEKTION ====== -->
+    <div style="margin-top: 40px; padding-top: 30px; border-top: 3px solid #e5e7eb;">
+      <h2>📋 Bestellverlauf (Letzte 50)</h2>
+      <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
+        Abgeschlossene und stornierte Bestellungen
+      </p>
+      
+      <!-- Suchfeld -->
+      <input 
+        id="orderSearch" 
+        type="text" 
+        placeholder="🔍 Suche nach Bestellnummer, Name oder Telefon..." 
+        oninput="searchOrders()"
+        style="margin-bottom: 16px;">
+      
+      <button onclick="loadOrderHistory()" class="secondary" style="margin-bottom: 16px;">🔄 Verlauf laden</button>
+      
+      <div id="ordersHistory">
+        <div style="text-align: center; padding: 40px; color: #666;">
+          <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
+          <p>Klicke auf "Verlauf laden" um Bestellungen anzuzeigen</p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="tab-phone" class="card tab-content active">
@@ -516,7 +541,7 @@ function showLoginScreen() {
     <div style="font-family:'Flame',system-ui,sans-serif;background:linear-gradient(135deg,#E31E24,#F9A825);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
       <div style="background:white;border-radius:20px;padding:40px;max-width:400px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.2);text-align:center;">
         <div style="font-size:60px;margin-bottom:20px;">🔐</div>
-        <h1 style="color:#E31E24;margin-bottom:10px;font-size:24px;">📦 Eingehende Bestellungen</h1>
+        <h1 style="color:#E31E24;margin-bottom:10px;font-size:24px;">Döner Boxx Admin</h1>
         <p style="color:#666;margin-bottom:30px;">Bitte Passwort eingeben</p>
         <input type="password" id="loginPassword" placeholder="Passwort" style="width:100%;padding:14px;border:2px solid #e5e7eb;border-radius:10px;font-size:16px;margin-bottom:15px;text-align:center;" onkeypress="if(event.key==='Enter')checkLogin()">
         <button onclick="checkLogin()" style="width:100%;padding:14px;background:linear-gradient(135deg,#E31E24,#F9A825);color:white;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;">🔓 Einloggen</button>
@@ -723,50 +748,10 @@ const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
-// 🤖 Telegram Bot Konfiguration
-const TELEGRAM_BOT_TOKEN = '8216843337:AAGEHoVsQPW6f3zYw5jFhK61GPKIbgfnKZI'
-const TELEGRAM_CHAT_ID = '8253938141'
-
 // Request Throttling - verhindert zu viele parallele Supabase Requests
 let requestQueue = []
 let activeRequests = 0
 const MAX_CONCURRENT_REQUESTS = 3
-
-// 🤖 Telegram Benachrichtigungen
-async function sendTelegramUpdate(orderNumber, customerName, status, message) {
-  try {
-    const statusEmojis = {
-      'pending': '🆕',
-      'paid': '💰',
-      'preparing': '🍳',
-      'ready': '📦',
-      'completed': '✅'
-    }
-    
-    const emoji = statusEmojis[status] || '📋'
-    
-    const text = `${emoji} *BESTELLUNG #${orderNumber}*
-
-👤 ${customerName}
-📊 Status: ${message}
-
-⏰ ${new Date().toLocaleTimeString('de-DE')}`
-
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: text,
-        parse_mode: 'Markdown'
-      })
-    })
-    
-    console.log('✅ Telegram Update gesendet:', status)
-  } catch (error) {
-    console.error('❌ Telegram Fehler:', error)
-  }
-}
 
 async function throttledRequest(requestFn) {
   while (activeRequests >= MAX_CONCURRENT_REQUESTS) {
@@ -954,30 +939,9 @@ async function checkAndUpdateChallenges(customerId, amount) {
         continue
       }
       
-      let progress = (progressRows && progressRows.length > 0) ? progressRows[0] : null
+      const progress = (progressRows && progressRows.length > 0) ? progressRows[0] : null
       
-      // ✅ FIX: Erstelle Progress wenn nicht vorhanden!
-      if (!progress) {
-        console.log('🎯 Erstelle neuen Challenge-Progress für Kunde:', customerId)
-        const { data: newProgress, error: createError } = await supabase
-          .from('challenge_progress')
-          .insert({
-            customer_id: customerId,
-            challenge_id: challenge.id,
-            completed_orders: 0,
-            is_completed: false
-          })
-          .select()
-          .single()
-        
-        if (createError) {
-          console.error('❌ Fehler beim Erstellen:', createError)
-          continue
-        }
-        
-        progress = newProgress
-      }
-      
+      if (!progress) continue
       if (progress.is_completed) continue
       
       const newOrders = progress.completed_orders + 1
@@ -987,11 +951,9 @@ async function checkAndUpdateChallenges(customerId, amount) {
         if (customer) {
           await supabase.from('customers').update({ points: customer.points + challenge.bonus_points }).eq('id', customerId)
           await supabase.from('transactions').insert({ customer_id: customerId, type: 'earn', amount: 0, points: challenge.bonus_points, staff: 'CHALLENGE', notes: `Challenge: ${challenge.bonus_points}P` })
-          console.log(`🎉 Challenge abgeschlossen! +${challenge.bonus_points}P`)
         }
       } else {
         await supabase.from('challenge_progress').update({ completed_orders: newOrders }).eq('id', progress.id)
-        console.log(`🎯 Challenge-Fortschritt: ${newOrders}/${challenge.required_orders}`)
       }
     }
   } catch (e) { console.error('Challenge error:', e) }
@@ -1610,111 +1572,44 @@ function renderOrders(orders) {
     let actions = ''
     if (order.status === 'pending') {
       if (order.payment_method === 'cash') {
-        // Nur EIN Button - macht automatisch alles
-        actions = `<button onclick="markOrderPaid('${order.id}', '${order.customer_id}', ${order.total})" class="success">💰 Bar bezahlt ✅</button>`
+        actions = `<button onclick="markOrderPaid('${order.id}', '${order.customer_id}', ${order.total})" class="success">💰 Bar bezahlt</button><button onclick="markOrderPreparing('${order.id}')" class="secondary">👨‍🍳 In Vorbereitung</button>`
       } else {
-        // PayPal: Nur EIN Button - macht automatisch alles
-        actions = `<button onclick="markPayPalPaid('${order.id}', '${order.customer_id}', ${order.total})" class="success">💳 PayPal bezahlt ✅</button>`
+        actions = `<button onclick="markOrderPreparing('${order.id}')" class="success">👨‍🍳 In Vorbereitung</button><button onclick="cancelOrder('${order.id}')" class="danger">❌ Stornieren</button>`
       }
+    } else if (order.status === 'preparing') {
+      actions = `<button onclick="markOrderReady('${order.id}')" class="success">✅ Bereit zur Abholung</button><button onclick="cancelOrder('${order.id}')" class="danger">❌ Stornieren</button>`
+    } else if (order.status === 'ready') {
+      actions = `<button onclick="completeOrder('${order.id}', '${order.customer_id}', '${order.qr_id}', ${order.total}, '${order.payment_method}')" class="success">🎉 Abgeholt & Abschließen</button><button onclick="cancelOrder('${order.id}')" class="danger">❌ Stornieren</button>`
     }
-    // Alle anderen Status zeigen keine Buttons mehr - wird automatisch abgeschlossen!
     
     return `<div class="order-card ${statusClass}"><div class="order-header"><div><span class="order-number">#${order.order_number}</span><span class="order-badge ${statusClass}">${statusText}</span><span class="payment-badge ${paymentClass}">${paymentText}</span></div><div class="order-time">${timeAgo}</div></div><div class="order-customer"><p><strong>👤 ${order.customer_name}</strong></p><p>📱 ${order.customer_phone}</p><p>🎫 QR-ID: ${order.qr_id}</p>${pickupInfo}${order.notes ? `<p><strong>💬 Notiz:</strong> ${order.notes}</p>` : ''}</div><div class="order-items">${items}</div><div class="order-total"><span>Gesamt:</span><span style="color: #E31E24;">${formatPrice(order.total)}</span></div><div class="order-actions">${actions}</div></div>`
   }).join('')
 }
 
 async function markOrderPaid(orderId, customerId, total) {
+  if (!confirm('Bestellung als bar bezahlt markieren?')) return
   try {
-    console.log('💰 Bar bezahlt - Auto-Workflow startet...')
+    console.log('💰 Marking order as paid:', orderId)
     
-    // Hole die Bestellung
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('id', orderId)
-      .single()
-    
-    if (orderError || !order) {
-      throw new Error('Bestellung nicht gefunden')
+    // Update Status
+    const { error: updateError } = await supabase.from('orders').update({ status: 'preparing' }).eq('id', orderId)
+    if (updateError) {
+      console.error('Update error:', updateError)
+      throw new Error('Status konnte nicht aktualisiert werden: ' + updateError.message)
     }
     
-    // 1. Status: preparing
-    await supabase.from('orders').update({ status: 'preparing' }).eq('id', orderId)
-    
-    // 2. Punkte gutschreiben
-    if (order.customer_phone && total) {
-      await addPointsForPhone(order.customer_phone, total)
-    } else if (customerId && total) {
+    // Punkte gutschreiben - DIREKT mit customer_id
+    if (customerId && total) {
       await addPointsForCustomerId(customerId, total)
     }
     
-    // 3. Telegram: Bar bezahlt
-    await sendTelegramUpdate(order.order_number, order.customer_name, 'paid', '💰 Bar bezahlt')
-    
-    // 4. Status: ready
-    await supabase.from('orders').update({ status: 'ready' }).eq('id', orderId)
-    await sendTelegramUpdate(order.order_number, order.customer_name, 'ready', '📦 Bereit zur Abholung!')
-    
-    // 5. Status: completed
-    await supabase.from('orders').update({ 
-      status: 'completed', 
-      completed_at: new Date().toISOString() 
-    }).eq('id', orderId)
-    await sendTelegramUpdate(order.order_number, order.customer_name, 'completed', '✅ Abgeschlossen!')
-    
-    console.log('✅ Bestellung komplett abgewickelt!')
+    alert('✅ Bezahlung erfasst und Punkte gutgeschrieben!')
     loadOrders()
   } catch (e) {
     console.error('markOrderPaid Fehler:', e)
+    alert('❌ Fehler: ' + e.message)
   }
 }
-
-async function markPayPalPaid(orderId, customerId, total) {
-  try {
-    console.log('💳 PayPal bezahlt - Auto-Workflow startet...')
-    
-    // Hole die Bestellung
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('id', orderId)
-      .single()
-    
-    if (orderError || !order) {
-      throw new Error('Bestellung nicht gefunden')
-    }
-    
-    // 1. Status: preparing
-    await supabase.from('orders').update({ status: 'preparing' }).eq('id', orderId)
-    
-    // 2. Punkte gutschreiben
-    if (order.customer_phone && total) {
-      await addPointsForPhone(order.customer_phone, total)
-    } else if (customerId && total) {
-      await addPointsForCustomerId(customerId, total)
-    }
-    
-    // 3. Telegram: PayPal bezahlt
-    await sendTelegramUpdate(order.order_number, order.customer_name, 'paid', '💳 PayPal bezahlt')
-    
-    // 4. Status: ready
-    await supabase.from('orders').update({ status: 'ready' }).eq('id', orderId)
-    await sendTelegramUpdate(order.order_number, order.customer_name, 'ready', '📦 Bereit zur Abholung!')
-    
-    // 5. Status: completed
-    await supabase.from('orders').update({ 
-      status: 'completed', 
-      completed_at: new Date().toISOString() 
-    }).eq('id', orderId)
-    await sendTelegramUpdate(order.order_number, order.customer_name, 'completed', '✅ Abgeschlossen!')
-    
-    console.log('✅ Bestellung komplett abgewickelt!')
-    loadOrders()
-  } catch (e) {
-    console.error('markPayPalPaid Fehler:', e)
-  }
-}
-
 async function markOrderPreparing(orderId) {
   try {
     console.log('Marking order as preparing:', orderId)
@@ -1733,21 +1628,11 @@ async function markOrderPreparing(orderId) {
 async function markOrderReady(orderId) {
   try {
     console.log('Marking order as ready:', orderId)
-    
-    // Hole Bestellung für Telegram
-    const { data: order } = await supabase.from('orders').select('*').eq('id', orderId).single()
-    
     const { error } = await supabase.from('orders').update({ status: 'ready' }).eq('id', orderId)
     if (error) {
       console.error('Update error:', error)
       throw error
     }
-    
-    // 🤖 Telegram Benachrichtigung
-    if (order) {
-      await sendTelegramUpdate(order.order_number, order.customer_name, 'ready', '📦 Bereit zur Abholung!')
-    }
-    
     loadOrders()
   } catch (e) {
     console.error('markOrderReady Fehler:', e)
@@ -1771,8 +1656,7 @@ async function completeOrder(orderId, customerId, qrId, total, paymentMethod) {
     // Prüfe Wheel-Berechtigung
     const wheelAvailable = isWheelAvailable(total)
     if (wheelAvailable) {
-      // Automatisch freischalten ohne Modal
-      await triggerLuckyWheel(orderId, customerId, paymentMethod)
+      showLuckyWheelModal(orderId, customerId, qrId, total, paymentMethod)
     } else {
       await finalizeOrder(orderId, customerId, paymentMethod)
     }
@@ -1783,24 +1667,17 @@ async function completeOrder(orderId, customerId, qrId, total, paymentMethod) {
 }
 async function finalizeOrder(orderId, customerId, paymentMethod) {
   try {
-    // Hole Bestellung für Telegram
-    const { data: order } = await supabase.from('orders').select('*').eq('id', orderId).single()
-    
     const { error } = await supabase.from('orders').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', orderId)
     if (error) throw error
-    
-    // 🤖 Telegram Benachrichtigung
-    if (order) {
-      await sendTelegramUpdate(order.order_number, order.customer_name, 'completed', '✅ Abgeschlossen!')
-    }
-    
+    alert('✅ Bestellung abgeschlossen!')
     loadOrders()
   } catch (e) {
-    console.error('Fehler:', e)
+    alert('❌ Fehler: ' + e.message)
   }
 }
 
 async function cancelOrder(orderId) {
+  if (!confirm('Bestellung wirklich stornieren?')) return
   try {
     console.log('Cancelling order:', orderId)
     const { error } = await supabase.from('orders').update({ status: 'cancelled', cancelled_at: new Date().toISOString() }).eq('id', orderId)
@@ -1808,9 +1685,11 @@ async function cancelOrder(orderId) {
       console.error('Cancel error:', error)
       throw error
     }
+    alert('✅ Bestellung storniert')
     loadOrders()
   } catch (e) {
     console.error('cancelOrder Fehler:', e)
+    alert('❌ Fehler: ' + e.message)
   }
 }
 
@@ -1828,7 +1707,7 @@ async function addPointsForOrder(qrId, amount) {
     
     console.log('✅ Kunde gefunden:', customer.name)
     
-    const points = Math.floor(amount * 10) // 1€ = 10 Punkte
+    const points = Math.floor(amount * 100)
     
     // Update Punkte
     const { error: updateError } = await supabase
@@ -1894,7 +1773,7 @@ async function addPointsForCustomerId(customerId, amount) {
     const customer = customers[0]
     console.log('✅ Kunde gefunden:', customer.name)
     
-    const points = Math.floor(amount * 10) // 1€ = 10 Punkte
+    const points = Math.floor(amount * 100)
     
     // Update Punkte
     const { error: updateError } = await supabase
@@ -1922,73 +1801,6 @@ async function addPointsForCustomerId(customerId, amount) {
     // Challenges prüfen
     await checkAndUpdateChallenges(customer.id, amount)
     
-    // 🎡 Lucky Wheel prüfen (bei Online-Bestellung)
-    await checkAndUnlockWheel(customer.id, amount)
-    
-    console.log(`✅ ${points} Punkte gutgeschrieben für ${customer.name}`)
-  } catch (e) {
-    console.error('❌ Fehler beim Gutschreiben der Punkte:', e)
-  }
-}
-
-async function addPointsForPhone(phone, amount) {
-  try {
-    console.log('💰 Gutschreibe Punkte für Telefon:', phone, 'Betrag:', amount)
-    
-    // Normalisiere Telefonnummer
-    let normalized = phone.replace(/[\s\-\(\)]/g, '')
-    if (normalized.startsWith('+')) normalized = normalized.substring(1)
-    if (normalized.startsWith('00')) normalized = normalized.substring(2)
-    if (normalized.startsWith('49') && normalized.length > 10) normalized = '0' + normalized.substring(2)
-    if (!normalized.startsWith('0') && normalized.length >= 10) normalized = '0' + normalized
-    
-    // Hole Customer über Telefon
-    const { data: customers, error: lookupError } = await supabase
-      .from('customers')
-      .select('*')
-      .eq('phone', normalized)
-      .limit(1)
-    
-    if (lookupError || !customers || customers.length === 0) {
-      console.error('❌ Kunde mit Telefon nicht gefunden:', phone, normalized)
-      alert('⚠️ Kunde nicht in System gefunden!\nTelefon: ' + phone + '\nKunde muss sich zuerst registrieren.')
-      return
-    }
-    
-    const customer = customers[0]
-    console.log('✅ Kunde gefunden:', customer.name)
-    
-    const points = Math.floor(amount * 10) // 1€ = 10 Punkte
-    
-    // Update Punkte
-    const { error: updateError } = await supabase
-      .from('customers')
-      .update({ points: customer.points + points })
-      .eq('id', customer.id)
-    
-    if (updateError) {
-      console.error('❌ Fehler beim Update:', updateError)
-      return
-    }
-    
-    // Transaktion speichern
-    await supabase
-      .from('transactions')
-      .insert({
-        customer_id: customer.id,
-        type: 'earn',
-        amount: amount,
-        points: points,
-        staff: 'PAYPAL-ORDER',
-        notes: `PayPal-Bestellung: ${points}P`
-      })
-    
-    // Challenges prüfen
-    await checkAndUpdateChallenges(customer.id, amount)
-    
-    // 🎡 Lucky Wheel prüfen (bei Online-Bestellung)
-    await checkAndUnlockWheel(customer.id, amount)
-    
     console.log(`✅ ${points} Punkte gutgeschrieben für ${customer.name}`)
   } catch (e) {
     console.error('❌ Fehler beim Gutschreiben der Punkte:', e)
@@ -2005,19 +1817,23 @@ async function triggerLuckyWheel(orderId, customerId, paymentMethod) {
       .from('wheel_unlocks')
       .insert({
         customer_id: customerId,
+        order_id: orderId,
         is_used: false,
         expires_at: expiresAt.toISOString()
       })
     
     if (unlockError) {
       console.error('Wheel unlock error:', unlockError)
+      alert('⚠️ Warnung: Glücksrad konnte nicht freigeschaltet werden, aber Bestellung wird abgeschlossen.')
     } else {
-      console.log('✅ Glücksrad automatisch freigeschaltet!')
+      alert('✅ Glücksrad wurde freigeschaltet! Der Kunde kann jetzt in der App drehen.')
     }
     
     await finalizeOrder(orderId, customerId, paymentMethod)
+    closeLuckyWheelModal()
   } catch (e) {
     console.error('Fehler:', e)
+    alert('❌ Fehler: ' + e.message)
   }
 }
 
@@ -2046,8 +1862,319 @@ function handleNewOrder(order) {
   playNotificationSound()
   showBrowserNotification(`🆕 Neue Bestellung #${order.order_number}`, `${order.customer_name} - ${formatPrice(order.total)} - ${order.payment_method === 'paypal' ? 'PayPal' : 'Bar'}`)
   loadOrders()
-  // ⚠️ KEINE automatische Punkte-Gutschrift bei PayPal!
-  // Punkte werden erst gutgeschrieben wenn Mitarbeiter PayPal-Zahlung bestätigt
+  if (order.payment_method === 'paypal' && order.customer_id) {
+    console.log('💳 PayPal Bestellung - Punkte werden automatisch gutgeschrieben')
+    setTimeout(() => addPointsForCustomerId(order.customer_id, order.total), 1000)
+  }
+}
+
+// ============================================
+// 📋 BESTELLVERLAUF & VERWALTUNG
+// ============================================
+
+let allOrderHistory = [] // Speichert alle geladenen Bestellungen für Suche
+
+async function loadOrderHistory() {
+  try {
+    // Zeige Lade-Indikator
+    const container = document.getElementById('ordersHistory')
+    if (container) {
+      container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;"><div style="font-size: 48px; margin-bottom: 16px;">⏳</div><p>Lade Bestellverlauf...</p></div>'
+    }
+    
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .in('status', ['completed', 'cancelled'])
+      .order('created_at', { ascending: false })
+      .limit(50)
+    
+    if (error) throw error
+    
+    allOrderHistory = data || []
+    renderOrderHistory(allOrderHistory)
+    
+    if (allOrderHistory.length === 0) {
+      document.getElementById('ordersHistory').innerHTML = '<div style="text-align: center; padding: 40px; color: #666;"><div style="font-size: 48px; margin-bottom: 16px;">📋</div><p>Keine abgeschlossenen Bestellungen</p></div>'
+    }
+  } catch (e) {
+    console.error('Load order history error:', e)
+    document.getElementById('ordersHistory').innerHTML = `<div class="result error">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+function searchOrders() {
+  const query = document.getElementById('orderSearch').value.toLowerCase().trim()
+  
+  if (!query) {
+    renderOrderHistory(allOrderHistory)
+    return
+  }
+  
+  const filtered = allOrderHistory.filter(order => {
+    return (
+      order.order_number.toLowerCase().includes(query) ||
+      order.customer_name.toLowerCase().includes(query) ||
+      order.customer_phone.includes(query) ||
+      order.qr_id.includes(query)
+    )
+  })
+  
+  renderOrderHistory(filtered)
+}
+
+function renderOrderHistory(orders) {
+  const container = document.getElementById('ordersHistory')
+  if (!container) return
+  
+  if (!orders || orders.length === 0) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;"><div style="font-size: 48px; margin-bottom: 16px;">🔍</div><p>Keine Bestellungen gefunden</p></div>'
+    return
+  }
+  
+  container.innerHTML = orders.map(order => {
+    const createdAt = new Date(order.created_at)
+    const completedAt = order.completed_at ? new Date(order.completed_at) : null
+    const cancelledAt = order.cancelled_at ? new Date(order.cancelled_at) : null
+    
+    const dateStr = createdAt.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    const timeStr = createdAt.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    
+    let statusText = 'Abgeschlossen', statusClass = 'ready', statusIcon = '✅'
+    let statusDate = completedAt ? completedAt.toLocaleString('de-DE') : '-'
+    
+    if (order.status === 'cancelled') {
+      statusText = 'Storniert'
+      statusClass = 'pending'
+      statusIcon = '❌'
+      statusDate = cancelledAt ? cancelledAt.toLocaleString('de-DE') : '-'
+    }
+    
+    const paymentText = order.payment_method === 'paypal' ? 'PayPal' : 'Bar'
+    const paymentClass = order.payment_method === 'paypal' ? 'paypal' : 'cash'
+    
+    const items = order.items.map(item => {
+      let optionsText = ''
+      if (item.options) {
+        const optionsList = Object.keys(item.options).filter(key => {
+          const value = item.options[key]
+          const defaultValue = item.product.options[key]?.default
+          return value !== defaultValue
+        }).map(key => {
+          const value = item.options[key]
+          const label = item.product.options[key]?.label || key
+          if (typeof value === 'string') return `${label}: ${value}`
+          return `${label}: ${value === 0 ? 'Ohne' : value === 1 ? '1x' : '2x'}`
+        })
+        const extrasList = item.extras?.map(extraId => {
+          const extra = item.product.extras?.find(e => e.id === extraId)
+          return extra ? `+ ${extra.name}` : ''
+        }).filter(Boolean) || []
+        const allOptions = [...optionsList, ...extrasList].filter(Boolean)
+        if (allOptions.length > 0) optionsText = `<div class="order-item-options">${allOptions.join(', ')}</div>`
+      }
+      return `<div class="order-item"><div class="order-item-name">${item.product.name} - ${formatPrice(item.price)}</div>${optionsText}</div>`
+    }).join('')
+    
+    const pickupInfo = order.pickup_type === 'later' && order.pickup_time ? 
+      `<p><strong>Abholzeit:</strong> ${order.pickup_time} Uhr</p>` : 
+      '<p><strong>Abholzeit:</strong> Sofort</p>'
+    
+    return `
+      <div class="order-card ${statusClass}" style="margin-bottom: 16px;">
+        <div class="order-header">
+          <div>
+            <span class="order-number">#${order.order_number}</span>
+            <span class="order-badge ${statusClass}">${statusIcon} ${statusText}</span>
+            <span class="payment-badge ${paymentClass}">${paymentText}</span>
+          </div>
+          <div class="order-time">${dateStr} ${timeStr}</div>
+        </div>
+        
+        <div class="order-customer">
+          <p><strong>👤 ${order.customer_name}</strong></p>
+          <p>📱 ${order.customer_phone}</p>
+          <p>🎫 QR-ID: ${order.qr_id}</p>
+          ${pickupInfo}
+          ${order.notes ? `<p><strong>💬 Notiz:</strong> ${order.notes}</p>` : ''}
+          <p style="font-size: 12px; color: #666; margin-top: 8px;">
+            <strong>${statusIcon} ${statusText}:</strong> ${statusDate}
+          </p>
+        </div>
+        
+        <div class="order-items">${items}</div>
+        
+        <div class="order-total">
+          <span>Gesamt:</span>
+          <span style="color: #E31E24;">${formatPrice(order.total)}</span>
+        </div>
+        
+        <div class="order-actions">
+          <button onclick="editOrder('${order.id}')" class="small secondary">✏️ Bearbeiten</button>
+          <button onclick="deleteOrder('${order.id}', '${order.customer_id}', ${order.total})" class="small danger">🗑️ Löschen</button>
+        </div>
+      </div>
+    `
+  }).join('')
+}
+
+async function editOrder(orderId) {
+  try {
+    // Hole Bestellung
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .single()
+    
+    if (error) throw error
+    if (!order) throw new Error('Bestellung nicht gefunden')
+    
+    // Zeige Edit-Dialog
+    const newTotal = prompt(
+      `Bestellung #${order.order_number} bearbeiten\n\n` +
+      `Kunde: ${order.customer_name}\n` +
+      `Aktueller Betrag: ${order.total.toFixed(2)}€\n\n` +
+      `Neuer Betrag in € eingeben:`,
+      order.total.toFixed(2)
+    )
+    
+    if (!newTotal || isNaN(newTotal)) return
+    
+    const newAmount = parseFloat(newTotal)
+    if (newAmount === order.total) {
+      alert('ℹ️ Betrag unverändert')
+      return
+    }
+    
+    if (!confirm(`Betrag ändern von ${order.total.toFixed(2)}€ auf ${newAmount.toFixed(2)}€?\n\nPunkte werden automatisch angepasst!`)) return
+    
+    // Berechne Punkt-Differenz
+    const oldPoints = Math.floor(order.total * 10)
+    const newPoints = Math.floor(newAmount * 10)
+    const pointsDiff = newPoints - oldPoints
+    
+    console.log(`Punkt-Anpassung: ${oldPoints}P → ${newPoints}P (Diff: ${pointsDiff}P)`)
+    
+    // Update Bestellung
+    await supabase
+      .from('orders')
+      .update({ 
+        total: newAmount,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', orderId)
+    
+    // Update Punkte beim Kunden
+    if (order.customer_id && pointsDiff !== 0) {
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('points')
+        .eq('id', order.customer_id)
+        .single()
+      
+      if (customer) {
+        const newCustomerPoints = customer.points + pointsDiff
+        
+        await supabase
+          .from('customers')
+          .update({ points: newCustomerPoints })
+          .eq('id', order.customer_id)
+        
+        // Transaktion für Korrektur
+        await supabase
+          .from('transactions')
+          .insert({
+            customer_id: order.customer_id,
+            type: pointsDiff > 0 ? 'earn' : 'correction',
+            amount: 0,
+            points: pointsDiff,
+            staff: 'SCANNER',
+            notes: `Bestellung #${order.order_number} korrigiert: ${order.total.toFixed(2)}€ → ${newAmount.toFixed(2)}€`
+          })
+        
+        console.log(`✅ Punkte aktualisiert: ${customer.points}P → ${newCustomerPoints}P`)
+      }
+    }
+    
+    alert(`✅ Bestellung aktualisiert!\n\nNeuer Betrag: ${newAmount.toFixed(2)}€\nPunkte-Änderung: ${pointsDiff > 0 ? '+' : ''}${pointsDiff}P`)
+    loadOrderHistory()
+    
+  } catch (e) {
+    console.error('Edit order error:', e)
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+async function deleteOrder(orderId, customerId, orderTotal) {
+  try {
+    // Hole Bestellung
+    const { data: order, error: fetchError } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .single()
+    
+    if (fetchError) throw fetchError
+    if (!order) throw new Error('Bestellung nicht gefunden')
+    
+    const pointsToRemove = Math.floor(orderTotal * 10)
+    
+    if (!confirm(
+      `⚠️ WARNUNG: Bestellung wirklich löschen?\n\n` +
+      `Bestellung: #${order.order_number}\n` +
+      `Kunde: ${order.customer_name}\n` +
+      `Betrag: ${orderTotal.toFixed(2)}€\n\n` +
+      `➡️ ${pointsToRemove} Punkte werden ENTFERNT!`
+    )) return
+    
+    // Entferne Punkte beim Kunden
+    if (customerId) {
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('points')
+        .eq('id', customerId)
+        .single()
+      
+      if (customer) {
+        const newPoints = Math.max(0, customer.points - pointsToRemove)
+        
+        await supabase
+          .from('customers')
+          .update({ points: newPoints })
+          .eq('id', customerId)
+        
+        // Transaktion für Stornierung
+        await supabase
+          .from('transactions')
+          .insert({
+            customer_id: customerId,
+            type: 'correction',
+            amount: 0,
+            points: -pointsToRemove,
+            staff: 'SCANNER',
+            notes: `Bestellung #${order.order_number} gelöscht: -${pointsToRemove}P`
+          })
+        
+        console.log(`✅ Punkte entfernt: ${customer.points}P → ${newPoints}P`)
+      }
+    }
+    
+    // Lösche Bestellung
+    const { error: deleteError } = await supabase
+      .from('orders')
+      .delete()
+      .eq('id', orderId)
+    
+    if (deleteError) throw deleteError
+    
+    alert(`✅ Bestellung gelöscht!\n\n${pointsToRemove} Punkte wurden entfernt.`)
+    loadOrderHistory()
+    
+  } catch (e) {
+    console.error('Delete order error:', e)
+    alert('❌ Fehler: ' + e.message)
+  }
 }
 
 function initOrderSystem() {
@@ -2057,16 +2184,7 @@ function initOrderSystem() {
   loadWheelConfig()
   setupRealtimeSubscription()
   loadOrders()
-  
-  // 🔄 Auto-Refresh: Lade Bestellungen alle 15 Sekunden
-  // (Zusätzlich zu Realtime, falls Realtime ausfällt)
-  setInterval(() => {
-    console.log('🔄 Auto-Refresh: Lade Bestellungen...')
-    loadOrders()
-  }, 15000)
-  
   console.log('✅ Bestellungs-System bereit!')
-  console.log('🔄 Auto-Refresh aktiv: Alle 15 Sekunden')
 }
 
 setTimeout(initOrderSystem, 1000)
