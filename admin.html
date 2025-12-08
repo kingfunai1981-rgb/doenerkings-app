@@ -437,16 +437,8 @@ textarea { resize: vertical; min-height: 60px; }
     <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
       <h3 style="color: #92400e; margin-bottom: 12px;">Neuen Coupon erstellen</h3>
       <div class="form-grid">
-        <div>
-          <label class="form-label">🍴 Produkt aus Menü wählen</label>
-          <select id="couponProduct" onchange="onProductSelect()" style="font-size: 14px;">
-            <option value="">-- Bitte Produkt wählen --</option>
-          </select>
-        </div>
-        <div>
-          <label class="form-label">💰 Coupon-Preis (automatisch gefüllt, kann geändert werden)</label>
-          <input type="text" id="couponPrice" placeholder="z.B. 5,50 €">
-        </div>
+        <div><label class="form-label">🍴 Produktname</label><input type="text" id="couponProduct" placeholder="z.B. Lahmacun Spezial"></div>
+        <div><label class="form-label">💰 Preis</label><input type="text" id="couponPrice" placeholder="z.B. 7,50 €"></div>
       </div>
       <div class="form-grid">
         <div><label class="form-label">📅 Start-Datum</label><input type="date" id="couponStart"></div>
@@ -511,7 +503,7 @@ textarea { resize: vertical; min-height: 60px; }
         <input type="text" id="customerSearch" placeholder="🔍 Suche nach Name oder Handynummer..." style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" oninput="filterCustomers()">
         <div style="margin-top: 8px; font-size: 14px; color: #666;"><span id="searchResultCount"></span></div>
       </div>
-      <div class="warning" id="warningBox" style="display: none;">⚠️ <strong>Hinweis:</strong> Beim Löschen eines Kunden werden auch alle zugehörigen Transaktionen und Codes gelöscht!</div>
+      <div class="warning" id="warningBox" style="display: none;">⚠️ <strong>Hinweis:</strong> Beim Löschen eines Kunden werden auch alle zugehörigen Daten gelöscht (Bestellungen, Transaktionen, Codes, Challenges, Glücksrad, Coupons, Boni)!</div>
       <div id="customerListContainer"><div class="loading"><p>⏳ Lade Kundendaten...</p></div></div>
     </div>
   </div>
@@ -833,49 +825,6 @@ const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
-// ═══════════════════════════════════════════════════════════════
-// 📦 MENÜ-PRODUKTE (19 Stück) - FÜR COUPON-DROPDOWN
-// ═══════════════════════════════════════════════════════════════
-const MENU_PRODUCTS = [
-  { name: 'Döner', price: 6.00 },
-  { name: 'Döner XL', price: 8.00 },
-  { name: 'Döner Box', price: 7.00 },
-  { name: 'Dürüm Döner', price: 7.00 },
-  { name: 'Döner Teller', price: 10.00 },
-  { name: 'Lahmacun', price: 4.00 },
-  { name: 'Lahmacun Spezial', price: 8.00 },
-  { name: 'Rindswurst im Brötchen', price: 3.50 },
-  { name: 'Curry Rindswurst mit Pommes', price: 6.90 },
-  { name: 'Köfte im Brot (5 Stk.)', price: 6.00 },
-  { name: 'Köfte Teller (7 Stk.)', price: 11.00 },
-  { name: 'Chicken Nuggets (6 Stk.)', price: 6.00 },
-  { name: 'Crispy Chicken Burger', price: 4.00 },
-  { name: 'Pommes', price: 3.50 },
-  { name: 'Ayran (0,25 l)', price: 1.50 },
-  { name: 'Wasser still (0,5 l)', price: 1.50 },
-  { name: 'Cola (0,33 l)', price: 2.00 },
-  { name: 'Fanta (0,33 l)', price: 2.00 },
-  { name: 'Cola Zero (0,33 l)', price: 2.00 }
-]
-
-// ✅ Funktion: Preis automatisch füllen wenn Produkt ausgewählt wird
-function onProductSelect() {
-  const select = document.getElementById('couponProduct')
-  const priceInput = document.getElementById('couponPrice')
-  
-  const selectedProduct = MENU_PRODUCTS.find(p => p.name === select.value)
-  
-  if (selectedProduct) {
-    // Setze Original-Preis (kann dann manuell geändert werden)
-    priceInput.value = selectedProduct.price.toFixed(2) + ' €'
-    priceInput.placeholder = 'Original: ' + selectedProduct.price.toFixed(2) + ' €'
-  } else {
-    priceInput.value = ''
-    priceInput.placeholder = 'z.B. 5,50 €'
-  }
-}
-
-
 function showResult(elementId, message, type) {
   const el = document.getElementById(elementId)
   if (!message) { el.className = ''; el.innerHTML = ''; return }
@@ -941,11 +890,135 @@ function filterCustomers() {
 }
 
 async function deleteSingleCustomer(customerId, customerName) {
-  const confirmed = confirm(`⚠️ KUNDE "${customerName.toUpperCase()}" LÖSCHEN?\n\nDiese Aktion löscht:\n✖️ Den Kunden\n✖️ Alle Transaktionen\n✖️ Alle Codes\n\nWirklich fortfahren?`)
+  // ✅ ERWEITERT: Zeige was alles gelöscht wird
+  const confirmed = confirm(
+    `⚠️ KUNDE "${customerName.toUpperCase()}" LÖSCHEN?\n\n` +
+    `Diese Aktion löscht:\n` +
+    `✖️ Den Kunden\n` +
+    `✖️ Alle Bestellungen (orders)\n` +
+    `✖️ Alle Transaktionen (transactions)\n` +
+    `✖️ Alle Codes (redeem_codes)\n` +
+    `✖️ Challenge-Fortschritt (challenge_progress)\n` +
+    `✖️ Glücksrad-Freischaltungen (wheel_unlocks)\n` +
+    `✖️ Aktivierte Coupons (activated_coupons)\n` +
+    `✖️ Aktivierte Boni (activated_global_bonuses)\n\n` +
+    `⚠️ DIES KANN NICHT RÜCKGÄNGIG GEMACHT WERDEN!\n\n` +
+    `Wirklich fortfahren?`
+  )
+  
   if (!confirmed) return
+  
   const doubleCheck = prompt(`Tippe "${customerName}" ein, um zu bestätigen:`)
-  if (doubleCheck !== customerName) { alert('❌ Abgebrochen - falsche Eingabe'); return }
-  try { await supabase.from('redeem_codes').delete().eq('customer_id', customerId); await supabase.from('transactions').delete().eq('customer_id', customerId); await supabase.from('customers').delete().eq('id', customerId); alert(`✅ Kunde "${customerName}" wurde erfolgreich gelöscht!`); loadAllCustomers() } catch (e) { alert('❌ Fehler beim Löschen: ' + e.message) }
+  if (doubleCheck !== customerName) { 
+    alert('❌ Abgebrochen - falsche Eingabe')
+    return 
+  }
+  
+  try {
+    console.log(`🗑️ Lösche Kunde: ${customerName} (${customerId})`)
+    
+    // Hole customer details um qr_id zu bekommen
+    const { data: customerData, error: fetchError } = await supabase
+      .from('customers')
+      .select('qr_id')
+      .eq('id', customerId)
+      .single()
+    
+    if (fetchError) {
+      console.error('❌ Fehler beim Laden der Kundendaten:', fetchError)
+    }
+    
+    const customerQrId = customerData?.qr_id
+    
+    // ✅ 1. BESTELLUNGEN löschen (NEU! - mit qr_id statt customer_id)
+    if (customerQrId) {
+      const { error: ordersError } = await supabase
+        .from('orders')
+        .delete()
+        .eq('qr_id', customerQrId)
+      if (ordersError) console.error('❌ Fehler beim Löschen der Bestellungen:', ordersError)
+      else console.log('✅ Bestellungen gelöscht')
+    } else {
+      console.log('⚠️ Keine QR-ID gefunden - überspringe Bestellungen')
+    }
+    
+    // ✅ 2. TRANSAKTIONEN löschen
+    const { error: txError } = await supabase
+      .from('transactions')
+      .delete()
+      .eq('customer_id', customerId)
+    if (txError) console.error('❌ Fehler beim Löschen der Transaktionen:', txError)
+    else console.log('✅ Transaktionen gelöscht')
+    
+    // ✅ 3. REDEEM CODES löschen
+    const { error: codesError } = await supabase
+      .from('redeem_codes')
+      .delete()
+      .eq('customer_id', customerId)
+    if (codesError) console.error('❌ Fehler beim Löschen der Codes:', codesError)
+    else console.log('✅ Codes gelöscht')
+    
+    // ✅ 4. CHALLENGE PROGRESS löschen (NEU!)
+    const { error: challengeError } = await supabase
+      .from('challenge_progress')
+      .delete()
+      .eq('customer_id', customerId)
+    if (challengeError) console.error('❌ Fehler beim Löschen des Challenge-Fortschritts:', challengeError)
+    else console.log('✅ Challenge-Fortschritt gelöscht')
+    
+    // ✅ 5. WHEEL UNLOCKS löschen (NEU!)
+    const { error: wheelError } = await supabase
+      .from('wheel_unlocks')
+      .delete()
+      .eq('customer_id', customerId)
+    if (wheelError) console.error('❌ Fehler beim Löschen der Wheel-Unlocks:', wheelError)
+    else console.log('✅ Wheel-Unlocks gelöscht')
+    
+    // ✅ 6. ACTIVATED COUPONS löschen (NEU!)
+    const { error: couponsError } = await supabase
+      .from('activated_coupons')
+      .delete()
+      .eq('customer_id', customerId)
+    if (couponsError) console.error('❌ Fehler beim Löschen der aktivierten Coupons:', couponsError)
+    else console.log('✅ Aktivierte Coupons gelöscht')
+    
+    // ✅ 7. ACTIVATED GLOBAL BONUSES löschen (NEU!)
+    const { error: bonusError } = await supabase
+      .from('activated_global_bonuses')
+      .delete()
+      .eq('customer_id', customerId)
+    if (bonusError) console.error('❌ Fehler beim Löschen der aktivierten Boni:', bonusError)
+    else console.log('✅ Aktivierte Boni gelöscht')
+    
+    // ✅ 8. KUNDE SELBST löschen
+    const { error: customerError } = await supabase
+      .from('customers')
+      .delete()
+      .eq('id', customerId)
+    
+    if (customerError) throw customerError
+    
+    console.log('✅ Kunde gelöscht')
+    
+    alert(
+      `✅ ERFOLGREICH GELÖSCHT!\n\n` +
+      `Kunde: "${customerName}"\n\n` +
+      `Alle zugehörigen Daten wurden entfernt:\n` +
+      `✅ Bestellungen\n` +
+      `✅ Transaktionen\n` +
+      `✅ Codes\n` +
+      `✅ Challenge-Fortschritt\n` +
+      `✅ Glücksrad-Freischaltungen\n` +
+      `✅ Aktivierte Coupons\n` +
+      `✅ Aktivierte Boni`
+    )
+    
+    loadAllCustomers()
+    
+  } catch (e) { 
+    alert('❌ Fehler beim Löschen: ' + e.message)
+    console.error('Delete customer error:', e)
+  }
 }
 
 function toggleBonusAmount() { const type = document.getElementById('globalBonusType').value; document.getElementById('globalBonusAmountField').style.display = type === 'double_points' ? 'none' : 'block' }
@@ -1163,18 +1236,6 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('globalBonusStart').value = todayStr; document.getElementById('globalBonusEnd').value = todayStr
   document.getElementById('challengeStart').value = todayStr; document.getElementById('challengeEnd').value = challenge20DaysStr
   document.getElementById('couponStart').value = todayStr; document.getElementById('couponEnd').value = todayStr
-
-  // ✅ DROPDOWN FÜLLEN: 19 Produkte ins Coupon-Dropdown laden
-  const productSelect = document.getElementById('couponProduct')
-  if (productSelect) {
-    MENU_PRODUCTS.forEach(product => {
-      const option = document.createElement('option')
-      option.value = product.name
-      option.textContent = `${product.name} (${product.price.toFixed(2)}€)`
-      productSelect.appendChild(option)
-    })
-    console.log('✅ Produkt-Dropdown gefüllt mit', MENU_PRODUCTS.length, 'Produkten')
-  }
 
 // 📊 Stats initialisieren
 setTimeout(() => {
