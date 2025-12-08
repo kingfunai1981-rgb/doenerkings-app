@@ -2492,31 +2492,85 @@ async function cancelCode(code) {
 }
 
 function logout() {
-  if (refreshInterval) clearInterval(refreshInterval)
+  console.log('🚪 Logout - Resette alles...')
+  
+  // 1. Intervalle stoppen
+  if (refreshInterval) {
+    clearInterval(refreshInterval)
+    refreshInterval = null
+  }
   refreshErrorCount = 0
+  
+  // 2. Kundendaten löschen
   currentCustomer = null
   safeRemoveItem('customerData')
   
-  // Schließe alle offenen Modals
-  document.getElementById('order-section').style.display = 'none'
-  document.getElementById('customizeModal')?.classList.remove('active')
-  document.getElementById('cartModal')?.classList.remove('active')
-  document.getElementById('checkoutModal')?.classList.remove('active')
-  document.getElementById('successModal')?.classList.remove('active')
+  // 3. ALLE Modals schließen
+  const modals = [
+    'order-section',
+    'customizeModal',
+    'cartModal',
+    'checkoutModal',
+    'successModal',
+    'qr-modal'
+  ]
+  modals.forEach(modalId => {
+    const modal = document.getElementById(modalId)
+    if (modal) {
+      modal.style.display = 'none'
+      modal.classList.remove('active')
+    }
+  })
   
-  // Leere Warenkorb
+  // 4. Warenkorb leeren
   cart = []
   updateCart()
   
-  // Resette Input-Felder
-  document.getElementById('reg-name').value = ''
-  document.getElementById('reg-phone').value = ''
-  document.getElementById('login-phone').value = ''
+  // 5. Resette Input-Felder
+  const inputs = [
+    'reg-name',
+    'reg-phone',
+    'login-phone',
+    'checkout-name',
+    'checkout-phone',
+    'checkout-notes'
+  ]
+  inputs.forEach(inputId => {
+    const input = document.getElementById(inputId)
+    if (input) input.value = ''
+  })
   
-  // Scrolle nach oben
+  // 6. Resette Result-Divs
+  const results = [
+    'reg-result',
+    'login-result'
+  ]
+  results.forEach(resultId => {
+    const result = document.getElementById(resultId)
+    if (result) {
+      result.className = ''
+      result.innerHTML = ''
+    }
+  })
+  
+  // 7. Kategorien-Status zurücksetzen
+  openCategories = []
+  
+  // 8. Scrolle nach oben
   window.scrollTo(0, 0)
   
-  showScreen('start')
+  // 9. Zur Start-Seite - WICHTIG: Erst alle Screens verstecken!
+  document.querySelectorAll('.screen').forEach(screen => {
+    screen.classList.remove('active')
+  })
+  
+  // 10. Dann Start-Screen anzeigen
+  const startScreen = document.getElementById('screen-start')
+  if (startScreen) {
+    startScreen.classList.add('active')
+  }
+  
+  console.log('✅ Logout komplett - Start-Screen aktiv')
 }
 
 window.onload = () => {
