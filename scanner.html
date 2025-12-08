@@ -1098,6 +1098,8 @@ async function addPointsByPhone() {
           else if (bonus.bonus_type === 'bonus_points') { bonusPointsAdded = bonus.bonus_amount || 100; pointsToAdd += bonusPointsAdded; bonusApplied = `💰 +${bonusPointsAdded} Bonus!` }
           // ✅ Lösche Bonus (statt is_used = true setzen, damit Kunde ihn nochmal aktivieren kann)
           await supabase.from('activated_global_bonuses').delete().eq('id', globalBonus.id)
+          // ✅ Setze last_global_bonus_used_at für heute
+          await supabase.from('customers').update({ last_global_bonus_used_at: new Date().toISOString() }).eq('id', customer.id)
           console.log('✅ Globaler Bonus verwendet:', bonusApplied)
         }
         if (activatedCoupons && activatedCoupons.length > 0) {
@@ -1272,6 +1274,8 @@ async function addPointsFromScan() {
           else { bonusPointsAdded = b.bonus_amount || 100; pointsToAdd += bonusPointsAdded; bonusApplied = `💰 +${bonusPointsAdded}P!` }
           // ✅ Lösche Bonus (statt is_used = true setzen)
           await supabase.from('activated_global_bonuses').delete().eq('id', globalBonus.id)
+          // ✅ Setze last_global_bonus_used_at
+          await supabase.from('customers').update({ last_global_bonus_used_at: new Date().toISOString() }).eq('id', currentCustomer.id)
         }
         const newTotal = currentCustomer.points + pointsToAdd
         await supabase.from('transactions').insert({ customer_id: currentCustomer.id, type: 'earn', amount, points: pointsToAdd, staff: 'SCANNER' })
@@ -1934,11 +1938,9 @@ async function addPointsForCustomerId(customerId, amount) {
         console.log(`🎉 Global Bonus angewendet: +${bonus.bonus_amount}P`, points)
       }
       
-      // Markiere als verwendet
-      await supabase
-        .from('activated_global_bonuses')
-        .delete()
-        .eq('id', globalBonus.id)
+      // ✅ Lösche Bonus und setze last_global_bonus_used_at
+      await supabase.from('activated_global_bonuses').delete().eq('id', globalBonus.id)
+      await supabase.from('customers').update({ last_global_bonus_used_at: new Date().toISOString() }).eq('id', customer.id)
     }
     
     // Update Punkte
@@ -2028,11 +2030,9 @@ async function addPointsForPhone(phone, amount) {
         console.log(`🎉 Global Bonus angewendet: +${bonus.bonus_amount}P`, points)
       }
       
-      // Markiere als verwendet
-      await supabase
-        .from('activated_global_bonuses')
-        .delete()
-        .eq('id', globalBonus.id)
+      // ✅ Lösche Bonus und setze last_global_bonus_used_at
+      await supabase.from('activated_global_bonuses').delete().eq('id', globalBonus.id)
+      await supabase.from('customers').update({ last_global_bonus_used_at: new Date().toISOString() }).eq('id', customer.id)
     }
     
     // Update Punkte
