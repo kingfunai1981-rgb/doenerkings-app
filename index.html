@@ -1180,7 +1180,7 @@ input:focus, textarea:focus {
 
     <div id="qr-modal" class="qr-modal" onclick="closeQRModal(event)">
       <div class="qr-modal-content" onclick="event.stopPropagation()">
-        <button class="qr-modal-close" onclick="closeQRModal()">×</button>
+        <button class="qr-modal-close" onclick="closeQRModal(event)">×</button>
         <div class="qr-modal-label">Zeige diesen Code beim Bezahlen</div>
         <img id="modal-qr" class="qr-modal-img" alt="QR">
         <div class="qr-modal-label">Oder nenne diese ID:</div>
@@ -1703,14 +1703,28 @@ async function refreshCustomerData() {
 }
 
 function openQRModal() {
-  document.getElementById('qr-modal').classList.add('active')
-  document.body.style.overflow = 'hidden'
+  console.log('🔍 QR-Modal wird geöffnet')
+  const modal = document.getElementById('qr-modal')
+  if (modal) {
+    modal.classList.add('active')
+    document.body.style.overflow = 'hidden'
+    console.log('✅ QR-Modal geöffnet')
+  } else {
+    console.error('❌ QR-Modal nicht gefunden!')
+  }
 }
 
 function closeQRModal(event) {
-  if (!event || event.target.id === 'qr-modal') {
-    document.getElementById('qr-modal').classList.remove('active')
-    document.body.style.overflow = 'auto'
+  console.log('🔍 QR-Modal wird geschlossen')
+  const modal = document.getElementById('qr-modal')
+  
+  // Wenn kein Event (Button-Click) oder Click auf Hintergrund
+  if (!event || event.target.id === 'qr-modal' || event.target.classList.contains('qr-modal-close')) {
+    if (modal) {
+      modal.classList.remove('active')
+      document.body.style.overflow = 'auto'
+      console.log('✅ QR-Modal geschlossen')
+    }
   }
 }
 
