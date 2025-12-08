@@ -2879,6 +2879,7 @@ function closeOrderModal() {
 // 🎟️ COUPON SYSTEM - FIX 2 & 4
 // ═══════════════════════════════════════════════════════════════
 let activeCoupons = []
+let openCategories = [] // ✅ FIX 1: Speichere welche Kategorien offen sind
 
 async function loadActiveCoupons() {
   try {
@@ -2913,6 +2914,8 @@ function getCouponPrice(productName) {
     const couponProduct = c.product.toLowerCase().trim()
     const checkName = productName.toLowerCase().trim()
     
+    console.log(`🔍 Vergleiche: Coupon"${couponProduct}" === Produkt"${checkName}"? ${couponProduct === checkName}`)
+    
     // NUR exakte Übereinstimmung!
     return couponProduct === checkName
   })
@@ -2922,7 +2925,7 @@ function getCouponPrice(productName) {
     const priceStr = coupon.price.toString().replace('€', '').replace(',', '.').trim()
     const price = parseFloat(priceStr)
     if (!isNaN(price)) {
-      console.log(`💰 Coupon gefunden für "${productName}": ${price}€ (Original: ${products.find(p => p.name === productName)?.price}€)`)
+      console.log(`✅ Coupon gefunden für "${productName}": ${price}€ (Original: ${products.find(p => p.name === productName)?.price}€)`)
       return price
     }
   }
@@ -2937,37 +2940,37 @@ function renderProducts() {
     {
       name: '🌯 Döner & Dürüm',
       ids: ['doener', 'doener-xl', 'dueruem', 'doener-box', 'doener-teller'],
-      open: true
+      open: openCategories[0] !== undefined ? openCategories[0] : true // ✅ FIX 1: Nutze gespeicherten Status
     },
     {
       name: '🥙 Lahmacun',
       ids: ['lahmacun', 'lahmacun-spezial'],
-      open: false
+      open: openCategories[1] || false // ✅ FIX 1: Nutze gespeicherten Status
     },
     {
       name: '🍖 Köfte',
       ids: ['koefte-brot', 'koefte-teller'],
-      open: false
+      open: openCategories[2] || false // ✅ FIX 1
     },
     {
       name: '🌭 Wurst',
       ids: ['rindswurst-broetchen', 'curry-rindswurst'],
-      open: false
+      open: openCategories[3] || false // ✅ FIX 1
     },
     {
       name: '🍗 Chicken',
       ids: ['chicken-nuggets', 'crispy-chicken-burger'],
-      open: false
+      open: openCategories[4] || false // ✅ FIX 1
     },
     {
       name: '🍟 Beilagen',
       ids: ['pommes'],
-      open: false
+      open: openCategories[5] || false // ✅ FIX 1
     },
     {
       name: '🥤 Getränke',
       ids: ['ayran', 'wasser', 'cola', 'fanta', 'cola-zero'],
-      open: false
+      open: openCategories[6] || false // ✅ FIX 1
     }
   ]
   
@@ -3030,9 +3033,11 @@ function toggleCategory(index) {
   if (content.classList.contains('open')) {
     content.classList.remove('open')
     arrow.textContent = '▶'
+    openCategories[index] = false // ✅ FIX 1: Speichere Status
   } else {
     content.classList.add('open')
     arrow.textContent = '▼'
+    openCategories[index] = true // ✅ FIX 1: Speichere Status
   }
 }
 
