@@ -2909,14 +2909,12 @@ async function loadActiveCoupons() {
 // ✅ FIX 4: Finde Coupon-Preis für Produkt
 function getCouponPrice(productName) {
   const coupon = activeCoupons.find(c => {
-    // Vergleiche Produktnamen (case-insensitive, auch mit Varianten)
+    // ✅ FIX: NUR exakte Übereinstimmung (case-insensitive)
     const couponProduct = c.product.toLowerCase().trim()
     const checkName = productName.toLowerCase().trim()
     
-    // Exakte Übereinstimmung oder enthält
-    return couponProduct === checkName || 
-           couponProduct.includes(checkName) || 
-           checkName.includes(couponProduct)
+    // NUR exakte Übereinstimmung!
+    return couponProduct === checkName
   })
   
   if (coupon && coupon.price) {
