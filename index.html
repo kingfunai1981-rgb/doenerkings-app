@@ -1544,8 +1544,23 @@ function normalizePhone(phone) {
 }
 
 function showScreen(screenName) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
-  document.getElementById(`screen-${screenName}`).classList.add('active')
+  console.log(`🔄 Wechsel zu Screen: ${screenName}`)
+  
+  // FORCE: Alle Screens verstecken
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active')
+    s.style.display = 'none' // FORCE: display none
+  })
+  
+  // FORCE: Gewünschten Screen anzeigen
+  const targetScreen = document.getElementById(`screen-${screenName}`)
+  if (targetScreen) {
+    targetScreen.classList.add('active')
+    targetScreen.style.display = 'block' // FORCE: display block
+    console.log(`✅ Screen "${screenName}" aktiviert`)
+  } else {
+    console.error(`❌ Screen "screen-${screenName}" nicht gefunden!`)
+  }
 }
 
 function showResult(elementId, message, type) {
@@ -2519,6 +2534,11 @@ async function cancelCode(code) {
 function logout() {
   console.log('🚪 Logout - Resette alles...')
   
+  // ⚡ KRITISCH: LocalStorage SOFORT löschen (BEVOR irgendetwas anderes)
+  currentCustomer = null
+  safeRemoveItem('customerData')
+  console.log('✅ LocalStorage gelöscht')
+  
   // 1. Intervalle stoppen
   if (refreshInterval) {
     clearInterval(refreshInterval)
@@ -2526,11 +2546,25 @@ function logout() {
   }
   refreshErrorCount = 0
   
-  // 2. Kundendaten löschen
-  currentCustomer = null
-  safeRemoveItem('customerData')
+  // 2. FORCE: Alle Screens sofort verstecken (mit display:none als Backup)
+  console.log('🔄 Verstecke alle Screens...')
+  document.querySelectorAll('.screen').forEach(screen => {
+    screen.classList.remove('active')
+    // FORCE: Zusätzlich display:none setzen als Backup
+    screen.style.display = 'none'
+  })
   
-  // 3. ALLE Modals schließen
+  // 3. FORCE: Nur Start-Screen anzeigen
+  const startScreen = document.getElementById('screen-start')
+  if (startScreen) {
+    startScreen.classList.add('active')
+    startScreen.style.display = 'block' // FORCE: display block
+    console.log('✅ Start-Screen aktiviert')
+  } else {
+    console.error('❌ Start-Screen nicht gefunden!')
+  }
+  
+  // 4. ALLE Modals schließen
   const modals = [
     'order-section',
     'customizeModal',
@@ -2547,11 +2581,11 @@ function logout() {
     }
   })
   
-  // 4. Warenkorb leeren
+  // 5. Warenkorb leeren
   cart = []
   updateCart()
   
-  // 5. Resette Input-Felder
+  // 6. Resette Input-Felder
   const inputs = [
     'reg-name',
     'reg-phone',
@@ -2565,7 +2599,7 @@ function logout() {
     if (input) input.value = ''
   })
   
-  // 6. Resette Result-Divs
+  // 7. Resette Result-Divs
   const results = [
     'reg-result',
     'login-result'
@@ -2578,38 +2612,59 @@ function logout() {
     }
   })
   
-  // 7. Kategorien-Status zurücksetzen
+  // 8. Kategorien-Status zurücksetzen
   openCategories = []
   
-  // 8. Scrolle nach oben
+  // 9. Scrolle nach oben
   window.scrollTo(0, 0)
   
-  // 9. Zur Start-Seite - WICHTIG: Erst alle Screens verstecken!
-  document.querySelectorAll('.screen').forEach(screen => {
-    screen.classList.remove('active')
-  })
-  
-  // 10. Dann Start-Screen anzeigen
-  const startScreen = document.getElementById('screen-start')
-  if (startScreen) {
-    startScreen.classList.add('active')
-  }
-  
-  console.log('✅ Logout komplett - Start-Screen aktiv')
+  // 10. Final Check: Stelle sicher dass NUR start-screen sichtbar ist
+  setTimeout(() => {
+    document.querySelectorAll('.screen').forEach(screen => {
+      if (screen.id !== 'screen-start') {
+        screen.classList.remove('active')
+        screen.style.display = 'none'
+      }
+    })
+    const startScreen = document.getElementById('screen-start')
+    if (startScreen) {
+      startScreen.classList.add('active')
+      startScreen.style.display = 'block'
+    }
+    console.log('✅ Logout komplett - Start-Screen aktiv')
+  }, 100)
 }
 
 window.onload = () => {
+  console.log('🚀 Seite geladen - Prüfe gespeicherte Kundendaten...')
+  
   const stored = safeGetItem('customerData')
-  if (stored) {
-    try {
-      const customer = JSON.parse(stored)
-      if (customer && customer.id && customer.qr_id) {
-        loadCustomer(customer)
-      }
-    } catch (e) { 
-      console.error('❌ Fehler beim Laden:', e)
+  
+  if (!stored) {
+    console.log('ℹ️ Keine gespeicherten Kundendaten - zeige Start-Screen')
+    // Stelle sicher dass Start-Screen angezeigt wird
+    showScreen('start')
+    return
+  }
+  
+  try {
+    const customer = JSON.parse(stored)
+    
+    // Validierung: Prüfe ob Kundendaten vollständig sind
+    if (!customer || !customer.id || !customer.qr_id) {
+      console.warn('⚠️ Unvollständige Kundendaten - lösche und zeige Start-Screen')
       safeRemoveItem('customerData')
+      showScreen('start')
+      return
     }
+    
+    console.log('✅ Gültige Kundendaten gefunden - lade Kunde:', customer.name)
+    loadCustomer(customer)
+    
+  } catch (e) { 
+    console.error('❌ Fehler beim Laden der Kundendaten:', e)
+    safeRemoveItem('customerData')
+    showScreen('start')
   }
 }
 
