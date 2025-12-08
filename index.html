@@ -3019,6 +3019,21 @@ async function loadGlobalBonuses() {
     
     const activatedIds = activated ? activated.map(a => a.global_bonus_id) : []
     
+    // ✅ NEU: Wenn keine aktivierten Bonusse, prüfe ob heute schon eingelöst
+    if (!activated || activated.length === 0) {
+      const lastUsed = currentCustomer.last_global_bonus_used_at
+      if (lastUsed) {
+        const lastUsedDate = new Date(lastUsed).toISOString().split('T')[0]
+        const today = new Date().toISOString().split('T')[0]
+        
+        if (lastUsedDate === today) {
+          document.getElementById('globalBonusSection').style.display = 'none'
+          console.log('ℹ️ Bonus heute bereits eingelöst - Sektion versteckt')
+          return
+        }
+      }
+    }
+    
     // Rendere Bonusse
     const section = document.getElementById('globalBonusSection')
     const list = document.getElementById('globalBonusList')
