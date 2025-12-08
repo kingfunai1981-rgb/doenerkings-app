@@ -1876,7 +1876,11 @@ let allOrderHistory = [] // Speichert alle geladenen Bestellungen für Suche
 
 async function loadOrderHistory() {
   try {
-    showResult('orderHistoryStatus', '⏳ Lade Bestellverlauf...', 'info')
+    // Zeige Lade-Indikator
+    const container = document.getElementById('ordersHistory')
+    if (container) {
+      container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;"><div style="font-size: 48px; margin-bottom: 16px;">⏳</div><p>Lade Bestellverlauf...</p></div>'
+    }
     
     const { data, error } = await supabase
       .from('orders')
