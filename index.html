@@ -3296,24 +3296,70 @@ function toggleCategory(index) {
 }
 
 function openCustomize(productId) {
-  currentProduct = products.find(p => p.id === productId)
-  currentCustomization = {
-    product: currentProduct,
-    options: {},
-    extras: []
+  console.log('🔵 openCustomize called with productId:', productId)
+  
+  try {
+    // Prüfe ob products existiert
+    if (!products || products.length === 0) {
+      console.error('❌ Products array ist leer oder undefined!')
+      alert('Fehler: Produkte nicht geladen. Bitte Seite neu laden.')
+      return
+    }
+    
+    // Finde Produkt
+    currentProduct = products.find(p => p.id === productId)
+    
+    if (!currentProduct) {
+      console.error('❌ Produkt nicht gefunden:', productId)
+      console.log('📋 Verfügbare Produkt-IDs:', products.map(p => p.id))
+      alert('Fehler: Produkt nicht gefunden. ProductId: ' + productId)
+      return
+    }
+    
+    console.log('✅ Produkt gefunden:', currentProduct.name)
+    
+    // Initialisiere Customization
+    currentCustomization = {
+      product: currentProduct,
+      options: {},
+      extras: []
+    }
+    
+    // Setze Default-Optionen
+    Object.keys(currentProduct.options).forEach(key => {
+      currentCustomization.options[key] = currentProduct.options[key].default
+    })
+    
+    console.log('✅ Customization initialisiert:', currentCustomization)
+    
+    // Wenn keine Optionen/Extras, direkt in Warenkorb
+    if (Object.keys(currentProduct.options).length === 0 && currentProduct.extras.length === 0) {
+      console.log('ℹ️ Keine Optionen, füge direkt zum Warenkorb hinzu')
+      addToCart()
+      return
+    }
+    
+    // Prüfe ob Modal existiert
+    const modal = document.getElementById('customizeModal')
+    if (!modal) {
+      console.error('❌ customizeModal Element nicht gefunden!')
+      alert('Fehler: Modal nicht gefunden. Bitte Seite neu laden.')
+      return
+    }
+    
+    console.log('✅ Modal gefunden, rendere...')
+    renderCustomizeModal()
+    
+    console.log('✅ Öffne Modal...')
+    modal.classList.add('active')
+    
+    console.log('🎉 Modal erfolgreich geöffnet!')
+    
+  } catch (error) {
+    console.error('❌ Fehler in openCustomize:', error)
+    console.error('❌ Stack:', error.stack)
+    alert('Fehler beim Öffnen: ' + error.message)
   }
-  
-  Object.keys(currentProduct.options).forEach(key => {
-    currentCustomization.options[key] = currentProduct.options[key].default
-  })
-  
-  if (Object.keys(currentProduct.options).length === 0 && currentProduct.extras.length === 0) {
-    addToCart()
-    return
-  }
-  
-  renderCustomizeModal()
-  document.getElementById('customizeModal').classList.add('active')
 }
 
 function closeCustomizeModal() {
@@ -3844,6 +3890,21 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('customerName')?.addEventListener('input', checkCheckoutReady)
   document.getElementById('customerPhone')?.addEventListener('input', checkCheckoutReady)
   document.getElementById('pickupTimeInput')?.addEventListener('change', checkCheckoutReady)
+  
+  // ✅ Debug: Prüfe wichtige Elemente
+  console.log('🔍 System-Check:')
+  console.log('  - Products loaded:', products ? `✅ ${products.length} Produkte` : '❌ Nicht geladen')
+  console.log('  - customizeModal:', document.getElementById('customizeModal') ? '✅ Vorhanden' : '❌ Fehlt')
+  console.log('  - modalTitle:', document.getElementById('modalTitle') ? '✅ Vorhanden' : '❌ Fehlt')
+  console.log('  - modalBody:', document.getElementById('modalBody') ? '✅ Vorhanden' : '❌ Fehlt')
+  console.log('  - products container:', document.getElementById('products') ? '✅ Vorhanden' : '❌ Fehlt')
+  
+  // Test ob openCustomize Funktion verfügbar ist
+  if (typeof openCustomize === 'function') {
+    console.log('  - openCustomize function: ✅ Verfügbar')
+  } else {
+    console.error('  - openCustomize function: ❌ Nicht gefunden!')
+  }
 })
 
 console.log('✅ Döner Boxx App geladen!')
