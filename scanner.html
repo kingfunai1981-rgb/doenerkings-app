@@ -1094,12 +1094,39 @@ async function addPointsByPhone() {
         if (activeGlobalBonuses && activeGlobalBonuses.length > 0) {
           const globalBonus = activeGlobalBonuses[0]
           const bonus = globalBonus.global_bonuses
+          
+          console.log('🎁 Bonus wird eingelöst:', {
+            activation_id: globalBonus.id,
+            global_bonus_id: bonus.id,
+            customer_id: customer.id,
+            bonus_type: bonus.bonus_type
+          })
+          
           if (bonus.bonus_type === 'double_points') { bonusPointsAdded = pointsToAdd; pointsToAdd *= 2; bonusApplied = '⭐ Doppelte Punkte!' }
           else if (bonus.bonus_type === 'bonus_points') { bonusPointsAdded = bonus.bonus_amount || 100; pointsToAdd += bonusPointsAdded; bonusApplied = `💰 +${bonusPointsAdded} Bonus!` }
-          // ✅ Lösche Bonus (statt is_used = true setzen, damit Kunde ihn nochmal aktivieren kann)
+          
+          // ═══════════════════════════════════════════════════════════════
+          // ✅ BONUS EINLÖSEN: Lösche aus activated_global_bonuses
+          // ✅ NEU: Speichere in used_global_bonuses_history
+          // ═══════════════════════════════════════════════════════════════
           await supabase.from('activated_global_bonuses').delete().eq('id', globalBonus.id)
-          // ✅ Setze last_global_bonus_used_at für heute
-          await supabase.from('customers').update({ last_global_bonus_used_at: new Date().toISOString() }).eq('id', customer.id)
+          
+          // ✅ NEU: Erstelle Eintrag in Historie mit Error-Handling
+          const { data: historyData, error: historyError } = await supabase
+            .from('used_global_bonuses_history')
+            .insert({
+              customer_id: customer.id,
+              global_bonus_id: bonus.id  // WICHTIG: bonus.id, nicht globalBonus.id!
+            })
+            .select()
+          
+          if (historyError) {
+            console.error('❌ FEHLER beim Speichern in Historie:', historyError)
+            console.error('📋 Versuchte Daten:', { customer_id: customer.id, global_bonus_id: bonus.id })
+          } else {
+            console.log('✅ In Historie gespeichert:', historyData)
+          }
+          
           console.log('✅ Globaler Bonus verwendet:', bonusApplied)
         }
         if (activatedCoupons && activatedCoupons.length > 0) {
@@ -1269,13 +1296,40 @@ async function addPointsFromScan() {
         let pointsToAdd = Math.round(amount * 10)
         let bonusApplied = null, bonusPointsAdded = 0
         if (globalBonuses && globalBonuses.length > 0) {
-          const globalBonus = globalBonuses[0]; const b = globalBonus.global_bonuses
+          const globalBonus = globalBonuses[0]
+          const b = globalBonus.global_bonuses
+          
+          console.log('🎁 Bonus wird eingelöst (addPointsFromScan):', {
+            activation_id: globalBonus.id,
+            global_bonus_id: b.id,
+            customer_id: currentCustomer.id,
+            bonus_type: b.bonus_type
+          })
+          
           if (b.bonus_type === 'double_points') { bonusPointsAdded = pointsToAdd; pointsToAdd *= 2; bonusApplied = '⭐ 2x Punkte!' }
           else { bonusPointsAdded = b.bonus_amount || 100; pointsToAdd += bonusPointsAdded; bonusApplied = `💰 +${bonusPointsAdded}P!` }
-          // ✅ Lösche Bonus (statt is_used = true setzen)
+          
+          // ═══════════════════════════════════════════════════════════════
+          // ✅ BONUS EINLÖSEN: Lösche aus activated_global_bonuses
+          // ✅ NEU: Speichere in used_global_bonuses_history
+          // ═══════════════════════════════════════════════════════════════
           await supabase.from('activated_global_bonuses').delete().eq('id', globalBonus.id)
-          // ✅ Setze last_global_bonus_used_at
-          await supabase.from('customers').update({ last_global_bonus_used_at: new Date().toISOString() }).eq('id', currentCustomer.id)
+          
+          // ✅ NEU: Erstelle Eintrag in Historie mit Error-Handling
+          const { data: historyData, error: historyError } = await supabase
+            .from('used_global_bonuses_history')
+            .insert({
+              customer_id: currentCustomer.id,
+              global_bonus_id: b.id  // WICHTIG: b.id (global_bonuses.id)
+            })
+            .select()
+          
+          if (historyError) {
+            console.error('❌ FEHLER beim Speichern in Historie:', historyError)
+            console.error('📋 Versuchte Daten:', { customer_id: currentCustomer.id, global_bonus_id: b.id })
+          } else {
+            console.log('✅ In Historie gespeichert:', historyData)
+          }
         }
         const newTotal = currentCustomer.points + pointsToAdd
         await supabase.from('transactions').insert({ customer_id: currentCustomer.id, type: 'earn', amount, points: pointsToAdd, staff: 'SCANNER' })
