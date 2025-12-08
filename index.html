@@ -3009,12 +3009,11 @@ async function loadGlobalBonuses() {
     
     console.log('✅ Aktive Global Bonusse geladen:', bonuses.length)
     
-    // Prüfe welche der Kunde bereits aktiviert hat
+    // Prüfe welche der Kunde bereits aktiviert hat (keine is_used Prüfung mehr nötig, da gelöscht wird)
     const { data: activated, error: activatedError } = await supabase
       .from('activated_global_bonuses')
       .select('*')
       .eq('customer_id', currentCustomer.id)
-      .eq('is_used', false)
     
     if (activatedError) throw activatedError
     
@@ -3067,12 +3066,11 @@ async function loadGlobalBonuses() {
 
 async function activateGlobalBonus(bonusId) {
   try {
-    // Prüfe ob Kunde bereits einen aktiven Bonus hat
+    // Prüfe ob Kunde bereits einen aktiven Bonus hat (keine is_used Prüfung mehr nötig)
     const { data: existing, error: checkError } = await supabase
       .from('activated_global_bonuses')
       .select('*')
       .eq('customer_id', currentCustomer.id)
-      .eq('is_used', false)
     
     if (checkError) throw checkError
     
