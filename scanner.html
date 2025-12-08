@@ -1096,12 +1096,13 @@ async function addPointsByPhone() {
           const bonus = globalBonus.global_bonuses
           if (bonus.bonus_type === 'double_points') { bonusPointsAdded = pointsToAdd; pointsToAdd *= 2; bonusApplied = '⭐ Doppelte Punkte!' }
           else if (bonus.bonus_type === 'bonus_points') { bonusPointsAdded = bonus.bonus_amount || 100; pointsToAdd += bonusPointsAdded; bonusApplied = `💰 +${bonusPointsAdded} Bonus!` }
-          await supabase.from('activated_global_bonuses').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', globalBonus.id)
+          // ✅ Lösche Bonus (statt is_used = true setzen, damit Kunde ihn nochmal aktivieren kann)
+          await supabase.from('activated_global_bonuses').delete().eq('id', globalBonus.id)
           console.log('✅ Globaler Bonus verwendet:', bonusApplied)
         }
         if (activatedCoupons && activatedCoupons.length > 0) {
           const c = activatedCoupons[0]
-          await supabase.from('activated_coupons').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', c.id)
+          await supabase.from('activated_coupons').delete().eq('id', c.id)
           couponUsed = `🎟️ Coupon: ${c.coupons.product}`
         }
         const newTotal = customer.points + pointsToAdd
@@ -1269,7 +1270,8 @@ async function addPointsFromScan() {
           const globalBonus = globalBonuses[0]; const b = globalBonus.global_bonuses
           if (b.bonus_type === 'double_points') { bonusPointsAdded = pointsToAdd; pointsToAdd *= 2; bonusApplied = '⭐ 2x Punkte!' }
           else { bonusPointsAdded = b.bonus_amount || 100; pointsToAdd += bonusPointsAdded; bonusApplied = `💰 +${bonusPointsAdded}P!` }
-          await supabase.from('activated_global_bonuses').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', globalBonus.id)
+          // ✅ Lösche Bonus (statt is_used = true setzen)
+          await supabase.from('activated_global_bonuses').delete().eq('id', globalBonus.id)
         }
         const newTotal = currentCustomer.points + pointsToAdd
         await supabase.from('transactions').insert({ customer_id: currentCustomer.id, type: 'earn', amount, points: pointsToAdd, staff: 'SCANNER' })
@@ -1381,7 +1383,7 @@ function closeCodeDetails() { document.getElementById('code').value = ''; docume
 async function useCoupon(activationId) {
   try {
     showResult('result-code', '⏳ Löse Coupon ein...', 'info')
-    await supabase.from('activated_coupons').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', activationId)
+    await supabase.from('activated_coupons').delete().eq('id', activationId)
     showResult('result-code', '✅ Coupon erfolgreich eingelöst!', 'success')
     document.getElementById('code').value = ''; document.getElementById('code-details').style.display = 'none'
   } catch (e) { showResult('result-code', '❌ Fehler: ' + e.message, 'error'); console.error('Use coupon error:', e) }
@@ -1935,7 +1937,7 @@ async function addPointsForCustomerId(customerId, amount) {
       // Markiere als verwendet
       await supabase
         .from('activated_global_bonuses')
-        .update({ is_used: true, used_at: new Date().toISOString() })
+        .delete()
         .eq('id', globalBonus.id)
     }
     
@@ -2029,7 +2031,7 @@ async function addPointsForPhone(phone, amount) {
       // Markiere als verwendet
       await supabase
         .from('activated_global_bonuses')
-        .update({ is_used: true, used_at: new Date().toISOString() })
+        .delete()
         .eq('id', globalBonus.id)
     }
     
