@@ -917,13 +917,30 @@ async function deleteSingleCustomer(customerId, customerName) {
   try {
     console.log(`🗑️ Lösche Kunde: ${customerName} (${customerId})`)
     
-    // ✅ 1. BESTELLUNGEN löschen (NEU!)
-    const { error: ordersError } = await supabase
-      .from('orders')
-      .delete()
-      .eq('customer_id', customerId)
-    if (ordersError) console.error('❌ Fehler beim Löschen der Bestellungen:', ordersError)
-    else console.log('✅ Bestellungen gelöscht')
+    // Hole customer details um qr_id zu bekommen
+    const { data: customerData, error: fetchError } = await supabase
+      .from('customers')
+      .select('qr_id')
+      .eq('id', customerId)
+      .single()
+    
+    if (fetchError) {
+      console.error('❌ Fehler beim Laden der Kundendaten:', fetchError)
+    }
+    
+    const customerQrId = customerData?.qr_id
+    
+    // ✅ 1. BESTELLUNGEN löschen (NEU! - mit qr_id statt customer_id)
+    if (customerQrId) {
+      const { error: ordersError } = await supabase
+        .from('orders')
+        .delete()
+        .eq('qr_id', customerQrId)
+      if (ordersError) console.error('❌ Fehler beim Löschen der Bestellungen:', ordersError)
+      else console.log('✅ Bestellungen gelöscht')
+    } else {
+      console.log('⚠️ Keine QR-ID gefunden - überspringe Bestellungen')
+    }
     
     // ✅ 2. TRANSAKTIONEN löschen
     const { error: txError } = await supabase
