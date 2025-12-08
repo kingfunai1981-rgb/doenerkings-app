@@ -3009,7 +3009,7 @@ async function loadGlobalBonuses() {
     
     console.log('✅ Aktive Global Bonusse geladen:', bonuses.length)
     
-    // Prüfe welche der Kunde bereits aktiviert hat (keine is_used Prüfung mehr nötig, da gelöscht wird)
+    // Prüfe welche der Kunde bereits aktiviert hat
     const { data: activated, error: activatedError } = await supabase
       .from('activated_global_bonuses')
       .select('*')
@@ -3019,32 +3019,41 @@ async function loadGlobalBonuses() {
     
     const activatedIds = activated ? activated.map(a => a.global_bonus_id) : []
     
-    // ✅ NEU: Wenn keine aktivierten Bonusse, prüfe ob heute schon eingelöst
-    if (!activated || activated.length === 0) {
-      const lastUsed = currentCustomer.last_global_bonus_used_at
-      if (lastUsed) {
-        const lastUsedDate = new Date(lastUsed).toISOString().split('T')[0]
-        const today = new Date().toISOString().split('T')[0]
-        
-        if (lastUsedDate === today) {
-          document.getElementById('globalBonusSection').style.display = 'none'
-          console.log('ℹ️ Bonus heute bereits eingelöst - Sektion versteckt')
-          return
-        }
-      }
+    // ✅ NEU: Lade Historie der bereits eingelösten Boni für diesen Kunden
+    // Ein Kunde darf jeden global_bonus nur EINMAL einlösen (pro bonus_id, nicht pro Tag!)
+    const { data: usedHistory, error: historyError } = await supabase
+      .from('used_global_bonuses_history')
+      .select('global_bonus_id')
+      .eq('customer_id', currentCustomer.id)
+    
+    if (historyError) throw historyError
+    
+    // IDs der bereits eingelösten Boni sammeln
+    const usedBonusIds = usedHistory ? usedHistory.map(h => h.global_bonus_id) : []
+    console.log('ℹ️ Bereits eingelöste Boni:', usedBonusIds.length)
+    
+    // Filtere Boni: Zeige nur solche an, die NICHT bereits eingelöst wurden
+    const availableBonuses = bonuses.filter(bonus => !usedBonusIds.includes(bonus.id))
+    
+    // Wenn keine verfügbaren Boni übrig sind, verstecke die Sektion
+    if (availableBonuses.length === 0 && activatedIds.length === 0) {
+      document.getElementById('globalBonusSection').style.display = 'none'
+      console.log('ℹ️ Alle Boni wurden bereits eingelöst - Sektion versteckt')
+      return
     }
     
     // Rendere Bonusse
     const section = document.getElementById('globalBonusSection')
     const list = document.getElementById('globalBonusList')
     
-    list.innerHTML = bonuses.map(bonus => {
+    list.innerHTML = availableBonuses.map(bonus => {
       const isActivated = activatedIds.includes(bonus.id)
       const bonusText = bonus.bonus_type === 'double_points' 
         ? '🔥 Doppelte Punkte!' 
         : `💰 +${bonus.bonus_amount} Bonus-Punkte`
       
       if (isActivated) {
+        // ✅ AKTIVER BONUS: Wurde aktiviert, aber noch nicht eingelöst
         return `
           <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #f59e0b; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -3056,6 +3065,7 @@ async function loadGlobalBonuses() {
           </div>
         `
       } else {
+        // ⭐ VERFÜGBARER BONUS: Nicht aktiviert, nicht eingelöst
         return `
           <div style="background: linear-gradient(135deg, #fff, #f9fafb); border: 2px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
