@@ -3018,22 +3018,34 @@ async function loadGlobalBonuses() {
     if (activatedError) throw activatedError
     
     const activatedIds = activated ? activated.map(a => a.global_bonus_id) : []
+    console.log('📋 Aktivierte Boni (noch nicht eingelöst):', activatedIds)
     
     // ✅ NEU: Lade Historie der bereits eingelösten Boni für diesen Kunden
     // Ein Kunde darf jeden global_bonus nur EINMAL einlösen (pro bonus_id, nicht pro Tag!)
     const { data: usedHistory, error: historyError } = await supabase
       .from('used_global_bonuses_history')
-      .select('global_bonus_id')
+      .select('*')
       .eq('customer_id', currentCustomer.id)
     
-    if (historyError) throw historyError
+    if (historyError) {
+      console.error('❌ Fehler beim Laden der Historie:', historyError)
+      throw historyError
+    }
+    
+    console.log('📜 Raw Historie-Daten:', usedHistory)
     
     // IDs der bereits eingelösten Boni sammeln
     const usedBonusIds = usedHistory ? usedHistory.map(h => h.global_bonus_id) : []
-    console.log('ℹ️ Bereits eingelöste Boni:', usedBonusIds.length)
+    console.log('ℹ️ Bereits eingelöste Boni:', usedBonusIds.length, usedBonusIds)
     
     // Filtere Boni: Zeige nur solche an, die NICHT bereits eingelöst wurden
-    const availableBonuses = bonuses.filter(bonus => !usedBonusIds.includes(bonus.id))
+    const availableBonuses = bonuses.filter(bonus => {
+      const isUsed = usedBonusIds.includes(bonus.id)
+      console.log(`🔍 Bonus ${bonus.id}:`, isUsed ? '❌ Bereits eingelöst' : '✅ Verfügbar')
+      return !isUsed
+    })
+    
+    console.log('✨ Verfügbare Boni nach Filter:', availableBonuses.length)
     
     // Wenn keine verfügbaren Boni übrig sind, verstecke die Sektion
     if (availableBonuses.length === 0 && activatedIds.length === 0) {
