@@ -2879,6 +2879,7 @@ function closeOrderModal() {
 // 🎟️ COUPON SYSTEM - FIX 2 & 4
 // ═══════════════════════════════════════════════════════════════
 let activeCoupons = []
+let previousCoupons = [] // ✅ NEU: Speichere vorherige Coupons zum Vergleich
 let openCategories = [] // ✅ FIX 1: Speichere welche Kategorien offen sind
 
 async function loadActiveCoupons() {
@@ -2895,11 +2896,21 @@ async function loadActiveCoupons() {
     
     if (error) throw error
     
+    // ✅ NEU: Prüfe ob sich Coupons geändert haben
+    const couponsChanged = JSON.stringify(previousCoupons) !== JSON.stringify(coupons)
+    
     activeCoupons = coupons || []
+    previousCoupons = coupons || []
+    
     console.log('✅ Aktive Coupons geladen:', activeCoupons.length)
     
-    // Re-render products with coupon prices
-    renderProducts()
+    // ✅ NEU: Rendere nur neu, wenn sich Coupons geändert haben
+    if (couponsChanged) {
+      console.log('🔄 Coupons haben sich geändert - rendere neu')
+      renderProducts()
+    } else {
+      console.log('✅ Coupons unverändert - kein Re-Render nötig')
+    }
     
   } catch (e) {
     console.error('❌ Fehler beim Laden von Coupons:', e)
@@ -2936,6 +2947,15 @@ function getCouponPrice(productName) {
 function renderProducts() {
   const container = document.getElementById('products')
   
+  // ✅ NEU: Lese aktuellen Zustand aus DOM aus, BEVOR wir neu rendern
+  // Damit bleiben geöffnete Kategorien beim Refresh offen!
+  for (let i = 0; i < 7; i++) {
+    const categoryContent = document.getElementById(`category-${i}`)
+    if (categoryContent) {
+      openCategories[i] = categoryContent.classList.contains('open')
+    }
+  }
+  
   const categories = [
     {
       name: '🌯 Döner & Dürüm',
@@ -2945,32 +2965,32 @@ function renderProducts() {
     {
       name: '🥙 Lahmacun',
       ids: ['lahmacun', 'lahmacun-spezial'],
-      open: openCategories[1] || false // ✅ FIX 1: Nutze gespeicherten Status
+      open: openCategories[1] !== undefined ? openCategories[1] : false // ✅ FIX 1: Nutze gespeicherten Status
     },
     {
       name: '🍖 Köfte',
       ids: ['koefte-brot', 'koefte-teller'],
-      open: openCategories[2] || false // ✅ FIX 1
+      open: openCategories[2] !== undefined ? openCategories[2] : false // ✅ FIX 1
     },
     {
       name: '🌭 Wurst',
       ids: ['rindswurst-broetchen', 'curry-rindswurst'],
-      open: openCategories[3] || false // ✅ FIX 1
+      open: openCategories[3] !== undefined ? openCategories[3] : false // ✅ FIX 1
     },
     {
       name: '🍗 Chicken',
       ids: ['chicken-nuggets', 'crispy-chicken-burger'],
-      open: openCategories[4] || false // ✅ FIX 1
+      open: openCategories[4] !== undefined ? openCategories[4] : false // ✅ FIX 1
     },
     {
       name: '🍟 Beilagen',
       ids: ['pommes'],
-      open: openCategories[5] || false // ✅ FIX 1
+      open: openCategories[5] !== undefined ? openCategories[5] : false // ✅ FIX 1
     },
     {
       name: '🥤 Getränke',
       ids: ['ayran', 'wasser', 'cola', 'fanta', 'cola-zero'],
-      open: openCategories[6] || false // ✅ FIX 1
+      open: openCategories[6] !== undefined ? openCategories[6] : false // ✅ FIX 1
     }
   ]
   
