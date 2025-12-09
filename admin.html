@@ -74,24 +74,24 @@ textarea { resize: vertical; min-height: 60px; }
   <div class="card" style="border: 3px solid #3b82f6;">
     <h2>☁️ Aktuelles Wetter</h2>
     <div id="current-weather-display" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 16px;">
-      <div style="background: #f9fafb; border-radius: 12px; padding: 16px; text-align: center;">
-        <div style="font-size: 48px; margin-bottom: 8px;" id="weather-icon">☁️</div>
-        <div style="font-size: 24px; font-weight: 700; color: #E31E24;" id="weather-temp">--°C</div>
-        <div style="font-size: 13px; color: #6b7280; margin-top: 4px;" id="weather-condition">Laden...</div>
+      <div style="background: #f9fafb; border-radius: 12px; padding: 20px; text-align: center;">
+        <div style="font-size: 56px; margin-bottom: 12px;" id="weather-icon">☁️</div>
+        <div style="font-size: 32px; font-weight: 700; color: #E31E24; margin-bottom: 4px;" id="weather-temp">12°C</div>
+        <div style="font-size: 14px; color: #6b7280;" id="weather-condition">Bewölkt</div>
       </div>
-      <div style="background: #f9fafb; border-radius: 12px; padding: 16px;">
-        <div style="font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 600;">🌧️ Regen</div>
-        <div style="font-size: 28px; font-weight: 700; color: #3b82f6;" id="weather-rain">-- mm/h</div>
+      <div style="background: #f9fafb; border-radius: 12px; padding: 20px; text-align: center;">
+        <div style="font-size: 14px; color: #6b7280; margin-bottom: 8px; font-weight: 600;">🌧️ Regen</div>
+        <div style="font-size: 36px; font-weight: 700; color: #3b82f6;" id="weather-rain">0 mm/h</div>
       </div>
-      <div style="background: #f9fafb; border-radius: 12px; padding: 16px;">
-        <div style="font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 600;">💨 Wind</div>
-        <div style="font-size: 28px; font-weight: 700; color: #10b981;" id="weather-wind">-- km/h</div>
+      <div style="background: #f9fafb; border-radius: 12px; padding: 20px; text-align: center;">
+        <div style="font-size: 14px; color: #6b7280; margin-bottom: 8px; font-weight: 600;">💨 Wind</div>
+        <div style="font-size: 36px; font-weight: 700; color: #10b981;" id="weather-wind">11 km/h</div>
       </div>
     </div>
-    <button class="primary" onclick="checkWeatherNow()" style="margin-top: 16px;">🔄 Wetter jetzt aktualisieren</button>
+    <button class="primary" onclick="updateWeather()" style="margin-top: 16px;">🔄 Wetter jetzt aktualisieren</button>
   </div>
 
-    <div class="card">
+  <div class="card">
     <h2>🎁 Globale Bonusse</h2>
     <p class="subtitle">Erstelle Bonusse, die sofort bei allen Kunden erscheinen</p>
     <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px;">
@@ -114,291 +114,6 @@ textarea { resize: vertical; min-height: 60px; }
     </div>
     <div style="margin-top: 24px;"><h3>Aktive Bonusse</h3><div id="globalBonusList"></div></div>
   </div>
-
-  <!-- 🌧️ WETTER-DÖNER-DEALS -->
-  <div class="card" style="border: 3px solid #3b82f6;">
-    <h2>🌧️ Wetter-Döner-Deals</h2>
-    <p class="subtitle">Automatischer Check um 11 Uhr | Intelligente Upgrades | Beste Preise garantiert</p>
-    
-    <!-- Preis-Staffelung Übersicht -->
-    <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-      <h3 style="color: #1e40af; margin-bottom: 12px;">🍖 Döner-Preis-Staffelung</h3>
-      <div style="font-size: 13px; color: #1e40af; margin-bottom: 12px; font-weight: 600;">
-        Normal: 6€ | Bei schlechtem Wetter:
-      </div>
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <div style="background: white; border-radius: 8px; padding: 12px;">
-          <div style="font-weight: 700; color: #1e40af; margin-bottom: 8px; font-size: 14px;">🌧️ REGEN-DEALS</div>
-          <div style="font-size: 12px; color: #374151; line-height: 1.8;">
-            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #e5e7eb;">
-              <span>3-5 mm/h</span>
-              <span style="color: #3b82f6; font-weight: 600;">5€ (-17%)</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #e5e7eb;">
-              <span>5-8 mm/h</span>
-              <span style="color: #2563eb; font-weight: 600;">4.50€ (-25%)</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #e5e7eb;">
-              <span>8-12 mm/h</span>
-              <span style="color: #1d4ed8; font-weight: 600;">4€ (-33%)</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 4px 0;">
-              <span>>12 mm/h</span>
-              <span style="color: #1e3a8a; font-weight: 700;">3€ (-50%!) 🔥</span>
-            </div>
-          </div>
-        </div>
-        
-        <div style="background: white; border-radius: 8px; padding: 12px;">
-          <div style="font-weight: 700; color: #1e40af; margin-bottom: 8px; font-size: 14px;">❄️ KÄLTE-DEALS</div>
-          <div style="font-size: 12px; color: #374151; line-height: 1.8;">
-            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #e5e7eb;">
-              <span>-1 bis 0°C</span>
-              <span style="color: #3b82f6; font-weight: 600;">4.50€ (-25%)</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #e5e7eb;">
-              <span>-5 bis -1°C</span>
-              <span style="color: #2563eb; font-weight: 600;">4€ (-33%)</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 4px 0;">
-              <span><-5°C</span>
-              <span style="color: #1e3a8a; font-weight: 700;">3€ (-50%!) 🔥</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 12px; margin-top: 12px; font-size: 13px; color: #92400e;">
-        💡 <strong>Strategie:</strong> Kunden wollen bei schlechtem Wetter liefern lassen. 
-        Mit krassen Rabatten (bis -50%!) holst du sie trotzdem raus! 
-        → Du sparst Lieferkosten + Lieferando-Provision!
-      </div>
-      
-  
-    <!-- WhatsApp Broadcast für Wetter-Deals -->
-    <div id="weather-deal-broadcast" style="display: none; background: #dcfce7; border: 2px solid #22c55e; border-radius: 10px; padding: 16px; margin-top: 12px;">
-      <div style="font-weight: 700; color: #166534; margin-bottom: 12px; font-size: 16px;">📢 WhatsApp Broadcast senden</div>
-      <div style="font-size: 14px; color: #166534; margin-bottom: 12px;">
-        Aktueller Deal: <span style="font-weight: 700; font-size: 18px;" id="broadcast-deal-price">-€</span>
-        <span id="broadcast-deal-reason" style="display: block; font-size: 13px; margin-top: 4px; opacity: 0.8;">-</span>
-      </div>
-      <button class="success" onclick="sendWeatherDealBroadcast()" style="background: #22c55e;">
-        📱 Deal an alle Kunden senden
-      </button>
-      <div id="result-broadcast"></div>
-    </div>
-
-    <!-- Auto-Check: 9-22 Uhr, alle 30 Min (hardcoded) -->
-      <div style="background: #dcfce7; border: 2px solid #22c55e; border-radius: 8px; padding: 12px; margin-top: 12px;">
-        <div style="font-weight: 700; color: #166534; margin-bottom: 6px;">🤖 Auto-Check AKTIV</div>
-        <div style="font-size: 13px; color: #166534; margin-bottom: 8px;">Läuft täglich: 9-22 Uhr, alle 30 Min</div>
-        <div id="weather-last-check" style="font-size: 12px; color: #166534; opacity: 0.8;">🔄 Zuletzt aktualisiert: --:--</div>
-      </div>
-    </div>
-
-    <!-- Deal-Status & Upgrade-Tracking -->
-    <div id="weather-deal-status" style="display: none; background: linear-gradient(135deg, #10b981, #34d399); color: white; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <div>
-          <div style="font-size: 18px; font-weight: 700;">✅ DEAL AKTIV</div>
-          <div style="font-size: 13px; opacity: 0.9;" id="deal-sent-time">Gesendet: --:--</div>
-        </div>
-        <div style="text-align: right;">
-          <div style="font-size: 28px; font-weight: 900;" id="deal-current-price">-€</div>
-          <div style="font-size: 12px; opacity: 0.9;">Aktueller Deal-Preis</div>
-        </div>
-      </div>
-      
-      <div style="background: rgba(255,255,255,0.2); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-        <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">📊 DEAL-VERLAUF HEUTE:</div>
-        <div id="deal-history" style="font-size: 12px; line-height: 1.8;"></div>
-      </div>
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; font-size: 12px;">
-        <div style="text-align: center;">
-          <div style="font-size: 20px; font-weight: 700;" id="deal-customers">0</div>
-          <div style="opacity: 0.9;">Kunden</div>
-        </div>
-        <div style="text-align: center;">
-          <div style="font-size: 20px; font-weight: 700;" id="deal-updates">0</div>
-          <div style="opacity: 0.9;">Updates</div>
-        </div>
-        <div style="text-align: center;">
-          <div style="font-size: 20px; font-weight: 700;" id="deal-savings">-€</div>
-          <div style="opacity: 0.9;">Ø Rabatt</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Upgrade-Alert -->
-    <div id="weather-upgrade-alert" style="display: none; background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-      <div style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">
-        🚨 BESSERER DEAL MÖGLICH!
-      </div>
-      <div style="font-size: 14px; margin-bottom: 12px;">
-        <div>Aktueller Deal: <span id="upgrade-old-price" style="font-weight: 700;">-€</span></div>
-        <div>Neuer Deal: <span id="upgrade-new-price" style="font-weight: 900; font-size: 18px;">-€</span></div>
-        <div style="margin-top: 4px; opacity: 0.9;" id="upgrade-reason">-</div>
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <button onclick="sendUpgradeDeal()" style="background: white; color: #f59e0b; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px;">
-          🔥 UPGRADE SENDEN
-        </button>
-        <button onclick="dismissUpgrade()" style="background: rgba(0,0,0,0.3); color: white; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">
-          ❌ Ignorieren
-        </button>
-      </div>
-    </div>
-
-    <!-- Aktuelles Wetter + Döner-Preis -->
-    <div id="weather-current" style="background: #f3f4f6; border-radius: 10px; padding: 16px; margin-bottom: 16px; display: none;">
-      <h3 style="margin-bottom: 12px;">☁️ Aktuelles Wetter</h3>
-      <div id="weather-display"></div>
-    </div>
-
-    <!-- Manuelle Aktion -->
-    <button class="success" onclick="checkWeatherNow()" id="btn-check-weather" style="font-size: 16px; padding: 16px; width: 100%; margin-bottom: 16px;">
-      🌤️ Wetter JETZT prüfen & Deal berechnen
-    </button>
-
-    <!-- WhatsApp Nachricht mit Deal -->
-    <div id="weather-whatsapp" style="display: none; background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 16px;">
-      <h3 style="color: #1e40af; margin-bottom: 12px;">📱 WhatsApp-Nachricht mit Deal</h3>
-      
-      <div style="margin-bottom: 12px;">
-        <label class="form-label" style="color: #1e40af;">Kunden-Nummern:</label>
-        <textarea id="weather-numbers" readonly style="background: white; min-height: 80px; font-family: monospace; font-size: 13px; border: 2px solid #3b82f6;"></textarea>
-        <button onclick="copyWeatherNumbers()" style="background: #3b82f6; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 8px;">
-          📋 Nummern kopieren
-        </button>
-      </div>
-
-      <div style="margin-bottom: 12px;">
-        <label class="form-label" style="color: #1e40af;">WhatsApp-Nachricht:</label>
-        <textarea id="weather-message" readonly style="background: white; min-height: 140px; border: 2px solid #3b82f6;"></textarea>
-        <button onclick="copyWeatherMessage()" style="background: #3b82f6; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 8px;">
-          📋 Nachricht kopieren
-        </button>
-      </div>
-    </div>
-
-    <div id="result-weather"></div>
-  </div>
-  <!-- 💤 WIN-BACK KAMPAGNE MIT COOLDOWN -->
-  <div class="card" style="border: 3px solid #8b5cf6;">
-    <h2>💤 Win-Back Kampagne (4 Phasen)</h2>
-    <p class="subtitle">Reaktiviere inaktive Kunden mit gestaffelten Boni & Cooldown-System</p>
-    
-    <!-- Phasen-Übersicht -->
-    <div style="background: #ede9fe; border: 2px solid #8b5cf6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-      <h3 style="color: #5b21b6; margin-bottom: 12px;">🎯 Win-Back Phasen</h3>
-      
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-bottom: 16px;">
-        <div style="background: white; border-left: 4px solid #f472b6; border-radius: 8px; padding: 12px;">
-          <div style="font-weight: 700; color: #111827; margin-bottom: 4px;">❤️ Phase 1: Mild</div>
-          <div style="font-size: 13px; color: #6b7280;">14+ Tage inaktiv</div>
-          <div style="font-size: 18px; font-weight: 700; color: #f472b6; margin: 6px 0;">+100 Punkte</div>
-          <div style="font-size: 12px; color: #6b7280;">Cooldown: 7 Tage</div>
-        </div>
-        
-        <div style="background: white; border-left: 4px solid #fb923c; border-radius: 8px; padding: 12px;">
-          <div style="font-weight: 700; color: #111827; margin-bottom: 4px;">😢 Phase 2: Medium</div>
-          <div style="font-size: 13px; color: #6b7280;">21+ Tage inaktiv</div>
-          <div style="font-size: 18px; font-weight: 700; color: #fb923c; margin: 6px 0;">+150 Punkte</div>
-          <div style="font-size: 12px; color: #6b7280;">Cooldown: 7 Tage</div>
-        </div>
-        
-        <div style="background: white; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 12px;">
-          <div style="font-weight: 700; color: #111827; margin-bottom: 4px;">🥺 Phase 3: Aggressiv</div>
-          <div style="font-size: 13px; color: #6b7280;">30+ Tage inaktiv</div>
-          <div style="font-size: 18px; font-weight: 700; color: #f59e0b; margin: 6px 0;">+300 Punkte</div>
-          <div style="font-size: 12px; color: #6b7280;">Cooldown: 30 Tage</div>
-        </div>
-        
-        <div style="background: white; border-left: 4px solid #dc2626; border-radius: 8px; padding: 12px;">
-          <div style="font-weight: 700; color: #111827; margin-bottom: 4px;">🔥 Phase 4: Ultimativ</div>
-          <div style="font-size: 13px; color: #6b7280;">60+ Tage inaktiv</div>
-          <div style="font-size: 18px; font-weight: 700; color: #dc2626; margin: 6px 0;">+500 Punkte</div>
-          <div style="font-size: 12px; color: #6b7280;">Cooldown: 60 Tage</div>
-        </div>
-      </div>
-      
-      <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 12px; font-size: 13px; color: #92400e;">
-        💡 <strong>Wichtig:</strong> Nur WhatsApp-aktivierte Kunden werden angeschrieben. Punkte werden automatisch beim nächsten QR-Scan gutgeschrieben (24h Zeitfenster)!
-      </div>
-    </div>
-
-    <!-- Phase auswählen -->
-    <div style="background: #f3f4f6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-      <label class="form-label">🎯 Phase auswählen:</label>
-      <select id="winback-phase" style="padding: 12px; font-size: 15px; font-weight: 600;">
-        <option value="1">❤️ Phase 1: Mild (14+ Tage, +100P, 7d Cooldown)</option>
-        <option value="2">😢 Phase 2: Medium (21+ Tage, +150P, 7d Cooldown)</option>
-        <option value="3">🥺 Phase 3: Aggressiv (30+ Tage, +300P, 30d Cooldown)</option>
-        <option value="4">🔥 Phase 4: Ultimativ (60+ Tage, +500P, 60d Cooldown)</option>
-      </select>
-      
-      <button class="success" onclick="prepareWinbackCampaign()" style="margin-top: 12px; font-size: 16px; padding: 16px;">
-        🔍 Kampagne vorbereiten
-      </button>
-    </div>
-
-    <!-- Statistiken -->
-    <div id="winback-stats" style="display: none; background: #f3f4f6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-      <h3 style="margin-bottom: 12px;">📊 Berechtigte Kunden</h3>
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
-        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
-          <div style="font-size: 32px; font-weight: 700; color: #8b5cf6;" id="stat-wb-eligible">0</div>
-          <div style="font-size: 13px; color: #6b7280;">Berechtigt</div>
-        </div>
-        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
-          <div style="font-size: 32px; font-weight: 700; color: #ef4444;" id="stat-wb-cooldown">0</div>
-          <div style="font-size: 13px; color: #6b7280;">Im Cooldown</div>
-        </div>
-        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
-          <div style="font-size: 32px; font-weight: 700; color: #10b981;" id="stat-wb-ready">0</div>
-          <div style="font-size: 13px; color: #6b7280;">Versandbereit</div>
-        </div>
-      </div>
-      
-      <!-- Kundenliste -->
-      <div id="winback-customer-list" style="max-height: 300px; overflow-y: auto; background: white; border-radius: 8px; padding: 12px;">
-        <!-- Wird dynamisch gefüllt -->
-      </div>
-    </div>
-
-    <!-- WhatsApp Export -->
-    <div id="winback-whatsapp" style="display: none; background: #ede9fe; border: 2px solid #8b5cf6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-      <h3 style="color: #5b21b6; margin-bottom: 12px;">📱 WhatsApp-Versand</h3>
-      
-      <div style="margin-bottom: 16px;">
-        <label class="form-label" style="color: #5b21b6;">1️⃣ Nummern kopieren:</label>
-        <textarea id="winback-numbers" readonly style="background: white; min-height: 100px; font-family: monospace; font-size: 13px;"></textarea>
-        <button onclick="copyWinbackNumbers()" style="background: #8b5cf6; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 8px;">
-          📋 Nummern kopieren
-        </button>
-      </div>
-
-      <div style="margin-bottom: 16px;">
-        <label class="form-label" style="color: #5b21b6;">2️⃣ Nachricht kopieren:</label>
-        <textarea id="winback-message" readonly style="background: white; min-height: 160px;"></textarea>
-        <button onclick="copyWinbackMessage()" style="background: #8b5cf6; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 8px;">
-          📋 Nachricht kopieren
-        </button>
-      </div>
-
-      <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-        <h4 style="color: #92400e; margin-bottom: 8px; font-size: 15px;">⚠️ WICHTIG: Nach WhatsApp-Versand</h4>
-        <p style="color: #92400e; font-size: 14px; margin-bottom: 12px;">
-          Nachdem du die Nachricht in WhatsApp Business versendet hast, MUSST du hier bestätigen!
-          Nur dann werden die Punkte beim nächsten QR-Scan automatisch gutgeschrieben.
-        </p>
-        <button onclick="confirmWinbackCampaign()" style="background: #10b981; color: white; width: 100%; padding: 16px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 16px;">
-          ✅ KAMPAGNE BESTÄTIGEN (Nachricht versendet!)
-        </button>
-      </div>
-    </div>
 
     <div id="result-winback"></div>
   </div>
@@ -2808,156 +2523,60 @@ function renderOrdersList() {
 console.log('✅ Business Intelligence geladen (FIXED)!')
 
 
-// ☁️ WETTER-CHECK FUNKTIONEN
-async function checkWeatherNow() {
+// ☁️ WETTER AKTUALISIEREN
+async function updateWeather() {
+  const btn = event.target
+  const originalText = btn.textContent
+  btn.disabled = true
+  btn.textContent = '⏳ Aktualisiere...'
+  
   try {
+    // Wetter-API Call (Kassel, Hessen)
     const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=51.32&longitude=9.49&current=temperature_2m,precipitation,wind_speed_10m,weather_code&timezone=Europe/Berlin')
     const data = await response.json()
     
     const temp = Math.round(data.current.temperature_2m)
     const rain = data.current.precipitation || 0
     const wind = Math.round(data.current.wind_speed_10m)
+    const code = data.current.weather_code
     
+    // Update UI
     document.getElementById('weather-temp').textContent = temp + '°C'
     document.getElementById('weather-rain').textContent = rain + ' mm/h'
     document.getElementById('weather-wind').textContent = wind + ' km/h'
-    document.getElementById('weather-condition').textContent = getWeatherCondition(data.current.weather_code)
-    document.getElementById('weather-icon').textContent = getWeatherIcon(data.current.weather_code)
     
-    // Prüfe ob Deal aktiv werden sollte
-    const dealPrice = calculateDealPrice(temp, rain)
-    if (dealPrice < 6) {
-      document.getElementById('weather-deal-broadcast').style.display = 'block'
-      document.getElementById('broadcast-deal-price').textContent = dealPrice.toFixed(2) + '€'
-      
-      let reason = ''
-      if (rain >= 12) reason = '🌧️ Extremer Regen (>12mm/h)'
-      else if (rain >= 8) reason = '🌧️ Starker Regen (8-12mm/h)'
-      else if (rain >= 5) reason = '🌧️ Regen (5-8mm/h)'
-      else if (rain >= 3) reason = '🌧️ Leichter Regen (3-5mm/h)'
-      else if (temp < -5) reason = '❄️ Extremkälte (<-5°C)'
-      else if (temp < -1) reason = '❄️ Frost (-5 bis -1°C)'
-      else if (temp <= 0) reason = '❄️ Eiskalt (-1 bis 0°C)'
-      
-      document.getElementById('broadcast-deal-reason').textContent = reason
-    } else {
-      document.getElementById('weather-deal-broadcast').style.display = 'none'
-    }
+    // Wetter-Icon
+    let icon = '☁️'
+    let condition = 'Wolkig'
+    if (code === 0) { icon = '☀️'; condition = 'Sonnig' }
+    else if (code <= 3) { icon = '⛅'; condition = 'Bewölkt' }
+    else if (code <= 49) { icon = '🌫️'; condition = 'Nebel' }
+    else if (code <= 69) { icon = '🌧️'; condition = 'Regen' }
+    else if (code <= 79) { icon = '🌨️'; condition = 'Schnee' }
+    else if (code <= 99) { icon = '⛈️'; condition = 'Gewitter' }
     
-    console.log('✅ Wetter aktualisiert:', temp + '°C, Regen:', rain + 'mm/h')
+    document.getElementById('weather-icon').textContent = icon
+    document.getElementById('weather-condition').textContent = condition
     
-  } catch (e) {
-    console.error('❌ Wetter-Check Fehler:', e)
-  }
-}
-
-function calculateDealPrice(temp, rain) {
-  let price = 6.00
-  
-  // Regen-Deals
-  if (rain >= 12) price = 3.00
-  else if (rain >= 8) price = 4.00
-  else if (rain >= 5) price = 4.50
-  else if (rain >= 3) price = 5.00
-  
-  // Kälte-Deals (nur wenn kein Regen-Deal aktiv)
-  if (price === 6.00) {
-    if (temp < -5) price = 3.00
-    else if (temp < -1) price = 4.00
-    else if (temp <= 0) price = 4.50
-  }
-  
-  return price
-}
-
-function getWeatherIcon(code) {
-  if (code === 0) return '☀️'
-  if (code <= 3) return '⛅'
-  if (code <= 49) return '🌫️'
-  if (code <= 69) return '🌧️'
-  if (code <= 79) return '🌨️'
-  if (code <= 99) return '⛈️'
-  return '☁️'
-}
-
-function getWeatherCondition(code) {
-  if (code === 0) return 'Sonnig'
-  if (code <= 3) return 'Bewölkt'
-  if (code <= 49) return 'Nebel'
-  if (code <= 69) return 'Regen'
-  if (code <= 79) return 'Schnee'
-  if (code <= 99) return 'Gewitter'
-  return 'Wolkig'
-}
-
-// 📱 WHATSAPP BROADCAST FUNKTION
-async function sendWeatherDealBroadcast() {
-  const btn = event.target
-  btn.disabled = true
-  btn.textContent = '⏳ Sende...'
-  
-  try {
-    // Hole alle Kunden mit Telefonnummer
-    const { data: customers, error } = await supabase
-      .from('customers')
-      .select('name, phone')
-      .not('phone', 'is', null)
-    
-    if (error) throw error
-    
-    const dealPrice = document.getElementById('broadcast-deal-price').textContent
-    const reason = document.getElementById('broadcast-deal-reason').textContent
-    
-    // WhatsApp Nachricht erstellen
-    const message = `🌧️ WETTER-DEAL! ${reason}
-
-🍖 Döner jetzt nur ${dealPrice}
-(Normalpreis: 6,00€)
-
-Komm vorbei und spare! 🏃
-
-📍 Döner Boxx
-⏰ Nur solange das Wetter schlecht ist!`
-    
-    // Hier würdest du die WhatsApp Business API Integration machen
-    // Für jetzt zeigen wir die Nachricht an
-    
-    const resultMsg = `✅ Deal-Nachricht bereit für ${customers.length} Kunden!
-
-📱 WhatsApp Nachricht:
-────────────────
-${message}
-────────────────
-
-💡 Kopiere diese Nachricht und sende sie manuell an deine Kunden-Gruppen oder verwende WhatsApp Business API für automatischen Versand.`
-    
-    showResult('result-broadcast', resultMsg, 'success-msg')
+    console.log('✅ Wetter aktualisiert:', temp + '°C,', condition)
     
     btn.disabled = false
-    btn.textContent = '✅ Nachricht erstellt'
-    
-    setTimeout(() => {
-      btn.textContent = '📱 Deal an alle Kunden senden'
-    }, 5000)
+    btn.textContent = '✅ Aktualisiert'
+    setTimeout(() => { btn.textContent = originalText }, 2000)
     
   } catch (e) {
-    console.error('❌ Broadcast Fehler:', e)
-    showResult('result-broadcast', '❌ Fehler: ' + e.message, 'error')
+    console.error('❌ Wetter-Fehler:', e)
     btn.disabled = false
-    btn.textContent = '📱 Deal an alle Kunden senden'
+    btn.textContent = '❌ Fehler'
+    setTimeout(() => { btn.textContent = originalText }, 2000)
   }
 }
 
-// Auto-Check beim Laden der Seite
-if (typeof window !== 'undefined') {
-  window.addEventListener('load', () => {
-    console.log('🚀 Starte Wetter-Check...')
-    checkWeatherNow()
-    
-    // Update alle 5 Minuten
-    setInterval(checkWeatherNow, 5 * 60 * 1000)
-  })
-}
+// Auto-Update beim Laden
+window.addEventListener('load', () => {
+  console.log('🌤️ Lade Wetter...')
+  updateWeather()
+})
 
 </script>
 </body>
