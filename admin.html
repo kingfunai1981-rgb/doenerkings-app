@@ -98,6 +98,7 @@ textarea { resize: vertical; min-height: 60px; }
       
     </div>
     <button class="primary" onclick="checkWeatherNow()" style="margin-top: 16px;">🔄 Wetter jetzt aktualisieren</button>
+    <div id="weather-last-update" style="text-align: center; color: #6b7280; font-size: 13px; margin-top: 8px;"></div>
   </div>
 
     <div class="card">
@@ -2664,10 +2665,16 @@ async function checkWeatherNow() {
     document.getElementById('weather-condition').textContent = getWeatherCondition(data.current.weather_code)
     document.getElementById('weather-icon').textContent = getWeatherIcon(data.current.weather_code)
     
+    // Aktualisierungszeit anzeigen
+    const now = new Date()
+    const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    document.getElementById('weather-last-update').textContent = '✅ Zuletzt aktualisiert: ' + timeStr
+    
     console.log('✅ Wetter aktualisiert:', temp + '°C, Regen:', rain + 'mm/h')
     
   } catch (e) {
     console.error('❌ Wetter-Check Fehler:', e)
+    document.getElementById('weather-last-update').textContent = '❌ Fehler beim Aktualisieren'
   }
 }
 
