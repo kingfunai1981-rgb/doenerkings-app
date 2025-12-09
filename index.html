@@ -2552,7 +2552,6 @@ function logout() {
   
   // 4. ALLE Modals schließen (NUR mit Klassen - kein inline display!)
   const modals = [
-    'order-section',
     'customizeModal',
     'cartModal',
     'checkoutModal',
@@ -2566,6 +2565,12 @@ function logout() {
       modal.style.display = ''  // ✅ Inline-Style ENTFERNEN statt setzen
     }
   })
+  
+  // 4b. order-section ist KEIN normales Modal - explizit schließen
+  const orderSection = document.getElementById('order-section')
+  if (orderSection) {
+    orderSection.style.display = 'none'  // ✅ Muss explizit none sein
+  }
   
   // 5. Warenkorb leeren
   cart = []
@@ -2604,21 +2609,7 @@ function logout() {
   // 9. Scrolle nach oben
   window.scrollTo(0, 0)
   
-  // 10. Final Check: Stelle sicher dass NUR start-screen sichtbar ist
-  setTimeout(() => {
-    document.querySelectorAll('.screen').forEach(screen => {
-      if (screen.id !== 'screen-start') {
-        screen.classList.remove('active')
-        screen.style.display = 'none'
-      }
-    })
-    const startScreen = document.getElementById('screen-start')
-    if (startScreen) {
-      startScreen.classList.add('active')
-      startScreen.style.display = 'block'
-    }
-    console.log('✅ Logout komplett - Start-Screen aktiv')
-  }, 100)
+  console.log('✅ Logout komplett - Start-Screen aktiv')
 }
 
 window.onload = () => {
