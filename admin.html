@@ -74,18 +74,23 @@ textarea { resize: vertical; min-height: 60px; }
   <div class="card" style="border: 3px solid #3b82f6;">
     <h2>☁️ Aktuelles Wetter</h2>
     <div id="current-weather-display" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 16px;">
+      <!-- Temperatur -->
       <div style="background: #f9fafb; border-radius: 12px; padding: 20px; text-align: center;">
-        <div style="font-size: 56px; margin-bottom: 12px;" id="weather-icon">☁️</div>
+        <div style="font-size: 56px; margin-bottom: 12px;" id="weather-icon">⛅</div>
         <div style="font-size: 32px; font-weight: 700; color: #E31E24; margin-bottom: 4px;" id="weather-temp">12°C</div>
         <div style="font-size: 14px; color: #6b7280;" id="weather-condition">Bewölkt</div>
       </div>
+      <!-- Regen -->
       <div style="background: #f9fafb; border-radius: 12px; padding: 20px; text-align: center;">
-        <div style="font-size: 14px; color: #6b7280; margin-bottom: 8px; font-weight: 600;">🌧️ Regen</div>
-        <div style="font-size: 36px; font-weight: 700; color: #3b82f6;" id="weather-rain">0 mm/h</div>
+        <div style="font-size: 56px; margin-bottom: 12px;">🌧️</div>
+        <div style="font-size: 32px; font-weight: 700; color: #3b82f6; margin-bottom: 4px;" id="weather-rain">0 mm/h</div>
+        <div style="font-size: 14px; color: #6b7280;">Regen</div>
       </div>
+      <!-- Wind -->
       <div style="background: #f9fafb; border-radius: 12px; padding: 20px; text-align: center;">
-        <div style="font-size: 14px; color: #6b7280; margin-bottom: 8px; font-weight: 600;">💨 Wind</div>
-        <div style="font-size: 36px; font-weight: 700; color: #10b981;" id="weather-wind">11 km/h</div>
+        <div style="font-size: 56px; margin-bottom: 12px;">💨</div>
+        <div style="font-size: 32px; font-weight: 700; color: #10b981; margin-bottom: 4px;" id="weather-wind">11 km/h</div>
+        <div style="font-size: 14px; color: #6b7280;">Wind</div>
       </div>
     </div>
     <button class="primary" onclick="updateWeather()" style="margin-top: 16px;">🔄 Wetter jetzt aktualisieren</button>
