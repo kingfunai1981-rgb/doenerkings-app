@@ -3649,24 +3649,30 @@ function renderCheckout() {
   const summary = document.getElementById('checkoutSummary')
   
   const items = cart.map(item => {
-    const optionsText = Object.keys(item.options)
-      .filter(key => {
-        const value = item.options[key]
-        const defaultValue = item.product.options[key].default
-        return value !== defaultValue
-      })
-      .map(key => {
-        const value = item.options[key]
-        const label = item.product.options[key].label
-        if (typeof value === 'string') return `${label}: ${value}`
-        return `${label}: ${value === 0 ? 'Ohne' : value === 1 ? '1x' : '2x'}`
-      })
-      .join(', ')
+    let optionsText = ''
+    if (item.options && item.product.options) {
+      optionsText = Object.keys(item.options)
+        .filter(key => {
+          const value = item.options[key]
+          const defaultValue = item.product.options[key]?.default
+          return value !== defaultValue
+        })
+        .map(key => {
+          const value = item.options[key]
+          const label = item.product.options[key]?.label || key
+          if (typeof value === 'string') return `${label}: ${value}`
+          return `${label}: ${value === 0 ? 'Ohne' : value === 1 ? '1x' : '2x'}`
+        })
+        .join(', ')
+    }
     
-    const extrasText = item.extras.map(extraId => {
-      const extra = item.product.extras.find(e => e.id === extraId)
-      return extra ? `+ ${extra.name}` : ''
-    }).join(', ')
+    let extrasText = ''
+    if (item.extras && item.product.extras) {
+      extrasText = item.extras.map(extraId => {
+        const extra = item.product.extras.find(e => e.id === extraId)
+        return extra ? `+ ${extra.name}` : ''
+      }).join(', ')
+    }
     
     return `
       <div class="summary-row">
@@ -3848,6 +3854,10 @@ async function placeOrder() {
     
     cart = []
     updateCart()
+    
+    // ✅ Button zurücksetzen
+    btn.disabled = false
+    btn.innerHTML = 'Jetzt bestellen - <span id="finalTotal">0,00 €</span>'
     
   } catch (error) {
     console.error('Error:', error)
