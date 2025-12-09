@@ -1689,6 +1689,11 @@ function renderOrders(orders) {
         // PayPal: Nur EIN Button - macht automatisch alles
         actions = `<button onclick="markPayPalPaid('${order.id}', '${order.customer_id}', ${order.total})" class="success">💳 PayPal bezahlt ✅</button>`
       }
+      // Bearbeiten & Löschen Buttons für PENDING orders
+      actions += `
+        <button onclick="editOrder('${order.id}')" class="secondary" style="margin-top: 8px;">✏️ Bearbeiten</button>
+        <button onclick="deleteOrder('${order.id}')" class="danger" style="margin-top: 8px;">🗑️ Löschen</button>
+      `
     }
     // Alle anderen Status zeigen keine Buttons mehr - wird automatisch abgeschlossen!
     
@@ -1876,6 +1881,75 @@ async function cancelOrder(orderId) {
     console.error('cancelOrder Fehler:', e)
   }
 }
+
+async function editOrder(orderId) {
+  try {
+    // Hole die Bestellung
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .single()
+    
+    if (error || !order) {
+      alert('❌ Fehler beim Laden der Bestellung')
+      return
+    }
+    
+    // Erstelle einen einfachen Prompt für die Änderungen
+    const newTotal = prompt('Neuer Gesamtbetrag:', order.total)
+    
+    if (newTotal === null) return // Abgebrochen
+    
+    const parsedTotal = parseFloat(newTotal)
+    if (isNaN(parsedTotal) || parsedTotal < 0) {
+      alert('❌ Ungültiger Betrag!')
+      return
+    }
+    
+    // Update die Bestellung
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ 
+        total: parsedTotal,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', orderId)
+    
+    if (updateError) {
+      alert('❌ Fehler beim Aktualisieren: ' + updateError.message)
+      return
+    }
+    
+    console.log('✅ Bestellung aktualisiert')
+    loadOrders()
+  } catch (e) {
+    console.error('editOrder Fehler:', e)
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+async function deleteOrder(orderId) {
+  try {
+    // Direktes Löschen ohne Bestätigung
+    const { error } = await supabase
+      .from('orders')
+      .delete()
+      .eq('id', orderId)
+    
+    if (error) {
+      alert('❌ Fehler beim Löschen: ' + error.message)
+      return
+    }
+    
+    console.log('✅ Bestellung gelöscht')
+    loadOrders()
+  } catch (e) {
+    console.error('deleteOrder Fehler:', e)
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
 
 async function addPointsForOrder(qrId, amount) {
   try {
