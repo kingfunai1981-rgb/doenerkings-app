@@ -2546,23 +2546,9 @@ function logout() {
   }
   refreshErrorCount = 0
   
-  // 2. FORCE: Alle Screens sofort verstecken (mit display:none als Backup)
-  console.log('🔄 Verstecke alle Screens...')
-  document.querySelectorAll('.screen').forEach(screen => {
-    screen.classList.remove('active')
-    // FORCE: Zusätzlich display:none setzen als Backup
-    screen.style.display = 'none'
-  })
-  
-  // 3. FORCE: Nur Start-Screen anzeigen
-  const startScreen = document.getElementById('screen-start')
-  if (startScreen) {
-    startScreen.classList.add('active')
-    startScreen.style.display = 'block' // FORCE: display block
-    console.log('✅ Start-Screen aktiviert')
-  } else {
-    console.error('❌ Start-Screen nicht gefunden!')
-  }
+  // 2. Alle Screens verstecken und zu Start-Screen wechseln
+  console.log('🔄 Wechsel zu Start-Screen...')
+  showScreen('start')  // ✅ Nutzt die zentrale showScreen() Funktion
   
   // 4. ALLE Modals schließen (NUR mit Klassen - kein inline display!)
   const modals = [
