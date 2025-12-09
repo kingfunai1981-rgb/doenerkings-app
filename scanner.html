@@ -1721,19 +1721,14 @@ async function markOrderPaid(orderId, customerId, total) {
       await addPointsForCustomerId(customerId, total)
     }
     
-    // 3. Telegram: Bar bezahlt
-    await sendTelegramUpdate(order.order_number, order.customer_name, 'paid', '💰 Bar bezahlt')
-    
-    // 4. Status: ready
+    // 3. Status: ready (ohne Telegram - du klickst es ja selbst)
     await supabase.from('orders').update({ status: 'ready' }).eq('id', orderId)
-    await sendTelegramUpdate(order.order_number, order.customer_name, 'ready', '📦 Bereit zur Abholung!')
     
-    // 5. Status: completed
+    // 4. Status: completed (ohne Telegram - du klickst es ja selbst)
     await supabase.from('orders').update({ 
       status: 'completed', 
       completed_at: new Date().toISOString() 
     }).eq('id', orderId)
-    await sendTelegramUpdate(order.order_number, order.customer_name, 'completed', '✅ Abgeschlossen!')
     
     console.log('✅ Bestellung komplett abgewickelt!')
     loadOrders()
@@ -1767,19 +1762,14 @@ async function markPayPalPaid(orderId, customerId, total) {
       await addPointsForCustomerId(customerId, total)
     }
     
-    // 3. Telegram: PayPal bezahlt
-    await sendTelegramUpdate(order.order_number, order.customer_name, 'paid', '💳 PayPal bezahlt')
-    
-    // 4. Status: ready
+    // 3. Status: ready (ohne Telegram - du klickst es ja selbst)
     await supabase.from('orders').update({ status: 'ready' }).eq('id', orderId)
-    await sendTelegramUpdate(order.order_number, order.customer_name, 'ready', '📦 Bereit zur Abholung!')
     
-    // 5. Status: completed
+    // 4. Status: completed (ohne Telegram - du klickst es ja selbst)
     await supabase.from('orders').update({ 
       status: 'completed', 
       completed_at: new Date().toISOString() 
     }).eq('id', orderId)
-    await sendTelegramUpdate(order.order_number, order.customer_name, 'completed', '✅ Abgeschlossen!')
     
     console.log('✅ Bestellung komplett abgewickelt!')
     loadOrders()
