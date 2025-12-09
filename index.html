@@ -850,6 +850,286 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
   box-shadow: 0 6px 16px rgba(227, 30, 36, 0.4);
 }
 
+/* 🍟 MENÜ-CUSTOMIZATION MODAL */
+.menu-customize-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 10001;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.menu-customize-modal.active {
+  display: flex;
+}
+
+.menu-customize-content {
+  background: white;
+  border-radius: 20px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUpModal 0.3s ease;
+}
+
+@keyframes slideUpModal {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.menu-step {
+  display: none;
+}
+
+.menu-step.active {
+  display: block;
+}
+
+.menu-step-header {
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  color: white;
+  padding: 24px;
+  border-radius: 20px 20px 0 0;
+  position: relative;
+}
+
+.menu-step-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-step-progress {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.menu-progress-dot {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.menu-progress-dot.active {
+  background: white;
+}
+
+.menu-step-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.menu-step-subtitle {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.menu-step-body {
+  padding: 24px;
+}
+
+.menu-option-group {
+  margin-bottom: 24px;
+}
+
+.menu-option-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #232122;
+  margin-bottom: 12px;
+}
+
+.menu-option-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.menu-option-btn {
+  flex: 1;
+  padding: 12px;
+  background: #f5f5f5;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.menu-option-btn:hover {
+  background: #ebebeb;
+}
+
+.menu-option-btn.active {
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  border-color: #E31E24;
+  color: white;
+}
+
+.menu-extras-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu-extra-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.menu-extra-item:hover {
+  background: #f3f4f6;
+}
+
+.menu-extra-item.active {
+  background: #fef3c7;
+  border-color: #F9A825;
+}
+
+.menu-extra-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menu-extra-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #d1d5db;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.menu-extra-item.active .menu-extra-checkbox {
+  background: #F9A825;
+  border-color: #F9A825;
+  color: white;
+}
+
+.menu-extra-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #E31E24;
+}
+
+.menu-drink-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.menu-drink-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.menu-drink-item:hover {
+  background: #f3f4f6;
+}
+
+.menu-drink-item.active {
+  background: linear-gradient(135deg, #FFFBF0, #FFF9E6);
+  border-color: #F9A825;
+}
+
+.menu-drink-radio {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.menu-drink-item.active .menu-drink-radio {
+  border-color: #F9A825;
+}
+
+.menu-drink-item.active .menu-drink-radio::after {
+  content: '';
+  width: 12px;
+  height: 12px;
+  background: #F9A825;
+  border-radius: 50%;
+}
+
+.menu-drink-info {
+  flex: 1;
+}
+
+.menu-drink-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #232122;
+  margin-bottom: 2px;
+}
+
+.menu-drink-desc {
+  font-size: 12px;
+  color: #666;
+}
+
+.menu-drink-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #E31E24;
+}
+
+.menu-step-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.menu-step-summary {
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #666;
+}
+
 .checkout-section {
   margin-bottom: 20px;
 }
@@ -1531,6 +1811,85 @@ input:focus, textarea:focus {
       <button class="place-order-btn" id="placeOrderBtn" onclick="placeOrder()" disabled>
         Jetzt bestellen - <span id="finalTotal">0,00 €</span>
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- 🍟 MENÜ-CUSTOMIZATION MODAL -->
+<div class="menu-customize-modal" id="menuCustomizeModal">
+  <div class="menu-customize-content">
+    <!-- Schritt 1: Pommes anpassen -->
+    <div class="menu-step active" id="menuStep1">
+      <div class="menu-step-header">
+        <button class="menu-step-close" onclick="closeMenuCustomize()">✕</button>
+        <div class="menu-step-progress">
+          <div class="menu-progress-dot active"></div>
+          <div class="menu-progress-dot"></div>
+        </div>
+        <div class="menu-step-title">🍟 Pommes anpassen</div>
+        <div class="menu-step-subtitle">Schritt 1 von 2</div>
+      </div>
+      
+      <div class="menu-step-body">
+        <div class="menu-option-group">
+          <div class="menu-option-label">Sauce</div>
+          <div class="menu-option-buttons">
+            <button class="menu-option-btn" onclick="selectPommesSauce('Ohne')">Ohne</button>
+            <button class="menu-option-btn active" onclick="selectPommesSauce('Ketchup')">Ketchup</button>
+            <button class="menu-option-btn" onclick="selectPommesSauce('Mayonnaise')">Mayonnaise</button>
+          </div>
+        </div>
+        
+        <div class="menu-option-group">
+          <div class="menu-option-label">Extras</div>
+          <div class="menu-extras-list">
+            <div class="menu-extra-item" onclick="togglePommesExtra('extraKetchup')">
+              <div class="menu-extra-info">
+                <div class="menu-extra-checkbox"></div>
+                <span>Extra Ketchup</span>
+              </div>
+              <div class="menu-extra-price">+0,30 €</div>
+            </div>
+            <div class="menu-extra-item" onclick="togglePommesExtra('extraMayo')">
+              <div class="menu-extra-info">
+                <div class="menu-extra-checkbox"></div>
+                <span>Extra Mayonnaise</span>
+              </div>
+              <div class="menu-extra-price">+0,30 €</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="menu-step-footer">
+        <button class="add-btn" onclick="goToMenuStep2()">➡️ Weiter zu Getränk</button>
+      </div>
+    </div>
+    
+    <!-- Schritt 2: Getränk wählen -->
+    <div class="menu-step" id="menuStep2">
+      <div class="menu-step-header">
+        <button class="menu-step-close" onclick="closeMenuCustomize()">✕</button>
+        <div class="menu-step-progress">
+          <div class="menu-progress-dot active"></div>
+          <div class="menu-progress-dot active"></div>
+        </div>
+        <div class="menu-step-title">🥤 Getränk wählen</div>
+        <div class="menu-step-subtitle">Schritt 2 von 2</div>
+      </div>
+      
+      <div class="menu-step-body">
+        <div class="menu-drink-list" id="drinkList">
+          <!-- Wird dynamisch gefüllt -->
+        </div>
+      </div>
+      
+      <div class="menu-step-footer">
+        <div class="menu-step-summary" id="menuSummary"></div>
+        <button class="add-btn" onclick="finalizeMenuBundle()" id="finalizeMenuBtn" disabled>
+          ✅ Menü zum Warenkorb - <span id="menuFinalPrice">0,00 €</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -3067,6 +3426,12 @@ let selectedPayment = null
 let selectedPickupTime = 'now'
 let selectedPickupTimeValue = null
 
+// 🍟 Menü-Bundle Customization Variablen
+let currentMenuBundle = null
+let menuPommesOptions = { sauce: 'Ketchup' }
+let menuPommesExtras = []
+let menuSelectedDrink = null
+
 function openOrderModal() {
   if (!currentCustomer) {
     alert('❌ Bitte melde dich erst an!')
@@ -3689,6 +4054,35 @@ function renderCart() {
   const html = cart.map((item, index) => {
     // 🎁 Spezielle Anzeige für Menü-Bundles
     if (item.isBundle) {
+      // ✅ Zeige Optionen vom Hauptprodukt (z.B. Döner-Anpassungen)
+      let mainProductDetails = ''
+      if (item.mainProductOptions && Object.keys(item.mainProductOptions).length > 0) {
+        // Finde das Original-Produkt um die Option-Labels zu bekommen
+        const originalProduct = products.find(p => p.name === item.mainProductName)
+        
+        if (originalProduct && originalProduct.options) {
+          const optionsList = Object.keys(item.mainProductOptions)
+            .filter(key => {
+              const value = item.mainProductOptions[key]
+              const defaultValue = originalProduct.options[key]?.default
+              return value !== defaultValue
+            })
+            .map(key => {
+              const value = item.mainProductOptions[key]
+              const label = originalProduct.options[key]?.label || key
+              if (typeof value === 'string') return `${label}: ${value}`
+              return `${label}: ${value === 0 ? 'Ohne' : value === 1 ? '1x' : '2x'}`
+            })
+          
+          if (optionsList.length > 0) {
+            mainProductDetails = `<div style="font-size: 12px; color: #666; margin-top: 6px; padding: 6px; background: #f9fafb; border-radius: 6px;">
+              <strong>Anpassungen ${item.mainProductName}:</strong><br>
+              ${optionsList.join(', ')}
+            </div>`
+          }
+        }
+      }
+      
       const bundleItemsList = item.bundleItems.map(bundleItem => 
         `<div style="display: flex; align-items: center; gap: 6px; padding: 4px 0; font-size: 13px; color: #666;">
           <span>${bundleItem.icon}</span>
@@ -3705,6 +4099,7 @@ function renderCart() {
           <div style="background: white; border-radius: 8px; padding: 10px; margin: 8px 0;">
             <div style="font-size: 12px; font-weight: 600; color: #92400e; margin-bottom: 6px;">Enthält:</div>
             ${bundleItemsList}
+            ${mainProductDetails}
           </div>
           <div class="cart-item-actions">
             <button class="cart-item-btn delete" onclick="removeFromCart(${index})">🗑️ Entfernen</button>
@@ -3868,7 +4263,7 @@ function upgradeToMenu(bundleId) {
   const bundle = MENU_BUNDLES.find(b => b.id === bundleId)
   if (!bundle) return
   
-  // Entferne das Hauptprodukt aus dem Warenkorb
+  // Finde das Hauptprodukt und speichere seine Optionen/Extras
   const mainProductIndex = cart.findIndex(item => 
     item.product.name === bundle.requiredProduct
   )
@@ -3878,33 +4273,25 @@ function upgradeToMenu(bundleId) {
     return
   }
   
-  // Entferne das alte Produkt
-  cart.splice(mainProductIndex, 1)
-  
-  // Füge das komplette Menü als Bundle hinzu
-  // (Erstelle ein spezielles Bundle-Produkt)
-  const menuProduct = {
-    product: {
-      name: bundle.name,
-      price: bundle.menuPrice,
-      category: 'menu',
-      image: '/menu-bundle.jpg'
-    },
-    price: bundle.menuPrice,
-    options: {},
-    extras: [],
-    isBundle: true,
-    bundleItems: bundle.includes
+  // Speichere Bundle und Original-Produkt für später
+  currentMenuBundle = {
+    bundle: bundle,
+    mainProductIndex: mainProductIndex,
+    originalProduct: cart[mainProductIndex]
   }
   
-  cart.push(menuProduct)
+  // Reset Customization
+  menuPommesOptions = { sauce: 'Ketchup' }
+  menuPommesExtras = []
+  menuSelectedDrink = null
   
-  // UI aktualisieren
-  updateCart()
-  renderCart()
+  // Öffne Customization Modal
+  document.getElementById('menuCustomizeModal').classList.add('active')
+  document.getElementById('menuStep1').classList.add('active')
+  document.getElementById('menuStep2').classList.remove('active')
   
-  // Erfolgs-Feedback
-  showToast(`✅ ${bundle.name} zum Warenkorb hinzugefügt!`)
+  // Schließe Warenkorb
+  closeCart()
 }
 
 function showToast(message) {
@@ -3943,6 +4330,203 @@ function showToast(message) {
       style.remove()
     }, 300)
   }, 2500)
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🍟 MENÜ-CUSTOMIZATION FUNKTIONEN
+// ═══════════════════════════════════════════════════════════════
+
+function closeMenuCustomize() {
+  document.getElementById('menuCustomizeModal').classList.remove('active')
+  currentMenuBundle = null
+  menuPommesOptions = { sauce: 'Ketchup' }
+  menuPommesExtras = []
+  menuSelectedDrink = null
+}
+
+function selectPommesSauce(sauce) {
+  menuPommesOptions.sauce = sauce
+  
+  // UI Update
+  document.querySelectorAll('#menuStep1 .menu-option-btn').forEach(btn => {
+    btn.classList.remove('active')
+    if (btn.textContent === sauce) {
+      btn.classList.add('active')
+    }
+  })
+}
+
+function togglePommesExtra(extraId) {
+  const index = menuPommesExtras.indexOf(extraId)
+  const item = document.querySelector(`#menuStep1 .menu-extra-item[onclick*="${extraId}"]`)
+  
+  if (index > -1) {
+    menuPommesExtras.splice(index, 1)
+    item.classList.remove('active')
+    item.querySelector('.menu-extra-checkbox').textContent = ''
+  } else {
+    menuPommesExtras.push(extraId)
+    item.classList.add('active')
+    item.querySelector('.menu-extra-checkbox').textContent = '✓'
+  }
+}
+
+function goToMenuStep2() {
+  // Wechsel zu Schritt 2
+  document.getElementById('menuStep1').classList.remove('active')
+  document.getElementById('menuStep2').classList.add('active')
+  
+  // Lade Getränke-Liste
+  renderDrinkList()
+  updateMenuSummary()
+}
+
+function renderDrinkList() {
+  const drinkList = document.getElementById('drinkList')
+  const bundle = currentMenuBundle.bundle
+  
+  // Bestimme welche Getränke je nach Bundle
+  let drinks = []
+  if (bundle.id === 'doener-menu') {
+    drinks = [
+      { id: 'ayran', name: 'Ayran (0,25 l)', desc: 'Erfrischendes türkisches Joghurtgetränk', price: 0, included: true },
+      { id: 'wasser', name: 'Wasser still (0,5 l)', desc: 'Stilles Mineralwasser', price: 0 },
+      { id: 'cola', name: 'Cola (0,33 l)', desc: 'Coca Cola (inkl. Pfand)', price: 0.50 },
+      { id: 'fanta', name: 'Fanta (0,33 l)', desc: 'Fanta Orange (inkl. Pfand)', price: 0.50 },
+      { id: 'cola-zero', name: 'Cola Zero (0,33 l)', desc: 'Coca Cola Zero (inkl. Pfand)', price: 0.50 }
+    ]
+  } else if (bundle.id === 'burger-menu') {
+    drinks = [
+      { id: 'cola', name: 'Cola (0,33 l)', desc: 'Coca Cola (inkl. Pfand)', price: 0, included: true },
+      { id: 'fanta', name: 'Fanta (0,33 l)', desc: 'Fanta Orange (inkl. Pfand)', price: 0 },
+      { id: 'cola-zero', name: 'Cola Zero (0,33 l)', desc: 'Coca Cola Zero (inkl. Pfand)', price: 0 },
+      { id: 'wasser', name: 'Wasser still (0,5 l)', desc: 'Stilles Mineralwasser', price: 0 },
+      { id: 'ayran', name: 'Ayran (0,25 l)', desc: 'Erfrischendes türkisches Joghurtgetränk', price: -0.50 }
+    ]
+  }
+  
+  drinkList.innerHTML = drinks.map(drink => {
+    const priceText = drink.price === 0 ? (drink.included ? 'Inklusive' : '') : (drink.price > 0 ? `+${formatPrice(drink.price)}` : formatPrice(Math.abs(drink.price)) + ' günstiger')
+    
+    return `
+      <div class="menu-drink-item" onclick="selectMenuDrink('${drink.id}', ${drink.price})">
+        <div class="menu-drink-radio"></div>
+        <div class="menu-drink-info">
+          <div class="menu-drink-name">${drink.name}</div>
+          <div class="menu-drink-desc">${drink.desc}</div>
+        </div>
+        ${priceText ? `<div class="menu-drink-price">${priceText}</div>` : ''}
+      </div>
+    `
+  }).join('')
+}
+
+function selectMenuDrink(drinkId, priceAdjustment) {
+  menuSelectedDrink = { id: drinkId, priceAdjustment: priceAdjustment }
+  
+  // UI Update
+  document.querySelectorAll('.menu-drink-item').forEach(item => {
+    item.classList.remove('active')
+  })
+  event.currentTarget.classList.add('active')
+  
+  // Enable button
+  document.getElementById('finalizeMenuBtn').disabled = false
+  
+  // Update summary
+  updateMenuSummary()
+}
+
+function updateMenuSummary() {
+  const bundle = currentMenuBundle.bundle
+  
+  // Berechne finalen Preis
+  let finalPrice = bundle.menuPrice
+  
+  // Pommes Extras
+  menuPommesExtras.forEach(extraId => {
+    const pommesProduct = products.find(p => p.id === 'pommes')
+    const extra = pommesProduct.extras.find(e => e.id === extraId)
+    if (extra) finalPrice += extra.price
+  })
+  
+  // Getränk Preisanpassung
+  if (menuSelectedDrink) {
+    finalPrice += menuSelectedDrink.priceAdjustment
+  }
+  
+  // Summary Text
+  const pommesProduct = products.find(p => p.id === 'pommes')
+  let pommesSummary = `🍟 Pommes (${menuPommesOptions.sauce})`
+  if (menuPommesExtras.length > 0) {
+    const extraNames = menuPommesExtras.map(extraId => {
+      const extra = pommesProduct.extras.find(e => e.id === extraId)
+      return extra ? extra.name : ''
+    }).filter(Boolean).join(', ')
+    pommesSummary += ` + ${extraNames}`
+  }
+  
+  let drinkSummary = menuSelectedDrink ? `🥤 ${products.find(p => p.id === menuSelectedDrink.id)?.name || 'Getränk'}` : '🥤 Getränk wählen...'
+  
+  document.getElementById('menuSummary').innerHTML = `
+    <div style="margin-bottom: 6px;">✅ ${bundle.requiredProduct}</div>
+    <div style="margin-bottom: 6px;">${pommesSummary}</div>
+    <div>${drinkSummary}</div>
+  `
+  
+  document.getElementById('menuFinalPrice').textContent = formatPrice(finalPrice)
+}
+
+function finalizeMenuBundle() {
+  if (!menuSelectedDrink) {
+    alert('❌ Bitte wähle ein Getränk!')
+    return
+  }
+  
+  const bundle = currentMenuBundle.bundle
+  const originalProduct = currentMenuBundle.originalProduct
+  
+  // Berechne finalen Preis
+  let finalPrice = bundle.menuPrice
+  menuPommesExtras.forEach(extraId => {
+    const pommesProduct = products.find(p => p.id === 'pommes')
+    const extra = pommesProduct.extras.find(e => e.id === extraId)
+    if (extra) finalPrice += extra.price
+  })
+  finalPrice += menuSelectedDrink.priceAdjustment
+  
+  // Entferne das alte Hauptprodukt
+  cart.splice(currentMenuBundle.mainProductIndex, 1)
+  
+  // Erstelle Menü-Bundle mit allen Details
+  const menuProduct = {
+    product: {
+      name: bundle.name,
+      price: finalPrice,
+      category: 'menu'
+    },
+    price: finalPrice,
+    options: originalProduct.options || {},
+    extras: originalProduct.extras || [],
+    isBundle: true,
+    bundleItems: bundle.includes,
+    mainProductOptions: originalProduct.options || {},
+    mainProductExtras: originalProduct.extras || [],
+    mainProductName: bundle.requiredProduct,
+    // 🍟 NEU: Pommes & Getränk Details
+    pommesOptions: menuPommesOptions,
+    pommesExtras: menuPommesExtras,
+    selectedDrink: menuSelectedDrink
+  }
+  
+  cart.push(menuProduct)
+  
+  // UI aufräumen
+  closeMenuCustomize()
+  updateCart()
+  
+  // Erfolgs-Toast
+  showToast(`✅ ${bundle.name} zum Warenkorb hinzugefügt!`)
 }
 
 // ═══════════════════════════════════════════════════════════════
