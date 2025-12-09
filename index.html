@@ -2564,7 +2564,7 @@ function logout() {
     console.error('❌ Start-Screen nicht gefunden!')
   }
   
-  // 4. ALLE Modals schließen
+  // 4. ALLE Modals schließen (NUR mit Klassen - kein inline display!)
   const modals = [
     'order-section',
     'customizeModal',
@@ -2576,8 +2576,8 @@ function logout() {
   modals.forEach(modalId => {
     const modal = document.getElementById(modalId)
     if (modal) {
-      modal.style.display = 'none'
       modal.classList.remove('active')
+      modal.style.display = ''  // ✅ Inline-Style ENTFERNEN statt setzen
     }
   })
   
