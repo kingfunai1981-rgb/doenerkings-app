@@ -10,8 +10,8 @@
 @font-face { font-family: 'Flame'; src: url('Flame-Regular.ttf') format('truetype'); font-weight: normal; font-style: normal; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Flame', system-ui, -apple-system, sans-serif; background: linear-gradient(135deg, #E31E24 0%, #F9A825 100%); min-height: 100vh; padding: 0; }
-.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-.card { width: 100%; background: white; border-radius: 20px; padding: 24px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; width: 100%; box-sizing: border-box; }
+.card { width: 100%; box-sizing: border-box; background: white; border-radius: 20px; padding: 24px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 .header-card { display: flex; align-items: center; gap: 20px; }
 .header-logo { width: 80px; height: 80px; flex-shrink: 0; }
 .header-logo img { width: 100%; height: 100%; object-fit: contain; }
@@ -67,8 +67,6 @@ textarea { resize: vertical; min-height: 60px; }
   <div class="card header-card">
     <div class="header-logo"><img src="/logo-round-new.png" alt="Döner Boxx"></div>
     <div class="header-text"><h1>Kunden verwalten</h1><p class="subtitle">Verwalte alle Kunden, Transaktionen und Punkte</p></div>
-  </div>
-
 
   <!-- ☁️ AKTUELLES WETTER -->
   <div class="card" style="border: 3px solid #3b82f6;">
@@ -96,32 +94,8 @@ textarea { resize: vertical; min-height: 60px; }
     <button class="primary" onclick="updateWeather()" style="margin-top: 16px;">🔄 Wetter jetzt aktualisieren</button>
   </div>
 
-  <div class="card">
-    <h2>🎁 Globale Bonusse</h2>
-    <p class="subtitle">Erstelle Bonusse, die sofort bei allen Kunden erscheinen</p>
-    <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px;">
-      <h3 style="color: #92400e; margin-bottom: 12px;">Neuen Bonus erstellen</h3>
-      <label class="form-label">🎯 Bonus-Typ</label>
-      <select id="globalBonusType" onchange="toggleBonusAmount()">
-        <option value="bonus_points">💰 Extra-Punkte</option>
-        <option value="double_points">⭐ Doppelte Punkte</option>
-      </select>
-      <div id="globalBonusAmountField">
-        <label class="form-label">💵 Bonus-Punkte</label>
-        <input type="number" id="globalBonusAmount" placeholder="z.B. 100" value="100">
-      </div>
-      <div class="form-grid">
-        <div><label class="form-label">📅 Start-Datum</label><input type="date" id="globalBonusStart"></div>
-        <div><label class="form-label">📅 End-Datum</label><input type="date" id="globalBonusEnd"></div>
-      </div>
-      <button class="success" onclick="createGlobalBonus()">🚀 Bonus erstellen</button>
-      <div id="result-global-bonus"></div>
-    </div>
-    <div style="margin-top: 24px;"><h3>Aktive Bonusse</h3><div id="globalBonusList"></div></div>
   </div>
 
-    <div id="result-winback"></div>
-  </div>
   <!-- 💤 WIN-BACK KAMPAGNE MIT COOLDOWN -->
   <div class="card" style="border: 3px solid #8b5cf6;">
     <h2>💤 Win-Back Kampagne (4 Phasen)</h2>
@@ -239,7 +213,7 @@ textarea { resize: vertical; min-height: 60px; }
 
     <div id="result-winback"></div>
   </div>
-    <div class="card">
+  <div class="card">
     <h2>🎯 Challenge-Bonus</h2>
     <p class="subtitle">Erstelle zeitlich begrenzte Herausforderungen mit Mindestbestellwert</p>
     <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px;">
@@ -2653,7 +2627,6 @@ async function updateWeather() {
   btn.textContent = '⏳ Aktualisiere...'
   
   try {
-    // Wetter-API Call (Kassel, Hessen)
     const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=51.32&longitude=9.49&current=temperature_2m,precipitation,wind_speed_10m,weather_code&timezone=Europe/Berlin')
     const data = await response.json()
     
@@ -2662,12 +2635,10 @@ async function updateWeather() {
     const wind = Math.round(data.current.wind_speed_10m)
     const code = data.current.weather_code
     
-    // Update UI
     document.getElementById('weather-temp').textContent = temp + '°C'
     document.getElementById('weather-rain').textContent = rain + ' mm/h'
     document.getElementById('weather-wind').textContent = wind + ' km/h'
     
-    // Wetter-Icon
     let icon = '☁️'
     let condition = 'Wolkig'
     if (code === 0) { icon = '☀️'; condition = 'Sonnig' }
@@ -2680,291 +2651,23 @@ async function updateWeather() {
     document.getElementById('weather-icon').textContent = icon
     document.getElementById('weather-condition').textContent = condition
     
-    console.log('✅ Wetter aktualisiert:', temp + '°C,', condition)
-    
     btn.disabled = false
     btn.textContent = '✅ Aktualisiert'
     setTimeout(() => { btn.textContent = originalText }, 2000)
     
   } catch (e) {
-    console.error('❌ Wetter-Fehler:', e)
+    console.error('Wetter-Fehler:', e)
     btn.disabled = false
     btn.textContent = '❌ Fehler'
     setTimeout(() => { btn.textContent = originalText }, 2000)
   }
 }
 
-// Auto-Update beim Laden
 window.addEventListener('load', () => {
-  console.log('🌤️ Lade Wetter...')
-  updateWeather()
+  if (document.getElementById('weather-temp')) {
+    updateWeather()
+  }
 })
-
-
-// ═══════════════════════════════════════════════════════════════
-// 💤 WIN-BACK KAMPAGNE FUNKTIONEN
-// ═══════════════════════════════════════════════════════════════
-const WINBACK_PHASES = [
-  { id: 1, days: 14, points: 100, cooldown: 7, label: 'Mild', emoji: '❤️', color: '#f472b6' },
-  { id: 2, days: 21, points: 150, cooldown: 7, label: 'Medium', emoji: '😢', color: '#fb923c' },
-  { id: 3, days: 30, points: 300, cooldown: 30, label: 'Aggressiv', emoji: '🥺', color: '#f59e0b' },
-  { id: 4, days: 60, points: 500, cooldown: 60, label: 'Ultimativ', emoji: '🔥', color: '#dc2626' }
-]
-
-let currentWinbackCampaign = null
-
-async function prepareWinbackCampaign() {
-  try {
-    showResult('result-winback', '⏳ Prüfe Kunden...', 'info')
-    
-    const phaseId = parseInt(document.getElementById('winback-phase').value)
-    const phase = WINBACK_PHASES.find(p => p.id === phaseId)
-    
-    if (!phase) {
-      showResult('result-winback', '❌ Ungültige Phase!', 'error')
-      return
-    }
-    
-    // Hole ALLE Kunden mit WhatsApp
-    const { data: allCustomers, error: customerError } = await supabase
-      .from('customers')
-      .select('id, name, phone, points, whatsapp_optin, winback_status')
-      .eq('whatsapp_optin', true)
-      .order('name')
-    
-    if (customerError) throw customerError
-    
-    if (!allCustomers || allCustomers.length === 0) {
-      showResult('result-winback', '❌ Keine WhatsApp-Kunden gefunden!', 'error')
-      return
-    }
-    
-    // Für jeden Kunden: Prüfe letzte Transaktion
-    const cutoffDate = new Date()
-    cutoffDate.setDate(cutoffDate.getDate() - phase.days)
-    
-    const eligibleCustomers = []
-    const cooldownCustomers = []
-    
-    for (const customer of allCustomers) {
-      // Prüfe letzte Transaktion
-      const { data: lastTx } = await supabase
-        .from('transactions')
-        .select('created_at')
-        .eq('customer_id', customer.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-      
-      // Inaktiv?
-      let isInactive = false
-      if (!lastTx || lastTx.length === 0) {
-        isInactive = true
-      } else {
-        const lastDate = new Date(lastTx[0].created_at)
-        if (lastDate < cutoffDate) {
-          isInactive = true
-        }
-      }
-      
-      if (!isInactive) continue
-      
-      // Prüfe Cooldown
-      const winbackStatus = customer.winback_status || {}
-      const cooldownUntil = winbackStatus.cooldown_until ? new Date(winbackStatus.cooldown_until) : null
-      const now = new Date()
-      
-      if (cooldownUntil && cooldownUntil > now) {
-        // Im Cooldown
-        cooldownCustomers.push({
-          ...customer,
-          cooldown_days: Math.ceil((cooldownUntil - now) / (1000 * 60 * 60 * 24))
-        })
-      } else {
-        // Berechtigt!
-        eligibleCustomers.push(customer)
-      }
-    }
-    
-    // Update Stats
-    document.getElementById('stat-wb-eligible').textContent = eligibleCustomers.length + cooldownCustomers.length
-    document.getElementById('stat-wb-cooldown').textContent = cooldownCustomers.length
-    document.getElementById('stat-wb-ready').textContent = eligibleCustomers.length
-    
-    // Zeige Stats
-    document.getElementById('winback-stats').style.display = 'block'
-    
-    // Zeige Kundenliste
-    const listDiv = document.getElementById('winback-customer-list')
-    
-    if (eligibleCustomers.length === 0) {
-      listDiv.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 20px;">Keine versandbereiten Kunden für diese Phase</div>'
-      document.getElementById('winback-whatsapp').style.display = 'none'
-      showResult('result-winback', `ℹ️ Keine Kunden bereit (${cooldownCustomers.length} im Cooldown)`, 'info')
-      return
-    }
-    
-    listDiv.innerHTML = eligibleCustomers.map(c => `
-      <div style="padding: 8px; margin-bottom: 6px; background: #f9fafb; border-radius: 6px; border-left: 3px solid ${phase.color};">
-        <div style="font-weight: 600; color: #111827;">${c.name}</div>
-        <div style="font-size: 13px; color: #6b7280;">${c.phone} • ${c.points}P</div>
-      </div>
-    `).join('')
-    
-    // Bereite WhatsApp vor
-    const numbers = eligibleCustomers.map(c => c.phone).join('\n')
-    document.getElementById('winback-numbers').value = numbers
-    
-    // Nachricht
-    const messages = {
-      1: `Hey! 👋
-
-Wir haben dich schon eine Weile nicht mehr gesehen! 😊
-
-🎁 HEUTE FÜR DICH: +${phase.points} BONUS-PUNKTE auf deine nächste Bestellung!
-
-Komm vorbei und lass es dir schmecken! 🥙
-
-📍 Döner Boxx
-⏰ Nur 24h gültig!`,
-      2: `Hey! 👋
-
-Du fehlst uns! 😢
-
-🎁 SPECIAL NUR FÜR DICH: +${phase.points} BONUS-PUNKTE auf deine nächste Bestellung!
-
-Das ist unser bestes Angebot für dich!
-
-📍 Döner Boxx
-⏰ Nur 24h gültig!`,
-      3: `Hey! 👋
-
-Wir vermissen dich richtig! 🥺
-
-🔥 KRASSES COMEBACK-ANGEBOT: +${phase.points} BONUS-PUNKTE auf deine nächste Bestellung!
-
-So viele Punkte gab es noch nie!
-
-📍 Döner Boxx
-⏰ Nur 24h gültig!`,
-      4: `Hey! 👋
-
-Das ist unser LETZTES ANGEBOT! 🔥
-
-💥 ULTIMATIVER COMEBACK-BONUS: +${phase.points} BONUS-PUNKTE auf deine nächste Bestellung!
-
-Mehr geht nicht! Komm zurück! 🙏
-
-📍 Döner Boxx
-⏰ NUR HEUTE 24h!`
-    }
-    
-    document.getElementById('winback-message').value = messages[phaseId]
-    
-    // Speichere Kampagne
-    currentWinbackCampaign = {
-      phase: phase,
-      customers: eligibleCustomers
-    }
-    
-    // Zeige WhatsApp
-    document.getElementById('winback-whatsapp').style.display = 'block'
-    
-    showResult('result-winback', 
-      `✅ ${eligibleCustomers.length} Kunden bereit für ${phase.emoji} ${phase.label} (+${phase.points}P)!`, 
-      'success')
-    
-  } catch (e) {
-    showResult('result-winback', '❌ Fehler: ' + e.message, 'error')
-    console.error('Prepare winback error:', e)
-  }
-}
-
-async function confirmWinbackCampaign() {
-  if (!currentWinbackCampaign) {
-    showResult('result-winback', '❌ Keine Kampagne vorbereitet!', 'error')
-    return
-  }
-  
-  if (!confirm(`Kampagne bestätigen?\n\n${currentWinbackCampaign.customers.length} Kunden erhalten beim nächsten QR-Scan automatisch +${currentWinbackCampaign.phase.points} Punkte!\n\nCooldown: ${currentWinbackCampaign.phase.cooldown} Tage`)) {
-    return
-  }
-  
-  try {
-    showResult('result-winback', '⏳ Speichere Kampagne...', 'info')
-    
-    const now = new Date()
-    const cooldownDate = new Date(now)
-    cooldownDate.setDate(cooldownDate.getDate() + currentWinbackCampaign.phase.cooldown)
-    
-    // Für jeden Kunden: Update winback_status
-    let successCount = 0
-    let errorCount = 0
-    
-    for (const customer of currentWinbackCampaign.customers) {
-      const currentStatus = customer.winback_status || {}
-      const history = currentStatus.history || []
-      
-      const newStatus = {
-        last_sent: now.toISOString(),
-        phase: currentWinbackCampaign.phase.id,
-        points_pending: currentWinbackCampaign.phase.points,
-        awarded: false,
-        cooldown_until: cooldownDate.toISOString(),
-        history: [
-          ...history,
-          {
-            sent_at: now.toISOString(),
-            phase: currentWinbackCampaign.phase.id,
-            points: currentWinbackCampaign.phase.points,
-            awarded: false,
-            awarded_at: null
-          }
-        ]
-      }
-      
-      const { error } = await supabase
-        .from('customers')
-        .update({ winback_status: newStatus })
-        .eq('id', customer.id)
-      
-      if (error) {
-        console.error('Error updating customer', customer.id, error)
-        errorCount++
-      } else {
-        successCount++
-      }
-    }
-    
-    showResult('result-winback', 
-      `✅ Kampagne bestätigt! ${successCount} Kunden erhalten beim nächsten QR-Scan automatisch +${currentWinbackCampaign.phase.points}P!${errorCount > 0 ? `\n⚠️ ${errorCount} Fehler` : ''}`, 
-      'success')
-    
-    alert(`✅ KAMPAGNE AKTIVIERT!\n\n${successCount} Kunden erhalten beim nächsten QR-Scan (innerhalb 24h) automatisch +${currentWinbackCampaign.phase.points} Bonus-Punkte!\n\nCooldown: ${currentWinbackCampaign.phase.cooldown} Tage aktiv.`)
-    
-    // Reset
-    currentWinbackCampaign = null
-    document.getElementById('winback-whatsapp').style.display = 'none'
-    document.getElementById('winback-stats').style.display = 'none'
-    
-  } catch (e) {
-    showResult('result-winback', '❌ Fehler: ' + e.message, 'error')
-    console.error('Confirm winback error:', e)
-  }
-}
-
-function copyWinbackNumbers() {
-  const textarea = document.getElementById('winback-numbers')
-  textarea.select()
-  document.execCommand('copy')
-  showResult('result-winback', '✅ Nummern kopiert!', 'success')
-}
-
-function copyWinbackMessage() {
-  const textarea = document.getElementById('winback-message')
-  textarea.select()
-  document.execCommand('copy')
-  showResult('result-winback', '✅ Nachricht kopiert!', 'success')
-}
 
 </script>
 </body>
