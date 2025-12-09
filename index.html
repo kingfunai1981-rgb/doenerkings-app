@@ -743,6 +743,113 @@ button:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; tran
   opacity: 0.3;
 }
 
+/* 🎁 MENÜ-BUNDLE STYLES */
+.menu-bundle-offer {
+  background: linear-gradient(135deg, #FFF9E6, #FFF4D6);
+  border: 2px solid #F9A825;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 16px 0;
+  box-shadow: 0 4px 12px rgba(249, 168, 37, 0.2);
+  animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 4px 12px rgba(249, 168, 37, 0.2); }
+  50% { box-shadow: 0 6px 20px rgba(249, 168, 37, 0.4); }
+}
+
+.menu-bundle-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.menu-bundle-icon {
+  font-size: 24px;
+}
+
+.menu-bundle-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #E31E24;
+}
+
+.menu-bundle-subtitle {
+  font-size: 13px;
+  color: #92400e;
+  margin-bottom: 12px;
+}
+
+.menu-bundle-items {
+  background: white;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.menu-bundle-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+.menu-bundle-item-icon {
+  font-size: 16px;
+}
+
+.menu-bundle-pricing {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.menu-bundle-original {
+  font-size: 14px;
+  color: #666;
+  text-decoration: line-through;
+}
+
+.menu-bundle-price {
+  font-size: 24px;
+  font-weight: 700;
+  color: #E31E24;
+}
+
+.menu-bundle-savings {
+  background: #10b981;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.menu-bundle-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.menu-bundle-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(227, 30, 36, 0.4);
+}
+
 .checkout-section {
   margin-bottom: 20px;
 }
@@ -3576,25 +3683,62 @@ function renderCart() {
     return
   }
   
+  // 🎁 MENÜ-BUNDLE CHECK
+  const menuOffer = checkForMenuBundle()
+  
   const html = cart.map((item, index) => {
-    const optionsText = Object.keys(item.options)
-      .filter(key => {
-        const value = item.options[key]
-        const defaultValue = item.product.options[key].default
-        return value !== defaultValue
-      })
-      .map(key => {
-        const value = item.options[key]
-        const label = item.product.options[key].label
-        if (typeof value === 'string') return `${label}: ${value}`
-        return `${label}: ${value === 0 ? 'Ohne' : value === 1 ? '1x' : '2x'}`
-      })
-      .join(', ')
+    // 🎁 Spezielle Anzeige für Menü-Bundles
+    if (item.isBundle) {
+      const bundleItemsList = item.bundleItems.map(bundleItem => 
+        `<div style="display: flex; align-items: center; gap: 6px; padding: 4px 0; font-size: 13px; color: #666;">
+          <span>${bundleItem.icon}</span>
+          <span>${bundleItem.name}</span>
+        </div>`
+      ).join('')
+      
+      return `
+        <div class="cart-item" style="border: 2px solid #F9A825; background: linear-gradient(135deg, #FFFBF0, #FFF9E6);">
+          <div class="cart-item-header">
+            <div class="cart-item-name" style="color: #E31E24;">🎁 ${item.product.name}</div>
+            <div class="cart-item-price" style="color: #E31E24; font-weight: 700;">${formatPrice(item.price)}</div>
+          </div>
+          <div style="background: white; border-radius: 8px; padding: 10px; margin: 8px 0;">
+            <div style="font-size: 12px; font-weight: 600; color: #92400e; margin-bottom: 6px;">Enthält:</div>
+            ${bundleItemsList}
+          </div>
+          <div class="cart-item-actions">
+            <button class="cart-item-btn delete" onclick="removeFromCart(${index})">🗑️ Entfernen</button>
+          </div>
+        </div>
+      `
+    }
     
-    const extrasText = item.extras.map(extraId => {
-      const extra = item.product.extras.find(e => e.id === extraId)
-      return extra ? `+ ${extra.name}` : ''
-    }).join(', ')
+    // Normale Produkte
+    let optionsText = ''
+    let extrasText = ''
+    
+    if (item.options && item.product.options) {
+      optionsText = Object.keys(item.options)
+        .filter(key => {
+          const value = item.options[key]
+          const defaultValue = item.product.options[key]?.default
+          return value !== defaultValue
+        })
+        .map(key => {
+          const value = item.options[key]
+          const label = item.product.options[key]?.label || key
+          if (typeof value === 'string') return `${label}: ${value}`
+          return `${label}: ${value === 0 ? 'Ohne' : value === 1 ? '1x' : '2x'}`
+        })
+        .join(', ')
+    }
+    
+    if (item.extras && item.product.extras) {
+      extrasText = item.extras.map(extraId => {
+        const extra = item.product.extras.find(e => e.id === extraId)
+        return extra ? `+ ${extra.name}` : ''
+      }).join(', ')
+    }
     
     return `
       <div class="cart-item">
@@ -3610,12 +3754,198 @@ function renderCart() {
     `
   }).join('')
   
-  container.innerHTML = html
+  // 🎁 MENÜ-BUNDLE ANGEBOT EINFÜGEN (falls verfügbar)
+  let finalHTML = html
+  if (menuOffer) {
+    finalHTML += generateMenuBundleHTML(menuOffer)
+  }
+  
+  container.innerHTML = finalHTML
   
   const total = cart.reduce((sum, item) => sum + item.price, 0)
   document.getElementById('cartModalTotal').textContent = formatPrice(total)
   document.getElementById('cartModalCount').textContent = cart.length
 }
+
+// ═══════════════════════════════════════════════════════════════
+// 🎁 MENÜ-BUNDLE SYSTEM
+// ═══════════════════════════════════════════════════════════════
+
+const MENU_BUNDLES = [
+  {
+    id: 'doener-menu',
+    name: 'Döner Menü',
+    icon: '🌯',
+    requiredProduct: 'Döner Klassik',
+    includes: [
+      { name: 'Döner Klassik', icon: '🌯' },
+      { name: 'Pommes Frites', icon: '🍟' },
+      { name: 'Ayran 0,33L', icon: '🥤' }
+    ],
+    originalPrice: 13.00,  // Beispiel: Döner (7,50) + Pommes (3,50) + Ayran (2,00)
+    menuPrice: 9.50,
+    savings: 3.50
+  },
+  {
+    id: 'burger-menu',
+    name: 'Crispy Chicken Burger Menü',
+    icon: '🍔',
+    requiredProduct: 'Crispy Chicken Burger',
+    includes: [
+      { name: 'Crispy Chicken Burger', icon: '🍔' },
+      { name: 'Pommes Frites', icon: '🍟' },
+      { name: 'Cola 0,33L', icon: '🥤' }
+    ],
+    originalPrice: 12.00,  // Beispiel: Burger (6,50) + Pommes (3,50) + Cola (2,00)
+    menuPrice: 9.00,
+    savings: 3.00
+  }
+]
+
+function checkForMenuBundle() {
+  // Prüfe für jedes Menü-Bundle, ob das Hauptprodukt im Warenkorb ist
+  for (const bundle of MENU_BUNDLES) {
+    const hasMainProduct = cart.some(item => 
+      item.product.name === bundle.requiredProduct
+    )
+    
+    if (hasMainProduct) {
+      // Prüfe ob bereits ein komplettes Menü im Warenkorb ist
+      const hasAllItems = bundle.includes.every(menuItem => 
+        cart.some(cartItem => cartItem.product.name === menuItem.name)
+      )
+      
+      // Zeige Angebot nur wenn NICHT alle Items schon da sind
+      if (!hasAllItems) {
+        return bundle
+      }
+    }
+  }
+  
+  return null
+}
+
+function generateMenuBundleHTML(bundle) {
+  return `
+    <div class="menu-bundle-offer">
+      <div class="menu-bundle-header">
+        <div class="menu-bundle-icon">${bundle.icon}</div>
+        <div class="menu-bundle-title">UPGRADE ZU MENÜ!</div>
+      </div>
+      
+      <div class="menu-bundle-subtitle">
+        ${bundle.name}
+      </div>
+      
+      <div class="menu-bundle-items">
+        ${bundle.includes.map(item => `
+          <div class="menu-bundle-item">
+            <span class="menu-bundle-item-icon">${item.icon}</span>
+            <span>${item.name}</span>
+          </div>
+        `).join('')}
+      </div>
+      
+      <div class="menu-bundle-pricing">
+        <div>
+          <div class="menu-bundle-original">Einzeln: ${formatPrice(bundle.originalPrice)}</div>
+          <div class="menu-bundle-price">${formatPrice(bundle.menuPrice)}</div>
+        </div>
+      </div>
+      
+      <div class="menu-bundle-savings">
+        💰 Spare ${formatPrice(bundle.savings)}!
+      </div>
+      
+      <button class="menu-bundle-btn" onclick="upgradeToMenu('${bundle.id}')">
+        ➕ Zum Menü upgraden
+      </button>
+    </div>
+  `
+}
+
+function upgradeToMenu(bundleId) {
+  const bundle = MENU_BUNDLES.find(b => b.id === bundleId)
+  if (!bundle) return
+  
+  // Entferne das Hauptprodukt aus dem Warenkorb
+  const mainProductIndex = cart.findIndex(item => 
+    item.product.name === bundle.requiredProduct
+  )
+  
+  if (mainProductIndex === -1) {
+    alert('❌ Hauptprodukt nicht mehr im Warenkorb!')
+    return
+  }
+  
+  // Entferne das alte Produkt
+  cart.splice(mainProductIndex, 1)
+  
+  // Füge das komplette Menü als Bundle hinzu
+  // (Erstelle ein spezielles Bundle-Produkt)
+  const menuProduct = {
+    product: {
+      name: bundle.name,
+      price: bundle.menuPrice,
+      category: 'menu',
+      image: '/menu-bundle.jpg'
+    },
+    price: bundle.menuPrice,
+    options: {},
+    extras: [],
+    isBundle: true,
+    bundleItems: bundle.includes
+  }
+  
+  cart.push(menuProduct)
+  
+  // UI aktualisieren
+  updateCart()
+  renderCart()
+  
+  // Erfolgs-Feedback
+  showToast(`✅ ${bundle.name} zum Warenkorb hinzugefügt!`)
+}
+
+function showToast(message) {
+  const toast = document.createElement('div')
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    z-index: 10001;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    animation: slideUpToast 0.3s ease;
+  `
+  toast.textContent = message
+  
+  const style = document.createElement('style')
+  style.textContent = `
+    @keyframes slideUpToast {
+      from { opacity: 0; transform: translate(-50%, 20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+  `
+  document.head.appendChild(style)
+  document.body.appendChild(toast)
+  
+  setTimeout(() => {
+    toast.style.animation = 'slideUpToast 0.3s ease reverse'
+    setTimeout(() => {
+      toast.remove()
+      style.remove()
+    }, 300)
+  }, 2500)
+}
+
+// ═══════════════════════════════════════════════════════════════
 
 function removeFromCart(index) {
   cart.splice(index, 1)
