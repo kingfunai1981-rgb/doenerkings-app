@@ -1551,13 +1551,17 @@ async function loadOrders() {
   try {
     // ✅ Cache-Bypass: Timestamp in Query um frische Daten zu erzwingen
     const timestamp = Date.now()
+    
+    // ✅ WICHTIG: Lade alle, AUSSER completed/cancelled
     const { data, error } = await supabase
       .from('orders')
       .select('*')
-      .in('status', ['pending', 'preparing', 'ready'])
+      .neq('status', 'completed')
+      .neq('status', 'cancelled')
       .order('created_at', { ascending: false })
     
     console.log(`📋 loadOrders called at ${timestamp}, found ${data?.length || 0} orders`)
+    console.log('📊 Order statuses:', data?.map(o => `${o.order_number}:${o.status}`))
     
     if (error) {
       console.error('loadOrders Fehler:', error)
