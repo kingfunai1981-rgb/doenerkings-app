@@ -1521,14 +1521,19 @@ input:focus, textarea:focus {
       </button>
     </div>
 
-    <!-- 📦 NEU: Bestellhistorie Section -->
+    <!-- 📦 NEU: Vorherige Bestellungen Section (zugeklappt) -->
     <div id="order-history-section" class="card" style="margin-bottom: 16px;">
-      <h2 style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
-        <span>📦</span>
-        <span>Meine Bestellungen</span>
-      </h2>
+      <div onclick="toggleHistorySection()" style="cursor: pointer; user-select: none;">
+        <h2 style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0;">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <span>📦</span>
+            <span>Vorherige Bestellungen</span>
+          </span>
+          <span id="history-toggle-icon" style="font-size: 20px; transition: transform 0.3s;">▼</span>
+        </h2>
+      </div>
       
-      <div id="order-history-list">
+      <div id="order-history-list" style="display: none; margin-top: 16px;">
         <div style="text-align: center; padding: 20px; color: #999;">
           Lade Bestellhistorie...
         </div>
@@ -4610,19 +4615,34 @@ document.addEventListener('visibilitychange', () => {
 // 📦 BESTELLHISTORIE FUNKTIONEN
 // ═══════════════════════════════════════════════════════════════
 
+function toggleHistorySection() {
+  const list = document.getElementById('order-history-list')
+  const icon = document.getElementById('history-toggle-icon')
+  
+  if (!list || !icon) return
+  
+  if (list.style.display === 'none') {
+    list.style.display = 'block'
+    icon.textContent = '▲'
+  } else {
+    list.style.display = 'none'
+    icon.textContent = '▼'
+  }
+}
+
 async function loadOrderHistory() {
   const container = document.getElementById('order-history-list')
   if (!container || !currentCustomer) return
   
   try {
-    // Lade letzte 10 abgeschlossene Bestellungen
+    // Lade letzte 3 abgeschlossene Bestellungen
     const { data: orders, error } = await supabase
       .from('orders')
       .select('*')
       .eq('customer_phone', currentCustomer.phone)
       .in('status', ['completed', 'cancelled'])
       .order('created_at', { ascending: false })
-      .limit(10)
+      .limit(3)
     
     if (error) {
       console.error('❌ Fehler beim Laden der Bestellhistorie:', error)
@@ -4825,21 +4845,49 @@ async function reorderItems(orderId) {
     // Lösche aktuellen Warenkorb
     cart = []
     
-    // Füge alle Items hinzu
+    let unavailableItems = []
+    
+    // Füge alle Items hinzu - MIT AKTUELLEN PREISEN!
     order.items.forEach(item => {
-      // Prüfe ob Produkt noch existiert
-      const product = item.product
-      if (!product) {
-        console.warn('⚠️ Produkt nicht mehr verfügbar:', item)
+      const productId = item.product?.id
+      
+      if (!productId) {
+        console.warn('⚠️ Produkt-ID fehlt:', item)
+        unavailableItems.push(item.product?.name || 'Unbekannt')
         return
       }
       
+      // ✅ WICHTIG: Finde Produkt aus products Array (AKTUELLE PREISE!)
+      const currentProduct = products.find(p => p.id === productId)
+      
+      if (!currentProduct) {
+        console.warn('⚠️ Produkt nicht mehr verfügbar:', productId)
+        unavailableItems.push(item.product?.name || productId)
+        return
+      }
+      
+      // Berechne AKTUELLEN Preis (Basis + Extras)
+      let currentPrice = currentProduct.price
+      
+      // Füge Extra-Preise hinzu
+      if (item.extras && item.extras.length > 0) {
+        item.extras.forEach(extraId => {
+          const extra = currentProduct.extras?.find(e => e.id === extraId)
+          if (extra) {
+            currentPrice += extra.price
+          }
+        })
+      }
+      
+      // ✅ WICHTIG: Verwende AKTUELLEN Preis, NICHT den alten Deal-Preis!
       cart.push({
-        product: product,
-        price: item.price,
+        product: currentProduct,
+        price: currentPrice,  // ← AKTUELLER Preis, kein Deal!
         options: item.options || {},
         extras: item.extras || []
       })
+      
+      console.log(`✅ ${currentProduct.name} hinzugefügt mit aktuellem Preis: ${currentPrice}€ (alter Preis war: ${item.price}€)`)
     })
     
     if (cart.length === 0) {
@@ -4851,9 +4899,25 @@ async function reorderItems(orderId) {
     updateCartUI()
     openOrderModal()
     
-    // Zeige Erfolgs-Nachricht
+    // Zeige Erfolgs-Nachricht mit Hinweis falls Preise anders sind
     setTimeout(() => {
-      alert(`✅ ${cart.length} Artikel wurden in den Warenkorb gelegt!`)
+      let message = `✅ ${cart.length} Artikel wurden in den Warenkorb gelegt!`
+      
+      if (unavailableItems.length > 0) {
+        message += `\n\n⚠️ Nicht verfügbar:\n${unavailableItems.join(', ')}`
+      }
+      
+      // Prüfe ob Preise sich geändert haben
+      const oldTotal = order.total
+      const newTotal = cart.reduce((sum, item) => sum + item.price, 0)
+      
+      if (Math.abs(oldTotal - newTotal) > 0.01) {
+        message += `\n\nℹ️ Hinweis: Die Preise können sich seit deiner letzten Bestellung geändert haben.`
+        message += `\nAlter Preis: ${oldTotal.toFixed(2)}€`
+        message += `\nNeuer Preis: ${newTotal.toFixed(2)}€`
+      }
+      
+      alert(message)
     }, 300)
     
   } catch (e) {
