@@ -297,8 +297,6 @@ textarea { resize: vertical; min-height: 60px; }
     <p class="subtitle">Verwalte Glücksrad-Konfiguration</p>
     <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px; margin-bottom: 20px;">
       <h3 style="color: #92400e; margin-bottom: 12px;">⚙️ Grundeinstellungen</h3>
-      <label class="form-label">Status</label>
-      <select id="wheel-active"><option value="true">✅ Aktiv</option><option value="false">❌ Inaktiv</option></select>
       <label class="form-label">📅 Aktive Wochentage</label>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 16px;">
         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;"><input type="checkbox" id="day-1" class="wheel-day" value="1" style="width: auto; margin: 0;"><span>Montag</span></label>
@@ -320,13 +318,6 @@ textarea { resize: vertical; min-height: 60px; }
       <input type="number" step="0.01" id="wheel-min-amount" value="10.00" placeholder="z.B. 10.00">
       <button class="success" onclick="saveWheelConfig()">💾 Einstellungen speichern</button>
       <div id="result-wheel-config"></div>
-    </div>
-    <div style="margin-top: 24px;"><h3>📊 Statistiken</h3>
-      <div class="stats" style="margin-top: 12px;">
-        <div class="stat-item"><div class="stat-value" id="stat-wheel-today">0</div><div class="stat-label">Heute gedreht</div></div>
-        <div class="stat-item"><div class="stat-value" id="stat-wheel-total">0</div><div class="stat-label">Gesamt gedreht</div></div>
-        <div class="stat-item"><div class="stat-value" id="stat-wheel-avg">0</div><div class="stat-label">Ø Gewinn (Punkte)</div></div>
-      </div>
     </div>
   </div>
 
