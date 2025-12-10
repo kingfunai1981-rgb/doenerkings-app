@@ -1801,8 +1801,10 @@ async function markOrderPaid(orderId, customerId, total) {
     console.log('✅ Status: completed')
     console.log('🎉 Bestellung komplett abgewickelt!')
     
-    // Warte kurz bevor reload (damit Status in DB committed wird)
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // ⏰ WICHTIG: Warte 3 Sekunden damit Supabase Transaction committed wird
+    console.log('⏰ Warte 3 Sekunden auf DB-Commit...')
+    await new Promise(resolve => setTimeout(resolve, 3000))
+    console.log('✅ Reload Orders...')
     loadOrders()
   } catch (e) {
     console.error('markOrderPaid Fehler:', e)
@@ -1891,8 +1893,10 @@ async function markPayPalPaid(orderId, customerId, total) {
     console.log('✅ Status: completed')
     console.log('🎉 Bestellung komplett abgewickelt!')
     
-    // Warte kurz bevor reload (damit Status in DB committed wird)
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // ⏰ WICHTIG: Warte 3 Sekunden damit Supabase Transaction committed wird
+    console.log('⏰ Warte 3 Sekunden auf DB-Commit...')
+    await new Promise(resolve => setTimeout(resolve, 3000))
+    console.log('✅ Reload Orders...')
     loadOrders()
   } catch (e) {
     console.error('markPayPalPaid Fehler:', e)
