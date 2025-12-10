@@ -935,7 +935,6 @@ async function loadWheelConfig() {
     const { data, error } = await supabase.from('wheel_config').select('*').limit(1)
     if (error || !data || data.length === 0) { showResult('result-wheel-config', 'ℹ️ Wheel Config noch nicht vorhanden.', 'info'); return }
     const config = data[0]
-    document.getElementById('wheel-active').value = config.is_active.toString()
     document.getElementById('wheel-min-amount').value = parseFloat(config.min_order_amount).toFixed(2)
     if (config.start_time) { document.getElementById('wheel-start-time').value = config.start_time }
     if (config.end_time) { document.getElementById('wheel-end-time').value = config.end_time }
@@ -944,20 +943,44 @@ async function loadWheelConfig() {
 }
 
 async function saveWheelConfig() {
-  const isActive = document.getElementById('wheel-active').value === 'true'
+  const btn = event.target
   const minAmount = parseFloat(document.getElementById('wheel-min-amount').value)
   const startTime = document.getElementById('wheel-start-time').value || null
   const endTime = document.getElementById('wheel-end-time').value || null
   if (!minAmount || minAmount <= 0) { showResult('result-wheel-config', '❌ Bitte gültigen Mindestbestellwert eingeben!', 'error'); return }
   const activeDays = []; document.querySelectorAll('.wheel-day:checked').forEach(checkbox => { activeDays.push(parseInt(checkbox.value)) })
   try {
+    // Button während Speichervorgang deaktivieren
+    btn.disabled = true
+    btn.textContent = '⏳ Speichere...'
+    btn.style.opacity = '0.6'
     showResult('result-wheel-config', '⏳ Speichere...', 'info')
-    const configData = { is_active: isActive, min_order_amount: minAmount, active_days: activeDays.length > 0 ? activeDays : null, start_time: startTime, end_time: endTime }
+    
+    const configData = { is_active: true, min_order_amount: minAmount, active_days: activeDays.length > 0 ? activeDays : null, start_time: startTime, end_time: endTime }
     const { data: existing } = await supabase.from('wheel_config').select('id').limit(1)
     if (existing && existing.length > 0) { await supabase.from('wheel_config').update(configData).eq('id', existing[0].id) }
     else { await supabase.from('wheel_config').insert(configData) }
-    showResult('result-wheel-config', '✅ Einstellungen gespeichert!', 'success')
-  } catch (e) { showResult('result-wheel-config', '❌ Fehler: ' + e.message, 'error'); console.error('Save wheel config error:', e) }
+    
+    // Erfolgs-Feedback
+    btn.textContent = '✅ Gespeichert!'
+    btn.style.opacity = '1'
+    showResult('result-wheel-config', '✅ Einstellungen erfolgreich gespeichert!', 'success')
+    
+    // Nach 2 Sekunden Button zurücksetzen
+    setTimeout(() => {
+      btn.textContent = '💾 Einstellungen speichern'
+      btn.disabled = false
+    }, 2000)
+  } catch (e) { 
+    btn.textContent = '❌ Fehler beim Speichern'
+    btn.disabled = false
+    btn.style.opacity = '1'
+    showResult('result-wheel-config', '❌ Fehler: ' + e.message, 'error')
+    console.error('Save wheel config error:', e)
+    setTimeout(() => {
+      btn.textContent = '💾 Einstellungen speichern'
+    }, 3000)
+  }
 }
 
 async function loadWheelStats() {
