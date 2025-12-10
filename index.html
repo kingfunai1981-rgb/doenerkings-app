@@ -4208,19 +4208,18 @@ async function placeOrder() {
         payment_method: 'paypal',
         pickup_time: pickupTime,
         pickup_type: selectedPickupTime,
-        status: 'pending',  // ⏳ Status "pending" - Punkte werden NICHT automatisch gutgeschrieben!
-        created_at: new Date().toISOString()
-        // ℹ️ WICHTIG: Punkte werden erst gutgeschrieben wenn Mitarbeiter im Scanner
-        // die Bestellung als "Abgeholt" markiert (Status: pending → completed)
+        status: 'pending'
+        // created_at wird automatisch von Supabase gesetzt
       }
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('orders')
         .insert([orderData])
       
       if (error) {
         console.error('Supabase error:', error)
-        throw new Error('Bestellung konnte nicht gespeichert werden')
+        console.error('Error details:', JSON.stringify(error, null, 2))
+        throw new Error('Bestellung konnte nicht gespeichert werden: ' + (error.message || 'Unbekannter Fehler'))
       }
       
       // 🤖 Sende Telegram Benachrichtigung
@@ -4268,19 +4267,18 @@ async function placeOrder() {
       payment_method: selectedPayment,
       pickup_time: pickupTime,
       pickup_type: selectedPickupTime,
-      status: 'pending',  // ⏳ Status "pending" - Punkte werden NICHT automatisch gutgeschrieben!
-      created_at: new Date().toISOString()
-      // ℹ️ WICHTIG: Punkte werden erst gutgeschrieben wenn Mitarbeiter im Scanner
-      // die Bestellung als "Abgeholt" markiert (Status: pending → completed)
+      status: 'pending'
+      // created_at wird automatisch von Supabase gesetzt
     }
     
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('orders')
       .insert([orderData])
     
     if (error) {
       console.error('Supabase error:', error)
-      throw new Error('Bestellung konnte nicht gespeichert werden')
+      console.error('Error details:', JSON.stringify(error, null, 2))
+      throw new Error('Bestellung konnte nicht gespeichert werden: ' + (error.message || 'Unbekannter Fehler'))
     }
     
     // 🤖 Sende Telegram Benachrichtigung
@@ -4323,8 +4321,8 @@ async function sendOrderNotification(orderNumber, customerName, total, paymentMe
       customer_name: customerName,
       total: total,
       payment_method: paymentMethod,
-      items: items,
-      created_at: new Date().toISOString()
+      items: items
+      // created_at wird automatisch gesetzt
     }
     
     // In Supabase speichern - Backend kümmert sich um Versand
