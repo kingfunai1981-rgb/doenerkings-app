@@ -1705,13 +1705,6 @@ async function markOrderPaid(orderId, customerId, total) {
   try {
     console.log('💰 Bar bezahlt - Auto-Workflow startet...')
     
-    // ✅ WICHTIG: Button sofort deaktivieren um Doppelklicks zu verhindern
-    const button = event?.target
-    if (button) {
-      button.disabled = true
-      button.innerHTML = '⏳ Wird verarbeitet...'
-    }
-    
     // Hole die Bestellung
     const { data: order, error: orderError } = await supabase
       .from('orders')
@@ -1723,71 +1716,29 @@ async function markOrderPaid(orderId, customerId, total) {
       throw new Error('Bestellung nicht gefunden')
     }
     
-    // ✅ WICHTIG: Prüfe ob schon completed
-    if (order.status === 'completed') {
-      console.log('⚠️ Bestellung wurde bereits abgeschlossen!')
-      alert('Diese Bestellung wurde bereits abgeschlossen!')
-      loadOrders()
-      return
-    }
-    
-    // ✅ WICHTIG: Prüfe ob Punkte schon gutgeschrieben wurden
-    if (order.points_earned && order.points_earned > 0) {
-      console.log('⚠️ Punkte wurden bereits gutgeschrieben!')
-      alert('Punkte wurden bereits gutgeschrieben für diese Bestellung!')
-      loadOrders()
-      return
-    }
-    
     // 1. Status: preparing
-    console.log('📋 Schritt 1: Setze Status auf preparing...')
     await supabase.from('orders').update({ status: 'preparing' }).eq('id', orderId)
-    console.log('✅ Status: preparing')
     
     // 2. Punkte gutschreiben
-    console.log('💰 Schritt 2: Schreibe Punkte gut...')
-    let pointsEarned = 0
     if (order.customer_phone && total) {
-      pointsEarned = await addPointsForPhone(order.customer_phone, total)
-      console.log(`✅ Punkte gutgeschrieben: ${pointsEarned}`)
+      await addPointsForPhone(order.customer_phone, total)
     } else if (customerId && total) {
-      pointsEarned = await addPointsForCustomerId(customerId, total)
-      console.log(`✅ Punkte gutgeschrieben: ${pointsEarned}`)
+      await addPointsForCustomerId(customerId, total)
     }
     
-    // Stelle sicher dass pointsEarned eine Zahl ist
-    if (!pointsEarned || isNaN(pointsEarned)) {
-      pointsEarned = 0
-    }
-    
-    // 3. Status: ready
-    console.log('📦 Schritt 3: Setze Status auf ready...')
+    // 3. Status: ready (ohne Telegram - du klickst es ja selbst)
     await supabase.from('orders').update({ status: 'ready' }).eq('id', orderId)
-    console.log('✅ Status: ready')
     
-    // 4. Status: completed
-    console.log('🎉 Schritt 4: Setze Status auf completed...')
-    const { error: completeError } = await supabase.from('orders').update({ 
-      status: 'completed',
-      points_earned: pointsEarned,
+    // 4. Status: completed (ohne Telegram - du klickst es ja selbst)
+    await supabase.from('orders').update({ 
+      status: 'completed', 
       completed_at: new Date().toISOString() 
     }).eq('id', orderId)
     
-    if (completeError) {
-      console.error('❌ Fehler beim Setzen von completed:', completeError)
-      throw completeError
-    }
-    
-    console.log('✅ Status: completed')
-    console.log('🎉 Bestellung komplett abgewickelt!')
-    
-    // Warte kurz bevor reload (damit Status in DB committed wird)
-    await new Promise(resolve => setTimeout(resolve, 500))
+    console.log('✅ Bestellung komplett abgewickelt!')
     loadOrders()
   } catch (e) {
     console.error('markOrderPaid Fehler:', e)
-    alert('Fehler beim Abschließen der Bestellung: ' + e.message)
-    loadOrders() // Reload um Button-Status zu resetten
   }
 }
 
@@ -1795,13 +1746,6 @@ async function markPayPalPaid(orderId, customerId, total) {
   try {
     console.log('💳 PayPal bezahlt - Auto-Workflow startet...')
     
-    // ✅ WICHTIG: Button sofort deaktivieren um Doppelklicks zu verhindern
-    const button = event?.target
-    if (button) {
-      button.disabled = true
-      button.innerHTML = '⏳ Wird verarbeitet...'
-    }
-    
     // Hole die Bestellung
     const { data: order, error: orderError } = await supabase
       .from('orders')
@@ -1813,66 +1757,26 @@ async function markPayPalPaid(orderId, customerId, total) {
       throw new Error('Bestellung nicht gefunden')
     }
     
-    // ✅ WICHTIG: Prüfe ob schon completed
-    if (order.status === 'completed') {
-      console.log('⚠️ Bestellung wurde bereits abgeschlossen!')
-      alert('Diese Bestellung wurde bereits abgeschlossen!')
-      loadOrders()
-      return
-    }
-    
-    // ✅ WICHTIG: Prüfe ob Punkte schon gutgeschrieben wurden
-    if (order.points_earned && order.points_earned > 0) {
-      console.log('⚠️ Punkte wurden bereits gutgeschrieben!')
-      alert('Punkte wurden bereits gutgeschrieben für diese Bestellung!')
-      loadOrders()
-      return
-    }
-    
     // 1. Status: preparing
-    console.log('📋 Schritt 1: Setze Status auf preparing...')
     await supabase.from('orders').update({ status: 'preparing' }).eq('id', orderId)
-    console.log('✅ Status: preparing')
     
     // 2. Punkte gutschreiben
-    console.log('💰 Schritt 2: Schreibe Punkte gut...')
-    let pointsEarned = 0
     if (order.customer_phone && total) {
-      pointsEarned = await addPointsForPhone(order.customer_phone, total)
-      console.log(`✅ Punkte gutgeschrieben: ${pointsEarned}`)
+      await addPointsForPhone(order.customer_phone, total)
     } else if (customerId && total) {
-      pointsEarned = await addPointsForCustomerId(customerId, total)
-      console.log(`✅ Punkte gutgeschrieben: ${pointsEarned}`)
+      await addPointsForCustomerId(customerId, total)
     }
     
-    // Stelle sicher dass pointsEarned eine Zahl ist
-    if (!pointsEarned || isNaN(pointsEarned)) {
-      pointsEarned = 0
-    }
-    
-    // 3. Status: ready
-    console.log('📦 Schritt 3: Setze Status auf ready...')
+    // 3. Status: ready (ohne Telegram - du klickst es ja selbst)
     await supabase.from('orders').update({ status: 'ready' }).eq('id', orderId)
-    console.log('✅ Status: ready')
     
-    // 4. Status: completed
-    console.log('🎉 Schritt 4: Setze Status auf completed...')
-    const { error: completeError } = await supabase.from('orders').update({ 
-      status: 'completed',
-      points_earned: pointsEarned,
+    // 4. Status: completed (ohne Telegram - du klickst es ja selbst)
+    await supabase.from('orders').update({ 
+      status: 'completed', 
       completed_at: new Date().toISOString() 
     }).eq('id', orderId)
     
-    if (completeError) {
-      console.error('❌ Fehler beim Setzen von completed:', completeError)
-      throw completeError
-    }
-    
-    console.log('✅ Status: completed')
-    console.log('🎉 Bestellung komplett abgewickelt!')
-    
-    // Warte kurz bevor reload (damit Status in DB committed wird)
-    await new Promise(resolve => setTimeout(resolve, 500))
+    console.log('✅ Bestellung komplett abgewickelt!')
     loadOrders()
   } catch (e) {
     console.error('markPayPalPaid Fehler:', e)
@@ -2197,10 +2101,8 @@ async function addPointsForCustomerId(customerId, amount) {
     await checkAndUnlockWheel(customer.id, amount)
     
     console.log(`✅ ${points} Punkte gutgeschrieben für ${customer.name}`)
-    return points // ✅ Gebe gutgeschriebene Punkte zurück
   } catch (e) {
     console.error('❌ Fehler beim Gutschreiben der Punkte:', e)
-    return 0 // ✅ Bei Fehler 0 zurückgeben
   }
 }
 
@@ -2301,10 +2203,8 @@ async function addPointsForPhone(phone, amount) {
     await checkAndUnlockWheel(customer.id, amount)
     
     console.log(`✅ ${points} Punkte gutgeschrieben für ${customer.name}`)
-    return points // ✅ Gebe gutgeschriebene Punkte zurück
   } catch (e) {
     console.error('❌ Fehler beim Gutschreiben der Punkte:', e)
-    return 0 // ✅ Bei Fehler 0 zurückgeben
   }
 }
 
