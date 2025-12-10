@@ -1740,27 +1740,49 @@ async function markOrderPaid(orderId, customerId, total) {
     }
     
     // 1. Status: preparing
+    console.log('📋 Schritt 1: Setze Status auf preparing...')
     await supabase.from('orders').update({ status: 'preparing' }).eq('id', orderId)
+    console.log('✅ Status: preparing')
     
     // 2. Punkte gutschreiben
+    console.log('💰 Schritt 2: Schreibe Punkte gut...')
     let pointsEarned = 0
     if (order.customer_phone && total) {
       pointsEarned = await addPointsForPhone(order.customer_phone, total)
+      console.log(`✅ Punkte gutgeschrieben: ${pointsEarned}`)
     } else if (customerId && total) {
       pointsEarned = await addPointsForCustomerId(customerId, total)
+      console.log(`✅ Punkte gutgeschrieben: ${pointsEarned}`)
     }
     
-    // 3. Status: ready (ohne Telegram - du klickst es ja selbst)
-    await supabase.from('orders').update({ status: 'ready' }).eq('id', orderId)
+    // Stelle sicher dass pointsEarned eine Zahl ist
+    if (!pointsEarned || isNaN(pointsEarned)) {
+      pointsEarned = 0
+    }
     
-    // 4. Status: completed + speichere dass Punkte gutgeschrieben wurden
-    await supabase.from('orders').update({ 
+    // 3. Status: ready
+    console.log('📦 Schritt 3: Setze Status auf ready...')
+    await supabase.from('orders').update({ status: 'ready' }).eq('id', orderId)
+    console.log('✅ Status: ready')
+    
+    // 4. Status: completed
+    console.log('🎉 Schritt 4: Setze Status auf completed...')
+    const { error: completeError } = await supabase.from('orders').update({ 
       status: 'completed',
-      points_earned: pointsEarned, // ✅ Speichere gutgeschriebene Punkte
+      points_earned: pointsEarned,
       completed_at: new Date().toISOString() 
     }).eq('id', orderId)
     
-    console.log('✅ Bestellung komplett abgewickelt!')
+    if (completeError) {
+      console.error('❌ Fehler beim Setzen von completed:', completeError)
+      throw completeError
+    }
+    
+    console.log('✅ Status: completed')
+    console.log('🎉 Bestellung komplett abgewickelt!')
+    
+    // Warte kurz bevor reload (damit Status in DB committed wird)
+    await new Promise(resolve => setTimeout(resolve, 500))
     loadOrders()
   } catch (e) {
     console.error('markOrderPaid Fehler:', e)
@@ -1808,27 +1830,49 @@ async function markPayPalPaid(orderId, customerId, total) {
     }
     
     // 1. Status: preparing
+    console.log('📋 Schritt 1: Setze Status auf preparing...')
     await supabase.from('orders').update({ status: 'preparing' }).eq('id', orderId)
+    console.log('✅ Status: preparing')
     
     // 2. Punkte gutschreiben
+    console.log('💰 Schritt 2: Schreibe Punkte gut...')
     let pointsEarned = 0
     if (order.customer_phone && total) {
       pointsEarned = await addPointsForPhone(order.customer_phone, total)
+      console.log(`✅ Punkte gutgeschrieben: ${pointsEarned}`)
     } else if (customerId && total) {
       pointsEarned = await addPointsForCustomerId(customerId, total)
+      console.log(`✅ Punkte gutgeschrieben: ${pointsEarned}`)
     }
     
-    // 3. Status: ready (ohne Telegram - du klickst es ja selbst)
-    await supabase.from('orders').update({ status: 'ready' }).eq('id', orderId)
+    // Stelle sicher dass pointsEarned eine Zahl ist
+    if (!pointsEarned || isNaN(pointsEarned)) {
+      pointsEarned = 0
+    }
     
-    // 4. Status: completed + speichere dass Punkte gutgeschrieben wurden
-    await supabase.from('orders').update({ 
+    // 3. Status: ready
+    console.log('📦 Schritt 3: Setze Status auf ready...')
+    await supabase.from('orders').update({ status: 'ready' }).eq('id', orderId)
+    console.log('✅ Status: ready')
+    
+    // 4. Status: completed
+    console.log('🎉 Schritt 4: Setze Status auf completed...')
+    const { error: completeError } = await supabase.from('orders').update({ 
       status: 'completed',
-      points_earned: pointsEarned, // ✅ Speichere gutgeschriebene Punkte
+      points_earned: pointsEarned,
       completed_at: new Date().toISOString() 
     }).eq('id', orderId)
     
-    console.log('✅ Bestellung komplett abgewickelt!')
+    if (completeError) {
+      console.error('❌ Fehler beim Setzen von completed:', completeError)
+      throw completeError
+    }
+    
+    console.log('✅ Status: completed')
+    console.log('🎉 Bestellung komplett abgewickelt!')
+    
+    // Warte kurz bevor reload (damit Status in DB committed wird)
+    await new Promise(resolve => setTimeout(resolve, 500))
     loadOrders()
   } catch (e) {
     console.error('markPayPalPaid Fehler:', e)
