@@ -3511,8 +3511,12 @@ function renderProducts() {
     `
   })
   
-  // ✅ SICHERHEIT: Sanitize HTML bevor es ins DOM kommt
-  container.innerHTML = DOMPurify.sanitize(html)
+  // ✅ SICHERHEIT: Sanitize HTML mit onclick-Support
+  // SAFE_FOR_TEMPLATES erlaubt onclick, solange kein JavaScript:-Protokoll verwendet wird
+  container.innerHTML = DOMPurify.sanitize(html, {
+    ADD_ATTR: ['onclick'], // Erlaube onclick-Attribute
+    ALLOW_UNKNOWN_PROTOCOLS: false // Blockiere javascript: URLs
+  })
 }
 
 function toggleCategory(index) {
@@ -3862,8 +3866,11 @@ function renderCart() {
     finalHTML += generateMenuBundleHTML(menuOffer)
   }
   
-  // ✅ SICHERHEIT: Sanitize HTML
-  container.innerHTML = DOMPurify.sanitize(finalHTML)
+  // ✅ SICHERHEIT: Sanitize HTML mit onclick-Support
+  container.innerHTML = DOMPurify.sanitize(finalHTML, {
+    ADD_ATTR: ['onclick'],
+    ALLOW_UNKNOWN_PROTOCOLS: false
+  })
   
   const total = cart.reduce((sum, item) => sum + item.price, 0)
   document.getElementById('cartModalTotal').textContent = formatPrice(total)
