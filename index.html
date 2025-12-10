@@ -4426,6 +4426,7 @@ async function placeOrder() {
       const orderData = {
         order_number: orderNumber, // String
         qr_id: orderQRID,
+        customer_id: currentCustomer.id, // ✅ WICHTIG: Verknüpfe mit Kunden-ID
         customer_name: name,
         customer_phone: phone,
         notes: notes || null,
@@ -4485,6 +4486,7 @@ async function placeOrder() {
     const orderData = {
       order_number: orderNumber, // String
       qr_id: orderQRID,
+      customer_id: currentCustomer.id, // ✅ WICHTIG: Verknüpfe mit Kunden-ID
       customer_name: name,
       customer_phone: phone,
       notes: notes || null,
@@ -4634,11 +4636,13 @@ async function loadOrderHistory() {
   if (!container || !currentCustomer) return
   
   try {
-    // Lade letzte 3 abgeschlossene Bestellungen
+    // Lade letzte 3 abgeschlossene Bestellungen DIESER Kunden-ID
+    // ✅ WICHTIG: Nach customer_id filtern, NICHT customer_phone!
+    // Wenn Kunde gelöscht und neu registriert wird, bekommt er neue ID
     const { data: orders, error } = await supabase
       .from('orders')
       .select('*')
-      .eq('customer_phone', currentCustomer.phone)
+      .eq('customer_id', currentCustomer.id)
       .in('status', ['completed', 'cancelled'])
       .order('created_at', { ascending: false })
       .limit(3)
