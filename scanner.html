@@ -1678,7 +1678,20 @@ function renderOrders(orders) {
     const items = order.items.map(item => {
       let optionsText = ''
       if (item.options) {
-        const optionsList = Object.keys(item.options).filter(key => {
+        // 🥙 Optimale Build-Reihenfolge für Döner
+        const buildOrder = ['knoblauch', 'scharf', 'fleisch', 'weiss', 'rot', 'salat', 'tomate', 'zwiebel']
+        
+        const optionsList = Object.keys(item.options)
+          .sort((a, b) => {
+            const indexA = buildOrder.indexOf(a)
+            const indexB = buildOrder.indexOf(b)
+            // Falls nicht in buildOrder: ans Ende
+            if (indexA === -1 && indexB === -1) return 0
+            if (indexA === -1) return 1
+            if (indexB === -1) return -1
+            return indexA - indexB
+          })
+          .filter(key => {
           const value = item.options[key]
           const defaultValue = item.product.options[key]?.default
           return value !== defaultValue
