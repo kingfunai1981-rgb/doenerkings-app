@@ -1717,7 +1717,7 @@ function renderOrders(orders) {
     }
     // Alle anderen Status zeigen keine Buttons mehr - wird automatisch abgeschlossen!
     
-    return `<div class="order-card ${statusClass}"><div class="order-header"><div><span class="order-number">#${order.order_number}</span><span class="order-badge ${statusClass}">${statusText}</span><span class="payment-badge ${paymentClass}">${paymentText}</span></div><div class="order-time">${timeAgo}</div></div><div class="order-customer"><p><strong>👤 ${order.customer_name}</strong></p><p>📱 ${order.customer_phone}</p><p>🎫 QR-ID: ${order.qr_id}</p>${pickupInfo}${order.notes ? `<p><strong>💬 Notiz:</strong> ${order.notes}</p>` : ''}</div><div class="order-items">${items}</div><div class="order-total"><span>Gesamt:</span><span style="color: #E31E24;">${formatPrice(order.total)}</span></div><div class="order-actions">${actions}</div></div>`
+    return `<div class="order-card ${statusClass}"><div class="order-header"><div><span class="order-number">#${order.order_number}</span><span class="order-badge ${statusClass}">${statusText}</span><span class="payment-badge ${paymentClass}">${paymentText}</span></div><div class="order-time">${timeAgo}</div></div><div class="order-customer"><p><strong>👤 ${order.customer_name}</strong></p><p>📱 ${order.customer_phone}</p>${pickupInfo}${order.notes ? `<p><strong>💬 Notiz:</strong> ${order.notes}</p>` : ''}</div><div class="order-items">${items}</div><div class="order-total"><span>Gesamt:</span><span style="color: #E31E24;">${formatPrice(order.total)}</span></div><div class="order-actions">${actions}</div></div>`
   }).join('')
 }
 
