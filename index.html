@@ -1219,6 +1219,210 @@ input:focus, textarea:focus {
 }
 
 
+/* ═══════════════════════════════════════════════════════════════
+   📦 BESTELLHISTORIE STYLES
+   ═══════════════════════════════════════════════════════════════ */
+.order-history-item {
+  background: white;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+}
+
+.order-history-item:hover {
+  border-color: #E31E24;
+  box-shadow: 0 2px 8px rgba(227, 30, 36, 0.1);
+}
+
+.order-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.order-history-number {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+}
+
+.order-history-date {
+  font-size: 12px;
+  color: #999;
+}
+
+.order-history-status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.order-history-status.completed {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.order-history-status.cancelled {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.order-history-items {
+  margin: 12px 0;
+}
+
+.order-history-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.order-history-item-name {
+  flex: 1;
+  color: #333;
+  font-weight: 500;
+}
+
+.order-history-item-options {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  padding-left: 12px;
+}
+
+.order-history-item-price {
+  color: #E31E24;
+  font-weight: 600;
+  white-space: nowrap;
+  margin-left: 12px;
+}
+
+.order-history-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  margin-top: 12px;
+  border-top: 2px solid #eee;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.order-history-total-label {
+  color: #333;
+}
+
+.order-history-total-amount {
+  color: #E31E24;
+  font-size: 18px;
+}
+
+.order-history-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.order-history-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.order-history-btn.primary {
+  background: linear-gradient(135deg, #E31E24, #F9A825);
+  color: white;
+}
+
+.order-history-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(227, 30, 36, 0.3);
+}
+
+.order-history-btn.secondary {
+  background: white;
+  color: #E31E24;
+  border: 2px solid #E31E24;
+}
+
+.order-history-btn.secondary:hover {
+  background: #E31E24;
+  color: white;
+}
+
+.order-history-details {
+  background: #f8f8f8;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+  display: none;
+  animation: slideDown 0.3s ease;
+}
+
+.order-history-details.show {
+  display: block;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.order-history-detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.order-history-detail-label {
+  font-weight: 500;
+  color: #333;
+}
+
+.order-history-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}
+
+.order-history-empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.order-history-empty-text {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+
 </style>
 </head>
 <body>
@@ -1315,6 +1519,20 @@ input:focus, textarea:focus {
         <span style="font-size: 20px;">🛒</span>
         <span>Jetzt bestellen</span>
       </button>
+    </div>
+
+    <!-- 📦 NEU: Bestellhistorie Section -->
+    <div id="order-history-section" class="card" style="margin-bottom: 16px;">
+      <h2 style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+        <span>📦</span>
+        <span>Meine Bestellungen</span>
+      </h2>
+      
+      <div id="order-history-list">
+        <div style="text-align: center; padding: 20px; color: #999;">
+          Lade Bestellhistorie...
+        </div>
+      </div>
     </div>
 
     <div id="pending-section" style="display: none;">
@@ -1827,6 +2045,7 @@ async function loadCustomer(customer) {
     loadActiveChallenges() // ✅ Lade Challenges beim Login
     loadActiveCoupons() // ✅ FIX 2: Lade Coupons beim Login
     loadGlobalBonuses() // ✅ Lade Global Bonusse beim Login
+    loadOrderHistory() // ✅ NEU: Lade Bestellhistorie
     
   } catch (e) {
     console.error('❌ Fehler beim Laden des Kunden:', e)
@@ -4386,6 +4605,262 @@ document.addEventListener('visibilitychange', () => {
     }
   }
 })
+
+// ═══════════════════════════════════════════════════════════════
+// 📦 BESTELLHISTORIE FUNKTIONEN
+// ═══════════════════════════════════════════════════════════════
+
+async function loadOrderHistory() {
+  const container = document.getElementById('order-history-list')
+  if (!container || !currentCustomer) return
+  
+  try {
+    // Lade letzte 10 abgeschlossene Bestellungen
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('customer_phone', currentCustomer.phone)
+      .in('status', ['completed', 'cancelled'])
+      .order('created_at', { ascending: false })
+      .limit(10)
+    
+    if (error) {
+      console.error('❌ Fehler beim Laden der Bestellhistorie:', error)
+      container.innerHTML = `
+        <div class="order-history-empty">
+          <div class="order-history-empty-icon">⚠️</div>
+          <div class="order-history-empty-text">
+            Bestellhistorie konnte nicht geladen werden.
+          </div>
+        </div>
+      `
+      return
+    }
+    
+    if (!orders || orders.length === 0) {
+      container.innerHTML = `
+        <div class="order-history-empty">
+          <div class="order-history-empty-icon">📦</div>
+          <div class="order-history-empty-text">
+            Noch keine Bestellungen.<br>
+            Bestelle jetzt und sammle Punkte!
+          </div>
+        </div>
+      `
+      return
+    }
+    
+    // Rendere Bestellungen
+    container.innerHTML = orders.map(order => renderOrderHistoryItem(order)).join('')
+    
+  } catch (e) {
+    console.error('❌ Fehler beim Laden der Bestellhistorie:', e)
+  }
+}
+
+function renderOrderHistoryItem(order) {
+  const date = new Date(order.created_at)
+  const dateStr = date.toLocaleDateString('de-DE', { 
+    day: '2-digit', 
+    month: '2-digit', 
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+  
+  const statusText = order.status === 'completed' ? 'Abgeschlossen' : 'Storniert'
+  const statusClass = order.status
+  
+  // Rendere Items
+  const itemsHtml = order.items.map(item => {
+    let optionsHtml = ''
+    
+    if (item.options) {
+      const optionsList = Object.keys(item.options)
+        .filter(key => {
+          const value = item.options[key]
+          const defaultValue = item.product?.options?.[key]?.default
+          return value !== defaultValue
+        })
+        .map(key => {
+          const value = item.options[key]
+          const label = item.product?.options?.[key]?.label || key
+          if (typeof value === 'string') return `${label}: ${value}`
+          return `${label}: ${value === 0 ? 'Ohne' : value === 1 ? '1x' : '2x'}`
+        })
+      
+      const extrasList = item.extras?.map(extraId => {
+        const extra = item.product?.extras?.find(e => e.id === extraId)
+        return extra ? `+ ${extra.name}` : ''
+      }).filter(Boolean) || []
+      
+      const allOptions = [...optionsList, ...extrasList].filter(Boolean)
+      if (allOptions.length > 0) {
+        optionsHtml = `<div class="order-history-item-options">${allOptions.join(', ')}</div>`
+      }
+    }
+    
+    return `
+      <div class="order-history-item-row">
+        <div>
+          <div class="order-history-item-name">${item.product?.name || 'Unbekanntes Produkt'}</div>
+          ${optionsHtml}
+        </div>
+        <div class="order-history-item-price">${formatPrice(item.price)}</div>
+      </div>
+    `
+  }).join('')
+  
+  // Details
+  const detailsHtml = `
+    <div class="order-history-details" id="details-${order.id}">
+      <div class="order-history-detail-row">
+        <span class="order-history-detail-label">Bestellnummer:</span>
+        <span>#${order.order_number}</span>
+      </div>
+      <div class="order-history-detail-row">
+        <span class="order-history-detail-label">QR-ID:</span>
+        <span>${order.qr_id}</span>
+      </div>
+      <div class="order-history-detail-row">
+        <span class="order-history-detail-label">Zahlungsart:</span>
+        <span>${order.payment_method === 'paypal' ? 'PayPal' : 'Bar'}</span>
+      </div>
+      ${order.pickup_type === 'later' && order.pickup_time ? `
+        <div class="order-history-detail-row">
+          <span class="order-history-detail-label">Abholzeit:</span>
+          <span>${order.pickup_time} Uhr</span>
+        </div>
+      ` : ''}
+      ${order.notes ? `
+        <div class="order-history-detail-row">
+          <span class="order-history-detail-label">Notiz:</span>
+          <span>${order.notes}</span>
+        </div>
+      ` : ''}
+      ${order.points_earned ? `
+        <div class="order-history-detail-row">
+          <span class="order-history-detail-label">Punkte erhalten:</span>
+          <span style="color: #2e7d32; font-weight: 600;">+${order.points_earned} Punkte</span>
+        </div>
+      ` : ''}
+    </div>
+  `
+  
+  return `
+    <div class="order-history-item">
+      <div class="order-history-header">
+        <div>
+          <div class="order-history-number">#${order.order_number}</div>
+          <div class="order-history-date">${dateStr}</div>
+        </div>
+        <span class="order-history-status ${statusClass}">${statusText}</span>
+      </div>
+      
+      <div class="order-history-items">
+        ${itemsHtml}
+      </div>
+      
+      <div class="order-history-total">
+        <span class="order-history-total-label">Gesamt:</span>
+        <span class="order-history-total-amount">${formatPrice(order.total)}</span>
+      </div>
+      
+      ${detailsHtml}
+      
+      <div class="order-history-actions">
+        <button class="order-history-btn secondary" onclick="toggleOrderDetails('${order.id}')">
+          <span id="toggle-icon-${order.id}">👁️</span>
+          <span id="toggle-text-${order.id}">Details</span>
+        </button>
+        ${order.status === 'completed' ? `
+          <button class="order-history-btn primary" onclick="reorderItems('${order.id}')">
+            <span>🔄</span>
+            <span>Wieder bestellen</span>
+          </button>
+        ` : ''}
+      </div>
+    </div>
+  `
+}
+
+function toggleOrderDetails(orderId) {
+  const details = document.getElementById(`details-${orderId}`)
+  const icon = document.getElementById(`toggle-icon-${orderId}`)
+  const text = document.getElementById(`toggle-text-${orderId}`)
+  
+  if (!details) return
+  
+  if (details.classList.contains('show')) {
+    details.classList.remove('show')
+    icon.textContent = '👁️'
+    text.textContent = 'Details'
+  } else {
+    details.classList.add('show')
+    icon.textContent = '🔼'
+    text.textContent = 'Verbergen'
+  }
+}
+
+async function reorderItems(orderId) {
+  try {
+    // Hole die Bestellung
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .single()
+    
+    if (error || !order) {
+      alert('❌ Bestellung konnte nicht geladen werden.')
+      return
+    }
+    
+    // Füge Items zum Warenkorb hinzu
+    if (!order.items || order.items.length === 0) {
+      alert('❌ Diese Bestellung enthält keine Artikel.')
+      return
+    }
+    
+    // Lösche aktuellen Warenkorb
+    cart = []
+    
+    // Füge alle Items hinzu
+    order.items.forEach(item => {
+      // Prüfe ob Produkt noch existiert
+      const product = item.product
+      if (!product) {
+        console.warn('⚠️ Produkt nicht mehr verfügbar:', item)
+        return
+      }
+      
+      cart.push({
+        product: product,
+        price: item.price,
+        options: item.options || {},
+        extras: item.extras || []
+      })
+    })
+    
+    if (cart.length === 0) {
+      alert('⚠️ Keine der Artikel aus dieser Bestellung ist mehr verfügbar.')
+      return
+    }
+    
+    // Öffne Bestellmodal
+    updateCartUI()
+    openOrderModal()
+    
+    // Zeige Erfolgs-Nachricht
+    setTimeout(() => {
+      alert(`✅ ${cart.length} Artikel wurden in den Warenkorb gelegt!`)
+    }, 300)
+    
+  } catch (e) {
+    console.error('❌ Fehler beim Wiederholen der Bestellung:', e)
+    alert('❌ Fehler beim Laden der Bestellung.')
+  }
+}
 
 console.log('✅ Döner Boxx App geladen!')
 </script>
