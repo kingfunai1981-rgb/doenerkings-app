@@ -4186,6 +4186,9 @@ async function placeOrder() {
     pickupTime = document.getElementById('pickupTimeInput').value
   }
   
+  // ✅ Stelle sicher dass pickup_type nie NULL ist
+  const finalPickupType = selectedPickupTime || 'now'
+  
   const btn = document.getElementById('placeOrderBtn')
   btn.disabled = true
   btn.innerHTML = '⏳ Bestellung wird verarbeitet...'
@@ -4207,7 +4210,7 @@ async function placeOrder() {
         total: total,
         payment_method: 'paypal',
         pickup_time: pickupTime,
-        pickup_type: selectedPickupTime,
+        pickup_type: finalPickupType, // ✅ Nie NULL
         status: 'pending'
         // created_at wird automatisch von Supabase gesetzt
       }
@@ -4266,7 +4269,7 @@ async function placeOrder() {
       total: total,
       payment_method: selectedPayment,
       pickup_time: pickupTime,
-      pickup_type: selectedPickupTime,
+      pickup_type: finalPickupType, // ✅ Nie NULL
       status: 'pending'
       // created_at wird automatisch von Supabase gesetzt
     }
