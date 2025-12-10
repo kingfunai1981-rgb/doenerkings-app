@@ -4194,11 +4194,11 @@ async function placeOrder() {
     // 💳 PAYPAL: Wenn PayPal gewählt, öffne PayPal.Me Link
     if (selectedPayment === 'paypal') {
       const orderQRID = Math.floor(1000 + Math.random() * 9000).toString()
-      const orderNumber = Math.floor(1000 + Math.random() * 9000)
+      const orderNumber = Math.floor(1000 + Math.random() * 9000).toString() // ✅ Als String für Supabase
       
       // Speichere Bestellung zuerst
       const orderData = {
-        order_number: orderNumber,
+        order_number: orderNumber, // String
         qr_id: orderQRID,
         customer_name: name,
         customer_phone: phone,
@@ -4255,10 +4255,10 @@ async function placeOrder() {
     
     // 💵 BAR-ZAHLUNG: Normale Bestellung ohne PayPal
     const orderQRID = Math.floor(1000 + Math.random() * 9000).toString()
-    const orderNumber = Math.floor(1000 + Math.random() * 9000)
+    const orderNumber = Math.floor(1000 + Math.random() * 9000).toString() // ✅ Als String
     
     const orderData = {
-      order_number: orderNumber,
+      order_number: orderNumber, // String
       qr_id: orderQRID,
       customer_name: name,
       customer_phone: phone,
