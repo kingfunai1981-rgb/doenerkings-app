@@ -1521,42 +1521,7 @@ input:focus, textarea:focus {
       </button>
     </div>
 
-    <!-- 📦 NEU: Vorherige Bestellungen Section (zugeklappt) -->
-    <div id="order-history-section" class="card" style="margin-bottom: 16px;">
-      <div onclick="toggleHistorySection()" style="cursor: pointer; user-select: none;">
-        <h2 style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0;">
-          <span style="display: flex; align-items: center; gap: 8px;">
-            <span>📦</span>
-            <span>Vorherige Bestellungen</span>
-          </span>
-          <span id="history-toggle-icon" style="font-size: 20px; transition: transform 0.3s;">▼</span>
-        </h2>
-      </div>
-      
-      <div id="order-history-list" style="display: none; margin-top: 16px;">
-        <div style="text-align: center; padding: 20px; color: #999;">
-          Lade Bestellhistorie...
-        </div>
-      </div>
-    </div>
-
-    <div id="pending-section" style="display: none;">
-      <div class="card">
-        <h2>⏳ Wartet auf Bestätigung</h2>
-        <div id="pending-list"></div>
-      </div>
-    </div>
-
-    <!-- 🎯 Challenge Section -->
-    <div id="challenge-section" style="display: none;">
-      <div class="card">
-        <h2>🎯 Aktive Challenges</h2>
-        <div id="challenge-list"></div>
-      </div>
-    </div>
-
-    
-    <!-- 🎡 NEU: Lucky Wheel Section (nur bei Freischaltung sichtbar) -->
+    <!-- 🎡 Lucky Wheel Section (nur bei Freischaltung sichtbar) -->
     <div id="wheel-section" class="wheel-section">
       <div class="card">
         <h2>🎡 Lucky Wheel</h2>
@@ -1590,6 +1555,40 @@ input:focus, textarea:focus {
         <div class="wheel-result-title" id="wheel-result-title">Glückwunsch!</div>
         <div class="wheel-result-prize" id="wheel-result-prize">+100 Punkte</div>
         <button onclick="closeWheelResult()">Weiter</button>
+      </div>
+    </div>
+
+    <!-- 📦 NEU: Vorherige Bestellungen Section (zugeklappt) -->
+    <div id="order-history-section" class="card" style="margin-bottom: 16px;">
+      <div onclick="toggleHistorySection()" style="cursor: pointer; user-select: none;">
+        <h2 style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0;">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <span>📦</span>
+            <span>Vorherige Bestellungen</span>
+          </span>
+          <span id="history-toggle-icon" style="font-size: 20px; transition: transform 0.3s;">▼</span>
+        </h2>
+      </div>
+      
+      <div id="order-history-list" style="display: none; margin-top: 16px;">
+        <div style="text-align: center; padding: 20px; color: #999;">
+          Lade Bestellhistorie...
+        </div>
+      </div>
+    </div>
+
+    <div id="pending-section" style="display: none;">
+      <div class="card">
+        <h2>⏳ Wartet auf Bestätigung</h2>
+        <div id="pending-list"></div>
+      </div>
+    </div>
+
+    <!-- 🎯 Challenge Section -->
+    <div id="challenge-section" style="display: none;">
+      <div class="card">
+        <h2>🎯 Aktive Challenges</h2>
+        <div id="challenge-list"></div>
       </div>
     </div>
 
@@ -4737,10 +4736,6 @@ function renderOrderHistoryItem(order) {
       <div class="order-history-detail-row">
         <span class="order-history-detail-label">Bestellnummer:</span>
         <span>#${order.order_number}</span>
-      </div>
-      <div class="order-history-detail-row">
-        <span class="order-history-detail-label">QR-ID:</span>
-        <span>${order.qr_id}</span>
       </div>
       <div class="order-history-detail-row">
         <span class="order-history-detail-label">Zahlungsart:</span>
