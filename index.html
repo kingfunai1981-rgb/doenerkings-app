@@ -1803,8 +1803,8 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 // 🤖 Telegram Bot Konfiguration
-const TELEGRAM_BOT_TOKEN = '8216843337:AAGEHoVsQPW6f3zYw5jFhK61GPKIbgfnKZI'
-const TELEGRAM_CHAT_ID = '8253938141'
+// ⚠️ TOKENS WURDEN ENTFERNT - Jetzt sicher im Backend!
+// Die Benachrichtigung erfolgt über Supabase Edge Function
 
 
 // 🎯 DOM Element Cache für bessere Performance
@@ -2712,15 +2712,17 @@ async function activateWhatsApp() {
   )
   
   try {
-    // ✅ SICHERHEIT: Hole WhatsApp-Nummer aus Datenbank statt hardcoded
-    const { data: config } = await supabase
-      .from('settings')
-      .select('whatsapp_number')
-      .limit(1)
-      .single()
+    // ✅ SICHERHEIT: WhatsApp URL über Edge Function holen
+    // Nummer ist NICHT mehr im Frontend sichtbar!
+    const { data: urlData, error: urlError } = await supabase.functions.invoke('get-whatsapp-url', {
+      body: { message }
+    })
     
-    const waNumber = config?.whatsapp_number || '4917621672130' // Fallback
-    const waUrl = `https://wa.me/${waNumber}?text=${message}`
+    if (urlError || !urlData?.url) {
+      throw new Error('WhatsApp URL konnte nicht erstellt werden')
+    }
+    
+    const waUrl = urlData.url
   
     // In Datenbank als "wartet auf Bestätigung" markieren
     const { error } = await supabase
@@ -4460,7 +4462,7 @@ async function placeOrder() {
       }
       
       // 🤖 Sende Telegram Benachrichtigung
-      sendOrderNotification(orderNumber, name, total, 'paypal', cart)
+      sendOrderNotification(orderNumber, name, phone, total, 'paypal', cart, pickupTime, finalPickupType, notes)
       
       // PayPal Zahlung - Direkt zu deinem PayPal.Me Link
       const paypalEmail = 'ahmetdemirel@freenet.de'
@@ -4520,7 +4522,7 @@ async function placeOrder() {
     }
     
     // 🤖 Sende Telegram Benachrichtigung
-    sendOrderNotification(orderNumber, name, total, 'cash', cart)
+    sendOrderNotification(orderNumber, name, phone, total, 'cash', cart, pickupTime, finalPickupType, notes)
     
     // Zeige nur Bestellnummer - KEIN QR-Code
     document.getElementById('orderNumber').textContent = orderNumber
@@ -4548,96 +4550,29 @@ function formatPrice(price) {
   return price.toFixed(2).replace('.', ',') + ' €'
 }
 
-// 🤖 Direkte Telegram Benachrichtigung
-async function sendOrderNotification(orderNumber, customerName, total, paymentMethod, items) {
-  // Prüfe ob Bot Token konfiguriert ist
-  if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'DEIN_BOT_TOKEN_HIER') {
-    console.log('⚠️ Telegram Bot Token nicht konfiguriert')
-    return
-  }
-  
+// 🤖 SICHERE Telegram Benachrichtigung über Edge Function
+async function sendOrderNotification(orderNumber, customerName, customerPhone, total, paymentMethod, items, pickupTime, pickupType, notes) {
   try {
-    // Formatiere Items Liste mit Optionen und Extras
-    const itemsList = items.map((item, index) => {
-      let itemText = `${index + 1}. <b>${item.product.name}</b>`
-      
-      // Optionen anzeigen (wenn nicht Standard)
-      if (item.options && Object.keys(item.options).length > 0) {
-        const optionsList = Object.keys(item.options)
-          .filter(key => {
-            const value = item.options[key]
-            const defaultValue = item.product.options?.[key]?.default
-            return value !== defaultValue
-          })
-          .map(key => {
-            const value = item.options[key]
-            const label = item.product.options?.[key]?.label || key
-            if (typeof value === 'string') return `${label}: ${value}`
-            return `${label}: ${value === 0 ? 'Ohne' : value === 1 ? '1x' : '2x'}`
-          })
-        
-        if (optionsList.length > 0) {
-          itemText += `\n   └ ${optionsList.join(', ')}`
-        }
+    // ✅ SICHER: Rufe Supabase Edge Function auf
+    // Token ist NICHT mehr im Frontend!
+    const { data, error } = await supabase.functions.invoke('send-telegram-notification', {
+      body: {
+        orderNumber,
+        customerName,
+        customerPhone,
+        total,
+        paymentMethod,
+        items,
+        pickupTime,
+        pickupType,
+        notes
       }
-      
-      // Extras anzeigen
-      if (item.extras && item.extras.length > 0) {
-        const extrasList = item.extras.map(extraId => {
-          const extra = item.product.extras?.find(e => e.id === extraId)
-          return extra ? extra.name : extraId
-        }).filter(Boolean)
-        
-        if (extrasList.length > 0) {
-          itemText += `\n   └ Extras: ${extrasList.join(', ')}`
-        }
-      }
-      
-      itemText += ` - <b>${formatPrice(item.price)}</b>`
-      return itemText
-    }).join('\n\n')
-    
-    // Erstelle Telegram-Nachricht
-    const paymentEmoji = paymentMethod === 'paypal' ? '💳' : '💵'
-    const paymentText = paymentMethod === 'paypal' ? 'PayPal' : 'Bar'
-    
-    const message = `
-🆕 <b>NEUE BESTELLUNG</b>
-
-━━━━━━━━━━━━━━━━━━━━━
-📋 Bestell-Nr.: <b>#${orderNumber}</b>
-👤 Kunde: <b>${customerName}</b>
-${paymentEmoji} Bezahlung: <b>${paymentText}</b>
-⏰ Zeit: ${new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
-━━━━━━━━━━━━━━━━━━━━━
-
-📦 <b>BESTELLTE ARTIKEL:</b>
-
-${itemsList}
-
-━━━━━━━━━━━━━━━━━━━━━
-💰 <b>GESAMT: ${formatPrice(total)}</b>
-━━━━━━━━━━━━━━━━━━━━━
-
-${paymentMethod === 'paypal' ? '⚠️ <b>Bitte PayPal-Zahlung prüfen!</b>' : '✅ <b>Barzahlung bei Abholung</b>'}
-`.trim()
-    
-    // Sende an Telegram
-    const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: message,
-        parse_mode: 'HTML'
-      })
     })
     
-    if (response.ok) {
-      console.log('✅ Telegram Benachrichtigung gesendet!')
+    if (error) {
+      console.error('❌ Telegram Benachrichtigung fehlgeschlagen:', error)
     } else {
-      const errorText = await response.text()
-      console.error('❌ Telegram Fehler:', errorText)
+      console.log('✅ Telegram Benachrichtigung gesendet!', data)
     }
     
   } catch (error) {
