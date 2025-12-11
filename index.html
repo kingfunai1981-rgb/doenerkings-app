@@ -4463,8 +4463,7 @@ async function placeOrder() {
       // 🤖 Sende Telegram Benachrichtigung
       sendOrderNotification(orderNumber, name, phone, total, 'paypal', cart, pickupTime, finalPickupType, notes)
       
-      // PayPal Zahlung - Direkt zu deinem PayPal.Me Link
-      const paypalEmail = 'ahmetdemirel@freenet.de'
+      // PayPal Zahlung - Direkt zu PayPal.Me Link
       const amount = total.toFixed(2)
       
       // PayPal.Me Link zu DoenerBoxx mit Betrag
