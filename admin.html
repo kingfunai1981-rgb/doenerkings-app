@@ -439,7 +439,8 @@ textarea { resize: vertical; min-height: 60px; }
   <div style="margin-bottom: 16px;">
     <button class="stat-btn active" id="btn-coupon" onclick="loadCouponStats()">🎟️ Coupon ROI</button>
     <button class="stat-btn" id="btn-rewards" onclick="loadRewardStats()">🏆 Prämien-Ranking</button>
-    <button class="stat-btn" id="btn-weather" onclick="loadWeatherStats()">🌧️ Wetter-Deals</button>
+    <!-- ✅ FIX: Wetter-Deals ausgeblendet -->
+<button class="stat-btn" id="btn-weather" onclick="loadWeatherStats()" style="display: none;">🌧️ Wetter-Deals</button>
     <button class="stat-btn" id="btn-wheel" onclick="loadWheelStats()">🎡 Glücksrad</button>
     <button class="stat-btn" id="btn-challenges" onclick="loadChallengeStats()">⚡ Challenges</button>
     <button class="stat-btn" id="btn-segments" onclick="loadSegmentStats()">👥 Segmente</button>
@@ -1765,6 +1766,7 @@ function setTimeRange(range, skipReload = false) {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   
+  // ✅ FIX: Entferne active von allen Buttons
   document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => btn.classList.remove('active'))
   currentTimeRange.label = range
   
@@ -1773,35 +1775,62 @@ function setTimeRange(range, skipReload = false) {
       currentTimeRange.start = today
       currentTimeRange.end = new Date(today.getTime() + 24*60*60*1000)
       document.getElementById('custom-date-range').style.display = 'none'
+      // ✅ Aktiviere Button - suche nach Text statt ID
+      document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => {
+        if (btn.textContent.includes('Heute')) btn.classList.add('active')
+      })
       break
     case '7days':
       currentTimeRange.start = new Date(now.getTime() - 7*24*60*60*1000)
       currentTimeRange.end = now
       document.getElementById('custom-date-range').style.display = 'none'
-      document.getElementById('btn-7days').classList.add('active')
+      // ✅ Aktiviere Button
+      document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => {
+        if (btn.textContent.includes('7 Tage')) btn.classList.add('active')
+      })
       break
     case '30days':
       currentTimeRange.start = new Date(now.getTime() - 30*24*60*60*1000)
       currentTimeRange.end = now
       document.getElementById('custom-date-range').style.display = 'none'
+      // ✅ Aktiviere Button
+      document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => {
+        if (btn.textContent.includes('30 Tage')) btn.classList.add('active')
+      })
       break
     case 'thisMonth':
       currentTimeRange.start = new Date(now.getFullYear(), now.getMonth(), 1)
       currentTimeRange.end = now
       document.getElementById('custom-date-range').style.display = 'none'
+      // ✅ Aktiviere Button
+      document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => {
+        if (btn.textContent.includes('Dieser Monat')) btn.classList.add('active')
+      })
       break
     case 'lastMonth':
       currentTimeRange.start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
       currentTimeRange.end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
       document.getElementById('custom-date-range').style.display = 'none'
+      // ✅ Aktiviere Button
+      document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => {
+        if (btn.textContent.includes('Letzter Monat')) btn.classList.add('active')
+      })
       break
     case 'all':
       currentTimeRange.start = null
       currentTimeRange.end = null
       document.getElementById('custom-date-range').style.display = 'none'
+      // ✅ Aktiviere Button
+      document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => {
+        if (btn.textContent.includes('Alle Zeit')) btn.classList.add('active')
+      })
       break
     case 'custom':
       document.getElementById('custom-date-range').style.display = 'block'
+      // ✅ Aktiviere Button
+      document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => {
+        if (btn.textContent.includes('Custom')) btn.classList.add('active')
+      })
       return
   }
   
@@ -2000,22 +2029,41 @@ async function loadRewardStats() {
     const allCount = redeems?.length || 0
     redeems = filterByTimeRange(redeems)
     
-    const rewardMap = new Map()
-    redeems?.forEach(r => {
-      const points = Math.abs(r.points)  // ✅ FIX: use 'points' not 'amount'
-      if (!rewardMap.has(points)) {
-        rewardMap.set(points, 0)
-      }
-      rewardMap.set(points, rewardMap.get(points) + 1)
-    })
-    
-    const rewards = Array.from(rewardMap.entries())
-      .map(([points, count]) => ({
-        points,
-        count,
-        name: points >= 1000 ? 'Große Prämie' : points >= 500 ? 'Mittlere Prämie' : 'Kleine Prämie',
-        emoji: points >= 1000 ? '🥙' : points >= 500 ? '🍟' : '🥤'
-      }))
+    // ✅ FIX: Gruppiere nach reward_name statt nach Punkten
+const rewardMap = new Map()
+redeems?.forEach(r => {
+  // Hole den reward_name aus notes (Format: "Code: XXXX - REWARD_NAME")
+  let rewardName = 'Unbekannte Prämie'
+  let points = Math.abs(r.points)
+  
+  if (r.notes && r.notes.includes(' - ')) {
+    const parts = r.notes.split(' - ')
+    if (parts.length > 1) {
+      rewardName = parts[1].trim()
+    }
+  }
+  
+  // Erstelle eindeutigen Key aus Name + Punkte
+  const key = `${rewardName}|${points}`
+  
+  if (!rewardMap.has(key)) {
+    rewardMap.set(key, { name: rewardName, points: points, count: 0 })
+  }
+  
+  const entry = rewardMap.get(key)
+  entry.count++
+})
+
+// ✅ Konvertiere Map zu Array und sortiere
+const rewards = Array.from(rewardMap.values())
+  .sort((a, b) => b.count - a.count)
+  .slice(0, 5)
+  .map(r => ({
+    points: r.points,
+    count: r.count,
+    name: r.name,  // ← Echter Name!
+    emoji: r.points >= 1000 ? '🥙' : r.points >= 500 ? '🍟' : '🥤'
+  }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5)
     
