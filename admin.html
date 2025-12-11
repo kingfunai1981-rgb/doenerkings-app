@@ -70,26 +70,22 @@ textarea { resize: vertical; min-height: 60px; }
   </div>
 
 
-  <!-- ☁️ AKTUELLES WETTER -->
   <div class="card" style="border: 3px solid #3b82f6;">
     <h2>☁️ Aktuelles Wetter</h2>
     <div id="current-weather-display" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 16px;">
       
-      <!-- Box 1: Temperatur -->
       <div style="background: #f9fafb; border-radius: 12px; padding: 24px; text-align: center;">
         <div style="font-size: 56px; margin-bottom: 12px;" id="weather-icon">☁️</div>
         <div style="font-size: 32px; font-weight: 700; color: #E31E24; margin-bottom: 8px;" id="weather-temp">--°C</div>
         <div style="font-size: 14px; color: #6b7280;" id="weather-condition">Laden...</div>
       </div>
       
-      <!-- Box 2: Regen -->
       <div style="background: #f9fafb; border-radius: 12px; padding: 24px; text-align: center;">
         <div style="font-size: 56px; margin-bottom: 12px;">🌧️</div>
         <div style="font-size: 32px; font-weight: 700; color: #3b82f6; margin-bottom: 8px;" id="weather-rain">-- mm/h</div>
         <div style="font-size: 14px; color: #6b7280;">Regen</div>
       </div>
       
-      <!-- Box 3: Wind -->
       <div style="background: #f9fafb; border-radius: 12px; padding: 24px; text-align: center;">
         <div style="font-size: 56px; margin-bottom: 12px;">💨</div>
         <div style="font-size: 32px; font-weight: 700; color: #10b981; margin-bottom: 8px;" id="weather-wind">-- km/h</div>
@@ -126,12 +122,10 @@ textarea { resize: vertical; min-height: 60px; }
   </div>
 
 
-  <!-- 💤 WIN-BACK KAMPAGNE MIT COOLDOWN -->
   <div class="card" style="border: 3px solid #8b5cf6;">
     <h2>💤 Win-Back Kampagne (4 Phasen)</h2>
     <p class="subtitle">Reaktiviere inaktive Kunden mit gestaffelten Boni & Cooldown-System</p>
     
-    <!-- Phasen-Übersicht -->
     <div style="background: #ede9fe; border: 2px solid #8b5cf6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
       <h3 style="color: #5b21b6; margin-bottom: 12px;">🎯 Win-Back Phasen</h3>
       
@@ -170,7 +164,6 @@ textarea { resize: vertical; min-height: 60px; }
       </div>
     </div>
 
-    <!-- Phase auswählen -->
     <div style="background: #f3f4f6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
       <label class="form-label">🎯 Phase auswählen:</label>
       <select id="winback-phase" style="padding: 12px; font-size: 15px; font-weight: 600;">
@@ -185,7 +178,6 @@ textarea { resize: vertical; min-height: 60px; }
       </button>
     </div>
 
-    <!-- Statistiken -->
     <div id="winback-stats" style="display: none; background: #f3f4f6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
       <h3 style="margin-bottom: 12px;">📊 Berechtigte Kunden</h3>
       <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
@@ -203,13 +195,10 @@ textarea { resize: vertical; min-height: 60px; }
         </div>
       </div>
       
-      <!-- Kundenliste -->
       <div id="winback-customer-list" style="max-height: 300px; overflow-y: auto; background: white; border-radius: 8px; padding: 12px;">
-        <!-- Wird dynamisch gefüllt -->
       </div>
     </div>
 
-    <!-- WhatsApp Export -->
     <div id="winback-whatsapp" style="display: none; background: #ede9fe; border: 2px solid #8b5cf6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
       <h3 style="color: #5b21b6; margin-bottom: 12px;">📱 WhatsApp-Versand</h3>
       
@@ -400,14 +389,10 @@ textarea { resize: vertical; min-height: 60px; }
   </div>
 
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 📊 BUSINESS INTELLIGENCE STATS -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
 <div class="card" style="border: 3px solid #F9A825;">
   <h2>📊 Business Intelligence</h2>
   <p class="subtitle">Alle Statistiken mit echten Daten aus deiner Datenbank</p>
 
-  <!-- Zeitraum-Filter -->
   <div style="background: #f9fafb; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
     <label class="form-label">📅 Zeitraum wählen:</label>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 12px;">
@@ -435,19 +420,13 @@ textarea { resize: vertical; min-height: 60px; }
     </div>
   </div>
 
-  <!-- Statistik-Navigation -->
   <div style="margin-bottom: 16px;">
     <button class="stat-btn active" id="btn-coupon" onclick="loadCouponStats()">🎟️ Coupon ROI</button>
     <button class="stat-btn" id="btn-rewards" onclick="loadRewardStats()">🏆 Prämien-Ranking</button>
-    <!-- ✅ FIX: Wetter-Deals ausgeblendet -->
 <button class="stat-btn" id="btn-weather" onclick="loadWeatherStats()" style="display: none;">🌧️ Wetter-Deals</button>
     <button class="stat-btn" id="btn-wheel" onclick="loadWheelStats()">🎡 Glücksrad</button>
-    <button class="stat-btn" id="btn-challenges" onclick="loadChallengeStats()">⚡ Challenges</button>
-    <button class="stat-btn" id="btn-segments" onclick="loadSegmentStats()">👥 Segmente</button>
-    <button class="stat-btn" id="btn-trends" onclick="loadTrendStats()">📈 Trends</button>
   </div>
 
-  <!-- Stats Content -->
   <div id="stats-content" style="background: #f9fafb; border-radius: 12px; padding: 20px; min-height: 400px;">
     <div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Initialisiere Statistiken...</div>
   </div>
@@ -457,9 +436,6 @@ textarea { resize: vertical; min-height: 60px; }
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ═══════════════════════════════════════════════════════════════
-// 🔐 LIZENZ & DOMAIN-SCHUTZ - NICHT ENTFERNEN!
-// ═══════════════════════════════════════════════════════════════
 (function() {
   const _0xB = 'Döner Boxx';
   const _0xL = 'DNBX-2025-LOYALTY-SYSTEM-PROTECTED';
@@ -468,13 +444,11 @@ textarea { resize: vertical; min-height: 60px; }
   
   const _0xHost = window.location.hostname;
   
-  // Schritt 1: Domain-Whitelist prüfen
   if (!_0xD.includes(_0xHost)) {
     document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;background:#1a1a1a;min-height:100vh;color:#ff4444;display:flex;flex-direction:column;align-items:center;justify-content:center;"><h1 style="font-size:48px;margin-bottom:20px;">⛔</h1><h2>LIZENZ UNGÜLTIG</h2><p style="margin-top:15px;">Diese Software ist nicht für diese Domain lizenziert.</p><p style="font-size:12px;color:#666;margin-top:30px;">© Döner Boxx - Alle Rechte vorbehalten</p></div>';
     throw new Error('Unauthorized domain');
   }
   
-  // Schritt 2: Lizenz-Hash berechnen und prüfen
   function _0xHash(s) {
     let h = 0;
     for (let i = 0; i < s.length; i++) {
@@ -491,13 +465,9 @@ textarea { resize: vertical; min-height: 60px; }
     throw new Error('Invalid license');
   }
 })();
-// ═══════════════════════════════════════════════════════════════
 
-// ═══════════════════════════════════════════════════════════════
-// 🔐 PASSWORT-SCHUTZ MIT 5-MINUTEN-SPERRE - NICHT ENTFERNEN!
-// ═══════════════════════════════════════════════════════════════
 const PASSWORT_HASH = 'efc68709a6bc20b7983129e56ce1d98739876e4274463aaece1a3edef374d47e';
-const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 Minuten in Millisekunden
+const LOCKOUT_DURATION = 5 * 60 * 1000;
 const MAX_VERSUCHE = 3;
 
 function getAuthState() {
@@ -641,7 +611,6 @@ async function checkLogin() {
   document.getElementById('loginPassword').focus();
 }
 
-// Prüfe Session und Sperre beim Laden
 if (isLocked()) {
   showLockScreen();
   throw new Error('Zugriff gesperrt');
@@ -651,40 +620,11 @@ if (sessionStorage.getItem('db_auth') !== PASSWORT_HASH) {
   showLoginScreen();
   throw new Error('Login erforderlich');
 }
-// ═══════════════════════════════════════════════════════════════
-// 🔐 ENDE PASSWORT-SCHUTZ
-// ═══════════════════════════════════════════════════════════════
 
 const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
-// ═══════════════════════════════════════════════════════════════
-// 📦 MENÜ-PRODUKTE (19 Stück) - FÜR COUPON-DROPDOWN
-// ═══════════════════════════════════════════════════════════════
-const MENU_PRODUCTS = [
-  { name: 'Döner', price: 6.00 },
-  { name: 'Döner XL', price: 8.00 },
-  { name: 'Döner Box', price: 7.00 },
-  { name: 'Dürüm Döner', price: 7.00 },
-  { name: 'Döner Teller', price: 10.00 },
-  { name: 'Lahmacun', price: 4.00 },
-  { name: 'Lahmacun Spezial', price: 8.00 },
-  { name: 'Rindswurst im Brötchen', price: 3.50 },
-  { name: 'Curry Rindswurst mit Pommes', price: 6.90 },
-  { name: 'Köfte im Brot (5 Stk.)', price: 6.00 },
-  { name: 'Köfte Teller (7 Stk.)', price: 11.00 },
-  { name: 'Chicken Nuggets (6 Stk.)', price: 6.00 },
-  { name: 'Crispy Chicken Burger', price: 4.00 },
-  { name: 'Pommes', price: 3.50 },
-  { name: 'Ayran (0,25 l)', price: 1.50 },
-  { name: 'Wasser still (0,5 l)', price: 1.50 },
-  { name: 'Cola (0,33 l)', price: 2.00 },
-  { name: 'Fanta (0,33 l)', price: 2.00 },
-  { name: 'Cola Zero (0,33 l)', price: 2.00 }
-]
-
-// ✅ Funktion: Preis automatisch füllen wenn Produkt ausgewählt wird
 function onProductSelect() {
   const select = document.getElementById('couponProduct')
   const priceInput = document.getElementById('couponPrice')
@@ -692,7 +632,6 @@ function onProductSelect() {
   const selectedProduct = MENU_PRODUCTS.find(p => p.name === select.value)
   
   if (selectedProduct) {
-    // Setze Original-Preis (kann dann manuell geändert werden)
     priceInput.value = selectedProduct.price.toFixed(2) + ' €'
     priceInput.placeholder = 'Original: ' + selectedProduct.price.toFixed(2) + ' €'
   } else {
@@ -708,7 +647,660 @@ function showResult(elementId, message, type) {
   el.className = `result ${type}`
   el.innerHTML = message
 }
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🗂️ Kunden verwalten - Döner Boxx</title>
+<link rel="icon" href="/favicon-new.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon-new.png">
+<style>
+@font-face { font-family: 'Flame'; src: url('Flame-Regular.ttf') format('truetype'); font-weight: normal; font-style: normal; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Flame', system-ui, -apple-system, sans-serif; background: linear-gradient(135deg, #E31E24 0%, #F9A825 100%); min-height: 100vh; padding: 20px; }
+.container { max-width: 1200px; margin: 0 auto; }
+.card { background: white; border-radius: 20px; padding: 24px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.header-card { display: flex; align-items: center; gap: 20px; }
+.header-logo { width: 80px; height: 80px; flex-shrink: 0; }
+.header-logo img { width: 100%; height: 100%; object-fit: contain; }
+.header-text { flex: 1; }
+h1 { color: #E31E24; font-size: 28px; margin-bottom: 8px; }
+h2 { color: #374151; font-size: 20px; margin-bottom: 16px; }
+.subtitle { color: #6b7280; font-size: 14px; margin-bottom: 20px; }
+.stats { background: #f9fafb; border-radius: 12px; padding: 16px; margin-bottom: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; }
+.stat-item { text-align: center; padding: 12px; }
+.stat-value { font-size: 32px; font-weight: 700; color: #E31E24; }
+.stat-label { font-size: 13px; color: #6b7280; margin-top: 4px; }
+button { padding: 12px 20px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+button.primary { background: linear-gradient(135deg, #E31E24, #F9A825); color: white; width: 100%; margin-bottom: 10px; }
+button.primary:hover { opacity: 0.9; transform: translateY(-1px); }
+button.danger { background: #dc2626; color: white; padding: 8px 16px; font-size: 14px; }
+button.danger:hover { background: #b91c1c; }
+button.success { background: #F9A825; color: white; width: 100%; margin-bottom: 10px; }
+button.success:hover { background: #f59e0b; }
+input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 15px; margin-bottom: 10px; transition: all 0.2s; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #E31E24; }
+textarea { resize: vertical; min-height: 60px; }
+.form-label { display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 14px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.warning { background: #fef3c7; border: 2px solid #f59e0b; color: #92400e; padding: 14px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; font-weight: 600; }
+.customer-list { max-height: 600px; overflow-y: auto; margin-top: 16px; }
+.customer-item { background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
+.customer-item:hover { border-color: #E31E24; background: #f3f4f6; }
+.customer-info { flex: 1; }
+.customer-info h3 { color: #111827; font-size: 18px; margin-bottom: 6px; font-weight: 700; }
+.customer-info p { color: #6b7280; font-size: 13px; margin: 3px 0; }
+.customer-info .qr-id { display: inline-block; background: #E31E24; color: white; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 700; margin-top: 6px; font-family: monospace; letter-spacing: 2px; }
+.customer-stats { display: flex; gap: 16px; align-items: center; margin-right: 16px; }
+.customer-points { text-align: center; }
+.customer-points .value { background: linear-gradient(135deg, #E31E24, #F9A825); color: white; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 20px; display: block; margin-bottom: 4px; }
+.customer-points .label { font-size: 11px; color: #6b7280; font-weight: 600; }
+.customer-txs { text-align: center; }
+.customer-txs .value { background: #F9A825; color: white; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 20px; display: block; margin-bottom: 4px; }
+.customer-txs .label { font-size: 11px; color: #6b7280; font-weight: 600; }
+.result { padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 14px; text-align: center; font-weight: 600; }
+.success { background: #fef3c7; color: #92400e; border: 2px solid #F9A825; }
+.error { background: #fee2e2; color: #991b1b; border: 2px solid #ef4444; }
+.info { background: #dbeafe; color: #1e40af; border: 2px solid #3b82f6; }
+.loading { text-align: center; padding: 40px; color: #6b7280; font-size: 16px; }
+.empty-state { text-align: center; padding: 40px; color: #6b7280; font-size: 15px; background: #f9fafb; border-radius: 12px; border: 2px dashed #e5e7eb; }
+.stat-btn { padding: 10px 16px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; margin-right: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; font-size: 14px; font-weight: 600; color: #374151; display: inline-block; }
+.stat-btn:hover { border-color: #F9A825; background: #fef3c7; color: #92400e; }
+.stat-btn.active { background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border-color: #E31E24; }
+</style>
+</head>
+<body>
 
+<div class="container">
+  <div class="card header-card">
+    <div class="header-logo"><img src="/logo-round-new.png" alt="Döner Boxx"></div>
+    <div class="header-text"><h1>Kunden verwalten</h1><p class="subtitle">Verwalte alle Kunden, Transaktionen und Punkte</p></div>
+  </div>
+
+
+  <div class="card" style="border: 3px solid #3b82f6;">
+    <h2>☁️ Aktuelles Wetter</h2>
+    <div id="current-weather-display" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 16px;">
+      
+      <div style="background: #f9fafb; border-radius: 12px; padding: 24px; text-align: center;">
+        <div style="font-size: 56px; margin-bottom: 12px;" id="weather-icon">☁️</div>
+        <div style="font-size: 32px; font-weight: 700; color: #E31E24; margin-bottom: 8px;" id="weather-temp">--°C</div>
+        <div style="font-size: 14px; color: #6b7280;" id="weather-condition">Laden...</div>
+      </div>
+      
+      <div style="background: #f9fafb; border-radius: 12px; padding: 24px; text-align: center;">
+        <div style="font-size: 56px; margin-bottom: 12px;">🌧️</div>
+        <div style="font-size: 32px; font-weight: 700; color: #3b82f6; margin-bottom: 8px;" id="weather-rain">-- mm/h</div>
+        <div style="font-size: 14px; color: #6b7280;">Regen</div>
+      </div>
+      
+      <div style="background: #f9fafb; border-radius: 12px; padding: 24px; text-align: center;">
+        <div style="font-size: 56px; margin-bottom: 12px;">💨</div>
+        <div style="font-size: 32px; font-weight: 700; color: #10b981; margin-bottom: 8px;" id="weather-wind">-- km/h</div>
+        <div style="font-size: 14px; color: #6b7280;">Wind</div>
+      </div>
+      
+    </div>
+    <button class="primary" onclick="checkWeatherNow()" style="margin-top: 16px;">🔄 Wetter jetzt aktualisieren</button>
+    <div id="weather-last-update" style="text-align: center; color: #6b7280; font-size: 13px; margin-top: 8px;"></div>
+  </div>
+
+    <div class="card">
+    <h2>🎁 Globale Bonusse</h2>
+    <p class="subtitle">Erstelle Bonusse, die sofort bei allen Kunden erscheinen</p>
+    <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px;">
+      <h3 style="color: #92400e; margin-bottom: 12px;">Neuen Bonus erstellen</h3>
+      <label class="form-label">🎯 Bonus-Typ</label>
+      <select id="globalBonusType" onchange="toggleBonusAmount()">
+        <option value="bonus_points">💰 Extra-Punkte</option>
+        <option value="double_points">⭐ Doppelte Punkte</option>
+      </select>
+      <div id="globalBonusAmountField">
+        <label class="form-label">💵 Bonus-Punkte</label>
+        <input type="number" id="globalBonusAmount" placeholder="z.B. 100" value="100">
+      </div>
+      <div class="form-grid">
+        <div><label class="form-label">📅 Start-Datum</label><input type="date" id="globalBonusStart"></div>
+        <div><label class="form-label">📅 End-Datum</label><input type="date" id="globalBonusEnd"></div>
+      </div>
+      <button class="success" onclick="createGlobalBonus()">🚀 Bonus erstellen</button>
+      <div id="result-global-bonus"></div>
+    </div>
+    <div style="margin-top: 24px;"><h3>Aktive Bonusse</h3><div id="globalBonusList"></div></div>
+  </div>
+
+
+  <div class="card" style="border: 3px solid #8b5cf6;">
+    <h2>💤 Win-Back Kampagne (4 Phasen)</h2>
+    <p class="subtitle">Reaktiviere inaktive Kunden mit gestaffelten Boni & Cooldown-System</p>
+    
+    <div style="background: #ede9fe; border: 2px solid #8b5cf6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #5b21b6; margin-bottom: 12px;">🎯 Win-Back Phasen</h3>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-bottom: 16px;">
+        <div style="background: white; border-left: 4px solid #f472b6; border-radius: 8px; padding: 12px;">
+          <div style="font-weight: 700; color: #111827; margin-bottom: 4px;">❤️ Phase 1: Mild</div>
+          <div style="font-size: 13px; color: #6b7280;">14+ Tage inaktiv</div>
+          <div style="font-size: 18px; font-weight: 700; color: #f472b6; margin: 6px 0;">+100 Punkte</div>
+          <div style="font-size: 12px; color: #6b7280;">Cooldown: 7 Tage</div>
+        </div>
+        
+        <div style="background: white; border-left: 4px solid #fb923c; border-radius: 8px; padding: 12px;">
+          <div style="font-weight: 700; color: #111827; margin-bottom: 4px;">😢 Phase 2: Medium</div>
+          <div style="font-size: 13px; color: #6b7280;">21+ Tage inaktiv</div>
+          <div style="font-size: 18px; font-weight: 700; color: #fb923c; margin: 6px 0;">+150 Punkte</div>
+          <div style="font-size: 12px; color: #6b7280;">Cooldown: 7 Tage</div>
+        </div>
+        
+        <div style="background: white; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 12px;">
+          <div style="font-weight: 700; color: #111827; margin-bottom: 4px;">🥺 Phase 3: Aggressiv</div>
+          <div style="font-size: 13px; color: #6b7280;">30+ Tage inaktiv</div>
+          <div style="font-size: 18px; font-weight: 700; color: #f59e0b; margin: 6px 0;">+300 Punkte</div>
+          <div style="font-size: 12px; color: #6b7280;">Cooldown: 30 Tage</div>
+        </div>
+        
+        <div style="background: white; border-left: 4px solid #dc2626; border-radius: 8px; padding: 12px;">
+          <div style="font-weight: 700; color: #111827; margin-bottom: 4px;">🔥 Phase 4: Ultimativ</div>
+          <div style="font-size: 13px; color: #6b7280;">60+ Tage inaktiv</div>
+          <div style="font-size: 18px; font-weight: 700; color: #dc2626; margin: 6px 0;">+500 Punkte</div>
+          <div style="font-size: 12px; color: #6b7280;">Cooldown: 60 Tage</div>
+        </div>
+      </div>
+      
+      <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 12px; font-size: 13px; color: #92400e;">
+        💡 <strong>Wichtig:</strong> Nur WhatsApp-aktivierte Kunden werden angeschrieben. Punkte werden automatisch beim nächsten QR-Scan gutgeschrieben (24h Zeitfenster)!
+      </div>
+    </div>
+
+    <div style="background: #f3f4f6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <label class="form-label">🎯 Phase auswählen:</label>
+      <select id="winback-phase" style="padding: 12px; font-size: 15px; font-weight: 600;">
+        <option value="1">❤️ Phase 1: Mild (14+ Tage, +100P, 7d Cooldown)</option>
+        <option value="2">😢 Phase 2: Medium (21+ Tage, +150P, 7d Cooldown)</option>
+        <option value="3">🥺 Phase 3: Aggressiv (30+ Tage, +300P, 30d Cooldown)</option>
+        <option value="4">🔥 Phase 4: Ultimativ (60+ Tage, +500P, 60d Cooldown)</option>
+      </select>
+      
+      <button class="success" onclick="prepareWinbackCampaign()" style="margin-top: 12px; font-size: 16px; padding: 16px;">
+        🔍 Kampagne vorbereiten
+      </button>
+    </div>
+
+    <div id="winback-stats" style="display: none; background: #f3f4f6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="margin-bottom: 12px;">📊 Berechtigte Kunden</h3>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
+          <div style="font-size: 32px; font-weight: 700; color: #8b5cf6;" id="stat-wb-eligible">0</div>
+          <div style="font-size: 13px; color: #6b7280;">Berechtigt</div>
+        </div>
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
+          <div style="font-size: 32px; font-weight: 700; color: #ef4444;" id="stat-wb-cooldown">0</div>
+          <div style="font-size: 13px; color: #6b7280;">Im Cooldown</div>
+        </div>
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
+          <div style="font-size: 32px; font-weight: 700; color: #10b981;" id="stat-wb-ready">0</div>
+          <div style="font-size: 13px; color: #6b7280;">Versandbereit</div>
+        </div>
+      </div>
+      
+      <div id="winback-customer-list" style="max-height: 300px; overflow-y: auto; background: white; border-radius: 8px; padding: 12px;">
+      </div>
+    </div>
+
+    <div id="winback-whatsapp" style="display: none; background: #ede9fe; border: 2px solid #8b5cf6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #5b21b6; margin-bottom: 12px;">📱 WhatsApp-Versand</h3>
+      
+      <div style="margin-bottom: 16px;">
+        <label class="form-label" style="color: #5b21b6;">1️⃣ Nummern kopieren:</label>
+        <textarea id="winback-numbers" readonly style="background: white; min-height: 100px; font-family: monospace; font-size: 13px;"></textarea>
+        <button onclick="copyWinbackNumbers()" style="background: #8b5cf6; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 8px;">
+          📋 Nummern kopieren
+        </button>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <label class="form-label" style="color: #5b21b6;">2️⃣ Nachricht kopieren:</label>
+        <textarea id="winback-message" readonly style="background: white; min-height: 160px;"></textarea>
+        <button onclick="copyWinbackMessage()" style="background: #8b5cf6; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 8px;">
+          📋 Nachricht kopieren
+        </button>
+      </div>
+
+      <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+        <h4 style="color: #92400e; margin-bottom: 8px; font-size: 15px;">⚠️ WICHTIG: Nach WhatsApp-Versand</h4>
+        <p style="color: #92400e; font-size: 14px; margin-bottom: 12px;">
+          Nachdem du die Nachricht in WhatsApp Business versendet hast, MUSST du hier bestätigen!
+          Nur dann werden die Punkte beim nächsten QR-Scan automatisch gutgeschrieben.
+        </p>
+        <button onclick="confirmWinbackCampaign()" style="background: #10b981; color: white; width: 100%; padding: 16px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 16px;">
+          ✅ KAMPAGNE BESTÄTIGEN (Nachricht versendet!)
+        </button>
+      </div>
+    </div>
+
+    <div id="result-winback"></div>
+  </div>
+  <div class="card">
+    <h2>🎯 Challenge-Bonus</h2>
+    <p class="subtitle">Erstelle zeitlich begrenzte Herausforderungen mit Mindestbestellwert</p>
+    <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px;">
+      <h3 style="color: #92400e; margin-bottom: 12px;">Neue Challenge</h3>
+      <div class="form-grid">
+        <div><label class="form-label">🎁 Extra-Punkte</label><input type="number" id="challengePoints" placeholder="z.B. 300" value="300"></div>
+        <div><label class="form-label">🔢 Anzahl Bestellungen</label><input type="number" id="challengeOrders" placeholder="z.B. 2" value="2" min="1"></div>
+      </div>
+      <label class="form-label">💰 Mindestbestellwert pro Bestellung (€)</label>
+      <input type="number" id="challengeMinAmount" placeholder="z.B. 10" value="10" step="0.01">
+      <div class="form-grid">
+        <div><label class="form-label">📅 Start-Datum</label><input type="date" id="challengeStart" onchange="autoCalculateEndDate()"></div>
+        <div><label class="form-label">📅 End-Datum (automatisch: 20 Tage)</label><input type="date" id="challengeEnd"></div>
+      </div>
+      <div style="background: #dbeafe; border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 13px; color: #1e40af;">ℹ️ <strong>Hinweis:</strong> Nur 1 Challenge Bonus gleichzeitig möglich.</div>
+      <button class="success" onclick="createChallenge()">🚀 Challenge erstellen</button>
+      <div id="result-challenge"></div>
+    </div>
+    <div style="margin-top: 20px;"><h3>Aktive Challenges</h3><div id="challengeList"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>🎟️ Coupon-System (Deal der Woche)</h2>
+    <p class="subtitle">Erstelle Angebote mit Start- und End-Datum</p>
+    <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #92400e; margin-bottom: 12px;">Neuen Coupon erstellen</h3>
+      <div class="form-grid">
+        <div>
+          <label class="form-label">🍴 Produkt aus Menü wählen</label>
+          <select id="couponProduct" onchange="onProductSelect()" style="font-size: 14px;">
+            <option value="">-- Bitte Produkt wählen --</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">💰 Coupon-Preis (automatisch gefüllt, kann geändert werden)</label>
+          <input type="text" id="couponPrice" placeholder="z.B. 5,50 €">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div><label class="form-label">📅 Start-Datum</label><input type="date" id="couponStart"></div>
+        <div><label class="form-label">📅 End-Datum</label><input type="date" id="couponEnd"></div>
+      </div>
+      <button class="success" onclick="createCoupon()">🎁 Coupon erstellen</button>
+      <div id="result-coupon-create"></div>
+    </div>
+    <div><h3>Aktuelle Coupons</h3><div id="result-coupon-load"></div><div id="couponList" style="margin-top: 12px;"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>🎡 Lucky Wheel Einstellungen</h2>
+    <p class="subtitle">Verwalte Glücksrad-Konfiguration</p>
+    <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px; margin-bottom: 20px;">
+      <h3 style="color: #92400e; margin-bottom: 12px;">⚙️ Grundeinstellungen</h3>
+      <label class="form-label">📅 Aktive Wochentage</label>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 16px;">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;"><input type="checkbox" id="day-1" class="wheel-day" value="1" style="width: auto; margin: 0;"><span>Montag</span></label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;"><input type="checkbox" id="day-2" class="wheel-day" value="2" style="width: auto; margin: 0;"><span>Dienstag</span></label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;"><input type="checkbox" id="day-3" class="wheel-day" value="3" style="width: auto; margin: 0;"><span>Mittwoch</span></label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;"><input type="checkbox" id="day-4" class="wheel-day" value="4" style="width: auto; margin: 0;"><span>Donnerstag</span></label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;"><input type="checkbox" id="day-5" class="wheel-day" value="5" style="width: auto; margin: 0;"><span>Freitag</span></label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;"><input type="checkbox" id="day-6" class="wheel-day" value="6" style="width: auto; margin: 0;"><span>Samstag</span></label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;"><input type="checkbox" id="day-0" class="wheel-day" value="0" style="width: auto; margin: 0;"><span>Sonntag</span></label>
+      </div>
+      <p style="font-size: 13px; color: #6b7280; margin-top: -8px; margin-bottom: 16px;">Wenn keine Tage ausgewählt sind, ist das Wheel jeden Tag verfügbar.</p>
+      <label class="form-label">🕐 Happy Hour Startzeit</label>
+      <input type="time" id="wheel-start-time" placeholder="z.B. 15:00">
+      <p style="font-size: 13px; color: #6b7280; margin-top: 4px; margin-bottom: 16px;">Leer lassen = ganztägig verfügbar</p>
+      <label class="form-label">🕐 Happy Hour Endzeit</label>
+      <input type="time" id="wheel-end-time" placeholder="z.B. 18:00">
+      <p style="font-size: 13px; color: #6b7280; margin-top: 4px; margin-bottom: 16px;">Leer lassen = ganztägig verfügbar</p>
+      <label class="form-label">💰 Mindestbestellwert (€)</label>
+      <input type="number" step="0.01" id="wheel-min-amount" value="10.00" placeholder="z.B. 10.00">
+      <button class="success" onclick="saveWheelConfig()">💾 Einstellungen speichern</button>
+      <div id="result-wheel-config"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Kunden verwalten</h2>
+    <p class="subtitle">Verwalte alle Kunden, Transaktionen und Punkte</p>
+    <div class="stats">
+      <div class="stat-item"><div class="stat-value" id="totalCustomers">0</div><div class="stat-label">Kunden</div></div>
+      <div class="stat-item"><div class="stat-value" id="totalTransactions">0</div><div class="stat-label">Transaktionen</div></div>
+      <div class="stat-item"><div class="stat-value" id="totalCodes">0</div><div class="stat-label">Codes</div></div>
+      <div class="stat-item"><div class="stat-value" id="whatsappOptins" style="color: #25D366;">0</div><div class="stat-label">📱 WhatsApp aktiv</div></div>
+    </div>
+    <div style="margin-top: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;"><h3 style="margin: 0;">Kundenliste</h3></div>
+      <div style="margin-bottom: 16px;">
+        <input type="text" id="customerSearch" placeholder="🔍 Suche nach Name oder Handynummer..." style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;" oninput="filterCustomers()">
+        <div style="margin-top: 8px; font-size: 14px; color: #666;"><span id="searchResultCount"></span></div>
+      </div>
+      <div class="warning" id="warningBox" style="display: none;">⚠️ <strong>Hinweis:</strong> Beim Löschen eines Kunden werden auch alle zugehörigen Transaktionen und Codes gelöscht!</div>
+      <div id="customerListContainer"><div class="loading"><p>⏳ Lade Kundendaten...</p></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📱 WhatsApp Marketing</h2>
+    <p class="subtitle">Verwalte WhatsApp-Benachrichtigungen für deine Kunden</p>
+    
+    <div style="background: #dcfce7; border: 2px solid #25D366; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #166534; margin-bottom: 8px;">✅ WhatsApp Business App Setup</h3>
+      <p style="font-size: 14px; color: #166534; margin-bottom: 12px;">
+        Für den Start nutze einfach die <strong>kostenlose WhatsApp Business App</strong>:
+      </p>
+      <ol style="font-size: 13px; color: #166534; margin-left: 20px;">
+        <li>WhatsApp Business App herunterladen</li>
+        <li>Geschäftsnummer einrichten</li>
+        <li>Broadcast-Liste erstellen (max. 256 Kontakte)</li>
+        <li>Telefonnummern exportieren (Button unten)</li>
+        <li>Nummern in Broadcast-Liste importieren</li>
+      </ol>
+      <p style="font-size: 12px; color: #166534; margin-top: 12px; font-style: italic;">
+        💡 Tipp: Ab ~100 Kunden mit Opt-In lohnt sich WhatsApp Business API mit Automatisierung!
+      </p>
+    </div>
+
+    <div style="background: #f9fafb; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="margin-bottom: 12px;">📊 Übersicht</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+        <div style="background: white; padding: 12px; border-radius: 8px; border: 2px solid #e5e7eb;">
+          <div style="font-size: 24px; font-weight: 700; color: #25D366;" id="wa-total-optins">0</div>
+          <div style="font-size: 12px; color: #6b7280;">WhatsApp aktiviert</div>
+        </div>
+        <div style="background: white; padding: 12px; border-radius: 8px; border: 2px solid #e5e7eb;">
+          <div style="font-size: 24px; font-weight: 700; color: #F9A825;" id="wa-total-customers">0</div>
+          <div style="font-size: 12px; color: #6b7280;">Gesamt-Kunden</div>
+        </div>
+        <div style="background: white; padding: 12px; border-radius: 8px; border: 2px solid #e5e7eb;">
+          <div style="font-size: 24px; font-weight: 700; color: #E31E24;" id="wa-optin-rate">0%</div>
+          <div style="font-size: 12px; color: #6b7280;">Opt-In Rate</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px;">
+      <h3 style="color: #92400e; margin-bottom: 12px;">📤 Telefonnummern exportieren</h3>
+      <p style="font-size: 14px; color: #92400e; margin-bottom: 12px;">
+        Exportiere alle Telefonnummern von Kunden mit WhatsApp-Opt-In für deine Broadcast-Liste:
+      </p>
+      <button class="success" onclick="exportWhatsAppNumbers()">📥 WhatsApp-Nummern exportieren</button>
+      <div id="result-wa-export"></div>
+      
+      <div id="wa-numbers-list" style="display: none; margin-top: 16px; background: white; padding: 12px; border-radius: 8px; max-height: 300px; overflow-y: auto;">
+        <h4 style="margin-bottom: 8px; font-size: 14px;">Kopiere diese Nummern:</h4>
+        <textarea id="wa-numbers-textarea" readonly style="width: 100%; min-height: 150px; font-family: monospace; font-size: 13px; padding: 8px;"></textarea>
+        <button onclick="copyWhatsAppNumbers()" style="margin-top: 8px; padding: 8px 16px; background: #25D366; color: white; border: none; border-radius: 6px; cursor: pointer;">
+          📋 In Zwischenablage kopieren
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+
+<div class="card" style="border: 3px solid #F9A825;">
+  <h2>📊 Business Intelligence</h2>
+  <p class="subtitle">Alle Statistiken mit echten Daten aus deiner Datenbank</p>
+
+  <div style="background: #f9fafb; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+    <label class="form-label">📅 Zeitraum wählen:</label>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 12px;">
+      <button class="stat-btn" onclick="setTimeRange('today')">Heute</button>
+      <button class="stat-btn active" id="btn-7days" onclick="setTimeRange('7days')">7 Tage</button>
+      <button class="stat-btn" onclick="setTimeRange('30days')">30 Tage</button>
+      <button class="stat-btn" onclick="setTimeRange('thisMonth')">Dieser Monat</button>
+      <button class="stat-btn" onclick="setTimeRange('lastMonth')">Letzter Monat</button>
+      <button class="stat-btn" onclick="setTimeRange('all')">Alle Zeit</button>
+      <button class="stat-btn" onclick="setTimeRange('custom')">Custom</button>
+    </div>
+
+    <div id="custom-date-range" style="display: none;">
+      <div class="form-grid">
+        <div>
+          <label class="form-label">Von:</label>
+          <input type="date" id="date-from">
+        </div>
+        <div>
+          <label class="form-label">Bis:</label>
+          <input type="date" id="date-to">
+        </div>
+      </div>
+      <button class="success" onclick="applyCustomRange()">✓ Anwenden</button>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 16px;">
+    <button class="stat-btn active" id="btn-coupon" onclick="loadCouponStats()">🎟️ Coupon ROI</button>
+    <button class="stat-btn" id="btn-rewards" onclick="loadRewardStats()">🏆 Prämien-Ranking</button>
+<button class="stat-btn" id="btn-weather" onclick="loadWeatherStats()" style="display: none;">🌧️ Wetter-Deals</button>
+    <button class="stat-btn" id="btn-wheel" onclick="loadWheelStats()">🎡 Glücksrad</button>
+    <button class="stat-btn" id="btn-challenges" onclick="loadChallengeStats()">⚡ Challenges</button>
+    <button class="stat-btn" id="btn-segments" onclick="loadSegmentStats()">👥 Segmente</button>
+    <button class="stat-btn" id="btn-trends" onclick="loadTrendStats()">📈 Trends</button>
+  </div>
+
+  <div id="stats-content" style="background: #f9fafb; border-radius: 12px; padding: 20px; min-height: 400px;">
+    <div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Initialisiere Statistiken...</div>
+  </div>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function() {
+  const _0xB = 'Döner Boxx';
+  const _0xL = 'DNBX-2025-LOYALTY-SYSTEM-PROTECTED';
+  const _0xD = ['localhost', 'doener-boxx.vercel.app', 'doenerboxx.de', 'www.doenerboxx.de'];
+  const _0xH = ['528de417', '88a8ce6b', 'a1f62429', '5da2c3a0'];
+  
+  const _0xHost = window.location.hostname;
+  
+  if (!_0xD.includes(_0xHost)) {
+    document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;background:#1a1a1a;min-height:100vh;color:#ff4444;display:flex;flex-direction:column;align-items:center;justify-content:center;"><h1 style="font-size:48px;margin-bottom:20px;">⛔</h1><h2>LIZENZ UNGÜLTIG</h2><p style="margin-top:15px;">Diese Software ist nicht für diese Domain lizenziert.</p><p style="font-size:12px;color:#666;margin-top:30px;">© Döner Boxx - Alle Rechte vorbehalten</p></div>';
+    throw new Error('Unauthorized domain');
+  }
+  
+  function _0xHash(s) {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) {
+      h = (h * 31 + s.charCodeAt(i)) & 0xffffffff;
+    }
+    if (h < 0) h = h >>> 0;
+    return h.toString(16);
+  }
+  
+  const _0xCalc = _0xHash(_0xB + '|' + _0xHost + '|' + _0xL);
+  
+  if (!_0xH.includes(_0xCalc)) {
+    document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;background:#1a1a1a;min-height:100vh;color:#ff4444;display:flex;flex-direction:column;align-items:center;justify-content:center;"><h1 style="font-size:48px;margin-bottom:20px;">⛔</h1><h2>LIZENZFEHLER</h2><p style="margin-top:15px;">Die Lizenzprüfung ist fehlgeschlagen.</p><p style="font-size:12px;color:#666;margin-top:30px;">© Döner Boxx - Alle Rechte vorbehalten</p></div>';
+    throw new Error('Invalid license');
+  }
+})();
+
+const PASSWORT_HASH = 'efc68709a6bc20b7983129e56ce1d98739876e4274463aaece1a3edef374d47e';
+const LOCKOUT_DURATION = 5 * 60 * 1000;
+const MAX_VERSUCHE = 3;
+
+function getAuthState() {
+  const stored = localStorage.getItem('db_auth_state');
+  if (!stored) return { versuche: MAX_VERSUCHE, gesperrtBis: null };
+  try { return JSON.parse(stored); } catch(e) { return { versuche: MAX_VERSUCHE, gesperrtBis: null }; }
+}
+
+function setAuthState(state) {
+  localStorage.setItem('db_auth_state', JSON.stringify(state));
+}
+
+function clearAuthState() {
+  localStorage.removeItem('db_auth_state');
+}
+
+function isLocked() {
+  const state = getAuthState();
+  if (state.gesperrtBis && Date.now() < state.gesperrtBis) {
+    return true;
+  }
+  if (state.gesperrtBis && Date.now() >= state.gesperrtBis) {
+    clearAuthState();
+  }
+  return false;
+}
+
+function getRemainingLockTime() {
+  const state = getAuthState();
+  if (!state.gesperrtBis) return 0;
+  return Math.max(0, Math.ceil((state.gesperrtBis - Date.now()) / 1000));
+}
+
+async function sha256(text) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function showLockScreen() {
+  const updateTimer = () => {
+    const remaining = getRemainingLockTime();
+    if (remaining <= 0) {
+      clearAuthState();
+      location.reload();
+      return;
+    }
+    const minutes = Math.floor(remaining / 60);
+    const seconds = remaining % 60;
+    const timerEl = document.getElementById('lockTimer');
+    if (timerEl) timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+  
+  document.body.innerHTML = `
+    <div style="font-family:'Flame',system-ui,sans-serif;background:linear-gradient(135deg,#dc2626,#991b1b);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:white;border-radius:20px;padding:40px;max-width:400px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.3);text-align:center;">
+        <div style="font-size:60px;margin-bottom:20px;">🚫</div>
+        <h1 style="color:#dc2626;margin-bottom:10px;font-size:24px;">Zugriff gesperrt</h1>
+        <p style="color:#666;margin-bottom:20px;">Zu viele Fehlversuche!</p>
+        <div style="background:#fee2e2;border:2px solid #dc2626;border-radius:12px;padding:20px;margin-bottom:20px;">
+          <p style="color:#991b1b;font-size:14px;margin-bottom:10px;">Sperre endet in:</p>
+          <div id="lockTimer" style="font-size:36px;font-weight:700;color:#dc2626;">5:00</div>
+        </div>
+        <p style="color:#666;font-size:13px;">Die Seite wird automatisch entsperrt.</p>
+        <a href="/" style="display:inline-block;margin-top:20px;color:#dc2626;font-size:14px;">← Zurück zur Startseite</a>
+      </div>
+    </div>
+  `;
+  updateTimer();
+  setInterval(updateTimer, 1000);
+}
+
+function showLoginScreen() {
+  if (isLocked()) {
+    showLockScreen();
+    return;
+  }
+  
+  const state = getAuthState();
+  const versuche = state.versuche;
+  
+  document.body.innerHTML = `
+    <div style="font-family:'Flame',system-ui,sans-serif;background:linear-gradient(135deg,#E31E24,#F9A825);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:white;border-radius:20px;padding:40px;max-width:400px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.2);text-align:center;">
+        <div style="font-size:60px;margin-bottom:20px;">🔐</div>
+        <h1 style="color:#E31E24;margin-bottom:10px;font-size:24px;">Döner Boxx Admin</h1>
+        <p style="color:#666;margin-bottom:30px;">Bitte Passwort eingeben</p>
+        <input type="password" id="loginPassword" placeholder="Passwort" style="width:100%;padding:14px;border:2px solid #e5e7eb;border-radius:10px;font-size:16px;margin-bottom:15px;text-align:center;" onkeypress="if(event.key==='Enter')checkLogin()">
+        <button onclick="checkLogin()" style="width:100%;padding:14px;background:linear-gradient(135deg,#E31E24,#F9A825);color:white;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;">🔓 Einloggen</button>
+        <p id="loginError" style="color:#dc2626;margin-top:15px;font-size:14px;display:none;"></p>
+        <p id="loginVersuche" style="color:#666;margin-top:10px;font-size:12px;">${versuche} Versuche übrig</p>
+      </div>
+    </div>
+  `;
+  setTimeout(() => document.getElementById('loginPassword').focus(), 100);
+}
+
+async function checkLogin() {
+  if (isLocked()) {
+    showLockScreen();
+    return;
+  }
+  
+  const eingabe = document.getElementById('loginPassword').value;
+  const errorEl = document.getElementById('loginError');
+  const versucheEl = document.getElementById('loginVersuche');
+  
+  if (!eingabe) {
+    errorEl.textContent = '❌ Bitte Passwort eingeben!';
+    errorEl.style.display = 'block';
+    return;
+  }
+  
+  const hash = await sha256(eingabe);
+  
+  if (hash === PASSWORT_HASH) {
+    sessionStorage.setItem('db_auth', PASSWORT_HASH);
+    clearAuthState();
+    location.reload();
+    return;
+  }
+  
+  const state = getAuthState();
+  state.versuche--;
+  
+  if (state.versuche <= 0) {
+    state.gesperrtBis = Date.now() + LOCKOUT_DURATION;
+    state.versuche = 0;
+    setAuthState(state);
+    showLockScreen();
+    return;
+  }
+  
+  setAuthState(state);
+  
+  errorEl.textContent = '❌ Falsches Passwort!';
+  errorEl.style.display = 'block';
+  versucheEl.textContent = state.versuche + ' Versuche übrig';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginPassword').focus();
+}
+
+if (isLocked()) {
+  showLockScreen();
+  throw new Error('Zugriff gesperrt');
+}
+
+if (sessionStorage.getItem('db_auth') !== PASSWORT_HASH) {
+  showLoginScreen();
+  throw new Error('Login erforderlich');
+}
+
+const SUPABASE_URL = 'https://pskuvrahvxlzrnxmuqnc.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBza3V2cmFodnhsenJueG11cW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NTA2MTYsImV4cCI6MjA3ODEyNjYxNn0.Ji5dTEFsGbgW9t79yhJg-nOHkzc0Z0oHtVe6c-iBvds'
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+]
+
+function onProductSelect() {
+  const select = document.getElementById('couponProduct')
+  const priceInput = document.getElementById('couponPrice')
+  
+  const selectedProduct = MENU_PRODUCTS.find(p => p.name === select.value)
+  
+  if (selectedProduct) {
+    priceInput.value = selectedProduct.price.toFixed(2) + ' €'
+    priceInput.placeholder = 'Original: ' + selectedProduct.price.toFixed(2) + ' €'
+  } else {
+    priceInput.value = ''
+    priceInput.placeholder = 'z.B. 5,50 €'
+  }
+}
+
+
+function showResult(elementId, message, type) {
+  const el = document.getElementById(elementId)
+  if (!message) { el.className = ''; el.innerHTML = ''; return }
+  el.className = `result ${type}`
+  el.innerHTML = message
+}
 async function loadAllCustomers() {
   const container = document.getElementById('customerListContainer')
   try {
@@ -722,7 +1314,6 @@ async function loadAllCustomers() {
     document.getElementById('totalTransactions').textContent = txCount || 0
     document.getElementById('totalCodes').textContent = codeCount || 0
     
-    // WhatsApp Stats
     const whatsappOptins = customers.filter(c => c.whatsapp_optin === true).length
     document.getElementById('whatsappOptins').textContent = whatsappOptins
     document.getElementById('wa-total-optins').textContent = whatsappOptins
@@ -805,7 +1396,6 @@ async function loadGlobalBonuses() {
     list.innerHTML = bonuses.map(bonus => {
       const startDate = bonus.start_date ? new Date(bonus.start_date) : new Date(bonus.created_at)
       const endDate = bonus.end_date ? new Date(bonus.end_date) : new Date(bonus.expires_at)
-      // Set end date to end of day (23:59:59)
       endDate.setHours(23, 59, 59, 999)
       const isExpired = endDate < now; const isNotStarted = startDate > now; const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
       const isActive = bonus.is_active && !isExpired && !isNotStarted
@@ -852,7 +1442,6 @@ async function loadChallenges() {
     list.innerHTML = challenges.map(c => {
       const start = new Date(c.start_date).toLocaleDateString('de-DE')
       const endDate = new Date(c.end_date)
-      // Set end date to end of day (23:59:59)
       endDate.setHours(23, 59, 59, 999)
       const end = endDate.toLocaleDateString('de-DE')
       const now = new Date()
@@ -897,13 +1486,11 @@ async function loadCoupons() {
     for (const coupon of coupons) {
       const startDate = coupon.start_date ? new Date(coupon.start_date) : new Date(coupon.created_at)
       const endDate = coupon.end_date ? new Date(coupon.end_date) : new Date(coupon.expires_at)
-      // Set end date to end of day (23:59:59)
       endDate.setHours(23, 59, 59, 999)
       const now = new Date(); const isExpired = endDate < now; const isNotStarted = startDate > now; const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
       if (isExpired && coupon.is_active) { await supabase.from('coupons').update({ is_active: false }).eq('id', coupon.id); coupon.is_active = false }
       const { data: activations } = await supabase.from('activated_coupons').select('customer_id, unique_code, is_used, activated_at, customers(name, phone)').eq('coupon_id', coupon.id).order('activated_at', { ascending: false })
 
-// Zähle nur eindeutige Kunden
 let uniqueCustomers = 0;
 if (activations && activations.length > 0) {
   const uniqueCustomerIds = new Set(activations.map(a => a.customer_id));
@@ -951,7 +1538,6 @@ async function saveWheelConfig() {
   if (!minAmount || minAmount <= 0) { showResult('result-wheel-config', '❌ Bitte gültigen Mindestbestellwert eingeben!', 'error'); return }
   const activeDays = []; document.querySelectorAll('.wheel-day:checked').forEach(checkbox => { activeDays.push(parseInt(checkbox.value)) })
   try {
-    // Button während Speichervorgang deaktivieren
     btn.disabled = true
     btn.textContent = '⏳ Speichere...'
     btn.style.opacity = '0.6'
@@ -962,12 +1548,10 @@ async function saveWheelConfig() {
     if (existing && existing.length > 0) { await supabase.from('wheel_config').update(configData).eq('id', existing[0].id) }
     else { await supabase.from('wheel_config').insert(configData) }
     
-    // Erfolgs-Feedback
     btn.textContent = '✅ Gespeichert!'
     btn.style.opacity = '1'
     showResult('result-wheel-config', '✅ Einstellungen erfolgreich gespeichert!', 'success')
     
-    // Nach 2 Sekunden Button zurücksetzen
     setTimeout(() => {
       btn.textContent = '💾 Einstellungen speichern'
       btn.disabled = false
@@ -1000,9 +1584,8 @@ async function loadWheelStats() {
 window.addEventListener('DOMContentLoaded', function() {
   loadAllCustomers(); loadGlobalBonuses(); loadChallenges(); loadCoupons()
   loadWheelConfig(); loadWheelStats()
-  loadWeatherSettings() // ← WETTER EINSTELLUNGEN LADEN
+  loadWeatherSettings()
   
-  // 🌧️ AUTO-CHECK beim Laden starten
   checkWeatherNow(false)
   
   const today = new Date(), nextWeek = new Date(); nextWeek.setDate(nextWeek.getDate() + 7)
@@ -1013,7 +1596,6 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('challengeStart').value = todayStr; document.getElementById('challengeEnd').value = challenge20DaysStr
   document.getElementById('couponStart').value = todayStr; document.getElementById('couponEnd').value = todayStr
 
-  // ✅ DROPDOWN FÜLLEN: 19 Produkte ins Coupon-Dropdown laden
   const productSelect = document.getElementById('couponProduct')
   if (productSelect) {
     MENU_PRODUCTS.forEach(product => {
@@ -1025,7 +1607,6 @@ window.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Produkt-Dropdown gefüllt mit', MENU_PRODUCTS.length, 'Produkten')
   }
 
-// 📊 Stats initialisieren
 setTimeout(() => {
   console.log('📊 Initialisiere Stats...')
   setTimeRange('7days', true)
@@ -1033,21 +1614,10 @@ setTimeout(() => {
 }, 1000)
 })
 
-// ═══════════════════════════════════════════════════════════════
-// Happy Hour Funktionen
-// ═══════════════════════════════════════════════════════════════
-
-// ═══════════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════════
-// Wetter-Döner-Deals System mit Intelligenter Upgrade-Logik
-// ═══════════════════════════════════════════════════════════════
-
-// 🔒 FEST VERANKERT (nicht änderbar vom Admin)
 const WEATHER_API_KEY = 'f30b80f8de3772f3145b8eb19139a305'
 const WEATHER_LAT = 51.338938
 const WEATHER_LON = 9.486639
 
-// 🍖 DÖNER PREIS-STAFFELUNG
 const DOENER_NORMAL_PRICE = 6.00
 
 const RAIN_DEALS = [
@@ -1063,14 +1633,12 @@ const TEMP_DEALS = [
   { min: -1, max: 0, price: 4.50, discount: 25, label: 'Kalt', emoji: '🧊' }
 ]
 
-// 🎮 UPGRADE-REGELN
 const UPGRADE_RULES = {
-  minPriceDiff: 1.00,      // Mindestens 1€ besser
-  minDiscountDiff: 15,     // Oder mindestens 15% mehr Rabatt
-  maxUpdatesPerDay: 2      // Max 2 Upgrades pro Tag
+  minPriceDiff: 1.00,
+  minDiscountDiff: 15,
+  maxUpdatesPerDay: 2
 }
 
-// 📊 TAGES-TRACKING
 let todayDeals = {
   date: null,
   deals: [],
@@ -1081,16 +1649,12 @@ let todayDeals = {
 let weatherCheckInterval = null
 let scheduledCheckTimeout = null
 
-// ⚠️ Auto-Check ist IMMER aktiv - keine Einstellungen mehr nötig
-
 async function checkWeatherNow(isAutoCheck = false) {
   try {
     const today = new Date().toDateString()
     if (todayDeals.date !== today) {
       todayDeals = { date: today, deals: [], updateCount: 0, customerCount: 0 }
     }
-    
-    // Zeige keine "Prüfe Wetter" Message mehr
     
     const response = await fetch(
       `https://api.openweathermap.org/data/2.5/weather?lat=${WEATHER_LAT}&lon=${WEATHER_LON}&appid=${WEATHER_API_KEY}&units=metric&lang=de`
@@ -1129,7 +1693,6 @@ async function checkWeatherNow(isAutoCheck = false) {
     
     displayWeatherInfo(temp, rain, desc, icon, newDeal)
     
-    // Update Zeitstempel in Info-Box
     const now = new Date()
     const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
     const timestampEl = document.getElementById('weather-last-check')
@@ -1200,195 +1763,9 @@ function displayWeatherInfo(temp, rain, desc, icon, deal) {
         </button>
       </div>
     `
-  } else {
-    // Kein Deal - zeige nichts
   }
   
   displayDiv.innerHTML = weatherHTML
-}
-
-async function activateWeatherDeal(price, discount, label, emoji, type) {
-  try {
-    const { data: customers } = await supabase
-      .from('customers')
-      .select('phone, name')
-      .eq('whatsapp_optin', true)
-      .order('name')
-    
-    if (!customers || customers.length === 0) {
-      showResult('result-weather', '⚠️ Keine WhatsApp-Kunden!', 'error')
-      return
-    }
-    
-    const couponCode = Math.floor(1000 + Math.random() * 9000).toString()
-    
-    const today = new Date()
-    const endOfDay = new Date(today)
-    endOfDay.setHours(23, 59, 59)
-    
-    const { error: couponError } = await supabase
-      .from('coupons')
-      .insert({
-        product_name: `Döner ${emoji} ${label}`,
-        price: `${price.toFixed(2)}€`,
-        original_price: `${DOENER_NORMAL_PRICE.toFixed(2)}€`,
-        start_date: today.toISOString().split('T')[0],
-        end_date: endOfDay.toISOString().split('T')[0],
-        coupon_code: couponCode,
-        is_active: true
-      })
-    
-    if (couponError) throw couponError
-    
-    const dealInfo = {
-      time: new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'}),
-      price: price,
-      discount: discount,
-      label: label,
-      emoji: emoji,
-      code: couponCode,
-      sent: true
-    }
-    
-    todayDeals.deals.push(dealInfo)
-    todayDeals.customerCount = customers.length
-    
-    updateDealStatus()
-    prepareWhatsAppMessage(price, discount, label, emoji, type, couponCode, customers)
-    
-    showResult('result-weather', `✅ Deal aktiviert! Code: ${couponCode}`, 'success')
-    
-  } catch (e) {
-    showResult('result-weather', '❌ Fehler: ' + e.message, 'error')
-  }
-}
-
-function prepareWhatsAppMessage(price, discount, label, emoji, type, code, customers) {
-  const numbers = customers.map(c => c.phone).join('\n')
-  document.getElementById('weather-numbers').value = numbers
-  
-  const isUpgrade = todayDeals.deals.filter(d => d.sent).length > 1
-  
-  let message = ''
-  
-  if (isUpgrade) {
-    const oldDeal = todayDeals.deals[todayDeals.deals.length - 2]
-    message = `🚨 WETTER-DEAL UPDATE!\n\n`
-    message += `Wetter ist NOCH SCHLECHTER! ${emoji}\n\n`
-    message += `DEIN DEAL WIRD BESSER:\n`
-    message += `Vorher: ${oldDeal.price.toFixed(2)}€\n`
-    message += `JETZT: ${price.toFixed(2)}€! 🔥\n\n`
-    message += `Du sparst jetzt ${(DOENER_NORMAL_PRICE - price).toFixed(2)}€ statt ${(DOENER_NORMAL_PRICE - oldDeal.price).toFixed(2)}€!\n\n`
-  } else {
-    if (type === 'rain') {
-      message = `🌧️ REGEN-DEAL! ${emoji}\n\n`
-      message += `Draußen ${label}!\n\n`
-    } else {
-      message = `❄️ KÄLTE-DEAL! ${emoji}\n\n`
-      message += `Draußen ${label}!\n\n`
-    }
-  }
-  
-  message += `🔥 NUR HEUTE:\n`
-  message += `DÖNER FÜR ${price.toFixed(2)}€!\n`
-  message += `(statt ${DOENER_NORMAL_PRICE.toFixed(2)}€ = -${discount}% RABATT!)\n\n`
-  message += `⚠️ Nur bei Abholung!\n`
-  message += `⚠️ Gültig bis 18:30 Uhr!\n\n`
-  message += `📱 Dein Code: ${code}\n\n`
-  message += `Komm vorbei & spare! 💪\n`
-  message += `📍 Döner Boxx`
-  
-  document.getElementById('weather-message').value = message
-  document.getElementById('weather-whatsapp').style.display = 'block'
-}
-
-function checkUpgradeOpportunity(newDeal) {
-  const lastDeal = todayDeals.deals[todayDeals.deals.length - 1]
-  
-  const priceDiff = lastDeal.price - newDeal.price
-  const discountDiff = newDeal.discount - lastDeal.discount
-  
-  const isSignificantPriceDrop = priceDiff >= UPGRADE_RULES.minPriceDiff
-  const isSignificantDiscountIncrease = discountDiff >= UPGRADE_RULES.minDiscountDiff
-  const hasUpdatesLeft = todayDeals.updateCount < UPGRADE_RULES.maxUpdatesPerDay
-  
-  if ((isSignificantPriceDrop || isSignificantDiscountIncrease) && hasUpdatesLeft) {
-    showUpgradeAlert(lastDeal, newDeal, priceDiff, discountDiff)
-  } else {
-    document.getElementById('weather-upgrade-alert').style.display = 'none'
-  }
-}
-
-function showUpgradeAlert(oldDeal, newDeal, priceDiff, discountDiff) {
-  document.getElementById('upgrade-old-price').textContent = oldDeal.price.toFixed(2) + '€'
-  document.getElementById('upgrade-new-price').textContent = newDeal.price.toFixed(2) + '€'
-  
-  let reason = ''
-  if (priceDiff >= UPGRADE_RULES.minPriceDiff) {
-    reason = `🎯 ${priceDiff.toFixed(2)}€ günstiger!`
-  } else {
-    reason = `📊 ${discountDiff}% mehr Rabatt!`
-  }
-  document.getElementById('upgrade-reason').textContent = reason
-  
-  document.getElementById('weather-upgrade-alert').style.display = 'block'
-  
-  window.pendingUpgrade = newDeal
-}
-
-async function sendUpgradeDeal() {
-  if (!window.pendingUpgrade) return
-  
-  const deal = window.pendingUpgrade
-  await activateWeatherDeal(deal.price, deal.discount, deal.label, deal.emoji, deal.type)
-  
-  todayDeals.updateCount++
-  dismissUpgrade()
-}
-
-function dismissUpgrade() {
-  document.getElementById('weather-upgrade-alert').style.display = 'none'
-  window.pendingUpgrade = null
-}
-
-function updateDealStatus() {
-  if (todayDeals.deals.length === 0) {
-    document.getElementById('weather-deal-status').style.display = 'none'
-    return
-  }
-  
-  const currentDeal = todayDeals.deals[todayDeals.deals.length - 1]
-  
-  document.getElementById('weather-deal-status').style.display = 'block'
-  document.getElementById('deal-current-price').textContent = currentDeal.price.toFixed(2) + '€'
-  document.getElementById('deal-sent-time').textContent = 'Gesendet: ' + currentDeal.time
-  document.getElementById('deal-customers').textContent = todayDeals.customerCount
-  document.getElementById('deal-updates').textContent = todayDeals.updateCount
-  
-  const avgDiscount = todayDeals.deals.reduce((sum, d) => sum + d.discount, 0) / todayDeals.deals.length
-  document.getElementById('deal-savings').textContent = '-' + avgDiscount.toFixed(0) + '%'
-  
-  let historyHTML = ''
-  todayDeals.deals.forEach((d, i) => {
-    historyHTML += `<div style="padding: 4px 0; ${i < todayDeals.deals.length - 1 ? 'opacity: 0.7;' : ''}">`
-    historyHTML += `${d.emoji} ${d.time}: ${d.price.toFixed(2)}€ (-${d.discount}%) ${i === 0 ? '✅ Initial' : '🔥 Upgrade'}`
-    historyHTML += `</div>`
-  })
-  document.getElementById('deal-history').innerHTML = historyHTML
-}
-
-function copyWeatherNumbers() {
-  const textarea = document.getElementById('weather-numbers')
-  textarea.select()
-  document.execCommand('copy')
-  showResult('result-weather', '✅ Nummern kopiert!', 'success')
-}
-
-function copyWeatherMessage() {
-  const textarea = document.getElementById('weather-message')
-  textarea.select()
-  document.execCommand('copy')
-  showResult('result-weather', '✅ Nachricht kopiert!', 'success')
 }
 
 function getWeatherIcon(weatherMain) {
@@ -1425,21 +1802,13 @@ function stopWeatherMonitoring() {
   console.log('⏹️ Wetter-Monitoring gestoppt')
 }
 
-// ⚠️ Auto-Start Wetter-Monitoring (IMMER aktiv)
 async function loadWeatherSettings() {
-  // Monitoring IMMER starten (keine Settings mehr)
   startWeatherMonitoring()
   
-  // Notification Permission anfragen
   if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission()
   }
 }
-
-// ═══════════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════════
-// Win-Back Kampagne mit 4-Phasen Cooldown System
-// ═══════════════════════════════════════════════════════════════
 
 const WINBACK_PHASES = [
   { id: 1, days: 14, points: 100, cooldown: 7, label: 'Mild', emoji: '❤️', color: '#f472b6' },
@@ -1462,7 +1831,6 @@ async function prepareWinbackCampaign() {
       return
     }
     
-    // Hole ALLE Kunden mit WhatsApp
     const { data: allCustomers, error: customerError } = await supabase
       .from('customers')
       .select('id, name, phone, points, whatsapp_optin, winback_status')
@@ -1476,7 +1844,6 @@ async function prepareWinbackCampaign() {
       return
     }
     
-    // Für jeden Kunden: Prüfe letzte Transaktion
     const cutoffDate = new Date()
     cutoffDate.setDate(cutoffDate.getDate() - phase.days)
     
@@ -1484,7 +1851,6 @@ async function prepareWinbackCampaign() {
     const cooldownCustomers = []
     
     for (const customer of allCustomers) {
-      // Prüfe letzte Transaktion
       const { data: lastTx } = await supabase
         .from('transactions')
         .select('created_at')
@@ -1492,7 +1858,6 @@ async function prepareWinbackCampaign() {
         .order('created_at', { ascending: false })
         .limit(1)
       
-      // Inaktiv?
       let isInactive = false
       if (!lastTx || lastTx.length === 0) {
         isInactive = true
@@ -1505,32 +1870,26 @@ async function prepareWinbackCampaign() {
       
       if (!isInactive) continue
       
-      // Prüfe Cooldown
       const winbackStatus = customer.winback_status || {}
       const cooldownUntil = winbackStatus.cooldown_until ? new Date(winbackStatus.cooldown_until) : null
       const now = new Date()
       
       if (cooldownUntil && cooldownUntil > now) {
-        // Im Cooldown
         cooldownCustomers.push({
           ...customer,
           cooldown_days: Math.ceil((cooldownUntil - now) / (1000 * 60 * 60 * 24))
         })
       } else {
-        // Berechtigt!
         eligibleCustomers.push(customer)
       }
     }
     
-    // Update Stats
     document.getElementById('stat-wb-eligible').textContent = eligibleCustomers.length + cooldownCustomers.length
     document.getElementById('stat-wb-cooldown').textContent = cooldownCustomers.length
     document.getElementById('stat-wb-ready').textContent = eligibleCustomers.length
     
-    // Zeige Stats
     document.getElementById('winback-stats').style.display = 'block'
     
-    // Zeige Kundenliste
     const listDiv = document.getElementById('winback-customer-list')
     
     if (eligibleCustomers.length === 0) {
@@ -1547,11 +1906,9 @@ async function prepareWinbackCampaign() {
       </div>
     `).join('')
     
-    // Bereite WhatsApp vor
     const numbers = eligibleCustomers.map(c => c.phone).join('\n')
     document.getElementById('winback-numbers').value = numbers
     
-    // Nachricht
     const messages = {
       1: `Hey! 👋
 
@@ -1597,13 +1954,11 @@ Mehr geht nicht! Komm zurück! 🙏
     
     document.getElementById('winback-message').value = messages[phaseId]
     
-    // Speichere Kampagne
     currentWinbackCampaign = {
       phase: phase,
       customers: eligibleCustomers
     }
     
-    // Zeige WhatsApp
     document.getElementById('winback-whatsapp').style.display = 'block'
     
     showResult('result-winback', 
@@ -1633,7 +1988,6 @@ async function confirmWinbackCampaign() {
     const cooldownDate = new Date(now)
     cooldownDate.setDate(cooldownDate.getDate() + currentWinbackCampaign.phase.cooldown)
     
-    // Für jeden Kunden: Update winback_status
     let successCount = 0
     let errorCount = 0
     
@@ -1678,7 +2032,6 @@ async function confirmWinbackCampaign() {
     
     alert(`✅ KAMPAGNE AKTIVIERT!\n\n${successCount} Kunden erhalten beim nächsten QR-Scan (innerhalb 24h) automatisch +${currentWinbackCampaign.phase.points} Bonus-Punkte!\n\nCooldown: ${currentWinbackCampaign.phase.cooldown} Tage aktiv.`)
     
-    // Reset
     currentWinbackCampaign = null
     document.getElementById('winback-whatsapp').style.display = 'none'
     document.getElementById('winback-stats').style.display = 'none'
@@ -1703,9 +2056,6 @@ function copyWinbackMessage() {
   showResult('result-winback', '✅ Nachricht kopiert!', 'success')
 }
 
-// ═══════════════════════════════════════════════════════════════
-// WhatsApp-Export-Funktionen
-// ═══════════════════════════════════════════════════════════════
 async function exportWhatsAppNumbers() {
   const resultDiv = document.getElementById('result-wa-export')
   const listDiv = document.getElementById('wa-numbers-list')
@@ -1728,7 +2078,6 @@ async function exportWhatsAppNumbers() {
       return
     }
     
-    // Format: +49... oder direkte Nummer
     const numbers = customers.map(c => c.phone).join('\n')
     textarea.value = numbers
     
@@ -1753,12 +2102,6 @@ function copyWhatsAppNumbers() {
     resultDiv.innerHTML = ''
   }, 3000)
 }
-// ═══════════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════════
-
-// ═══════════════════════════════════════════════════════════════
-// 📊 BUSINESS INTELLIGENCE STATS FUNCTIONS
-// ═══════════════════════════════════════════════════════════════
 
 let currentTimeRange = { start: null, end: null, label: '7days' }
 
@@ -1766,7 +2109,6 @@ function setTimeRange(range, skipReload = false) {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   
-  // ✅ FIX: Entferne active von allen Buttons
   document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => btn.classList.remove('active'))
   currentTimeRange.label = range
   
@@ -1775,7 +2117,6 @@ function setTimeRange(range, skipReload = false) {
       currentTimeRange.start = today
       currentTimeRange.end = new Date(today.getTime() + 24*60*60*1000)
       document.getElementById('custom-date-range').style.display = 'none'
-      // ✅ Aktiviere Button - suche nach Text statt ID
       document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => {
         if (btn.textContent.includes('Heute')) btn.classList.add('active')
       })
@@ -1784,7 +2125,6 @@ function setTimeRange(range, skipReload = false) {
       currentTimeRange.start = new Date(now.getTime() - 7*24*60*60*1000)
       currentTimeRange.end = now
       document.getElementById('custom-date-range').style.display = 'none'
-      // ✅ Aktiviere Button
       document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => {
         if (btn.textContent.includes('7 Tage')) btn.classList.add('active')
       })
@@ -1793,7 +2133,6 @@ function setTimeRange(range, skipReload = false) {
       currentTimeRange.start = new Date(now.getTime() - 30*24*60*60*1000)
       currentTimeRange.end = now
       document.getElementById('custom-date-range').style.display = 'none'
-      // ✅ Aktiviere Button
       document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => {
         if (btn.textContent.includes('30 Tage')) btn.classList.add('active')
       })
@@ -1802,7 +2141,6 @@ function setTimeRange(range, skipReload = false) {
       currentTimeRange.start = new Date(now.getFullYear(), now.getMonth(), 1)
       currentTimeRange.end = now
       document.getElementById('custom-date-range').style.display = 'none'
-      // ✅ Aktiviere Button
       document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => {
         if (btn.textContent.includes('Dieser Monat')) btn.classList.add('active')
       })
@@ -1811,7 +2149,6 @@ function setTimeRange(range, skipReload = false) {
       currentTimeRange.start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
       currentTimeRange.end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
       document.getElementById('custom-date-range').style.display = 'none'
-      // ✅ Aktiviere Button
       document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => {
         if (btn.textContent.includes('Letzter Monat')) btn.classList.add('active')
       })
@@ -1820,14 +2157,12 @@ function setTimeRange(range, skipReload = false) {
       currentTimeRange.start = null
       currentTimeRange.end = null
       document.getElementById('custom-date-range').style.display = 'none'
-      // ✅ Aktiviere Button
       document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => {
         if (btn.textContent.includes('Alle Zeit')) btn.classList.add('active')
       })
       break
     case 'custom':
       document.getElementById('custom-date-range').style.display = 'block'
-      // ✅ Aktiviere Button
       document.querySelectorAll('.stat-btn[onclick^="setTimeRange"]').forEach(btn => {
         if (btn.textContent.includes('Custom')) btn.classList.add('active')
       })
@@ -1864,7 +2199,6 @@ function applyCustomRange() {
 function filterByTimeRange(data, dateField = 'created_at') {
   const total = data?.length || 0
   
-  // WICHTIG: Bei "all" keine Filterung
   if (!currentTimeRange.start || !currentTimeRange.end) {
     console.log('⭐ Alle Zeit ausgewählt - kein Filter')
     return data
@@ -1995,6 +2329,19 @@ async function loadCouponStats() {
         </div>
       ` : '<div style="text-align: center; padding: 20px; color: #6b7280;">Noch keine Coupon-Daten im gewählten Zeitraum</div>'}
     `
+    
+    if (totalActivations === 0) {
+      content.innerHTML += `
+        <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px; margin-top: 16px;">
+          <div style="font-weight: 700; color: #92400e; margin-bottom: 8px;">ℹ️ Hinweis zu Coupon-Tracking</div>
+          <div style="font-size: 13px; color: #92400e;">
+            Coupon-Einlösungen werden aktuell über das Bestellsystem getrackt, nicht über separate Aktivierungen.
+            Die Statistik wird in einer späteren Version erweitert.
+          </div>
+        </div>
+      `
+    }
+    
   } catch (e) {
     console.error('❌ Fehler:', e)
     content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
@@ -2008,7 +2355,6 @@ async function loadRewardStats() {
   document.getElementById('btn-rewards')?.classList.add('active')
   
   try {
-    // ✅ NEUE LOGIK: Lade ALLE Transaktionen und filtere dann
     let { data: allTransactions, error: redeemsError } = await supabase
       .from('transactions')
       .select('points, created_at, type, notes')
@@ -2018,7 +2364,6 @@ async function loadRewardStats() {
       throw redeemsError
     }
     
-    // ✅ FIX: Filtere Einlösungen (negative Punkte ODER type=redeem)
     let redeems = allTransactions?.filter(tx => {
       const isRedeem = tx.type === 'redeem' || 
                        (tx.notes && tx.notes.includes('Code:')) ||
@@ -2029,10 +2374,8 @@ async function loadRewardStats() {
     const allCount = redeems?.length || 0
     redeems = filterByTimeRange(redeems)
     
-    // ✅ FIX: Gruppiere nach reward_name statt nach Punkten
 const rewardMap = new Map()
 redeems?.forEach(r => {
-  // Hole den reward_name aus notes (Format: "Code: XXXX - REWARD_NAME")
   let rewardName = 'Unbekannte Prämie'
   let points = Math.abs(r.points)
   
@@ -2043,7 +2386,6 @@ redeems?.forEach(r => {
     }
   }
   
-  // Erstelle eindeutigen Key aus Name + Punkte
   const key = `${rewardName}|${points}`
   
   if (!rewardMap.has(key)) {
@@ -2054,21 +2396,18 @@ redeems?.forEach(r => {
   entry.count++
 })
 
-// ✅ Konvertiere Map zu Array und sortiere
 const rewards = Array.from(rewardMap.values())
   .sort((a, b) => b.count - a.count)
   .slice(0, 5)
   .map(r => ({
     points: r.points,
     count: r.count,
-    name: r.name,  // ← Echter Name!
+    name: r.name,
     emoji: r.points >= 1000 ? '🥙' : r.points >= 500 ? '🍟' : '🥤'
   }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5)
     
     const totalRedeems = redeems?.length || 0
-    const totalPoints = redeems?.reduce((sum, r) => sum + Math.abs(r.points), 0) || 0  // ✅ FIX: use 'points'
+    const totalPoints = redeems?.reduce((sum, r) => sum + Math.abs(r.points), 0) || 0
     
     content.innerHTML = `
       <h3 style="color: #111827; margin-bottom: 16px;">🏆 Prämien-Ranking</h3>
@@ -2110,358 +2449,6 @@ const rewards = Array.from(rewardMap.values())
   }
 }
 
-async function loadWeatherStats() {
-  const content = document.getElementById('stats-content')
-  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Wetter-Deal Statistiken...</div>'
-  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
-  document.getElementById('btn-weather')?.classList.add('active')
-  
-  try {
-    const { data: coupons } = await supabase.from('coupons').select('*')
-    let { data: activations, error: activationsError } = await supabase
-      .from('activated_coupons')
-      .select('*, coupons(title, product)')
-    
-    if (activationsError) {
-      console.error('❌ Activations error:', activationsError)
-      throw activationsError
-    }
-    
-    const allCount = activations?.length || 0
-    activations = filterByTimeRange(activations, 'activated_at')
-    
-    const weatherDeals = coupons?.filter(c => 
-      c.title?.includes('3€') || c.title?.includes('4€') || c.title?.includes('4.50€') || c.title?.includes('5€')
-    ) || []
-    
-    const weatherActivations = activations?.filter(a => 
-      a.coupons?.title?.includes('3€') || a.coupons?.title?.includes('4€') || 
-      a.coupons?.title?.includes('4.50€') || a.coupons?.title?.includes('5€')
-    ) || []
-    
-    const totalActivated = weatherActivations.length
-    const totalUsed = weatherActivations.filter(a => a.is_used).length
-    const avgDiscount = 30
-    
-    content.innerHTML = `
-      <h3 style="color: #111827; margin-bottom: 16px;">🌧️ Wetter-Döner-Deals Performance</h3>
-      
-      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
-        <strong style="color: #1e40af;">🔍 Zeitraum:</strong> ${currentTimeRange.label}<br>
-        <span style="color: #1e3a8a;">Gesamt: ${allCount} | Weather-Activations: ${totalActivated}</span>
-      </div>
-      
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px;">
-        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${weatherDeals.length}</div>
-          <div style="font-size: 13px; color: #6b7280;">Aktive Deals</div>
-        </div>
-        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${totalActivated}</div>
-          <div style="font-size: 13px; color: #6b7280;">Aktivierungen</div>
-        </div>
-        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #f59e0b;">-${avgDiscount}%</div>
-          <div style="font-size: 13px; color: #6b7280;">Ø Rabatt</div>
-        </div>
-        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #10b981;">${totalUsed}</div>
-          <div style="font-size: 13px; color: #6b7280;">Bestellungen</div>
-        </div>
-      </div>
-      
-      <div style="background: #dcfce7; padding: 16px; border-radius: 10px; border: 2px solid #22c55e;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div style="font-size: 14px; color: #166534;">Conversion Rate:</div>
-          <div style="font-size: 22px; font-weight: 900; color: #166534;">${totalActivated > 0 ? Math.round((totalUsed/totalActivated)*100) : 0}%</div>
-        </div>
-      </div>
-    `
-  } catch (e) {
-    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
-  }
-}
-
-async function loadChallengeStats() {
-  const content = document.getElementById('stats-content')
-  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Challenge-Statistiken...</div>'
-  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
-  document.getElementById('btn-challenges')?.classList.add('active')
-  
-  try {
-    const { data: challenges } = await supabase.from('challenges').select('*')
-    let { data: progress } = await supabase.from('challenge_progress').select('*')
-    
-    const totalChallenges = challenges?.length || 0
-    const activeChallenges = challenges?.filter(c => c.is_active).length || 0
-    const totalParticipants = new Set(progress?.map(p => p.customer_id)).size
-    const completedChallenges = progress?.filter(p => p.is_completed).length || 0
-    const completionRate = progress?.length > 0 ? Math.round((completedChallenges / progress.length) * 100) : 0
-    
-    const challengeStats = challenges?.map(c => {
-      const participations = progress?.filter(p => p.challenge_id === c.id) || []
-      const completed = participations.filter(p => p.is_completed).length
-      return {
-        title: c.title,
-        participants: participations.length,
-        completed,
-        rate: participations.length > 0 ? Math.round((completed / participations.length) * 100) : 0,
-        reward: c.reward_points
-      }
-    }).sort((a, b) => b.participants - a.participants).slice(0, 3) || []
-    
-    const totalRevenueFromChallenges = completedChallenges * 6
-    const avgIncreasePerCustomer = totalParticipants > 0 ? (totalRevenueFromChallenges / totalParticipants).toFixed(2) : 0
-    
-    content.innerHTML = `
-      <h3 style="color: #111827; margin-bottom: 16px;">⚡ Challenge Performance</h3>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 20px;">
-        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #E31E24;">${totalChallenges}</div>
-          <div style="font-size: 13px; color: #6b7280;">Total Challenges</div>
-        </div>
-        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #10b981;">${activeChallenges}</div>
-          <div style="font-size: 13px; color: #6b7280;">Aktiv</div>
-        </div>
-        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${totalParticipants}</div>
-          <div style="font-size: 13px; color: #6b7280;">Teilnehmer</div>
-        </div>
-        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${completionRate}%</div>
-          <div style="font-size: 13px; color: #6b7280;">Erfolgsrate</div>
-        </div>
-      </div>
-      
-      ${challengeStats.length > 0 ? `
-        <div style="background: white; padding: 20px; border-radius: 10px;">
-          <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">🏆 Top Challenges</div>
-          ${challengeStats.map((c, i) => `
-            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ${i === 0 ? '#F9A825' : '#e5e7eb'};">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                  <div style="font-size: 14px; font-weight: 700; color: #111827;">${c.title}</div>
-                  <div style="font-size: 12px; color: #6b7280;">Teilnehmer: ${c.participants} | Abgeschlossen: ${c.completed}</div>
-                </div>
-                <div style="text-align: right;">
-                  <div style="font-size: 18px; font-weight: 700; color: ${c.rate >= 75 ? '#22c55e' : c.rate >= 50 ? '#f59e0b' : '#6b7280'};">${c.rate}%</div>
-                  <div style="font-size: 11px; color: #6b7280;">${c.reward}P</div>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      ` : '<div style="text-align: center; padding: 20px; color: #6b7280;">Noch keine Challenges vorhanden</div>'}
-    `
-  } catch (e) {
-    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
-  }
-}
-
-async function loadSegmentStats() {
-  const content = document.getElementById('stats-content')
-  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Kunden-Segmente...</div>'
-  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
-  document.getElementById('btn-segments')?.classList.add('active')
-  
-  try {
-    // ✅ NEUE LOGIK: Lade ALLE und filtere dann
-    let { data: allTransactions } = await supabase
-      .from('transactions')
-      .select('customer_id, created_at, amount, staff, notes')
-    
-    // ✅ FIX: Filtere echte Käufe (Betrag > 0 UND keine Wheel-Gewinne)
-    let transactions = allTransactions?.filter(tx => {
-      const hasAmount = tx.amount && parseFloat(tx.amount) > 0
-      const isWheelWin = tx.staff === 'WHEEL' || 
-                         (tx.notes && (tx.notes.includes('Wheel') || tx.notes.includes('Lucky')))
-      return hasAmount && !isWheelWin
-    }) || []
-    
-    const allCount = transactions?.length || 0
-    transactions = filterByTimeRange(transactions)
-    
-    const customerTxCount = new Map()
-    transactions?.forEach(t => {
-      customerTxCount.set(t.customer_id, (customerTxCount.get(t.customer_id) || 0) + 1)
-    })
-    
-    let vipCount = 0, stammCount = 0, regularCount = 0, gelegentlichCount = 0, einmaligCount = 0
-    
-    customerTxCount.forEach(count => {
-      if (count >= 20) vipCount++
-      else if (count >= 10) stammCount++
-      else if (count >= 5) regularCount++
-      else if (count >= 2) gelegentlichCount++
-      else einmaligCount++
-    })
-    
-    const totalCustomers = customerTxCount.size || 1
-    
-    const segments = [
-      { name: 'VIP', visits: '20+', count: vipCount, percent: Math.round((vipCount/totalCustomers)*100), color: '#dc2626' },
-      { name: 'Stamm', visits: '10-19', count: stammCount, percent: Math.round((stammCount/totalCustomers)*100), color: '#f59e0b' },
-      { name: 'Regular', visits: '5-9', count: regularCount, percent: Math.round((regularCount/totalCustomers)*100), color: '#3b82f6' },
-      { name: 'Gelegentlich', visits: '2-4', count: gelegentlichCount, percent: Math.round((gelegentlichCount/totalCustomers)*100), color: '#6b7280' },
-      { name: 'Einmalig', visits: '1', count: einmaligCount, percent: Math.round((einmaligCount/totalCustomers)*100), color: '#9ca3af' }
-    ]
-    
-    content.innerHTML = `
-      <h3 style="color: #111827; margin-bottom: 16px;">👥 Kunden-Segmente</h3>
-      
-      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
-        <strong style="color: #1e40af;">🔍 Zeitraum:</strong> ${currentTimeRange.label}<br>
-        <span style="color: #1e3a8a;">Käufe gesamt: ${allCount} | Nach Filter: ${transactions?.length || 0}</span>
-      </div>
-      
-      <div style="background: white; padding: 16px; border-radius: 10px; margin-bottom: 16px; text-align: center;">
-        <div style="font-size: 32px; font-weight: 700; color: #E31E24;">${totalCustomers}</div>
-        <div style="font-size: 13px; color: #6b7280;">Aktive Kunden</div>
-      </div>
-      
-      ${segments.map(s => `
-        <div style="background: white; padding: 16px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid ${s.color};">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <div style="font-size: 16px; font-weight: 700; color: #111827;">${s.name}</div>
-              <div style="font-size: 13px; color: #6b7280;">${s.visits} Käufe</div>
-            </div>
-            <div style="text-align: right;">
-              <div style="font-size: 28px; font-weight: 700; color: ${s.color};">${s.count}</div>
-              <div style="font-size: 13px; color: #6b7280;">${s.percent}%</div>
-            </div>
-          </div>
-          <div style="background: #f3f4f6; height: 8px; border-radius: 4px; margin-top: 12px; overflow: hidden;">
-            <div style="background: ${s.color}; height: 100%; width: ${s.percent}%; transition: width 0.3s;"></div>
-          </div>
-        </div>
-      `).join('')}
-    `
-  } catch (e) {
-    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
-  }
-}
-
-async function loadTrendStats() {
-  const content = document.getElementById('stats-content')
-  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Trend-Daten...</div>'
-  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
-  document.getElementById('btn-trends')?.classList.add('active')
-  
-  try {
-    // ✅ NEUE LOGIK: Lade ALLE Transaktionen und filtere dann
-    let { data: allTransactions, error } = await supabase
-      .from('transactions')
-      .select('created_at, amount, points, staff, notes, type')
-      .order('created_at', { ascending: false })
-    
-    if (error) throw error
-    
-    console.log('📦 Alle Transaktionen geladen:', allTransactions?.length)
-    
-    // ✅ FIX: Filtere echte Käufe (Betrag > 0 UND keine Wheel-Gewinne)
-    let transactions = allTransactions?.filter(tx => {
-      const hasAmount = tx.amount && parseFloat(tx.amount) > 0
-      const isWheelWin = tx.staff === 'WHEEL' || 
-                         (tx.notes && (tx.notes.includes('Wheel') || tx.notes.includes('Lucky')))
-      return hasAmount && !isWheelWin
-    }) || []
-    
-    console.log('📦 Echte KÄUFE (Betrag > 0, kein Wheel):', transactions?.length)
-    
-    const allCount = transactions?.length || 0
-    transactions = filterByTimeRange(transactions)
-    console.log('✅ Nach Zeitfilter:', transactions?.length)
-    
-    const dayCount = new Map()
-    const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']
-    
-    transactions?.forEach(t => {
-      const date = new Date(t.created_at)
-      const dayIndex = date.getDay()
-      const dayName = dayNames[dayIndex]
-      dayCount.set(dayName, (dayCount.get(dayName) || 0) + 1)
-    })
-    
-    const totalTx = transactions?.length || 1
-    const days = dayNames
-      .map(name => ({
-        name,
-        orders: dayCount.get(name) || 0,
-        percent: Math.round(((dayCount.get(name) || 0) / totalTx) * 100)
-      }))
-      .sort((a, b) => b.orders - a.orders)
-    
-    const hourCount = new Map()
-    transactions?.forEach(t => {
-      const hour = new Date(t.created_at).getHours()
-      hourCount.set(hour, (hourCount.get(hour) || 0) + 1)
-    })
-    
-    const rushHours = []
-    if (hourCount.size > 0) {
-      const lunchCount = [11,12,13,14].reduce((sum, h) => sum + (hourCount.get(h) || 0), 0)
-      if (lunchCount > 0) rushHours.push({ time: '11-14 Uhr', count: lunchCount, percent: Math.round((lunchCount/totalTx)*100), color: '#dc2626' })
-      
-      const dinnerCount = [17,18,19,20].reduce((sum, h) => sum + (hourCount.get(h) || 0), 0)
-      if (dinnerCount > 0) rushHours.push({ time: '17-20 Uhr', count: dinnerCount, percent: Math.round((dinnerCount/totalTx)*100), color: '#f59e0b' })
-      
-      const afternoonCount = [14,15,16,17].reduce((sum, h) => sum + (hourCount.get(h) || 0), 0)
-      if (afternoonCount > 0) rushHours.push({ time: '14-17 Uhr', count: afternoonCount, percent: Math.round((afternoonCount/totalTx)*100), color: '#3b82f6' })
-    }
-    
-    rushHours.sort((a, b) => b.percent - a.percent)
-    
-    content.innerHTML = `
-      <h3 style="color: #111827; margin-bottom: 16px;">📈 Zeitbasierte Trends (NUR Käufe)</h3>
-      
-      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
-        <strong style="color: #1e40af;">🔍 Debug-Info:</strong><br>
-        <span style="color: #1e3a8a;">Gesamt Käufe in DB: ${allCount} | Nach Zeitfilter: ${totalTx}</span>
-      </div>
-      
-      <div style="margin-bottom: 24px;">
-        <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">📅 Beste Verkaufstage:</div>
-        ${days.slice(0, 7).map((d, i) => `
-          <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ${i === 0 ? '#F9A825' : i === 1 ? '#f59e0b' : i === 2 ? '#3b82f6' : '#e5e7eb'};">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <div style="font-size: 20px;">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '📊'}</div>
-                <div style="font-size: 14px; font-weight: 600; color: #111827;">${d.name}</div>
-              </div>
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="font-size: 20px; font-weight: 700; color: #F9A825;">${d.orders}</div>
-                <div style="font-size: 13px; color: #6b7280; min-width: 40px; text-align: right;">${d.percent}%</div>
-              </div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-      
-      ${rushHours.length > 0 ? `
-        <div style="margin-bottom: 20px;">
-          <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">🕐 Rush-Hours:</div>
-          ${rushHours.map(r => `
-            <div style="background: white; padding: 14px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ${r.color};">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="font-size: 14px; font-weight: 600; color: #111827;">${r.time}</div>
-                <div>
-                  <span style="font-size: 18px; font-weight: 700; color: ${r.color};">${r.count}</span>
-                  <span style="font-size: 14px; color: #6b7280; margin-left: 8px;">(${r.percent}%)</span>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      ` : ''}
-    `
-  } catch (e) {
-    console.error('❌ Fehler:', e)
-    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
-  }
-}
-
 async function loadWheelStats() {
   const content = document.getElementById('stats-content')
   content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Glücksrad-Statistiken...</div>'
@@ -2469,61 +2456,59 @@ async function loadWheelStats() {
   document.getElementById('btn-wheel')?.classList.add('active')
   
   try {
-    let { data: spins, error } = await supabase
+    let { data: allSpins, error: spinsError } = await supabase
       .from('wheel_spins')
       .select('*')
-      .order('spun_at', { ascending: false })
     
-    if (error) throw error
+    if (spinsError) {
+      console.error('❌ Spins error:', spinsError)
+      throw spinsError
+    }
     
-    console.log('📦 Alle Spins geladen:', spins?.length)
-    const allCount = spins?.length || 0
-    spins = filterByTimeRange(spins, 'spun_at')
-    console.log('✅ Nach Filter:', spins?.length)
+    const allCount = allSpins?.length || 0
+    const spins = filterByTimeRange(allSpins)
     
-    const { data: unlocks } = await supabase.from('wheel_unlocks').select('*')
     const totalSpins = spins?.length || 0
-    const totalUnlocks = unlocks?.length || 0
+    const totalPoints = spins?.reduce((sum, s) => sum + s.prize_points, 0) || 0
+    const avgPoints = totalSpins > 0 ? Math.round(totalPoints / totalSpins) : 0
     
     const prizeMap = new Map()
     spins?.forEach(s => {
-      const prize = s.prize_value || 'Unbekannt'
-      prizeMap.set(prize, (prizeMap.get(prize) || 0) + 1)
+      const key = s.prize_points
+      if (!prizeMap.has(key)) {
+        prizeMap.set(key, { points: key, count: 0 })
+      }
+      prizeMap.get(key).count++
     })
     
-    const prizes = Array.from(prizeMap.entries())
-      .map(([prize, count]) => ({
-        prize: prize + ' Punkte',
-        count,
-        percent: totalSpins > 0 ? Math.round((count / totalSpins) * 100) : 0
-      }))
+    const prizes = Array.from(prizeMap.values())
       .sort((a, b) => b.count - a.count)
-      .slice(0, 5)
-    
-    const weekAgo = new Date()
-    weekAgo.setDate(weekAgo.getDate() - 7)
-    const spinsThisWeek = spins?.filter(s => new Date(s.spun_at) >= weekAgo).length || 0
+      .map(p => ({
+        ...p,
+        percentage: totalSpins > 0 ? Math.round((p.count / totalSpins) * 100) : 0,
+        emoji: p.points >= 100 ? '🎁' : p.points >= 50 ? '⭐' : '🎯'
+      }))
     
     content.innerHTML = `
-      <h3 style="color: #111827; margin-bottom: 16px;">🎡 Glücksrad Performance</h3>
+      <h3 style="color: #111827; margin-bottom: 16px;">🎰 Glücksrad Statistiken</h3>
       
       <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
-        <strong style="color: #1e40af;">🔍 Debug-Info:</strong><br>
-        <span style="color: #1e3a8a;">Gesamt Spins in DB: ${allCount} | Nach Zeitfilter: ${totalSpins}</span>
+        <strong style="color: #1e40af;">🔍 Zeitraum:</strong> ${currentTimeRange.label}<br>
+        <span style="color: #1e3a8a;">Gesamt: ${allCount} | Nach Filter: ${totalSpins}</span>
       </div>
       
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 20px;">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">
         <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
           <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${totalSpins}</div>
-          <div style="font-size: 13px; color: #6b7280;">Gesamt Spins</div>
+          <div style="font-size: 13px; color: #6b7280;">Gesamte Drehungen</div>
         </div>
         <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${spinsThisWeek}</div>
-          <div style="font-size: 13px; color: #6b7280;">Diese Woche</div>
+          <div style="font-size: 32px; font-weight: 700; color: #E31E24;">${totalPoints}</div>
+          <div style="font-size: 13px; color: #6b7280;">Verschenkte Punkte</div>
         </div>
         <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #10b981;">${totalUnlocks}</div>
-          <div style="font-size: 13px; color: #6b7280;">Freischaltungen</div>
+          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${avgPoints}</div>
+          <div style="font-size: 13px; color: #6b7280;">Ø Punkte/Dreh</div>
         </div>
       </div>
       
@@ -2531,246 +2516,239 @@ async function loadWheelStats() {
         <div style="background: white; padding: 20px; border-radius: 10px;">
           <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">🎁 Gewinn-Verteilung</div>
           ${prizes.map(p => `
-            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="font-size: 14px; font-weight: 600; color: #111827;">${p.prize}</div>
-                <div style="display: flex; align-items: center; gap: 12px;">
-                  <div style="font-size: 18px; font-weight: 700; color: #F9A825;">${p.count}x</div>
-                  <div style="font-size: 14px; color: #6b7280;">(${p.percent}%)</div>
+            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="font-size: 32px;">${p.emoji}</div>
+                <div>
+                  <div style="font-size: 16px; font-weight: 700; color: #111827;">${p.points} Punkte</div>
+                  <div style="font-size: 12px; color: #6b7280;">${p.count}x gedreht</div>
                 </div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 24px; font-weight: 700; color: #F9A825;">${p.percentage}%</div>
               </div>
             </div>
           `).join('')}
         </div>
-      ` : '<div style="text-align: center; padding: 20px; color: #6b7280;">Noch keine Gewinne</div>'}
+      ` : '<div style="text-align: center; padding: 40px; color: #6b7280;">Noch keine Glücksrad-Daten im gewählten Zeitraum</div>'}
     `
   } catch (e) {
-    console.error('❌ Fehler:', e)
     content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
   }
 }
 
-window.addEventListener('DOMContentLoaded', function() {
-  console.log('🚀 Stats Page geladen (Fixed)')
-  setTimeRange('7days', true)
-  setTimeout(() => {
-    console.log('📊 Lade erste Statistik...')
-    loadCouponStats()
-      // 🛒 Bestellungen laden
-  }, 300)
-})
-
-// ✅ Make functions globally accessible for onclick handlers
-window.setTimeRange = setTimeRange
-window.applyCustomRange = applyCustomRange
-window.loadCouponStats = loadCouponStats
-window.loadRewardStats = loadRewardStats
-window.loadWeatherStats = loadWeatherStats
-window.loadWheelStats = loadWheelStats
-window.loadChallengeStats = loadChallengeStats
-window.loadSegmentStats = loadSegmentStats
-window.loadTrendStats = loadTrendStats
-
-
-// ═══════════════════════════════════════════════════════════════
-// 🛒 ONLINE BESTELLUNGEN VERWALTUNG
-// ═══════════════════════════════════════════════════════════════
-
-let currentOrdersFilter = 'all'
-let allOrders = []
-
-
-function filterOrders(filter) {
-  currentOrdersFilter = filter
+async function loadWeatherStats() {
+  const content = document.getElementById('stats-content')
+  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Wetter-Deal Statistiken...</div>'
+  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
+  document.getElementById('btn-weather')?.classList.add('active')
   
-  // Filter-Buttons aktualisieren
-  document.querySelectorAll('.stat-btn').forEach(btn => btn.classList.remove('active'))
-  document.getElementById('filter-' + filter).classList.add('active')
-  
-  renderOrdersList()
+  try {
+    let { data: allDeals, error: dealsError } = await supabase
+      .from('weather_deals')
+      .select('*')
+      .order('created_at', { ascending: false })
+    
+    if (dealsError) {
+      console.error('❌ Weather deals error:', dealsError)
+      throw dealsError
+    }
+    
+    const allCount = allDeals?.length || 0
+    const deals = filterByTimeRange(allDeals)
+    
+    const totalDeals = deals?.length || 0
+    const totalRevenue = deals?.reduce((sum, d) => sum + (d.price * d.redemptions), 0) || 0
+    const totalRedemptions = deals?.reduce((sum, d) => sum + d.redemptions, 0) || 0
+    const avgDiscount = totalDeals > 0 ? Math.round(deals.reduce((sum, d) => sum + d.discount, 0) / totalDeals) : 0
+    
+    content.innerHTML = `
+      <h3 style="color: #111827; margin-bottom: 16px;">🌧️ Wetter-Deal Statistiken</h3>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+        <strong style="color: #1e40af;">🔍 Zeitraum:</strong> ${currentTimeRange.label}<br>
+        <span style="color: #1e3a8a;">Gesamt: ${allCount} | Nach Filter: ${totalDeals}</span>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px;">
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${totalDeals}</div>
+          <div style="font-size: 13px; color: #6b7280;">Aktive Deals</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${totalRedemptions}</div>
+          <div style="font-size: 13px; color: #6b7280;">Einlösungen</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #22c55e;">${totalRevenue}€</div>
+          <div style="font-size: 13px; color: #6b7280;">Umsatz</div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 700; color: #E31E24;">-${avgDiscount}%</div>
+          <div style="font-size: 13px; color: #6b7280;">Ø Rabatt</div>
+        </div>
+      </div>
+      
+      ${deals.length > 0 ? `
+        <div style="background: white; padding: 20px; border-radius: 10px;">
+          <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">📋 Deal-Historie</div>
+          ${deals.map(d => {
+            const date = new Date(d.created_at).toLocaleDateString('de-DE')
+            return `
+              <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <div style="font-size: 14px; font-weight: 700; color: #111827;">${d.label} ${d.emoji}</div>
+                    <div style="font-size: 12px; color: #6b7280;">${date} • Döner ${d.price}€ (-${d.discount}%)</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 18px; font-weight: 700; color: #F9A825;">${d.redemptions}x</div>
+                    <div style="font-size: 11px; color: #6b7280;">${(d.price * d.redemptions).toFixed(2)}€</div>
+                  </div>
+                </div>
+              </div>
+            `
+          }).join('')}
+        </div>
+      ` : '<div style="text-align: center; padding: 40px; color: #6b7280;">Noch keine Wetter-Deals im gewählten Zeitraum</div>'}
+    `
+  } catch (e) {
+    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
+  }
 }
 
-function renderOrdersList() {
-  let filteredOrders = allOrders
-  
-  // Filter anwenden
-  if (currentOrdersFilter !== 'all') {
-    if (currentOrdersFilter === 'paid') {
-      filteredOrders = allOrders.filter(o => o.payment_status === 'paid' || o.status === 'paid')
-    } else {
-      filteredOrders = allOrders.filter(o => o.status === currentOrdersFilter)
-    }
-  }
-  
-  const list = document.getElementById('orders-list')
-  
-  if (filteredOrders.length === 0) {
-    list.innerHTML = `
-      <div style="text-align: center; padding: 40px; color: #666;">
-        🛒 Keine Bestellungen in dieser Kategorie
-      </div>
-    `
+async function activateWeatherDeal(price, discount, label, emoji, type) {
+  if (!confirm(`Wetter-Deal "${label}" aktivieren?\n\nDöner: ${price}€ (-${discount}%)\n\nDieser Deal wird in die Datenbank eingetragen und ist für heute gültig.`)) {
     return
   }
   
-  list.innerHTML = filteredOrders.map(order => {
-    const date = new Date(order.created_at)
-    const dateStr = date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
-    const time = date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-    
-    const statusColors = {
-      'pending': '#f59e0b',
-      'paid': '#3b82f6',
-      'completed': '#10b981',
-      'cancelled': '#dc2626'
-    }
-    
-    const statusLabels = {
-      'pending': '⏳ Offen',
-      'paid': '💳 Bezahlt',
-      'completed': '✅ Abgeschlossen',
-      'cancelled': '❌ Storniert'
-    }
-    
-    const customer = order.customers || {}
-    const itemsCount = Array.isArray(order.items) ? order.items.length : 0
-    
-    return `
-      <div style="background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
-        <!-- Header -->
-        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
-          <div>
-            <div style="font-size: 18px; font-weight: 700; color: #111827;">
-              🛒 ${order.order_number}
-            </div>
-            <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
-              ${dateStr} ${time}
-            </div>
-          </div>
-          <div style="background: ${statusColors[order.status]}; color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600;">
-            ${statusLabels[order.status]}
-          </div>
-        </div>
-        
-        <!-- Kunde -->
-        <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-          <div style="font-weight: 600; margin-bottom: 6px;">👤 ${order.customer_name}</div>
-          <div style="font-size: 13px; color: #666;">
-            📱 ${order.customer_phone} | 🆔 ${customer.qr_id || 'N/A'}
-          </div>
-        </div>
-        
-        <!-- Bestellung -->
-        <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-          <div style="font-weight: 600; margin-bottom: 8px;">📦 ${itemsCount} Artikel</div>
-          <div style="font-size: 20px; font-weight: 700; color: #E31E24;">
-            ${order.total.toFixed(2)} €
-          </div>
-          <div style="font-size: 13px; color: #666; margin-top: 6px;">
-            💳 ${order.payment_method === 'cash' ? '💵 Bar' : '💳 PayPal'}
-            ${order.payment_status === 'paid' ? ' • ✅ Bezahlt' : ' • ⏳ Ausstehend'}
-          </div>
-          ${order.pickup_time ? `
-            <div style="font-size: 13px; color: #666; margin-top: 4px;">
-              🕐 Abholung: ${order.pickup_time}
-            </div>
-          ` : ''}
-          ${order.notes ? `
-            <div style="font-size: 13px; color: #666; margin-top: 8px; background: #f9fafb; padding: 8px; border-radius: 6px;">
-              📝 ${order.notes}
-            </div>
-          ` : ''}
-        </div>
-        
-        <!-- Aktionen -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px;">
-          ${order.status === 'pending' ? `
-            <button onclick="updateOrderStatus('${order.id}', 'paid')" style="background: #3b82f6; color: white; padding: 10px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
-              💳 Bezahlt
-            </button>
-          ` : ''}
-          ${order.status === 'paid' || order.payment_status === 'paid' ? `
-            <button onclick="updateOrderStatus('${order.id}', 'completed')" style="background: #10b981; color: white; padding: 10px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
-              ✅ Abschließen
-            </button>
-          ` : ''}
-          ${order.status !== 'cancelled' && order.status !== 'completed' ? `
-            <button onclick="updateOrderStatus('${order.id}', 'cancelled')" style="background: #dc2626; color: white; padding: 10px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
-              ❌ Stornieren
-            </button>
-          ` : ''}
-        </div>
-      </div>
-    `
-  }).join('')
-}
-
-
-// ═══════════════════════════════════════════════════════════════
-
-console.log('✅ Business Intelligence geladen (FIXED)!')
-
-
-// ☁️ WETTER-CHECK FUNKTIONEN
-async function checkWeatherNow() {
   try {
-    const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=51.32&longitude=9.49&current=temperature_2m,precipitation,wind_speed_10m,weather_code&timezone=Europe/Berlin')
-    const data = await response.json()
+    const { error } = await supabase.from('weather_deals').insert({
+      type: type,
+      label: label,
+      emoji: emoji,
+      price: price,
+      discount: discount,
+      redemptions: 0,
+      created_at: new Date().toISOString()
+    })
     
-    const temp = Math.round(data.current.temperature_2m)
-    const rain = data.current.precipitation || 0
-    const wind = Math.round(data.current.wind_speed_10m)
+    if (error) throw error
     
-    document.getElementById('weather-temp').textContent = temp + '°C'
-    document.getElementById('weather-rain').textContent = rain + ' mm/h'
-    document.getElementById('weather-wind').textContent = wind + ' km/h'
-    document.getElementById('weather-condition').textContent = getWeatherCondition(data.current.weather_code)
-    document.getElementById('weather-icon').textContent = getWeatherIcon(data.current.weather_code)
+    showResult('result-weather', `✅ Deal "${label}" aktiviert! Döner heute nur ${price}€!`, 'success')
     
-    // Aktualisierungszeit anzeigen
-    const now = new Date()
-    const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-    document.getElementById('weather-last-update').textContent = '✅ Zuletzt aktualisiert: ' + timeStr
-    
-    console.log('✅ Wetter aktualisiert:', temp + '°C, Regen:', rain + 'mm/h')
+    alert(`✅ WETTER-DEAL AKTIVIERT!\n\nDöner heute nur ${price}€ statt 6,00€\n(-${discount}% Rabatt)\n\nJetzt WhatsApp-Nachricht vorbereiten und an alle Kunden senden!`)
     
   } catch (e) {
-    console.error('❌ Wetter-Check Fehler:', e)
-    document.getElementById('weather-last-update').textContent = '❌ Fehler beim Aktualisieren'
+    showResult('result-weather', '❌ Fehler: ' + e.message, 'error')
   }
 }
 
-function getWeatherIcon(code) {
-  if (code === 0) return '☀️'
-  if (code <= 3) return '⛅'
-  if (code <= 49) return '🌫️'
-  if (code <= 69) return '🌧️'
-  if (code <= 79) return '🌨️'
-  if (code <= 99) return '⛈️'
-  return '☁️'
+function checkUpgradeOpportunity(newDeal) {
+  if (!newDeal || todayDeals.deals.length === 0) return
+  
+  const lastDeal = todayDeals.deals[todayDeals.deals.length - 1]
+  
+  const priceDiff = lastDeal.price - newDeal.price
+  const discountDiff = newDeal.discount - lastDeal.discount
+  
+  if (priceDiff >= UPGRADE_RULES.minPriceDiff && discountDiff >= UPGRADE_RULES.minDiscountDiff) {
+    if (todayDeals.updateCount < UPGRADE_RULES.maxUpdatesPerDay) {
+      const upgradeDiv = document.getElementById('weather-upgrade-notice')
+      if (upgradeDiv) {
+        upgradeDiv.style.display = 'block'
+        upgradeDiv.innerHTML = `
+          <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px; margin-top: 12px;">
+            <div style="font-weight: 700; color: #92400e; margin-bottom: 8px;">⚠️ UPGRADE VERFÜGBAR!</div>
+            <div style="font-size: 13px; color: #92400e; margin-bottom: 12px;">
+              Neuer besserer Deal verfügbar!<br>
+              Alt: ${lastDeal.price}€ (-${lastDeal.discount}%) → Neu: ${newDeal.price}€ (-${newDeal.discount}%)<br>
+              Verbesserung: ${priceDiff.toFixed(2)}€ / +${discountDiff}%
+            </div>
+            <button onclick="upgradeWeatherDeal(${newDeal.price}, ${newDeal.discount}, '${newDeal.label}', '${newDeal.emoji}', '${newDeal.type}')" 
+                    style="background: #f59e0b; color: white; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
+              🚀 DEAL UPGRADEN
+            </button>
+          </div>
+        `
+      }
+    }
+  }
 }
 
-function getWeatherCondition(code) {
-  if (code === 0) return 'Sonnig'
-  if (code <= 3) return 'Bewölkt'
-  if (code <= 49) return 'Nebel'
-  if (code <= 69) return 'Regen'
-  if (code <= 79) return 'Schnee'
-  if (code <= 99) return 'Gewitter'
-  return 'Wolkig'
-}
-
-// Auto-Check beim Laden der Seite
-if (typeof window !== 'undefined') {
-  window.addEventListener('load', () => {
-    console.log('🚀 Starte Wetter-Check...')
-    checkWeatherNow()
+async function upgradeWeatherDeal(price, discount, label, emoji, type) {
+  if (todayDeals.updateCount >= UPGRADE_RULES.maxUpdatesPerDay) {
+    alert('❌ Maximale Anzahl Updates für heute erreicht!')
+    return
+  }
+  
+  if (!confirm(`Deal upgraden zu "${label}"?\n\nNeuer Preis: ${price}€ (-${discount}%)\n\nWhatsApp-Nachricht wird an ${todayDeals.customerCount} Kunden gesendet!`)) {
+    return
+  }
+  
+  try {
+    await activateWeatherDeal(price, discount, label, emoji, type)
     
-    // Update alle 5 Minuten
-    setInterval(checkWeatherNow, 5 * 60 * 1000)
-  })
+    todayDeals.deals.push({ price, discount, label, emoji, type })
+    todayDeals.updateCount++
+    
+    document.getElementById('weather-upgrade-notice').style.display = 'none'
+    
+  } catch (e) {
+    alert('❌ Fehler beim Upgrade: ' + e.message)
+  }
 }
 
+  { name: 'Wasser 1l', price: 2.50 }
+]
+
+function showResult(elementId, message, type) {
+  const el = document.getElementById(elementId)
+  if (!el) return
+  
+  const colors = { 
+    success: { bg: '#dcfce7', border: '#22c55e', text: '#166534' },
+    error: { bg: '#fee2e2', border: '#ef4444', text: '#991b1b' },
+    info: { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af' }
+  }
+  
+  const style = colors[type] || colors.info
+  
+  el.innerHTML = `
+    <div style="background: ${style.bg}; border: 2px solid ${style.border}; border-radius: 8px; padding: 12px; margin-top: 12px; color: ${style.text}; font-size: 14px;">
+      ${message}
+    </div>
+  `
+  
+  if (type === 'success' || type === 'error') {
+    setTimeout(() => { el.innerHTML = '' }, 5000)
+  }
+}
+</script>
+</body>
+</html>
+
+const MENU_PRODUCTS = [
+  { name: 'Döner', price: 6.00 },
+  { name: 'Döner XL', price: 8.00 },
+  { name: 'Döner Box', price: 7.00 },
+  { name: 'Dürüm Döner', price: 7.00 },
+  { name: 'Döner Teller', price: 10.00 },
+  { name: 'Lahmacun', price: 4.00 },
+  { name: 'Lahmacun Spezial', price: 8.00 },
+  { name: 'Rindswurst im Brötchen', price: 3.50 },
+  { name: 'Curry Rindswurst mit Pommes', price: 6.90 },
+  { name: 'Köfte im Brot (5 Stk.)', price: 6.00 },
+  { name: 'Köfte Teller (7 Stk.)', price: 11.00 },
+  { name: 'Chicken Nuggets (6 Stk.)', price: 6.00 },
+  { name: 'Crispy Chicken Burger', price: 4.00 },
+  { name: 'Pommes', price: 3.50 },
+  { name: 'Ayran (0,25 l)', price: 1.50 },
+  { name: 'Wasser still (0,5 l)', price: 1.50 },
+  { name: 'Cola (0,33 l)', price: 2.00 },
+  { name: 'Fanta (0,33 l)', price: 2.00 },
+  { name: 'Cola Zero (0,33 l)', price: 2.00 }
+]
 </script>
 </body>
 </html>
