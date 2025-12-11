@@ -3080,19 +3080,20 @@ const products = [
     defaultSauce: 2, // 2x Knoblauch
     options: {
       fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      knoblauch: { label: 'Knoblauchsauce', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Scharfe Sauce', choices: [0, 1, 2], default: 0 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 },
       salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
       tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 }
     },
     extras: [
       { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
       { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+      { id: 'extraKnoblauch', name: 'Extra Knoblauchsauce', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Scharfe Sauce', price: 0.70 },
+      { id: 'extraScharfPulver', name: 'Scharf (Pulver)', price: 0.00 }
     ]
   },
   {
@@ -3104,19 +3105,20 @@ const products = [
     options: {
       fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
       kaese: { label: 'Käse', choices: [0, 1], default: 0 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      knoblauch: { label: 'Knoblauchsauce', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Scharfe Sauce', choices: [0, 1, 2], default: 0 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 },
       salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
       tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 }
     },
     extras: [
       { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
       { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+      { id: 'extraKnoblauch', name: 'Extra Knoblauchsauce', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Scharfe Sauce', price: 0.70 },
+      { id: 'extraScharfPulver', name: 'Scharf (Pulver)', price: 0.00 }
     ]
   },
   {
@@ -3128,14 +3130,15 @@ const products = [
     options: {
       fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
       pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 }
+      knoblauch: { label: 'Knoblauchsauce', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Scharfe Sauce', choices: [0, 1, 2], default: 0 }
     },
     extras: [
       { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
       { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+      { id: 'extraKnoblauch', name: 'Extra Knoblauchsauce', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Scharfe Sauce', price: 0.70 },
+      { id: 'extraScharfPulver', name: 'Scharf (Pulver)', price: 0.00 }
     ]
   },
   {
@@ -3146,19 +3149,20 @@ const products = [
     defaultSauce: 2,
     options: {
       fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      knoblauch: { label: 'Knoblauchsauce', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Scharfe Sauce', choices: [0, 1, 2], default: 0 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 },
       salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
       tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 }
     },
     extras: [
       { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
       { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+      { id: 'extraKnoblauch', name: 'Extra Knoblauchsauce', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Scharfe Sauce', price: 0.70 },
+      { id: 'extraScharfPulver', name: 'Scharf (Pulver)', price: 0.00 }
     ]
   },
   {
@@ -3168,18 +3172,19 @@ const products = [
     description: 'Türkische Pizza',
     defaultSauce: 2,
     options: {
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      knoblauch: { label: 'Knoblauchsauce', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Scharfe Sauce', choices: [0, 1, 2], default: 0 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 },
       salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
       tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 }
     },
     extras: [
       { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+      { id: 'extraKnoblauch', name: 'Extra Knoblauchsauce', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Scharfe Sauce', price: 0.70 },
+      { id: 'extraScharfPulver', name: 'Scharf (Pulver)', price: 0.00 }
     ]
   },
   {
@@ -3190,19 +3195,20 @@ const products = [
     defaultSauce: 2,
     options: {
       fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      knoblauch: { label: 'Knoblauchsauce', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Scharfe Sauce', choices: [0, 1, 2], default: 0 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 },
       salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
       tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 }
     },
     extras: [
       { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
       { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+      { id: 'extraKnoblauch', name: 'Extra Knoblauchsauce', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Scharfe Sauce', price: 0.70 },
+      { id: 'extraScharfPulver', name: 'Scharf (Pulver)', price: 0.00 }
     ]
   },
   {
@@ -3214,19 +3220,20 @@ const products = [
     options: {
       fleisch: { label: 'Dönerfleisch', choices: [0, 1], default: 1 },
       pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      knoblauch: { label: 'Knoblauchsauce', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Scharfe Sauce', choices: [0, 1, 2], default: 0 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 },
       salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
       tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 }
     },
     extras: [
       { id: 'extraFleisch', name: 'Extra Dönerfleisch (60g)', price: 2.00 },
       { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+      { id: 'extraKnoblauch', name: 'Extra Knoblauchsauce', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Scharfe Sauce', price: 0.70 },
+      { id: 'extraScharfPulver', name: 'Scharf (Pulver)', price: 0.00 }
     ]
   },
   {
@@ -3259,19 +3266,20 @@ const products = [
     defaultSauce: 2,
     options: {
       koefte: { label: 'Köfte', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      knoblauch: { label: 'Knoblauchsauce', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Scharfe Sauce', choices: [0, 1, 2], default: 0 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 },
       salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
       tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 }
     },
     extras: [
       { id: 'extraKoefte', name: 'Extra Köfte', price: 2.00 },
       { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+      { id: 'extraKnoblauch', name: 'Extra Knoblauchsauce', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Scharfe Sauce', price: 0.70 },
+      { id: 'extraScharfPulver', name: 'Scharf (Pulver)', price: 0.00 }
     ]
   },
   {
@@ -3283,19 +3291,20 @@ const products = [
     options: {
       koefte: { label: 'Köfte', choices: [0, 1], default: 1 },
       pommes: { label: 'Pommes', choices: [0, 1], default: 1 },
-      knoblauch: { label: 'Sauce Knoblauch', choices: [0, 1, 2], default: 2 },
-      scharf: { label: 'Sauce Scharf', choices: [0, 1, 2], default: 0 },
+      knoblauch: { label: 'Knoblauchsauce', choices: [0, 1, 2], default: 2 },
+      scharf: { label: 'Scharfe Sauce', choices: [0, 1, 2], default: 0 },
+      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
+      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 },
       salat: { label: 'Eisbergsalat', choices: [0, 1], default: 1 },
       tomate: { label: 'Tomate', choices: [0, 1], default: 1 },
-      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 },
-      weiss: { label: 'Weißkraut', choices: [0, 1], default: 1 },
-      rot: { label: 'Rotkraut', choices: [0, 1], default: 1 }
+      zwiebel: { label: 'Zwiebel', choices: [0, 1], default: 1 }
     },
     extras: [
       { id: 'extraKoefte', name: 'Extra Köfte', price: 2.00 },
       { id: 'extraKaese', name: 'Extra Käse', price: 1.00 },
-      { id: 'extraKnoblauch', name: 'Extra Sauce Knoblauch', price: 0.70 },
-      { id: 'extraScharf', name: 'Extra Sauce Scharf', price: 0.70 }
+      { id: 'extraKnoblauch', name: 'Extra Knoblauchsauce', price: 0.70 },
+      { id: 'extraScharf', name: 'Extra Scharfe Sauce', price: 0.70 },
+      { id: 'extraScharfPulver', name: 'Scharf (Pulver)', price: 0.00 }
     ]
   },
   {
