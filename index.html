@@ -2701,15 +2701,14 @@ async function activateWhatsApp() {
   const phone = currentCustomer.phone
   const name = currentCustomer.name
   
-  // WhatsApp Opt-In Text
-  const message = encodeURIComponent(
+  // WhatsApp Opt-In Text (NICHT encoden - Backend macht das!)
+  const message = 
     `Hallo Döner Boxx Team! 👋\n\n` +
     `Ich möchte exklusive Angebote, Happy Hour Alerts und Glücksrad-Erinnerungen per WhatsApp erhalten.\n\n` +
     `Name: ${name}\n` +
     `Telefon: ${phone}\n\n` +
     `Mit dieser Nachricht bestätige ich meine Einwilligung.\n\n` +
     `📱 Abmeldung jederzeit über dein Kundenkonto möglich`
-  )
   
   try {
     // ✅ SICHERHEIT: WhatsApp URL über Edge Function holen
