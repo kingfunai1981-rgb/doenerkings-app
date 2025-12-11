@@ -56,7 +56,7 @@ textarea { resize: vertical; min-height: 60px; }
 .info { background: #dbeafe; color: #1e40af; border: 2px solid #3b82f6; }
 .loading { text-align: center; padding: 40px; color: #6b7280; font-size: 16px; }
 .empty-state { text-align: center; padding: 40px; color: #6b7280; font-size: 15px; background: #f9fafb; border-radius: 12px; border: 2px dashed #e5e7eb; }
-.stat-btn { padding: 10px 16px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; margin-right: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; font-size: 14px; font-weight: 600; color: #374151; display: inline-block; }
+.stat-btn { padding: 10px 16px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; font-size: 14px; font-weight: 600; color: #374151; display: inline-block; flex: 1; min-width: 0; }
 .stat-btn:hover { border-color: #F9A825; background: #fef3c7; color: #92400e; }
 .stat-btn.active { background: linear-gradient(135deg, #E31E24, #F9A825); color: white; border-color: #E31E24; }
 </style>
@@ -436,11 +436,8 @@ textarea { resize: vertical; min-height: 60px; }
   </div>
 
   <!-- Statistik-Navigation -->
-  <div style="margin-bottom: 16px;">
-    <button class="stat-btn active" id="btn-coupon" onclick="loadCouponStats()">🎟️ Coupon ROI</button>
-    <button class="stat-btn" id="btn-rewards" onclick="loadRewardStats()">🏆 Prämien-Ranking</button>
-    <!-- ✅ FIX: Wetter-Deals ausgeblendet -->
-<button class="stat-btn" id="btn-weather" onclick="loadWeatherStats()" style="display: none;">🌧️ Wetter-Deals</button>
+  <div style="margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px;">
+    <button class="stat-btn active" id="btn-rewards" onclick="loadRewardStats()">🏆 Prämien-Ranking</button>
     <button class="stat-btn" id="btn-wheel" onclick="loadWheelStats()">🎡 Glücksrad</button>
     <button class="stat-btn" id="btn-challenges" onclick="loadChallengeStats()">⚡ Challenges</button>
     <button class="stat-btn" id="btn-segments" onclick="loadSegmentStats()">👥 Segmente</button>
@@ -750,7 +747,7 @@ function displayCustomers(customers) {
     const txCount = window.customerTxCounts?.[customer.id] || 0
     const created = new Date(customer.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
     const whatsappBadge = customer.whatsapp_optin ? '<span style="display: inline-block; background: #25D366; color: white; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; margin-left: 6px;">📱 WhatsApp</span>' : ''
-    customerList.innerHTML += `<div class="customer-item" data-customer-id="${customer.id}"><div class="customer-info"><h3>${customer.name}${whatsappBadge}</h3><p>📱 ${customer.phone}</p><p>📅 Registriert: ${created}</p><span class="qr-id">QR: ${customer.qr_id}</span></div><div class="customer-stats"><div class="customer-points"><span class="value">${customer.points}</span><span class="label">Punkte</span></div><div class="customer-txs"><span class="value">${txCount}</span><span class="label">Transaktionen</span></div></div><button class="danger" onclick="deleteSingleCustomer('${customer.id}', '${customer.name}')">🗑️ Löschen</button></div>`
+    customerList.innerHTML += `<div class="customer-item" data-customer-id="${customer.id}"><div class="customer-info"><h3>${customer.name}${whatsappBadge}</h3><p>📱 ${customer.phone}</p><p>📅 Registriert: ${created}</p><span class="qr-id">QR: ${customer.qr_id}</span></div><div class="customer-stats"><div class="customer-points"><span class="value">${customer.points}</span><span class="label">Punkte</span></div><div class="customer-txs"><span class="value">${txCount}</span><span class="label">Transaktionen</span></div></div><div style="display: flex; align-items: center;"><button class="danger" onclick="deleteSingleCustomer('${customer.id}', '${customer.name}')">🗑️ Löschen</button></div></div>`
   }
 }
 
@@ -1029,7 +1026,7 @@ window.addEventListener('DOMContentLoaded', function() {
 setTimeout(() => {
   console.log('📊 Initialisiere Stats...')
   setTimeRange('7days', true)
-  setTimeout(() => loadCouponStats(), 500)
+  setTimeout(() => loadRewardStats(), 500)
 }, 1000)
 })
 
@@ -1879,128 +1876,6 @@ function filterByTimeRange(data, dateField = 'created_at') {
   return filtered
 }
 
-async function loadCouponStats() {
-  const content = document.getElementById('stats-content')
-  content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Coupon-Statistiken...</div>'
-  document.querySelectorAll('.stat-btn[onclick^="load"]').forEach(btn => btn.classList.remove('active'))
-  document.getElementById('btn-coupon').classList.add('active')
-  
-  try {
-    const { data: coupons } = await supabase.from('coupons').select('*')
-    let { data: activations, error: activationsError } = await supabase
-      .from('activated_coupons')
-      .select('*, coupons(title, product, price)')
-    
-    if (activationsError) {
-      console.error('❌ Activations error:', activationsError)
-      throw activationsError
-    }
-    
-    console.log('📦 Alle Aktivierungen:', activations?.length)
-    const allCount = activations?.length || 0
-    activations = filterByTimeRange(activations, 'activated_at')
-    console.log('✅ Nach Filter:', activations?.length)
-    
-    const totalCoupons = coupons?.length || 0
-    const activeCoupons = coupons?.filter(c => c.is_active).length || 0
-    const totalActivations = activations?.length || 0
-    const usedActivations = activations?.filter(a => a.is_used).length || 0
-    
-    const couponMap = new Map()
-    activations?.forEach(a => {
-      const title = a.coupons?.title || 'Unbekannt'
-      if (!couponMap.has(title)) {
-        couponMap.set(title, { title, activated: 0, used: 0 })
-      }
-      const entry = couponMap.get(title)
-      entry.activated++
-      if (a.is_used) entry.used++
-    })
-    
-    const topCoupons = Array.from(couponMap.values())
-      .map(c => ({
-        ...c,
-        rate: c.activated > 0 ? Math.round((c.used / c.activated) * 100) : 0,
-        revenue: c.used * 6
-      }))
-      .sort((a, b) => b.activated - a.activated)
-      .slice(0, 5)
-    
-    const conversionRate = totalActivations > 0 ? Math.round((usedActivations / totalActivations) * 100) : 0
-    const revenue = usedActivations * 6
-    const avgIncrease = totalActivations > 0 ? (revenue / totalActivations).toFixed(2) : 0
-    
-    content.innerHTML = `
-      <h3 style="color: #111827; margin-bottom: 16px;">🎟️ Coupon ROI Analyse</h3>
-      
-      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
-        <strong style="color: #1e40af;">🔍 Zeitraum:</strong> ${currentTimeRange.label}<br>
-        <span style="color: #1e3a8a;">Gesamt: ${allCount} | Nach Filter: ${totalActivations}</span>
-      </div>
-      
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
-        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #E31E24;">${totalCoupons}</div>
-          <div style="font-size: 13px; color: #6b7280;">Total Coupons</div>
-        </div>
-        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #10b981;">${activeCoupons}</div>
-          <div style="font-size: 13px; color: #6b7280;">Aktive Coupons</div>
-        </div>
-        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${totalActivations}</div>
-          <div style="font-size: 13px; color: #6b7280;">Aktivierungen</div>
-        </div>
-        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${usedActivations}</div>
-          <div style="font-size: 13px; color: #6b7280;">Einlösungen</div>
-        </div>
-      </div>
-      
-      <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 16px;">
-        <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">💰 Performance</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
-          <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; text-align: center;">
-            <div style="font-size: 24px; font-weight: 700; color: #10b981;">${conversionRate}%</div>
-            <div style="font-size: 12px; color: #6b7280;">Conversion</div>
-          </div>
-          <div style="background: #dcfce7; padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #22c55e;">
-            <div style="font-size: 24px; font-weight: 700; color: #166534;">${revenue}€</div>
-            <div style="font-size: 12px; color: #166534;">Umsatz</div>
-          </div>
-          <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; text-align: center;">
-            <div style="font-size: 24px; font-weight: 700; color: #F9A825;">+${avgIncrease}€</div>
-            <div style="font-size: 12px; color: #6b7280;">Ø pro Kunde</div>
-          </div>
-        </div>
-      </div>
-      
-      ${topCoupons.length > 0 ? `
-        <div style="background: white; padding: 20px; border-radius: 10px;">
-          <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">🏆 Top Coupons</div>
-          ${topCoupons.map((c, i) => `
-            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ${i === 0 ? '#F9A825' : '#e5e7eb'};">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                  <div style="font-size: 14px; font-weight: 700; color: #111827;">${i + 1}. ${c.title}</div>
-                  <div style="font-size: 12px; color: #6b7280;">Aktiviert: ${c.activated}x | Eingelöst: ${c.used}x</div>
-                </div>
-                <div style="text-align: right;">
-                  <div style="font-size: 18px; font-weight: 700; color: ${c.rate >= 75 ? '#22c55e' : c.rate >= 50 ? '#f59e0b' : '#6b7280'};">${c.rate}%</div>
-                  <div style="font-size: 11px; color: #6b7280;">${c.revenue}€</div>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      ` : '<div style="text-align: center; padding: 20px; color: #6b7280;">Noch keine Coupon-Daten im gewählten Zeitraum</div>'}
-    `
-  } catch (e) {
-    console.error('❌ Fehler:', e)
-    content.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Fehler: ${e.message}</div>`
-  }
-}
-
 async function loadRewardStats() {
   const content = document.getElementById('stats-content')
   content.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">⏳ Lade Prämien-Statistiken...</div>'
@@ -2438,23 +2313,6 @@ async function loadTrendStats() {
           </div>
         `).join('')}
       </div>
-      
-      ${rushHours.length > 0 ? `
-        <div style="margin-bottom: 20px;">
-          <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">🕐 Rush-Hours:</div>
-          ${rushHours.map(r => `
-            <div style="background: white; padding: 14px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ${r.color};">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="font-size: 14px; font-weight: 600; color: #111827;">${r.time}</div>
-                <div>
-                  <span style="font-size: 18px; font-weight: 700; color: ${r.color};">${r.count}</span>
-                  <span style="font-size: 14px; color: #6b7280; margin-left: 8px;">(${r.percent}%)</span>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      ` : ''}
     `
   } catch (e) {
     console.error('❌ Fehler:', e)
@@ -2507,26 +2365,6 @@ async function loadWheelStats() {
     content.innerHTML = `
       <h3 style="color: #111827; margin-bottom: 16px;">🎡 Glücksrad Performance</h3>
       
-      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
-        <strong style="color: #1e40af;">🔍 Debug-Info:</strong><br>
-        <span style="color: #1e3a8a;">Gesamt Spins in DB: ${allCount} | Nach Zeitfilter: ${totalSpins}</span>
-      </div>
-      
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 20px;">
-        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #F9A825;">${totalSpins}</div>
-          <div style="font-size: 13px; color: #6b7280;">Gesamt Spins</div>
-        </div>
-        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${spinsThisWeek}</div>
-          <div style="font-size: 13px; color: #6b7280;">Diese Woche</div>
-        </div>
-        <div style="background: white; padding: 16px; border-radius: 10px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #10b981;">${totalUnlocks}</div>
-          <div style="font-size: 13px; color: #6b7280;">Freischaltungen</div>
-        </div>
-      </div>
-      
       ${prizes.length > 0 ? `
         <div style="background: white; padding: 20px; border-radius: 10px;">
           <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px;">🎁 Gewinn-Verteilung</div>
@@ -2555,7 +2393,7 @@ window.addEventListener('DOMContentLoaded', function() {
   setTimeRange('7days', true)
   setTimeout(() => {
     console.log('📊 Lade erste Statistik...')
-    loadCouponStats()
+    loadRewardStats()
       // 🛒 Bestellungen laden
   }, 300)
 })
