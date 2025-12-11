@@ -724,17 +724,18 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 // 🤖 Telegram Bot Konfiguration
-const TELEGRAM_BOT_TOKEN = '8216843337:AAGEHoVsQPW6f3zYw5jFhK61GPKIbgfnKZI'
-const TELEGRAM_CHAT_ID = '8253938141'
+// ⚠️ TOKENS WURDEN ENTFERNT - Jetzt sicher im Backend!
+// Die Benachrichtigung erfolgt über Supabase Edge Function
 
 // Request Throttling - verhindert zu viele parallele Supabase Requests
 let requestQueue = []
 let activeRequests = 0
 const MAX_CONCURRENT_REQUESTS = 3
 
-// 🤖 Telegram Benachrichtigungen
 async function sendTelegramUpdate(orderNumber, customerName, status, message) {
   try {
+    // ✅ SICHER: Rufe Supabase Edge Function auf
+    // Token ist NICHT mehr im Frontend!
     const statusEmojis = {
       'pending': '🆕',
       'paid': '💰',
@@ -745,24 +746,31 @@ async function sendTelegramUpdate(orderNumber, customerName, status, message) {
     
     const emoji = statusEmojis[status] || '📋'
     
-    const text = `${emoji} *BESTELLUNG #${orderNumber}*
-
-👤 ${customerName}
-📊 Status: ${message}
-
-⏰ ${new Date().toLocaleTimeString('de-DE')}`
-
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: text,
-        parse_mode: 'Markdown'
-      })
+    const { data, error } = await supabase.functions.invoke('send-telegram-notification', {
+      body: {
+        orderNumber,
+        customerName,
+        customerPhone: '',  // Scanner hat keine Phone-Info
+        total: 0,  // Scanner hat keinen Betrag
+        paymentMethod: 'status_update',
+        items: [],
+        pickupTime: null,
+        pickupType: 'now',
+        notes: `Status: ${message}`,
+        // Spezielle Flags für Status-Update
+        isStatusUpdate: true,
+        status: status,
+        statusMessage: message,
+        statusEmoji: emoji
+      }
     })
     
-    console.log('✅ Telegram Update gesendet:', status)
+    if (error) {
+      console.error('❌ Telegram Benachrichtigung fehlgeschlagen:', error)
+    } else {
+      console.log('✅ Telegram Status-Update gesendet!', data)
+    }
+    
   } catch (error) {
     console.error('❌ Telegram Fehler:', error)
   }
