@@ -243,6 +243,188 @@ textarea { resize: vertical; min-height: 60px; }
 
     <div id="result-winback"></div>
   </div>
+  <!-- 🎯 GEZIELTE MARKETING-AKTIONEN -->
+  <div class="card" style="border: 3px solid #10b981;">
+    <h2>🎯 Gezielte Marketing-Aktionen</h2>
+    <p class="subtitle">Sende spezielle Angebote an ausgewählte Kundengruppen (nur sie sehen es!)</p>
+    
+    <!-- Info-Box -->
+    <div style="background: #d1fae5; border: 2px solid #10b981; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #065f46; margin-bottom: 8px;">💡 Wie funktioniert es?</h3>
+      <div style="font-size: 14px; color: #065f46;">
+        <strong>1.</strong> Wähle deine Zielgruppe (z.B. "15+ Tage inaktiv")<br>
+        <strong>2.</strong> Erstelle ein Angebot (z.B. "Döner 3€")<br>
+        <strong>3.</strong> Sende WhatsApp-Nachricht<br>
+        <strong>4.</strong> <strong>NUR diese Kunden</strong> sehen das Angebot in der App! 🔒
+      </div>
+    </div>
+
+    <!-- Schritt 1: Kundengruppe wählen -->
+    <div style="background: #f3f4f6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #111827; margin-bottom: 12px;">1️⃣ Zielgruppe auswählen</h3>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px;">
+        <!-- Inaktivitäts-Filter -->
+        <div>
+          <label class="form-label">⏰ Inaktivität</label>
+          <select id="target-inactive-days">
+            <option value="0">Alle (keine Filterung)</option>
+            <option value="7">7+ Tage inaktiv</option>
+            <option value="14">14+ Tage inaktiv</option>
+            <option value="21">21+ Tage inaktiv</option>
+            <option value="30">30+ Tage inaktiv</option>
+            <option value="60">60+ Tage inaktiv</option>
+          </select>
+        </div>
+        
+        <!-- Punkte-Filter -->
+        <div>
+          <label class="form-label">💰 Punktestand</label>
+          <select id="target-points">
+            <option value="all">Alle</option>
+            <option value="0-100">0-100 Punkte</option>
+            <option value="100-500">100-500 Punkte</option>
+            <option value="500-1000">500-1000 Punkte</option>
+            <option value="1000+">1000+ Punkte</option>
+          </select>
+        </div>
+        
+        <!-- Bestellungen-Filter -->
+        <div>
+          <label class="form-label">🛒 Bestellungen</label>
+          <select id="target-orders">
+            <option value="all">Alle</option>
+            <option value="1-5">1-5 Bestellungen</option>
+            <option value="6-10">6-10 Bestellungen</option>
+            <option value="11-20">11-20 Bestellungen</option>
+            <option value="20+">20+ Bestellungen (VIP)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" id="target-whatsapp-only" checked style="width: auto; margin: 0;">
+          <span style="font-size: 14px; color: #92400e; font-weight: 600;">📱 Nur WhatsApp-aktivierte Kunden</span>
+        </label>
+      </div>
+      
+      <button class="success" onclick="previewTargetGroup()" style="margin-top: 8px;">
+        🔍 Vorschau zeigen
+      </button>
+    </div>
+
+    <!-- Schritt 2: Preview der Kundengruppe -->
+    <div id="target-preview" style="display: none; background: #f9fafb; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #111827; margin-bottom: 12px;">2️⃣ Deine Zielgruppe</h3>
+      
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
+          <div style="font-size: 32px; font-weight: 700; color: #10b981;" id="target-count">0</div>
+          <div style="font-size: 13px; color: #6b7280;">Berechtigte Kunden</div>
+        </div>
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
+          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;" id="target-avg-points">0</div>
+          <div style="font-size: 13px; color: #6b7280;">Ø Punkte</div>
+        </div>
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
+          <div style="font-size: 32px; font-weight: 700; color: #f59e0b;" id="target-avg-orders">0</div>
+          <div style="font-size: 13px; color: #6b7280;">Ø Bestellungen</div>
+        </div>
+      </div>
+      
+      <div id="target-customer-list" style="max-height: 200px; overflow-y: auto; background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+        <!-- Wird dynamisch gefüllt -->
+      </div>
+      
+      <button class="success" onclick="showActionCreator()">
+        ➡️ Weiter zur Aktion
+      </button>
+    </div>
+
+    <!-- Schritt 3: Aktion erstellen -->
+    <div id="action-creator" style="display: none; background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #92400e; margin-bottom: 12px;">3️⃣ Aktion erstellen</h3>
+      
+      <label class="form-label">🎁 Aktionstyp</label>
+      <select id="action-type" onchange="toggleActionFields()">
+        <option value="private_coupon">🎟️ Privater Coupon (nur diese Gruppe sieht ihn!)</option>
+        <option value="bonus_points">💰 Bonus-Punkte</option>
+        <option value="double_points">⭐ Doppelte Punkte</option>
+      </select>
+      
+      <!-- Coupon-Felder -->
+      <div id="action-coupon-fields">
+        <div class="form-grid" style="margin-top: 12px;">
+          <div>
+            <label class="form-label">🍴 Produkt</label>
+            <select id="action-product" onchange="onActionProductSelect()">
+              <option value="">-- Bitte wählen --</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">💰 Preis</label>
+            <input type="text" id="action-price" placeholder="z.B. 3,00 €">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Bonus-Punkte Felder -->
+      <div id="action-bonus-fields" style="display: none;">
+        <label class="form-label" style="margin-top: 12px;">💵 Bonus-Punkte</label>
+        <input type="number" id="action-bonus-amount" placeholder="z.B. 100" value="100">
+      </div>
+      
+      <!-- Gültigkeit -->
+      <div class="form-grid" style="margin-top: 12px;">
+        <div>
+          <label class="form-label">📅 Gültig ab</label>
+          <input type="date" id="action-start">
+        </div>
+        <div>
+          <label class="form-label">📅 Gültig bis</label>
+          <input type="date" id="action-end">
+        </div>
+      </div>
+      
+      <button class="success" onclick="createTargetedAction()" style="margin-top: 12px;">
+        🚀 Aktion erstellen & WhatsApp vorbereiten
+      </button>
+    </div>
+
+    <!-- Schritt 4: WhatsApp-Export -->
+    <div id="action-whatsapp" style="display: none; background: #d1fae5; border: 2px solid #10b981; border-radius: 10px; padding: 16px;">
+      <h3 style="color: #065f46; margin-bottom: 12px;">4️⃣ WhatsApp-Versand</h3>
+      
+      <div style="margin-bottom: 16px;">
+        <label class="form-label" style="color: #065f46;">1️⃣ Nummern kopieren:</label>
+        <textarea id="action-numbers" readonly style="background: white; min-height: 100px; font-family: monospace; font-size: 13px;"></textarea>
+        <button onclick="copyActionNumbers()" style="background: #10b981; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 8px;">
+          📋 Nummern kopieren
+        </button>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <label class="form-label" style="color: #065f46;">2️⃣ Nachricht kopieren:</label>
+        <textarea id="action-message" readonly style="background: white; min-height: 160px;"></textarea>
+        <button onclick="copyActionMessage()" style="background: #10b981; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 8px;">
+          📋 Nachricht kopieren
+        </button>
+      </div>
+      
+      <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 12px;">
+        <p style="color: #92400e; font-size: 14px; margin-bottom: 8px;">
+          ✅ Angebot wurde erstellt und ist <strong>NUR für diese Kundengruppe sichtbar!</strong>
+        </p>
+        <p style="color: #92400e; font-size: 13px;">
+          Die Kunden können das Angebot jetzt in ihrer App sehen und aktivieren.
+        </p>
+      </div>
+    </div>
+
+    <div id="result-targeted-action"></div>
+  </div>
+
   <div class="card">
     <h2>🎯 Challenge-Bonus</h2>
     <p class="subtitle">Erstelle zeitlich begrenzte Herausforderungen mit Mindestbestellwert</p>
@@ -2723,6 +2905,388 @@ function renderOrdersList() {
   }).join('')
 }
 
+
+// ═══════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════
+// 🎯 GEZIELTE MARKETING-AKTIONEN
+// ═══════════════════════════════════════════════════════════════
+
+let targetedCustomers = []
+let currentAction = null
+
+async function previewTargetGroup() {
+  try {
+    showResult('result-targeted-action', '⏳ Analysiere Kunden...', 'info')
+    
+    const inactiveDays = parseInt(document.getElementById('target-inactive-days').value)
+    const pointsRange = document.getElementById('target-points').value
+    const ordersRange = document.getElementById('target-orders').value
+    const whatsappOnly = document.getElementById('target-whatsapp-only').checked
+    
+    // Hole alle Kunden
+    let query = supabase.from('customers').select('*')
+    if (whatsappOnly) {
+      query = query.eq('whatsapp_optin', true)
+    }
+    
+    const { data: allCustomers, error } = await query
+    if (error) throw error
+    
+    if (!allCustomers || allCustomers.length === 0) {
+      showResult('result-targeted-action', '❌ Keine Kunden gefunden!', 'error')
+      return
+    }
+    
+    // Filter 1: Inaktivität
+    let filtered = []
+    
+    if (inactiveDays > 0) {
+      const cutoffDate = new Date()
+      cutoffDate.setDate(cutoffDate.getDate() - inactiveDays)
+      
+      for (const customer of allCustomers) {
+        const { data: lastTx } = await supabase
+          .from('transactions')
+          .select('created_at')
+          .eq('customer_id', customer.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+        
+        let isInactive = false
+        if (!lastTx || lastTx.length === 0) {
+          isInactive = true
+        } else {
+          const lastDate = new Date(lastTx[0].created_at)
+          if (lastDate < cutoffDate) {
+            isInactive = true
+          }
+        }
+        
+        if (isInactive) {
+          filtered.push(customer)
+        }
+      }
+    } else {
+      filtered = [...allCustomers]
+    }
+    
+    // Filter 2: Punkte
+    if (pointsRange !== 'all') {
+      const [min, max] = pointsRange.includes('+') 
+        ? [parseInt(pointsRange), 999999]
+        : pointsRange.split('-').map(n => parseInt(n))
+      
+      filtered = filtered.filter(c => c.points >= min && c.points <= max)
+    }
+    
+    // Filter 3: Bestellungen
+    if (ordersRange !== 'all') {
+      const customerOrderCounts = new Map()
+      
+      for (const customer of filtered) {
+        const { count } = await supabase
+          .from('transactions')
+          .select('*', { count: 'exact', head: true })
+          .eq('customer_id', customer.id)
+          .gt('amount', 0)
+        
+        customerOrderCounts.set(customer.id, count || 0)
+      }
+      
+      const [min, max] = ordersRange.includes('+')
+        ? [parseInt(ordersRange), 999999]
+        : ordersRange.split('-').map(n => parseInt(n))
+      
+      filtered = filtered.filter(c => {
+        const count = customerOrderCounts.get(c.id) || 0
+        return count >= min && count <= max
+      })
+    }
+    
+    if (filtered.length === 0) {
+      showResult('result-targeted-action', 'ℹ️ Keine Kunden entsprechen diesen Kriterien', 'info')
+      document.getElementById('target-preview').style.display = 'none'
+      return
+    }
+    
+    // Speichere gefilterte Kunden
+    targetedCustomers = filtered
+    
+    // Berechne Stats
+    const avgPoints = Math.round(filtered.reduce((sum, c) => sum + c.points, 0) / filtered.length)
+    
+    let totalOrders = 0
+    for (const customer of filtered) {
+      const { count } = await supabase
+        .from('transactions')
+        .select('*', { count: 'exact', head: true })
+        .eq('customer_id', customer.id)
+        .gt('amount', 0)
+      totalOrders += (count || 0)
+    }
+    const avgOrders = Math.round(totalOrders / filtered.length)
+    
+    // Update UI
+    document.getElementById('target-count').textContent = filtered.length
+    document.getElementById('target-avg-points').textContent = avgPoints
+    document.getElementById('target-avg-orders').textContent = avgOrders
+    
+    // Zeige Kundenliste
+    const listDiv = document.getElementById('target-customer-list')
+    listDiv.innerHTML = filtered.slice(0, 20).map(c => `
+      <div style="padding: 8px; margin-bottom: 6px; background: #f9fafb; border-radius: 6px; border-left: 3px solid #10b981;">
+        <div style="font-weight: 600; color: #111827;">${c.name}</div>
+        <div style="font-size: 13px; color: #6b7280;">${c.phone} • ${c.points}P</div>
+      </div>
+    `).join('') + (filtered.length > 20 ? `<div style="text-align: center; padding: 8px; color: #6b7280; font-size: 13px;">... und ${filtered.length - 20} weitere</div>` : '')
+    
+    document.getElementById('target-preview').style.display = 'block'
+    showResult('result-targeted-action', `✅ ${filtered.length} Kunden gefunden!`, 'success')
+    
+  } catch (e) {
+    showResult('result-targeted-action', '❌ Fehler: ' + e.message, 'error')
+    console.error('Preview error:', e)
+  }
+}
+
+function showActionCreator() {
+  document.getElementById('action-creator').style.display = 'block'
+  
+  // Setze Datum auf heute
+  const today = new Date().toISOString().split('T')[0]
+  document.getElementById('action-start').value = today
+  document.getElementById('action-end').value = today
+  
+  // Fülle Produkt-Dropdown
+  const productSelect = document.getElementById('action-product')
+  productSelect.innerHTML = '<option value="">-- Bitte wählen --</option>'
+  MENU_PRODUCTS.forEach(product => {
+    const option = document.createElement('option')
+    option.value = product.name
+    option.textContent = `${product.name} (${product.price.toFixed(2)}€)`
+    productSelect.appendChild(option)
+  })
+}
+
+function toggleActionFields() {
+  const type = document.getElementById('action-type').value
+  document.getElementById('action-coupon-fields').style.display = type === 'private_coupon' ? 'block' : 'none'
+  document.getElementById('action-bonus-fields').style.display = type === 'bonus_points' ? 'block' : 'none'
+}
+
+function onActionProductSelect() {
+  const select = document.getElementById('action-product')
+  const priceInput = document.getElementById('action-price')
+  
+  const selectedProduct = MENU_PRODUCTS.find(p => p.name === select.value)
+  
+  if (selectedProduct) {
+    priceInput.value = selectedProduct.price.toFixed(2) + ' €'
+    priceInput.placeholder = 'Original: ' + selectedProduct.price.toFixed(2) + ' €'
+  } else {
+    priceInput.value = ''
+    priceInput.placeholder = 'z.B. 3,00 €'
+  }
+}
+
+async function createTargetedAction() {
+  try {
+    const actionType = document.getElementById('action-type').value
+    const startDate = document.getElementById('action-start').value
+    const endDate = document.getElementById('action-end').value
+    
+    if (!startDate || !endDate) {
+      showResult('result-targeted-action', '❌ Bitte Start- und End-Datum wählen!', 'error')
+      return
+    }
+    
+    if (targetedCustomers.length === 0) {
+      showResult('result-targeted-action', '❌ Keine Zielgruppe ausgewählt!', 'error')
+      return
+    }
+    
+    showResult('result-targeted-action', '⏳ Erstelle Aktion...', 'info')
+    
+    if (actionType === 'private_coupon') {
+      // Private Coupon erstellen
+      const product = document.getElementById('action-product').value.trim()
+      const price = document.getElementById('action-price').value.trim()
+      
+      if (!product || !price) {
+        showResult('result-targeted-action', '❌ Bitte Produkt und Preis ausfüllen!', 'error')
+        return
+      }
+      
+      // Erstelle Coupon in DB
+      const couponCode = Math.floor(1000 + Math.random() * 9000).toString()
+      
+      const { data: coupon, error: couponError } = await supabase
+        .from('coupons')
+        .insert({
+          code: couponCode,
+          title: '🎯 Gezielte Aktion',
+          product: product,
+          price: price,
+          description: `Nur für ausgewählte Kunden (${targetedCustomers.length})`,
+          start_date: startDate,
+          end_date: endDate,
+          expires_at: endDate,
+          is_active: true,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+      
+      if (couponError) throw couponError
+      
+      // Aktiviere Coupon für alle Zielkunden
+      const activations = targetedCustomers.map(c => ({
+        coupon_id: coupon.id,
+        customer_id: c.id,
+        unique_code: Math.random().toString(36).substring(2, 10).toUpperCase(),
+        is_used: false,
+        activated_at: new Date().toISOString()
+      }))
+      
+      const { error: activationError } = await supabase
+        .from('activated_coupons')
+        .insert(activations)
+      
+      if (activationError) throw activationError
+      
+      // Bereite WhatsApp vor
+      const numbers = targetedCustomers.map(c => c.phone).join('\n')
+      document.getElementById('action-numbers').value = numbers
+      
+      const message = `🎁 SPECIAL NUR FÜR DICH!
+
+Wir vermissen dich! 😊
+
+🔥 EXKLUSIVES ANGEBOT:
+${product} für nur ${price}!
+
+⚠️ Nur für DICH freigeschaltet!
+📱 Öffne die App & aktiviere dein Angebot!
+
+📍 Döner Boxx
+⏰ Gültig bis: ${new Date(endDate).toLocaleDateString('de-DE')}`
+      
+      document.getElementById('action-message').value = message
+      
+      currentAction = {
+        type: 'private_coupon',
+        coupon: coupon,
+        customers: targetedCustomers
+      }
+      
+      document.getElementById('action-whatsapp').style.display = 'block'
+      showResult('result-targeted-action', `✅ Privater Coupon erstellt! ${targetedCustomers.length} Kunden können ihn jetzt in der App sehen.`, 'success')
+      
+    } else if (actionType === 'bonus_points') {
+      // Bonus-Punkte erstellen
+      const bonusAmount = parseInt(document.getElementById('action-bonus-amount').value)
+      
+      if (!bonusAmount || bonusAmount <= 0) {
+        showResult('result-targeted-action', '❌ Bitte gültige Bonus-Punkte eingeben!', 'error')
+        return
+      }
+      
+      // Erstelle Global Bonus (aber markiere als targeted)
+      const { error } = await supabase
+        .from('global_bonuses')
+        .insert({
+          bonus_type: 'bonus_points',
+          bonus_amount: bonusAmount,
+          start_date: startDate,
+          end_date: endDate,
+          expires_at: endDate,
+          title: `🎯 Bonus für ${targetedCustomers.length} Kunden`,
+          description: 'Gezielte Aktion',
+          is_active: true,
+          created_at: new Date().toISOString()
+        })
+      
+      if (error) throw error
+      
+      // Bereite WhatsApp vor
+      const numbers = targetedCustomers.map(c => c.phone).join('\n')
+      document.getElementById('action-numbers').value = numbers
+      
+      const message = `🎁 BONUS NUR FÜR DICH!
+
+Hey! Wir haben was Besonderes für dich! 🎉
+
+💰 +${bonusAmount} BONUS-PUNKTE
+auf deine nächste Bestellung!
+
+⚠️ Nur heute gültig!
+
+📍 Döner Boxx`
+      
+      document.getElementById('action-message').value = message
+      
+      document.getElementById('action-whatsapp').style.display = 'block'
+      showResult('result-targeted-action', `✅ Bonus-Aktion erstellt für ${targetedCustomers.length} Kunden!`, 'success')
+      
+    } else if (actionType === 'double_points') {
+      // Doppelte Punkte
+      const { error } = await supabase
+        .from('global_bonuses')
+        .insert({
+          bonus_type: 'double_points',
+          bonus_amount: 0,
+          start_date: startDate,
+          end_date: endDate,
+          expires_at: endDate,
+          title: `⭐ Doppelte Punkte für ${targetedCustomers.length} Kunden`,
+          description: 'Gezielte Aktion',
+          is_active: true,
+          created_at: new Date().toISOString()
+        })
+      
+      if (error) throw error
+      
+      // Bereite WhatsApp vor
+      const numbers = targetedCustomers.map(c => c.phone).join('\n')
+      document.getElementById('action-numbers').value = numbers
+      
+      const message = `⭐ DOPPELTE PUNKTE NUR FÜR DICH!
+
+Hey! Heute ist dein Tag! 🎉
+
+⭐ DOPPELTE PUNKTE
+auf deine nächste Bestellung!
+
+⚠️ Nur heute gültig!
+
+📍 Döner Boxx`
+      
+      document.getElementById('action-message').value = message
+      
+      document.getElementById('action-whatsapp').style.display = 'block'
+      showResult('result-targeted-action', `✅ Doppelte-Punkte-Aktion erstellt für ${targetedCustomers.length} Kunden!`, 'success')
+    }
+    
+  } catch (e) {
+    showResult('result-targeted-action', '❌ Fehler: ' + e.message, 'error')
+    console.error('Create action error:', e)
+  }
+}
+
+function copyActionNumbers() {
+  const textarea = document.getElementById('action-numbers')
+  textarea.select()
+  document.execCommand('copy')
+  showResult('result-targeted-action', '✅ Nummern kopiert!', 'success')
+}
+
+function copyActionMessage() {
+  const textarea = document.getElementById('action-message')
+  textarea.select()
+  document.execCommand('copy')
+  showResult('result-targeted-action', '✅ Nachricht kopiert!', 'success')
+}
 
 // ═══════════════════════════════════════════════════════════════
 
