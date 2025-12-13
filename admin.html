@@ -192,56 +192,19 @@ textarea { resize: vertical; min-height: 60px; }
         </label>
       </div>
       
-      <button class="success" onclick="previewTargetGroup()" style="margin-top: 8px;">
-        🔍 Vorschau zeigen
-      </button>
-    </div>
-
-    <!-- Schritt 2: Preview der Kundengruppe -->
-    <div id="target-preview" style="display: none; background: #f9fafb; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-      <h3 style="color: #111827; margin-bottom: 12px;">2️⃣ Deine Zielgruppe</h3>
-      
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
-        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
-          <div style="font-size: 32px; font-weight: 700; color: #10b981;" id="target-count">0</div>
-          <div style="font-size: 13px; color: #6b7280;">Berechtigte Kunden</div>
-        </div>
-        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
-          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;" id="target-avg-points">0</div>
-          <div style="font-size: 13px; color: #6b7280;">Ø Punkte</div>
-        </div>
-        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
-          <div style="font-size: 32px; font-weight: 700; color: #f59e0b;" id="target-avg-orders">0</div>
-          <div style="font-size: 13px; color: #6b7280;">Ø Bestellungen</div>
-        </div>
-      </div>
-      
-      <div id="target-customer-list" style="max-height: 200px; overflow-y: auto; background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-        <!-- Wird dynamisch gefüllt -->
-      </div>
-      
-      <!-- WhatsApp Export Buttons -->
-      <div style="background: #dcfce7; border: 2px solid #25D366; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-        <h4 style="color: #166534; margin-bottom: 8px; font-size: 14px;">📱 WhatsApp Export</h4>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <button onclick="copyTargetPhoneNumbers()" style="padding: 10px; background: #25D366; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
-            📋 Nummern kopieren
-          </button>
-          <button onclick="downloadTargetPhoneCSV()" style="padding: 10px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
-            📥 CSV exportieren
-          </button>
-        </div>
-        <div id="export-result" style="margin-top: 8px; font-size: 13px; color: #166534;"></div>
-      </div>
-      
-      <button class="success" onclick="showActionCreator()">
+      <button class="success" onclick="createActionDirectly()" style="margin-top: 8px;">
         ➡️ Weiter zur Aktion
       </button>
     </div>
 
-    <!-- Schritt 3: Aktion erstellen -->
+    <!-- Schritt 2: Preview der Kundengruppe (AUSGEBLENDET - auf Nutzer-Anfrage) -->
+    <div id="target-preview" style="display: none !important;">
+      <!-- Section komplett ausgeblendet -->
+    </div>
+
+    <!-- Schritt 2: Aktion erstellen (früher Schritt 3) -->
     <div id="action-creator" style="display: none; background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-      <h3 style="color: #92400e; margin-bottom: 12px;">3️⃣ Aktion erstellen</h3>
+      <h3 style="color: #92400e; margin-bottom: 12px;">2️⃣ Aktion erstellen</h3>
       
       <label class="form-label">🎁 Aktionstyp</label>
       <select id="action-type" onchange="toggleActionFields()">
@@ -284,14 +247,29 @@ textarea { resize: vertical; min-height: 60px; }
         </div>
       </div>
       
+      <!-- WhatsApp Export Buttons -->
+      <div style="background: #dcfce7; border: 2px solid #25D366; border-radius: 8px; padding: 12px; margin-bottom: 12px; margin-top: 12px;">
+        <h4 style="color: #166534; margin-bottom: 8px; font-size: 14px;">📱 WhatsApp Export (Zielgruppe)</h4>
+        <p style="font-size: 13px; color: #166534; margin-bottom: 8px;">Exportiere Telefonnummern deiner Zielgruppe:</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button onclick="copyTargetPhoneNumbers()" style="padding: 10px; background: #25D366; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
+            📋 Nummern kopieren
+          </button>
+          <button onclick="downloadTargetPhoneCSV()" style="padding: 10px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
+            📥 CSV exportieren
+          </button>
+        </div>
+        <div id="export-result" style="margin-top: 8px; font-size: 13px; color: #166534;"></div>
+      </div>
+      
       <button class="success" onclick="createTargetedAction()" style="margin-top: 12px;">
         🚀 Aktion erstellen & WhatsApp vorbereiten
       </button>
     </div>
 
-    <!-- Schritt 4: WhatsApp-Export -->
+    <!-- Schritt 3: WhatsApp-Export (früher Schritt 4) -->
     <div id="action-whatsapp" style="display: none; background: #d1fae5; border: 2px solid #10b981; border-radius: 10px; padding: 16px;">
-      <h3 style="color: #065f46; margin-bottom: 12px;">4️⃣ WhatsApp-Versand</h3>
+      <h3 style="color: #065f46; margin-bottom: 12px;">3️⃣ WhatsApp-Versand</h3>
       
       <div style="margin-bottom: 16px;">
         <label class="form-label" style="color: #065f46;">📋 Nummern kopieren:</label>
@@ -736,13 +714,10 @@ async function loadAllCustomers() {
     document.getElementById('totalTransactions').textContent = txCount || 0
     document.getElementById('totalCodes').textContent = codeCount || 0
     
-    // WhatsApp Stats
+    // WhatsApp Stats (nur für Dashboard-Stat, nicht für entfernte Card)
     const whatsappOptins = customers.filter(c => c.whatsapp_optin === true).length
     document.getElementById('whatsappOptins').textContent = whatsappOptins
-    document.getElementById('wa-total-optins').textContent = whatsappOptins
-    document.getElementById('wa-total-customers').textContent = customers?.length || 0
-    const optinRate = customers.length > 0 ? Math.round((whatsappOptins / customers.length) * 100) : 0
-    document.getElementById('wa-optin-rate').textContent = optinRate + '%'
+    // wa-total-optins, wa-total-customers, wa-optin-rate entfernt (WhatsApp Card wurde entfernt)
     if (!customers || customers.length === 0) { container.innerHTML = '<div class="empty-state">📭 Noch keine Kunden vorhanden</div>'; document.getElementById('warningBox').style.display = 'none'; document.getElementById('searchResultCount').textContent = ''; return }
     window.allCustomers = customers
     const customerTxCounts = {}
@@ -1457,9 +1432,17 @@ async function loadWeatherSettings() {
 // WhatsApp-Export-Funktionen
 // ═══════════════════════════════════════════════════════════════
 async function exportWhatsAppNumbers() {
+  // ⚠️ Diese Funktion ist veraltet (WhatsApp Card wurde entfernt)
+  // Sie bleibt nur zur Kompatibilität erhalten
   const resultDiv = document.getElementById('result-wa-export')
   const listDiv = document.getElementById('wa-numbers-list')
   const textarea = document.getElementById('wa-numbers-textarea')
+  
+  // Null-Checks für entfernte Elemente
+  if (!resultDiv || !listDiv || !textarea) {
+    console.warn('WhatsApp export: Elemente nicht gefunden (WhatsApp Card wurde entfernt)')
+    return
+  }
   
   try {
     resultDiv.innerHTML = '<div class="result info">⏳ Lade WhatsApp-Nummern...</div>'
@@ -1486,21 +1469,33 @@ async function exportWhatsAppNumbers() {
     listDiv.style.display = 'block'
     
   } catch (e) {
-    resultDiv.innerHTML = `<div class="result error">❌ Fehler: ${e.message}</div>`
+    if (resultDiv) {
+      resultDiv.innerHTML = `<div class="result error">❌ Fehler: ${e.message}</div>`
+    }
     console.error('WhatsApp export error:', e)
   }
 }
 
 function copyWhatsAppNumbers() {
+  // ⚠️ Diese Funktion ist veraltet (WhatsApp Card wurde entfernt)
   const textarea = document.getElementById('wa-numbers-textarea')
+  const resultDiv = document.getElementById('result-wa-export')
+  
+  // Null-Checks
+  if (!textarea || !resultDiv) {
+    console.warn('WhatsApp copy: Elemente nicht gefunden (WhatsApp Card wurde entfernt)')
+    return
+  }
+  
   textarea.select()
   document.execCommand('copy')
   
-  const resultDiv = document.getElementById('result-wa-export')
   resultDiv.innerHTML = '<div class="result success">✅ Nummern in Zwischenablage kopiert!</div>'
   
   setTimeout(() => {
-    resultDiv.innerHTML = ''
+    if (resultDiv) {
+      resultDiv.innerHTML = ''
+    }
   }, 3000)
 }
 // ═══════════════════════════════════════════════════════════════
@@ -2642,6 +2637,134 @@ async function previewTargetGroup() {
   } catch (e) {
     showResult('result-targeted-action', '❌ Fehler: ' + e.message, 'error')
     console.error('Preview error:', e)
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🚀 DIRECT ACTION CREATOR (Skip Preview)
+// ═══════════════════════════════════════════════════════════════
+
+async function createActionDirectly() {
+  try {
+    // Führe denselben Filter wie previewTargetGroup() aus
+    // aber zeige KEINE Preview an → gehe direkt zur Aktion
+    
+    const inactiveDays = parseInt(document.getElementById('target-inactive-days').value)
+    const pointsRange = document.getElementById('target-points').value
+    const ordersRange = document.getElementById('target-orders').value
+    const whatsappOnly = document.getElementById('target-whatsapp-only').checked
+    
+    // Hole alle Kunden
+    let query = supabase.from('customers').select('*')
+    
+    if (whatsappOnly) {
+      query = query.eq('whatsapp_optin', true)
+    }
+    
+    const { data: allCustomers, error } = await query
+    if (error) throw error
+    
+    if (!allCustomers || allCustomers.length === 0) {
+      alert('❌ Keine Kunden gefunden!')
+      return
+    }
+    
+    // Filter 1: Inaktivität (Bucket-Logik)
+    let filtered = []
+    
+    if (inactiveDays > 0) {
+      const bucketRanges = {
+        7: [7, 13],
+        14: [14, 20],
+        21: [21, 29],
+        30: [30, 59],
+        60: [60, 999999]
+      }
+      
+      const [minDays, maxDays] = bucketRanges[inactiveDays] || [inactiveDays, 999999]
+      
+      const minCutoffDate = new Date()
+      minCutoffDate.setDate(minCutoffDate.getDate() - maxDays)
+      
+      const maxCutoffDate = new Date()
+      maxCutoffDate.setDate(maxCutoffDate.getDate() - minDays)
+      
+      for (const customer of allCustomers) {
+        const { data: lastTx } = await supabase
+          .from('transactions')
+          .select('created_at')
+          .eq('customer_id', customer.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+        
+        let lastActivityDate
+        if (!lastTx || lastTx.length === 0) {
+          lastActivityDate = new Date(customer.created_at)
+        } else {
+          lastActivityDate = new Date(lastTx[0].created_at)
+        }
+        
+        if (lastActivityDate >= minCutoffDate && lastActivityDate < maxCutoffDate) {
+          const cooldownOk = await checkMarketingCooldown(customer.id, inactiveDays)
+          
+          if (cooldownOk) {
+            filtered.push(customer)
+          }
+        }
+      }
+    } else {
+      filtered = [...allCustomers]
+    }
+    
+    // Filter 2: Punkte
+    if (pointsRange !== 'all') {
+      const [min, max] = pointsRange.includes('+') 
+        ? [parseInt(pointsRange), 999999]
+        : pointsRange.split('-').map(n => parseInt(n))
+      
+      filtered = filtered.filter(c => c.points >= min && c.points <= max)
+    }
+    
+    // Filter 3: Bestellungen
+    if (ordersRange !== 'all') {
+      const customerOrderCounts = new Map()
+      
+      for (const customer of filtered) {
+        const { count } = await supabase
+          .from('transactions')
+          .select('*', { count: 'exact', head: true })
+          .eq('customer_id', customer.id)
+          .gt('amount', 0)
+        
+        customerOrderCounts.set(customer.id, count || 0)
+      }
+      
+      const [min, max] = ordersRange.includes('+')
+        ? [parseInt(ordersRange), 999999]
+        : ordersRange.split('-').map(n => parseInt(n))
+      
+      filtered = filtered.filter(c => {
+        const count = customerOrderCounts.get(c.id) || 0
+        return count >= min && count <= max
+      })
+    }
+    
+    if (filtered.length === 0) {
+      alert('ℹ️ Keine Kunden entsprechen diesen Kriterien')
+      return
+    }
+    
+    // Speichere gefilterte Kunden (WICHTIG für Export-Funktionen!)
+    window.targetedCustomers = filtered
+    
+    // SKIP Preview → gehe direkt zur Aktion!
+    showActionCreator()
+    
+    console.log(`✅ ${filtered.length} Kunden gefiltert → Direkt zur Aktion`)
+    
+  } catch (e) {
+    alert('❌ Fehler beim Filtern: ' + e.message)
+    console.error('Filter error:', e)
   }
 }
 
