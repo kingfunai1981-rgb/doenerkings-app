@@ -147,15 +147,15 @@ textarea { resize: vertical; min-height: 60px; }
       <h3 style="color: #111827; margin-bottom: 12px;">1️⃣ Zielgruppe auswählen</h3>
       
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px;">
-        <!-- Inaktivitäts-Filter -->
+        <!-- Inaktivitäts-Filter (Bucket-Logik) -->
         <div>
-          <label class="form-label">⏰ Inaktivität</label>
+          <label class="form-label">⏰ Inaktivität (exklusive Segmente)</label>
           <select id="target-inactive-days">
             <option value="0">Alle (keine Filterung)</option>
-            <option value="7">7+ Tage inaktiv</option>
-            <option value="14">14+ Tage inaktiv</option>
-            <option value="21">21+ Tage inaktiv</option>
-            <option value="30">30+ Tage inaktiv</option>
+            <option value="7">7-13 Tage inaktiv</option>
+            <option value="14">14-20 Tage inaktiv</option>
+            <option value="21">21-29 Tage inaktiv</option>
+            <option value="30">30-59 Tage inaktiv</option>
             <option value="60">60+ Tage inaktiv</option>
           </select>
         </div>
@@ -218,6 +218,20 @@ textarea { resize: vertical; min-height: 60px; }
       
       <div id="target-customer-list" style="max-height: 200px; overflow-y: auto; background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
         <!-- Wird dynamisch gefüllt -->
+      </div>
+      
+      <!-- WhatsApp Export Buttons -->
+      <div style="background: #dcfce7; border: 2px solid #25D366; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+        <h4 style="color: #166534; margin-bottom: 8px; font-size: 14px;">📱 WhatsApp Export</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button onclick="copyTargetPhoneNumbers()" style="padding: 10px; background: #25D366; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
+            📋 Nummern kopieren
+          </button>
+          <button onclick="downloadTargetPhoneCSV()" style="padding: 10px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
+            📥 CSV exportieren
+          </button>
+        </div>
+        <div id="export-result" style="margin-top: 8px; font-size: 13px; color: #166534;"></div>
       </div>
       
       <button class="success" onclick="showActionCreator()">
@@ -398,63 +412,7 @@ textarea { resize: vertical; min-height: 60px; }
     </div>
   </div>
 
-  <div class="card">
-    <h2>📱 WhatsApp Marketing</h2>
-    <p class="subtitle">Verwalte WhatsApp-Benachrichtigungen für deine Kunden</p>
-    
-    <div style="background: #dcfce7; border: 2px solid #25D366; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-      <h3 style="color: #166534; margin-bottom: 8px;">✅ WhatsApp Business App Setup</h3>
-      <p style="font-size: 14px; color: #166534; margin-bottom: 12px;">
-        Für den Start nutze einfach die <strong>kostenlose WhatsApp Business App</strong>:
-      </p>
-      <ol style="font-size: 13px; color: #166534; margin-left: 20px;">
-        <li>WhatsApp Business App herunterladen</li>
-        <li>Geschäftsnummer einrichten</li>
-        <li>Broadcast-Liste erstellen (max. 256 Kontakte)</li>
-        <li>Telefonnummern exportieren (Button unten)</li>
-        <li>Nummern in Broadcast-Liste importieren</li>
-      </ol>
-      <p style="font-size: 12px; color: #166534; margin-top: 12px; font-style: italic;">
-        💡 Tipp: Ab ~100 Kunden mit Opt-In lohnt sich WhatsApp Business API mit Automatisierung!
-      </p>
-    </div>
-
-    <div style="background: #f9fafb; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-      <h3 style="margin-bottom: 12px;">📊 Übersicht</h3>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-        <div style="background: white; padding: 12px; border-radius: 8px; border: 2px solid #e5e7eb;">
-          <div style="font-size: 24px; font-weight: 700; color: #25D366;" id="wa-total-optins">0</div>
-          <div style="font-size: 12px; color: #6b7280;">WhatsApp aktiviert</div>
-        </div>
-        <div style="background: white; padding: 12px; border-radius: 8px; border: 2px solid #e5e7eb;">
-          <div style="font-size: 24px; font-weight: 700; color: #F9A825;" id="wa-total-customers">0</div>
-          <div style="font-size: 12px; color: #6b7280;">Gesamt-Kunden</div>
-        </div>
-        <div style="background: white; padding: 12px; border-radius: 8px; border: 2px solid #e5e7eb;">
-          <div style="font-size: 24px; font-weight: 700; color: #E31E24;" id="wa-optin-rate">0%</div>
-          <div style="font-size: 12px; color: #6b7280;">Opt-In Rate</div>
-        </div>
-      </div>
-    </div>
-
-    <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px;">
-      <h3 style="color: #92400e; margin-bottom: 12px;">📤 Telefonnummern exportieren</h3>
-      <p style="font-size: 14px; color: #92400e; margin-bottom: 12px;">
-        Exportiere alle Telefonnummern von Kunden mit WhatsApp-Opt-In für deine Broadcast-Liste:
-      </p>
-      <button class="success" onclick="exportWhatsAppNumbers()">📥 WhatsApp-Nummern exportieren</button>
-      <div id="result-wa-export"></div>
-      
-      <div id="wa-numbers-list" style="display: none; margin-top: 16px; background: white; padding: 12px; border-radius: 8px; max-height: 300px; overflow-y: auto;">
-        <h4 style="margin-bottom: 8px; font-size: 14px;">Kopiere diese Nummern:</h4>
-        <textarea id="wa-numbers-textarea" readonly style="width: 100%; min-height: 150px; font-family: monospace; font-size: 13px; padding: 8px;"></textarea>
-        <button onclick="copyWhatsAppNumbers()" style="margin-top: 8px; padding: 8px 16px; background: #25D366; color: white; border: none; border-radius: 6px; cursor: pointer;">
-          📋 In Zwischenablage kopieren
-        </button>
-      </div>
-    </div>
-
-  </div>
+  <!-- ✅ WhatsApp Marketing Card entfernt (auf Anfrage des Nutzers) -->
 
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -2549,12 +2507,32 @@ async function previewTargetGroup() {
       return
     }
     
-    // Filter 1: Inaktivität
+    // Filter 1: Inaktivität (BUCKET-LOGIK - exklusive Segmente!)
     let filtered = []
     
     if (inactiveDays > 0) {
-      const cutoffDate = new Date()
-      cutoffDate.setDate(cutoffDate.getDate() - inactiveDays)
+      // Bucket-Definitionen (exklusiv):
+      // 7: 7-13 Tage
+      // 14: 14-20 Tage
+      // 21: 21-29 Tage
+      // 30: 30-59 Tage
+      // 60: 60+ Tage
+      
+      const bucketRanges = {
+        7: [7, 13],
+        14: [14, 20],
+        21: [21, 29],
+        30: [30, 59],
+        60: [60, 999999]
+      }
+      
+      const [minDays, maxDays] = bucketRanges[inactiveDays] || [inactiveDays, 999999]
+      
+      const minCutoffDate = new Date()
+      minCutoffDate.setDate(minCutoffDate.getDate() - maxDays)
+      
+      const maxCutoffDate = new Date()
+      maxCutoffDate.setDate(maxCutoffDate.getDate() - minDays)
       
       for (const customer of allCustomers) {
         const { data: lastTx } = await supabase
@@ -2564,20 +2542,24 @@ async function previewTargetGroup() {
           .order('created_at', { ascending: false })
           .limit(1)
         
-        let isInactive = false
+        let lastActivityDate
         if (!lastTx || lastTx.length === 0) {
-          // Keine Bestellung? Prüfe Registrierungsdatum!
-          const registrationDate = new Date(customer.created_at)
-          isInactive = registrationDate < cutoffDate
+          // Keine Bestellung? Nutze Registrierungsdatum
+          lastActivityDate = new Date(customer.created_at)
         } else {
-          const lastDate = new Date(lastTx[0].created_at)
-          if (lastDate < cutoffDate) {
-            isInactive = true
-          }
+          lastActivityDate = new Date(lastTx[0].created_at)
         }
         
-        if (isInactive) {
-          filtered.push(customer)
+        // Bucket-Check: lastActivityDate muss im Bucket-Bereich liegen
+        // Beispiel 21-29: lastActivityDate zwischen (heute - 29 Tage) und (heute - 21 Tage)
+        if (lastActivityDate >= minCutoffDate && lastActivityDate < maxCutoffDate) {
+          
+          // ✅ COOLDOWN-CHECK: Prüfe ob Kunde bereits in diesem Bucket kontaktiert wurde
+          const cooldownOk = await checkMarketingCooldown(customer.id, inactiveDays)
+          
+          if (cooldownOk) {
+            filtered.push(customer)
+          }
         }
       }
     } else {
@@ -2662,6 +2644,175 @@ async function previewTargetGroup() {
     console.error('Preview error:', e)
   }
 }
+
+// ═══════════════════════════════════════════════════════════════
+// 📱 WHATSAPP EXPORT FUNCTIONS (für Zielgruppen)
+// ═══════════════════════════════════════════════════════════════
+
+function copyTargetPhoneNumbers() {
+  if (!targetedCustomers || targetedCustomers.length === 0) {
+    document.getElementById('export-result').innerHTML = '❌ Keine Kunden zum Exportieren!'
+    return
+  }
+  
+  // Filter nur WhatsApp Opt-In
+  const whatsappCustomers = targetedCustomers.filter(c => c.whatsapp_optin)
+  
+  if (whatsappCustomers.length === 0) {
+    document.getElementById('export-result').innerHTML = '❌ Keine WhatsApp-aktivierten Kunden in der Zielgruppe!'
+    return
+  }
+  
+  // Extrahiere Telefonnummern (Duplikate entfernen)
+  const phoneNumbers = [...new Set(whatsappCustomers.map(c => c.phone).filter(p => p))]
+  
+  // Format: Eine Nummer pro Zeile
+  const numbersText = phoneNumbers.join('\n')
+  
+  // In Zwischenablage kopieren
+  navigator.clipboard.writeText(numbersText).then(() => {
+    document.getElementById('export-result').innerHTML = `✅ ${phoneNumbers.length} Nummern kopiert!`
+    setTimeout(() => {
+      document.getElementById('export-result').innerHTML = ''
+    }, 3000)
+  }).catch(err => {
+    document.getElementById('export-result').innerHTML = '❌ Fehler beim Kopieren: ' + err.message
+  })
+}
+
+function downloadTargetPhoneCSV() {
+  if (!targetedCustomers || targetedCustomers.length === 0) {
+    document.getElementById('export-result').innerHTML = '❌ Keine Kunden zum Exportieren!'
+    return
+  }
+  
+  // Filter nur WhatsApp Opt-In
+  const whatsappCustomers = targetedCustomers.filter(c => c.whatsapp_optin)
+  
+  if (whatsappCustomers.length === 0) {
+    document.getElementById('export-result').innerHTML = '❌ Keine WhatsApp-aktivierten Kunden in der Zielgruppe!'
+    return
+  }
+  
+  // CSV erstellen: Name, Telefon
+  let csv = 'Name,Telefon\n'
+  whatsappCustomers.forEach(c => {
+    csv += `"${c.name || 'Unbekannt'}","${c.phone || ''}"\n`
+  })
+  
+  // Download triggern
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const link = document.createElement('a')
+  const url = URL.createObjectURL(blob)
+  
+  const now = new Date()
+  const timestamp = now.toISOString().split('T')[0]
+  link.setAttribute('href', url)
+  link.setAttribute('download', `whatsapp_nummern_${timestamp}.csv`)
+  link.style.display = 'none'
+  
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  
+  document.getElementById('export-result').innerHTML = `✅ CSV mit ${whatsappCustomers.length} Nummern heruntergeladen!`
+  setTimeout(() => {
+    document.getElementById('export-result').innerHTML = ''
+  }, 3000)
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🔒 MARKETING COOLDOWN FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+
+async function checkMarketingCooldown(customerId, currentBucket, cooldownDays = 7) {
+  try {
+    // Hole Kunden-Daten
+    const { data: customer, error } = await supabase
+      .from('customers')
+      .select('last_marketing_bucket, last_marketing_contact_at')
+      .eq('id', customerId)
+      .single()
+    
+    if (error) {
+      console.error('Cooldown check error:', error)
+      return true // Bei Fehler: Berechtigt (fail-safe)
+    }
+    
+    // Noch nie kontaktiert? → Berechtigt
+    if (!customer.last_marketing_contact_at) {
+      return true
+    }
+    
+    const lastContact = new Date(customer.last_marketing_contact_at)
+    const now = new Date()
+    const daysSinceContact = Math.floor((now - lastContact) / (1000 * 60 * 60 * 24))
+    
+    // Gleicher Bucket UND innerhalb Cooldown? → NICHT berechtigt
+    if (customer.last_marketing_bucket === currentBucket && daysSinceContact < cooldownDays) {
+      return false
+    }
+    
+    // Höherer Bucket erreicht? → Berechtigt
+    if (currentBucket > customer.last_marketing_bucket) {
+      return true
+    }
+    
+    // Cooldown abgelaufen? → Berechtigt
+    if (daysSinceContact >= cooldownDays) {
+      return true
+    }
+    
+    // Default: Nicht berechtigt
+    return false
+    
+  } catch (e) {
+    console.error('Cooldown check exception:', e)
+    return true // Fail-safe
+  }
+}
+
+async function setMarketingCooldown(customerId, bucket) {
+  try {
+    const { error } = await supabase
+      .from('customers')
+      .update({
+        last_marketing_contact_at: new Date().toISOString(),
+        last_marketing_bucket: bucket
+      })
+      .eq('id', customerId)
+    
+    if (error) {
+      console.error('Set cooldown error:', error)
+    }
+  } catch (e) {
+    console.error('Set cooldown exception:', e)
+  }
+}
+
+async function resetAllCooldowns() {
+  if (!confirm('⚠️ WARNUNG!\n\nWirklich ALLE Marketing-Cooldowns zurücksetzen?\n\nDies ermöglicht es Kunden wieder angezeigt zu werden.')) {
+    return
+  }
+  
+  try {
+    const { error } = await supabase
+      .from('customers')
+      .update({
+        last_marketing_contact_at: null,
+        last_marketing_bucket: null
+      })
+      .not('last_marketing_contact_at', 'is', null)
+    
+    if (error) throw error
+    
+    alert('✅ Alle Cooldowns zurückgesetzt!')
+  } catch (e) {
+    alert('❌ Fehler: ' + e.message)
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
 
 function showActionCreator() {
   document.getElementById('action-creator').style.display = 'block'
@@ -2782,6 +2933,15 @@ async function createTargetedAction() {
       document.getElementById('action-whatsapp').style.display = 'block'
       showResult('result-targeted-action', `✅ Privater Coupon erstellt! ${targetedCustomers.length} Kunden können ihn jetzt in der App sehen.`, 'success')
       
+      // ✅ COOLDOWN: Markiere Kunden als kontaktiert
+      const currentBucket = parseInt(document.getElementById('target-inactive-days').value)
+      if (currentBucket > 0) {
+        for (const customer of targetedCustomers) {
+          await setMarketingCooldown(customer.id, currentBucket)
+        }
+        console.log(`✅ Cooldown gesetzt für ${targetedCustomers.length} Kunden (Bucket ${currentBucket})`)
+      }
+      
     } else if (actionType === 'bonus_points') {
       // Bonus-Punkte erstellen
       const bonusAmount = parseInt(document.getElementById('action-bonus-amount').value)
@@ -2832,6 +2992,15 @@ async function createTargetedAction() {
       document.getElementById('action-whatsapp').style.display = 'block'
       showResult('result-targeted-action', `✅ Bonus-Aktion erstellt! Nur ${targetedCustomers.length} Kunden sehen sie.`, 'success')
       
+      // ✅ COOLDOWN: Markiere Kunden als kontaktiert
+      const currentBucket = parseInt(document.getElementById('target-inactive-days').value)
+      if (currentBucket > 0) {
+        for (const customer of targetedCustomers) {
+          await setMarketingCooldown(customer.id, currentBucket)
+        }
+        console.log(`✅ Cooldown gesetzt für ${targetedCustomers.length} Kunden (Bucket ${currentBucket})`)
+      }
+      
     } else if (actionType === 'double_points') {
       // Doppelte Punkte als PRIVAT erstellen
       const { data: bonus, error: bonusError } = await supabase
@@ -2873,6 +3042,15 @@ async function createTargetedAction() {
       
       document.getElementById('action-whatsapp').style.display = 'block'
       showResult('result-targeted-action', `✅ Doppelte-Punkte-Aktion erstellt! Nur ${targetedCustomers.length} Kunden sehen sie.`, 'success')
+      
+      // ✅ COOLDOWN: Markiere Kunden als kontaktiert
+      const currentBucket = parseInt(document.getElementById('target-inactive-days').value)
+      if (currentBucket > 0) {
+        for (const customer of targetedCustomers) {
+          await setMarketingCooldown(customer.id, currentBucket)
+        }
+        console.log(`✅ Cooldown gesetzt für ${targetedCustomers.length} Kunden (Bucket ${currentBucket})`)
+      }
     }
     
   } catch (e) {
