@@ -2547,7 +2547,7 @@ async function previewTargetGroup() {
         
         // Bucket-Check: lastActivityDate muss im Bucket-Bereich liegen
         // Beispiel 21-29: lastActivityDate zwischen (heute - 29 Tage) und (heute - 21 Tage)
-        if (lastActivityDate >= minCutoffDate && lastActivityDate < maxCutoffDate) {
+        if (lastActivityDate >= minCutoffDate && lastActivityDate <= maxCutoffDate) {
           
           // ✅ COOLDOWN-CHECK: Prüfe ob Kunde bereits in diesem Bucket kontaktiert wurde
           const cooldownOk = await checkMarketingCooldown(customer.id, inactiveDays)
@@ -2704,7 +2704,7 @@ async function createActionDirectly() {
           lastActivityDate = new Date(lastTx[0].created_at)
         }
         
-        if (lastActivityDate >= minCutoffDate && lastActivityDate < maxCutoffDate) {
+        if (lastActivityDate >= minCutoffDate && lastActivityDate <= maxCutoffDate) {
           const cooldownOk = await checkMarketingCooldown(customer.id, inactiveDays)
           
           if (cooldownOk) {
