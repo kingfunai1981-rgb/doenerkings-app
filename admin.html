@@ -483,6 +483,21 @@ textarea { resize: vertical; min-height: 60px; }
     throw new Error('Invalid license');
   }
 })();
+
+// ═══════════════════════════════════════════════════════════════
+// 🐛 DEBUG: Alert Hook mit Trace
+// ═══════════════════════════════════════════════════════════════
+(function() {
+  const originalAlert = window.alert;
+  window.alert = function(message) {
+    console.log('🚨 ===== ALERT HOOK =====');
+    console.log('Message:', message);
+    console.log('Stack Trace:');
+    console.trace();
+    console.log('========================');
+    return originalAlert.call(window, message);
+  };
+})();
 // ═══════════════════════════════════════════════════════════════
 
 // ═══════════════════════════════════════════════════════════════
@@ -2480,6 +2495,8 @@ let targetedCustomers = []
 let currentAction = null
 
 async function previewTargetGroup() {
+  const runId = `RUN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  console.log(`🔍 ===== previewTargetGroup() START [${runId}] =====`);
   try {
     showResult('result-targeted-action', '⏳ Analysiere Kunden...', 'info')
     
@@ -2644,25 +2661,32 @@ async function previewTargetGroup() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// 🚀 DIRECT ACTION CREATOR (Skip Preview)
+// 🚀 DIRECT ACTION CREATOR (Skip Preview) - DEBOUNCED
 // ═══════════════════════════════════════════════════════════════
 
-async function createActionDirectly() {
-  console.log('🚀 ===== createActionDirectly() START =====')
+let createActionDirectlyRunning = false;
+let createActionDirectlyLastCall = 0;
+
+async function createActionDirectly_Internal() {
+  const runId = `RUN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  console.log(`🚀 ===== createActionDirectly() START [${runId}] =====`);
   try {
     // Führe denselben Filter wie previewTargetGroup() aus
     // aber zeige KEINE Preview an → gehe direkt zur Aktion
     
-    const inactiveDays = parseInt(document.getElementById('target-inactive-days').value)
-    const pointsRange = document.getElementById('target-points').value
-    const ordersRange = document.getElementById('target-orders').value
-    const whatsappOnly = document.getElementById('target-whatsapp-only').checked
+    const inactiveDaysEl = document.getElementById('target-inactive-days');
+    const whatsappOnlyEl = document.getElementById('target-whatsapp-only');
     
-    console.log('📋 Filter-Kriterien gelesen:')
-    console.log('  - inactiveDays:', inactiveDays)
-    console.log('  - pointsRange:', pointsRange)
-    console.log('  - ordersRange:', ordersRange)
-    console.log('  - whatsappOnly:', whatsappOnly)
+    const inactiveDays = parseInt(inactiveDaysEl.value);
+    const pointsRange = document.getElementById('target-points').value;
+    const ordersRange = document.getElementById('target-orders').value;
+    const whatsappOnly = whatsappOnlyEl.checked;
+    
+    console.log(`[${runId}] 📋 Filter-Kriterien gelesen:`);
+    console.log(`[${runId}]   - inactiveDays: ${inactiveDays} (element.value: "${inactiveDaysEl.value}")`);
+    console.log(`[${runId}]   - pointsRange: ${pointsRange}`);
+    console.log(`[${runId}]   - ordersRange: ${ordersRange}`);
+    console.log(`[${runId}]   - whatsappOnly: ${whatsappOnly} (element.checked: ${whatsappOnlyEl.checked}, getAttribute('checked'): ${whatsappOnlyEl.getAttribute('checked')})`);
     
     // Hole alle Kunden
     let query = supabase.from('customers').select('*')
@@ -2674,12 +2698,7 @@ async function createActionDirectly() {
     const { data: allCustomers, error } = await query
     if (error) throw error
     
-    console.log('📦 Kunden aus DB geladen:')
-    console.log('  - Anzahl:', allCustomers?.length || 0)
-    console.log('  - Erste 3 Kunden:', allCustomers?.slice(0, 3).map(c => ({ id: c.id, name: c.name, whatsapp_optin: c.whatsapp_optin, created_at: c.created_at })))
-    
     if (!allCustomers || allCustomers.length === 0) {
-      console.log('❌ ALERT: Keine Kunden gefunden')
       alert('❌ Keine Kunden gefunden!')
       return
     }
@@ -2766,18 +2785,10 @@ async function createActionDirectly() {
       })
     }
     
-    console.log('🎯 ===== FINALE PRÜFUNG =====')
-    console.log('filtered.length:', filtered.length)
-    console.log('filtered:', filtered.map(c => ({ id: c.id, name: c.name, phone: c.phone, whatsapp_optin: c.whatsapp_optin, points: c.points })))
-    
     if (filtered.length === 0) {
-      console.log('❌ ===== ALERT WIRD ANGEZEIGT =====')
-      console.log('Grund: filtered.length === 0')
       alert('ℹ️ Keine Kunden entsprechen diesen Kriterien')
       return
     }
-    
-    console.log('✅ ===== KEIN ALERT, WEITER ZUR AKTION =====')
     
     // Speichere gefilterte Kunden (WICHTIG für Export-Funktionen!)
     // ✅ FIX: Beide Varianten setzen für Kompatibilität
@@ -2790,8 +2801,45 @@ async function createActionDirectly() {
     console.log(`✅ ${filtered.length} Kunden gefiltert → Direkt zur Aktion`)
     
   } catch (e) {
+    console.log(`[${runId}] ❌ ERROR in createActionDirectly`);
     alert('❌ Fehler beim Filtern: ' + e.message)
     console.error('Filter error:', e)
+  } finally {
+    createActionDirectlyRunning = false;
+    console.log(`[${runId}] ===== createActionDirectly() END =====`);
+  }
+}
+
+// Debounced wrapper to prevent double-calls
+async function createActionDirectly() {
+  const now = Date.now();
+  const timeSinceLastCall = now - createActionDirectlyLastCall;
+  
+  console.log('🔘 createActionDirectly() WRAPPER called');
+  console.log('  - Running:', createActionDirectlyRunning);
+  console.log('  - Time since last call:', timeSinceLastCall, 'ms');
+  
+  // Prevent double-click (< 500ms)
+  if (timeSinceLastCall < 500) {
+    console.log('⚠️ BLOCKED: Too fast! (< 500ms since last call)');
+    return;
+  }
+  
+  // Prevent concurrent execution
+  if (createActionDirectlyRunning) {
+    console.log('⚠️ BLOCKED: Function already running!');
+    return;
+  }
+  
+  createActionDirectlyRunning = true;
+  createActionDirectlyLastCall = now;
+  console.log('✅ ALLOWED: Calling _Internal()');
+  
+  try {
+    await createActionDirectly_Internal();
+  } catch (e) {
+    console.error('Error in wrapper:', e);
+    createActionDirectlyRunning = false;
   }
 }
 
