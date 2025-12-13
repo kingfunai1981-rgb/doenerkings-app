@@ -3722,23 +3722,36 @@ async function activateGlobalBonus(bonusId) {
 
 // ✅ FIX 4: Finde Coupon-Preis für Produkt
 function getCouponPrice(productName) {
-  const coupon = activeCoupons.find(c => {
-    // ✅ FIX: NUR exakte Übereinstimmung (case-insensitive)
+  // ✅ BUGFIX: Private Coupons (kundenspezifisch) haben IMMER Vorrang vor globalen Coupons
+  // 1. Suche zuerst nach privaten Coupons
+  const privateCoupon = activeCoupons.find(c => {
     const couponProduct = c.product.toLowerCase().trim()
     const checkName = productName.toLowerCase().trim()
-    
-    console.log(`🔍 Vergleiche: Coupon"${couponProduct}" === Produkt"${checkName}"? ${couponProduct === checkName}`)
-    
-    // NUR exakte Übereinstimmung!
-    return couponProduct === checkName
+    return couponProduct === checkName && c.is_private === true
   })
   
-  if (coupon && coupon.price) {
-    // Parse Preis aus String wie "5.00 €" oder "5,00 €"
-    const priceStr = coupon.price.toString().replace('€', '').replace(',', '.').trim()
+  // 2. Wenn privater Coupon existiert, verwende diesen (höchste Priorität)
+  if (privateCoupon && privateCoupon.price) {
+    const priceStr = privateCoupon.price.toString().replace('€', '').replace(',', '.').trim()
     const price = parseFloat(priceStr)
     if (!isNaN(price)) {
-      console.log(`✅ Coupon gefunden für "${productName}": ${price}€ (Original: ${products.find(p => p.name === productName)?.price}€)`)
+      console.log(`🎯 Privater Coupon gefunden für "${productName}": ${price}€ (Priorität: HOCH)`)
+      return price
+    }
+  }
+  
+  // 3. Nur wenn KEIN privater Coupon existiert, suche nach globalem Coupon
+  const globalCoupon = activeCoupons.find(c => {
+    const couponProduct = c.product.toLowerCase().trim()
+    const checkName = productName.toLowerCase().trim()
+    return couponProduct === checkName && (!c.is_private || c.is_private === false)
+  })
+  
+  if (globalCoupon && globalCoupon.price) {
+    const priceStr = globalCoupon.price.toString().replace('€', '').replace(',', '.').trim()
+    const price = parseFloat(priceStr)
+    if (!isNaN(price)) {
+      console.log(`🎟️ Globaler Coupon gefunden für "${productName}": ${price}€ (Priorität: NORMAL)`)
       return price
     }
   }
