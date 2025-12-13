@@ -2668,122 +2668,155 @@ let createActionDirectlyRunning = false;
 let createActionDirectlyLastCall = 0;
 
 async function createActionDirectly_Internal() {
-  const runId = `RUN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  console.log(`🚀 ===== createActionDirectly() START [${runId}] =====`);
-  try {
-    // Führe denselben Filter wie previewTargetGroup() aus
-    // aber zeige KEINE Preview an → gehe direkt zur Aktion
-    
-    const inactiveDaysEl = document.getElementById('target-inactive-days');
-    const whatsappOnlyEl = document.getElementById('target-whatsapp-only');
-    
-    const inactiveDays = parseInt(inactiveDaysEl.value);
-    const pointsRange = document.getElementById('target-points').value;
-    const ordersRange = document.getElementById('target-orders').value;
-    const whatsappOnly = whatsappOnlyEl.checked;
-    
-    console.log(`[${runId}] 📋 Filter-Kriterien gelesen:`);
-    console.log(`[${runId}]   - inactiveDays: ${inactiveDays} (element.value: "${inactiveDaysEl.value}")`);
-    console.log(`[${runId}]   - pointsRange: ${pointsRange}`);
-    console.log(`[${runId}]   - ordersRange: ${ordersRange}`);
-    console.log(`[${runId}]   - whatsappOnly: ${whatsappOnly} (element.checked: ${whatsappOnlyEl.checked}, getAttribute('checked'): ${whatsappOnlyEl.getAttribute('checked')})`);
-    
-    // Hole alle Kunden
-    let query = supabase.from('customers').select('*')
-    
-    if (whatsappOnly) {
-      query = query.eq('whatsapp_optin', true)
+    // RUN ID Logging bereits eingebaut (siehe Konsole)
+    createActionDirectlyRunning = true
+    showResult('result-targeted-action', '⏳ Suche Kunden...', 'info')
+
+    // 1. Eingaben lesen
+    const inactiveDays = parseInt(document.getElementById('target-inactive-days').value)
+    const pointsRange = document.getElementById('target-points').value
+    const ordersRange = document.getElementById('target-orders').value
+    const whatsappOnly = document.getElementById('target-whatsapp-only').checked
+
+    // 2. Alle Kunden laden (für die Filterung)
+    const { data: allCustomers, error: allCustomersError } = await supabase
+        .from('customers')
+        .select('*')
+
+    if (allCustomersError) {
+        showResult('result-targeted-action', '❌ Fehler beim Laden der Kundendaten: ' + allCustomersError.message, 'error')
+        createActionDirectlyRunning = false
+        return
     }
-    
-    const { data: allCustomers, error } = await query
-    if (error) throw error
-    
-    if (!allCustomers || allCustomers.length === 0) {
-      alert('❌ Keine Kunden gefunden!')
-      return
+
+    if (allCustomers.length === 0) {
+        showResult('result-targeted-action', '❌ Keine Kunden gefunden!', 'error')
+        createActionDirectlyRunning = false
+        return
     }
-    
-    // Filter 1: Inaktivität (Bucket-Logik)
+
+    // Filter 1: Inaktivität (BUCKET-LOGIK - exklusive Segmente!)
     let filtered = []
-    
     if (inactiveDays > 0) {
-      const bucketRanges = {
-        7: [7, 13],
-        14: [14, 20],
-        21: [21, 29],
-        30: [30, 59],
-        60: [60, 999999]
-      }
-      
-      const [minDays, maxDays] = bucketRanges[inactiveDays] || [inactiveDays, 999999]
-      
-      const minCutoffDate = new Date()
-      minCutoffDate.setDate(minCutoffDate.getDate() - maxDays)
-      minCutoffDate.setHours(0, 0, 0, 0)  // ✅ Start of day
-      
-      const maxCutoffDate = new Date()
-      maxCutoffDate.setDate(maxCutoffDate.getDate() - minDays)
-      maxCutoffDate.setHours(23, 59, 59, 999)  // ✅ FIX: End of day (inkl. Uhrzeit!)
-      
-      for (const customer of allCustomers) {
-        const { data: lastTx } = await supabase
-          .from('transactions')
-          .select('created_at')
-          .eq('customer_id', customer.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-        
-        let lastActivityDate
-        if (!lastTx || lastTx.length === 0) {
-          lastActivityDate = new Date(customer.created_at)
-        } else {
-          lastActivityDate = new Date(lastTx[0].created_at)
+        // Bucket-Definitionen (exklusiv):
+        const bucketRanges = {
+            7: [7, 13],
+            14: [14, 20],
+            21: [21, 29],
+            30: [30, 59],
+            60: [60, 999999]
         }
+        const [minDays, maxDays] = bucketRanges[inactiveDays] || [inactiveDays, 999999]
         
-        if (lastActivityDate >= minCutoffDate && lastActivityDate <= maxCutoffDate) {
-          const cooldownOk = await checkMarketingCooldown(customer.id, inactiveDays)
-          
-          if (cooldownOk) {
-            filtered.push(customer)
-          }
+        // Berechnung der Cutoff-Daten für den Inaktivitätsbereich
+        const minCutoffDate = new Date()
+        minCutoffDate.setDate(minCutoffDate.getDate() - maxDays)
+        minCutoffDate.setHours(0, 0, 0, 0) // Start of day
+        
+        const maxCutoffDate = new Date()
+        maxCutoffDate.setDate(maxCutoffDate.getDate() - minDays)
+        maxCutoffDate.setHours(23, 59, 59, 999) // End of day (inkl. Uhrzeit!)
+
+        console.log(`[DEBUG] Suche Inaktivität: ${minDays}-${maxDays} Tage. Cutoff-Bereich: ${minCutoffDate.toISOString().split('T')[0]} bis ${maxCutoffDate.toISOString().split('T')[0]}`)
+
+
+        for (const customer of allCustomers) {
+            // FIX: Nur Transaktionen mit Betrag > 0 (echte Käufe) berücksichtigen
+            // Dies korrigiert den Fehler, dass z.B. 0€-Punkte-Spins als "Aktivität" zählen.
+            const { data: lastTx } = await supabase
+                .from('transactions')
+                .select('created_at')
+                .eq('customer_id', customer.id)
+                .gt('amount', 0) // <--- FIX: Filter für Kaufaktivität (Amount > 0)
+                .order('created_at', { ascending: false })
+                .limit(1)
+
+            let lastActivityDate
+            if (!lastTx || lastTx.length === 0) {
+                // Kunde hatte nie eine echte Bestellung. Die Aktivität ist das Registrierdatum.
+                lastActivityDate = new Date(customer.created_at)
+            } else {
+                lastActivityDate = new Date(lastTx[0].created_at)
+            }
+            
+            // Debugging-Log für den Hauptfehler-Case:
+            if (inactiveDays === 60) {
+                const daysInactive = Math.floor((new Date() - lastActivityDate) / (1000 * 60 * 60 * 24))
+                const activityStatus = (lastActivityDate >= minCutoffDate && lastActivityDate <= maxCutoffDate) ? 'ENHÄLT (Inaktiv)' : 'FÄLLT HERAUS (Zu aktiv oder zu inaktiv)';
+                console.log(`[DEBUG: ${customer.id}] Letzte Kauf-Aktivität: ${lastActivityDate.toISOString().split('T')[0]} (${daysInactive} Tage inaktiv). Status: ${activityStatus}`);
+            }
+
+            // Prüfung, ob die letzte Kauf-Aktivität im gewünschten Inaktivitäts-Zeitraum liegt
+            if (lastActivityDate >= minCutoffDate && lastActivityDate <= maxCutoffDate) {
+                const cooldownOk = await checkMarketingCooldown(customer.id, inactiveDays)
+                if (cooldownOk) {
+                    filtered.push(customer)
+                } else {
+                    console.log(`[DEBUG: ${customer.id}] FÄLLT HERAUS wegen Cooldown-Logik.`);
+                }
+            }
         }
-      }
     } else {
-      filtered = [...allCustomers]
+        filtered = [...allCustomers]
     }
-    
+
     // Filter 2: Punkte
     if (pointsRange !== 'all') {
-      const [min, max] = pointsRange.includes('+') 
-        ? [parseInt(pointsRange), 999999]
-        : pointsRange.split('-').map(n => parseInt(n))
-      
-      filtered = filtered.filter(c => c.points >= min && c.points <= max)
+        const [min, max] = pointsRange.includes('+') ? [parseInt(pointsRange), 999999] : pointsRange.split('-').map(n => parseInt(n))
+        const beforeFilterCount = filtered.length
+        filtered = filtered.filter(c => c.points >= min && c.points <= max)
+        console.log(`[DEBUG] Punkte-Filter (${pointsRange}) hat ${beforeFilterCount - filtered.length} Kunden entfernt.`)
     }
-    
+
     // Filter 3: Bestellungen
     if (ordersRange !== 'all') {
-      const customerOrderCounts = new Map()
-      
-      for (const customer of filtered) {
-        const { count } = await supabase
-          .from('transactions')
-          .select('*', { count: 'exact', head: true })
-          .eq('customer_id', customer.id)
-          .gt('amount', 0)
-        
-        customerOrderCounts.set(customer.id, count || 0)
-      }
-      
-      const [min, max] = ordersRange.includes('+')
-        ? [parseInt(ordersRange), 999999]
-        : ordersRange.split('-').map(n => parseInt(n))
-      
-      filtered = filtered.filter(c => {
-        const count = customerOrderCounts.get(c.id) || 0
-        return count >= min && count <= max
-      })
+        // Hole alle Bestellzähler in einem Schritt (besser für Performance, falls nicht schon vorhanden)
+        const customerOrderCounts = new Map()
+        for (const customer of filtered) {
+            // Hinweis: Hier wird auch AMOUNT > 0 verwendet, um konsistent zu sein
+            const { count } = await supabase
+                .from('transactions')
+                .select('*', { count: 'exact', head: true })
+                .eq('customer_id', customer.id)
+                .gt('amount', 0)
+            customerOrderCounts.set(customer.id, count || 0)
+        }
+
+        const [min, max] = ordersRange.includes('+') ? [parseInt(ordersRange), 999999] : ordersRange.split('-').map(n => parseInt(n))
+        const beforeFilterCount = filtered.length
+        filtered = filtered.filter(c => {
+            const orderCount = customerOrderCounts.get(c.id) || 0
+            return orderCount >= min && orderCount <= max
+        })
+        console.log(`[DEBUG] Bestell-Filter (${ordersRange}) hat ${beforeFilterCount - filtered.length} Kunden entfernt.`)
     }
+
+    // Filter 4: WhatsApp Opt-In
+    const beforeFilterCount = filtered.length
+    if (whatsappOnly) {
+        filtered = filtered.filter(c => c.whatsapp_optin)
+        console.log(`[DEBUG] WhatsApp-Filter hat ${beforeFilterCount - filtered.length} Kunden entfernt.`)
+    }
+
+    // 3. Ergebnis prüfen
+    if (filtered.length === 0) {
+        alert('Keine Kunden entsprechen diesen Kriterien')
+        showResult('result-targeted-action', '❌ Keine Kunden entsprechen diesen Kriterien!', 'error')
+        createActionDirectlyRunning = false
+        return
+    }
+
+    // 4. Zielgruppe zwischenspeichern und UI anzeigen
+    window.targetedCustomers = filtered // Für den Export und die Aktion
+    document.getElementById('action-creator').style.display = 'block'
+    showResult('result-targeted-action', `✅ Zielgruppe gefunden: ${filtered.length} Kunden.`, 'success')
+
+    // Performance-Logging, falls gewünscht
+    const duration = new Date() - createActionDirectlyLastCall
+    console.log(`[DEBUG] Gesamtlaufzeit: ${duration}ms`)
+
+    createActionDirectlyRunning = false
+}
     
     if (filtered.length === 0) {
       alert('ℹ️ Keine Kunden entsprechen diesen Kriterien')
