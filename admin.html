@@ -2670,6 +2670,12 @@ let createActionDirectlyLastCall = 0;
 async function createActionDirectly_Internal() {
     // RUN ID Logging bereits eingebaut (siehe Konsole)
     createActionDirectlyRunning = true
+    // =======================================================================
+// KORRIGIERTE FUNKTION: createActionDirectly_Internal()
+// =======================================================================
+async function createActionDirectly_Internal() {
+    // RUN ID Logging bereits eingebaut (siehe Konsole)
+    createActionDirectlyRunning = true
     showResult('result-targeted-action', '⏳ Suche Kunden...', 'info')
 
     // 1. Eingaben lesen
@@ -2817,10 +2823,7 @@ async function createActionDirectly_Internal() {
 
     createActionDirectlyRunning = false
 }
-    
-    if (filtered.length === 0) {
-      alert('ℹ️ Keine Kunden entsprechen diesen Kriterien')
-      return
+// =======================================================================
     }
     
     // Speichere gefilterte Kunden (WICHTIG für Export-Funktionen!)
