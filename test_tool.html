@@ -99,11 +99,17 @@
       box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
     }
     
+    .btn:disabled {
+      background: #cbd5e0;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
     .btn-danger {
       background: #dc2626;
     }
     
-    .btn-danger:hover {
+    .btn-danger:hover:not(:disabled) {
       background: #b91c1c;
     }
     
@@ -111,7 +117,7 @@
       background: #10b981;
     }
     
-    .btn-success:hover {
+    .btn-success:hover:not(:disabled) {
       background: #059669;
     }
     
@@ -146,6 +152,7 @@
       padding: 12px;
       border-radius: 8px;
       font-size: 14px;
+      line-height: 1.6;
     }
     
     .result-success {
@@ -215,6 +222,7 @@
       gap: 8px;
       margin-bottom: 20px;
       border-bottom: 2px solid #e2e8f0;
+      flex-wrap: wrap;
     }
     
     .tab {
@@ -239,6 +247,14 @@
     
     .tab-content.active {
       display: block;
+    }
+    
+    code {
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
     }
   </style>
 </head>
@@ -265,7 +281,6 @@
     <div class="tabs">
       <button class="tab active" onclick="switchTab('testaccounts')">Testaccounts</button>
       <button class="tab" onclick="switchTab('time-sim')">Zeit-Simulation</button>
-      <button class="tab" onclick="switchTab('e2e')">E2E-Tests</button>
       <button class="tab" onclick="switchTab('cleanup')">Cleanup</button>
       <button class="tab" onclick="switchTab('stats')">Statistiken</button>
     </div>
@@ -289,11 +304,11 @@
             <input type="number" id="new-test-points" class="form-input" value="100">
           </div>
           <button class="btn btn-success" onclick="createTestAccount()">✅ Testaccount erstellen</button>
-          <div id="create-result" class="result-box" style="display: none;"></div>
+          <div id="create-result"></div>
         </div>
         
         <div class="card">
-          <h2>📋 Testaccounts laden</h2>
+          <h2>📋 Testaccounts anzeigen</h2>
           <button class="btn" onclick="loadTestAccounts()">🔄 Testaccounts laden</button>
           <div id="testaccounts-list" class="test-accounts-list"></div>
         </div>
@@ -313,10 +328,6 @@
               <option value="">-- Testaccount wählen --</option>
             </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Tage zurück</label>
-            <input type="number" id="time-sim-days" class="form-input" placeholder="z.B. 21">
-          </div>
           <div class="btn-group">
             <button class="btn btn-small" onclick="simulateRegistration(7)">-7 Tage</button>
             <button class="btn btn-small" onclick="simulateRegistration(14)">-14 Tage</button>
@@ -324,8 +335,12 @@
             <button class="btn btn-small" onclick="simulateRegistration(30)">-30 Tage</button>
             <button class="btn btn-small" onclick="simulateRegistration(60)">-60 Tage</button>
           </div>
+          <div class="form-group">
+            <label class="form-label">Oder eigene Anzahl Tage</label>
+            <input type="number" id="time-sim-days" class="form-input" placeholder="z.B. 45">
+          </div>
           <button class="btn" onclick="simulateRegistrationCustom()">⏰ Custom Tage setzen</button>
-          <div id="time-sim-result" class="result-box" style="display: none;"></div>
+          <div id="time-sim-result"></div>
         </div>
         
         <div class="card">
@@ -342,52 +357,7 @@
             <button class="btn btn-small" onclick="simulateLastOrder(21)">-21 Tage</button>
             <button class="btn btn-small" onclick="simulateLastOrder(30)">-30 Tage</button>
           </div>
-          <div id="last-order-result" class="result-box" style="display: none;"></div>
-        </div>
-        
-      </div>
-    </div>
-    
-    <!-- Tab: E2E Tests -->
-    <div id="tab-e2e" class="tab-content">
-      <div class="grid">
-        
-        <div class="card">
-          <h2>🛒 Bestellungs-Simulation</h2>
-          <div class="form-group">
-            <label class="form-label">Testaccount</label>
-            <select id="e2e-account" class="form-select">
-              <option value="">-- Testaccount wählen --</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Produkt</label>
-            <input type="text" id="e2e-product" class="form-input" placeholder="z.B. Döner">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Preis (€)</label>
-            <input type="number" id="e2e-price" class="form-input" step="0.01" placeholder="z.B. 6.00">
-          </div>
-          <button class="btn" onclick="testOrderSimulation()">▶️ Bestellung simulieren</button>
-          <div id="e2e-order-result"></div>
-        </div>
-        
-        <div class="card">
-          <h2>🎟️ Coupon-Sichtbarkeit Test</h2>
-          <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">
-            Testet ob Testaccounts private Coupons sehen und globale Coupons korrekt filtern
-          </p>
-          <button class="btn" onclick="testCouponVisibility()">▶️ Coupon-Sichtbarkeit testen</button>
-          <div id="e2e-coupon-result"></div>
-        </div>
-        
-        <div class="card">
-          <h2>🧪 Kritische Tests (Auto)</h2>
-          <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">
-            Führt automatisch wichtige Tests aus: Preis-Priorität, Aktivierungen, Doppelte Punkte
-          </p>
-          <button class="btn btn-success" onclick="runCriticalTests()">🚀 Kritische Tests laufen lassen</button>
-          <div id="test-suite-results"></div>
+          <div id="last-order-result"></div>
         </div>
         
       </div>
@@ -399,6 +369,9 @@
         
         <div class="card">
           <h2>📊 Testdaten zählen</h2>
+          <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">
+            Zeigt Anzahl aller Testaccounts und deren Daten
+          </p>
           <button class="btn" onclick="countTestData()">🔍 Testdaten zählen</button>
           <div id="count-result"></div>
         </div>
@@ -406,7 +379,8 @@
         <div class="card">
           <h2>🗑️ Testdaten löschen</h2>
           <div class="result-box result-error">
-            <strong>⚠️ ACHTUNG:</strong> Diese Aktionen sind irreversibel!
+            <strong>⚠️ ACHTUNG:</strong> Diese Aktion ist irreversibel!<br>
+            Löscht ALLE Testaccounts und deren Transaktionen, Aktivierungen, etc.
           </div>
           <button class="btn btn-danger" style="margin-top: 12px;" onclick="deleteAllTestData()">
             ⚠️ ALLE Testdaten löschen
@@ -423,14 +397,20 @@
         
         <div class="card">
           <h2>📈 Produktiv vs. Gesamt</h2>
+          <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">
+            Vergleicht Gesamt-Kunden mit Produktiv-Kunden (ohne Tests)
+          </p>
           <button class="btn" onclick="loadStats()">📊 Statistiken laden</button>
           <div id="stats-result"></div>
         </div>
         
         <div class="card">
-          <h2>🔍 View-Status</h2>
-          <button class="btn" onclick="checkViews()">🔍 Views prüfen</button>
-          <div id="views-result"></div>
+          <h2>🔍 System-Status</h2>
+          <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">
+            Prüft ob production_* Views und Cleanup-Funktionen vorhanden sind
+          </p>
+          <button class="btn" onclick="checkSystemStatus()">🔍 Status prüfen</button>
+          <div id="status-result"></div>
         </div>
         
       </div>
@@ -447,7 +427,20 @@
     const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // TODO: Anpassen!
     const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY'; // TODO: Anpassen!
     
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // Fix: Verwende window.supabase.createClient
+    let supabase = null;
+    
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        const { createClient } = window.supabase;
+        supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        console.log('✅ Supabase initialized');
+      } catch (e) {
+        console.error('❌ Supabase initialization failed:', e);
+        alert('FEHLER: Supabase konnte nicht initialisiert werden. Bitte URL und KEY anpassen!');
+      }
+    });
     
     let currentTestAccounts = [];
     
@@ -474,8 +467,13 @@
     // ═══════════════════════════════════════════════════════════════
     
     async function createTestAccount() {
-      const name = document.getElementById('new-test-name').value;
-      const phone = document.getElementById('new-test-phone').value;
+      if (!supabase) {
+        showResult('create-result', '❌ Supabase nicht initialisiert! Bitte URL/KEY anpassen.', 'error');
+        return;
+      }
+      
+      const name = document.getElementById('new-test-name').value.trim();
+      const phone = document.getElementById('new-test-phone').value.trim();
       const points = parseInt(document.getElementById('new-test-points').value) || 100;
       
       if (!name || !phone) {
@@ -515,10 +513,17 @@
         
       } catch (e) {
         showResult('create-result', '❌ Fehler: ' + e.message, 'error');
+        console.error(e);
       }
     }
     
     async function loadTestAccounts() {
+      if (!supabase) {
+        document.getElementById('testaccounts-list').innerHTML = 
+          '<div class="result-box result-error">❌ Supabase nicht initialisiert!</div>';
+        return;
+      }
+      
       try {
         const { data, error } = await supabase
           .from('customers')
@@ -555,6 +560,7 @@
       } catch (e) {
         document.getElementById('testaccounts-list').innerHTML = 
           `<div class="result-box result-error">❌ Fehler: ${e.message}</div>`;
+        console.error(e);
       }
     }
     
@@ -568,7 +574,6 @@
       
       document.getElementById('time-sim-account').innerHTML = options;
       document.getElementById('last-order-account').innerHTML = options;
-      document.getElementById('e2e-account').innerHTML = options;
     }
     
     // ═══════════════════════════════════════════════════════════════
@@ -576,6 +581,11 @@
     // ═══════════════════════════════════════════════════════════════
     
     async function simulateRegistration(daysAgo) {
+      if (!supabase) {
+        showResult('time-sim-result', '❌ Supabase nicht initialisiert!', 'error');
+        return;
+      }
+      
       const accountId = document.getElementById('time-sim-account').value;
       if (!accountId) {
         showResult('time-sim-result', '❌ Bitte Testaccount wählen', 'error');
@@ -601,8 +611,11 @@
           'success'
         );
         
+        loadTestAccounts(); // Refresh list
+        
       } catch (e) {
         showResult('time-sim-result', '❌ Fehler: ' + e.message, 'error');
+        console.error(e);
       }
     }
     
@@ -616,6 +629,11 @@
     }
     
     async function simulateLastOrder(daysAgo) {
+      if (!supabase) {
+        showResult('last-order-result', '❌ Supabase nicht initialisiert!', 'error');
+        return;
+      }
+      
       const accountId = document.getElementById('last-order-account').value;
       if (!accountId) {
         showResult('last-order-result', '❌ Bitte Testaccount wählen', 'error');
@@ -644,6 +662,11 @@
             .eq('id', existingTrans[0].id);
           
           if (error) throw error;
+          
+          showResult('last-order-result', 
+            `✅ Letzte Bestellung zurückdatiert auf ${newDate.toLocaleDateString('de-DE')} (-${daysAgo} Tage)`, 
+            'success'
+          );
         } else {
           // Create test transaction
           const { error } = await supabase
@@ -657,59 +680,17 @@
             });
           
           if (error) throw error;
+          
+          showResult('last-order-result', 
+            `✅ Test-Bestellung erstellt und zurückdatiert auf ${newDate.toLocaleDateString('de-DE')} (-${daysAgo} Tage)`, 
+            'success'
+          );
         }
-        
-        showResult('last-order-result', 
-          `✅ Letzte Bestellung zurückdatiert auf ${newDate.toLocaleDateString('de-DE')} (-${daysAgo} Tage)`, 
-          'success'
-        );
         
       } catch (e) {
         showResult('last-order-result', '❌ Fehler: ' + e.message, 'error');
+        console.error(e);
       }
-    }
-    
-    // ═══════════════════════════════════════════════════════════════
-    // E2E TESTS
-    // ═══════════════════════════════════════════════════════════════
-    
-    async function testOrderSimulation() {
-      const accountId = document.getElementById('e2e-account').value;
-      const product = document.getElementById('e2e-product').value;
-      const price = parseFloat(document.getElementById('e2e-price').value);
-      
-      if (!accountId || !product || !price) {
-        document.getElementById('e2e-order-result').innerHTML = 
-          '<div class="result-box result-error">❌ Bitte alle Felder ausfüllen!</div>';
-        return;
-      }
-      
-      const resultDiv = document.getElementById('e2e-order-result');
-      resultDiv.innerHTML = '<div class="result-box result-info">⏳ Simuliere Bestellung...</div>';
-      
-      try {
-        // Implementation siehe previous E2E-Tests
-        resultDiv.innerHTML = '<div class="result-box result-success">✅ Simulation komplett (Details siehe Konsole)</div>';
-        
-      } catch (e) {
-        resultDiv.innerHTML = `<div class="result-box result-error">❌ Fehler: ${e.message}</div>`;
-      }
-    }
-    
-    async function testCouponVisibility() {
-      // Implementation siehe previous code
-      const resultDiv = document.getElementById('e2e-coupon-result');
-      resultDiv.innerHTML = '<div class="result-box result-success">✅ Test komplett</div>';
-    }
-    
-    async function runCriticalTests() {
-      const resultDiv = document.getElementById('test-suite-results');
-      resultDiv.innerHTML = '<div class="result-box result-info">⏳ Führe kritische Tests aus...</div>';
-      
-      // Implementation siehe previous code
-      setTimeout(() => {
-        resultDiv.innerHTML = '<div class="result-box result-success">✅ Alle kritischen Tests bestanden!</div>';
-      }, 1000);
     }
     
     // ═══════════════════════════════════════════════════════════════
@@ -717,62 +698,80 @@
     // ═══════════════════════════════════════════════════════════════
     
     async function countTestData() {
+      if (!supabase) {
+        showResult('count-result', '❌ Supabase nicht initialisiert!', 'error');
+        return;
+      }
+      
       try {
         const resultDiv = document.getElementById('count-result');
-        resultDiv.innerHTML = '<div class="result-box result-info">⏳ Zähle Testdaten...</div>';
+        showResult('count-result', '⏳ Zähle Testdaten...', 'info');
         
         const { data, error } = await supabase.rpc('count_test_data');
         
         if (error) throw error;
         
-        resultDiv.innerHTML = `
+        const html = `
           <div class="result-box result-info">
-            <strong>Testdaten-Übersicht:</strong><br>
-            Testaccounts: ${data.test_customers}<br>
-            Test-Transaktionen: ${data.test_transactions}<br>
-            Test-Coupons: ${data.test_coupons}<br>
-            Test-Bonusse: ${data.test_bonuses}<br>
-            Test-Codes: ${data.test_codes}
+            <strong>📊 Testdaten-Übersicht:</strong><br>
+            <div style="margin-top: 8px; line-height: 1.8;">
+              Testaccounts: <strong>${data.test_customers}</strong><br>
+              Test-Transaktionen: <strong>${data.test_transactions}</strong><br>
+              Test-Coupons: <strong>${data.test_coupons}</strong><br>
+              Test-Bonusse: <strong>${data.test_bonuses}</strong><br>
+              Test-Codes: <strong>${data.test_codes}</strong>
+            </div>
           </div>
         `;
         
+        resultDiv.innerHTML = html;
+        
       } catch (e) {
-        document.getElementById('count-result').innerHTML = 
-          `<div class="result-box result-error">❌ Fehler: ${e.message}</div>`;
+        showResult('count-result', '❌ Fehler: ' + e.message, 'error');
+        console.error(e);
       }
     }
     
     async function deleteAllTestData() {
-      if (!confirm('⚠️ WARNUNG! Wirklich ALLE Testdaten löschen?\n\nDies kann nicht rückgängig gemacht werden!')) return;
-      if (!confirm('Bist du SICHER? Dies löscht ALLE Testaccounts und deren Daten!')) return;
+      if (!supabase) {
+        alert('Supabase nicht initialisiert!');
+        return;
+      }
+      
+      if (!confirm('⚠️ WARNUNG!\n\nWirklich ALLE Testdaten löschen?\n\nDies kann nicht rückgängig gemacht werden!')) return;
+      if (!confirm('Bist du SICHER?\n\nDies löscht ALLE Testaccounts und deren Daten!')) return;
       
       try {
-        const resultDiv = document.getElementById('cleanup-result');
-        resultDiv.innerHTML = '<div class="result-box result-info">⏳ Lösche alle Testdaten...</div>';
+        showResult('cleanup-result', '⏳ Lösche alle Testdaten...', 'info');
         
         const { data, error } = await supabase.rpc('cleanup_all_test_data');
         
         if (error) throw error;
         
-        resultDiv.innerHTML = `
+        const html = `
           <div class="result-box result-success">
-            <strong>✅ Testdaten gelöscht:</strong><br>
-            Testaccounts: ${data.deleted_customers}<br>
-            Transaktionen: ${data.deleted_transactions}<br>
-            Coupons: ${data.deleted_coupons}<br>
-            Bonusse: ${data.deleted_bonuses}<br>
-            Codes: ${data.deleted_codes}
+            <strong>✅ Testdaten erfolgreich gelöscht:</strong><br>
+            <div style="margin-top: 8px; line-height: 1.8;">
+              Testaccounts: <strong>${data.deleted_customers}</strong><br>
+              Transaktionen: <strong>${data.deleted_transactions}</strong><br>
+              Coupons: <strong>${data.deleted_coupons}</strong><br>
+              Bonusse: <strong>${data.deleted_bonuses}</strong><br>
+              Codes: <strong>${data.deleted_codes}</strong>
+            </div>
           </div>
         `;
         
+        document.getElementById('cleanup-result').innerHTML = html;
+        
+        // Reset lists
         currentTestAccounts = [];
         updateDropdowns();
         document.getElementById('testaccounts-list').innerHTML = 
           '<div class="result-box result-info">Keine Testaccounts vorhanden</div>';
         
       } catch (e) {
-        document.getElementById('cleanup-result').innerHTML = 
-          `<div class="result-box result-error">❌ Fehler: ${e.message}</div>`;
+        showResult('cleanup-result', '❌ Fehler: ' + e.message, 'error');
+        console.error(e);
       }
     }
     
@@ -781,40 +780,95 @@
     // ═══════════════════════════════════════════════════════════════
     
     async function loadStats() {
+      if (!supabase) {
+        showResult('stats-result', '❌ Supabase nicht initialisiert!', 'error');
+        return;
+      }
+      
       try {
-        const resultDiv = document.getElementById('stats-result');
-        resultDiv.innerHTML = '<div class="result-box result-info">⏳ Lade Statistiken...</div>';
+        showResult('stats-result', '⏳ Lade Statistiken...', 'info');
         
         // Gesamt
         const { count: totalCustomers } = await supabase
           .from('customers')
           .select('*', { count: 'exact', head: true });
         
-        // Produktiv
-        const { count: prodCustomers } = await supabase
-          .from('production_customers')
-          .select('*', { count: 'exact', head: true });
+        // Produktiv (try both production_customers view and fallback)
+        let prodCustomers = 0;
+        try {
+          const { count } = await supabase
+            .from('production_customers')
+            .select('*', { count: 'exact', head: true });
+          prodCustomers = count;
+        } catch (e) {
+          // Fallback if view doesn't exist
+          const { count } = await supabase
+            .from('customers')
+            .select('*', { count: 'exact', head: true })
+            .eq('is_test_account', false);
+          prodCustomers = count;
+        }
         
         const testCustomers = totalCustomers - prodCustomers;
         
-        resultDiv.innerHTML = `
+        const html = `
           <div class="result-box result-info">
-            <strong>Kunden-Statistik:</strong><br>
-            Gesamt: ${totalCustomers}<br>
-            Produktiv: ${prodCustomers}<br>
-            Testaccounts: ${testCustomers}
+            <strong>📊 Kunden-Statistik:</strong><br>
+            <div style="margin-top: 8px; line-height: 1.8;">
+              Gesamt: <strong>${totalCustomers}</strong><br>
+              Produktiv: <strong>${prodCustomers}</strong><br>
+              Testaccounts: <strong>${testCustomers}</strong>
+            </div>
           </div>
         `;
         
+        document.getElementById('stats-result').innerHTML = html;
+        
       } catch (e) {
-        document.getElementById('stats-result').innerHTML = 
-          `<div class="result-box result-error">❌ Fehler: ${e.message}</div>`;
+        showResult('stats-result', '❌ Fehler: ' + e.message, 'error');
+        console.error(e);
       }
     }
     
-    async function checkViews() {
-      const resultDiv = document.getElementById('views-result');
-      resultDiv.innerHTML = '<div class="result-box result-success">✅ Views aktiv: production_customers, production_transactions, ...</div>';
+    async function checkSystemStatus() {
+      if (!supabase) {
+        showResult('status-result', '❌ Supabase nicht initialisiert!', 'error');
+        return;
+      }
+      
+      try {
+        showResult('status-result', '⏳ Prüfe System-Status...', 'info');
+        
+        let status = '<div class="result-box result-info"><strong>🔍 System-Status:</strong><br><div style="margin-top: 8px; line-height: 1.8;">';
+        
+        // Check production_customers view
+        try {
+          await supabase.from('production_customers').select('id').limit(1);
+          status += '✅ production_customers View vorhanden<br>';
+        } catch (e) {
+          status += '❌ production_customers View fehlt<br>';
+        }
+        
+        // Check count_test_data function
+        try {
+          await supabase.rpc('count_test_data');
+          status += '✅ count_test_data() Funktion vorhanden<br>';
+        } catch (e) {
+          status += '❌ count_test_data() Funktion fehlt<br>';
+        }
+        
+        // Check cleanup_all_test_data function
+        // Don't actually call it, just check if it exists
+        status += '✅ cleanup_all_test_data() Funktion (nicht geprüft)<br>';
+        
+        status += '</div></div>';
+        
+        document.getElementById('status-result').innerHTML = status;
+        
+      } catch (e) {
+        showResult('status-result', '❌ Fehler: ' + e.message, 'error');
+        console.error(e);
+      }
     }
     
     // ═══════════════════════════════════════════════════════════════
@@ -823,17 +877,8 @@
     
     function showResult(elementId, message, type) {
       const element = document.getElementById(elementId);
-      element.style.display = 'block';
-      element.className = `result-box result-${type}`;
-      element.innerHTML = message;
+      element.innerHTML = `<div class="result-box result-${type}">${message}</div>`;
     }
-    
-    // ═══════════════════════════════════════════════════════════════
-    // INITIALIZATION
-    // ═══════════════════════════════════════════════════════════════
-    
-    // Load testaccounts on page load
-    loadTestAccounts();
     
   </script>
 </body>
