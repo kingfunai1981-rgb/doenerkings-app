@@ -3430,28 +3430,79 @@ let previousCoupons = [] // ✅ NEU: Speichere vorherige Coupons zum Vergleich
 let openCategories = [] // ✅ FIX 1: Speichere welche Kategorien offen sind
 
 async function loadActiveCoupons() {
+  if (!currentCustomer) {
+    console.warn('⚠️ Kein Kunde geladen, kann Coupons nicht filtern')
+    activeCoupons = []
+    return
+  }
+  
   try {
     const now = new Date()
     const todayStr = now.toISOString().split('T')[0]
     
-    const { data: coupons, error } = await supabase
+    // Lade ALLE aktiven Coupons
+    const { data: allCoupons, error: couponError } = await supabase
       .from('coupons')
       .select('*')
       .eq('is_active', true)
       .lte('start_date', todayStr)
       .gte('end_date', todayStr)
     
-    if (error) throw error
+    if (couponError) throw couponError
     
-    // ✅ NEU: Prüfe ob sich Coupons geändert haben
-    const couponsChanged = JSON.stringify(previousCoupons) !== JSON.stringify(coupons)
+    if (!allCoupons || allCoupons.length === 0) {
+      activeCoupons = []
+      previousCoupons = []
+      console.log('ℹ️ Keine aktiven Coupons')
+      return
+    }
     
-    activeCoupons = coupons || []
-    previousCoupons = coupons || []
+    // 🔒 KRITISCH: Hole Coupon-Aktivierungen für DIESEN Kunden
+    const { data: activations, error: activationError } = await supabase
+      .from('activated_coupons')
+      .select('coupon_id')
+      .eq('customer_id', currentCustomer.id)
     
-    console.log('✅ Aktive Coupons geladen:', activeCoupons.length)
+    if (activationError) {
+      console.warn('⚠️ Fehler beim Laden der Aktivierungen:', activationError)
+      // Bei Fehler: Zeige nur öffentliche Coupons
+      const publicCoupons = allCoupons.filter(c => !c.is_private)
+      activeCoupons = publicCoupons
+      previousCoupons = publicCoupons
+      console.log(`✅ ${publicCoupons.length} öffentliche Coupons geladen (Aktivierungs-Check fehlgeschlagen)`)
+      return
+    }
     
-    // ✅ NEU: Rendere nur neu, wenn sich Coupons geändert haben
+    const activatedCouponIds = activations ? activations.map(a => a.coupon_id) : []
+    
+    // 🎯 FILTER: Nur öffentliche ODER für diesen Kunden aktivierte private Coupons
+    const visibleCoupons = allCoupons.filter(coupon => {
+      // Öffentlicher Coupon (is_private = false, null oder undefined)
+      if (!coupon.is_private) {
+        console.log(`✅ Öffentlicher Coupon sichtbar: ${coupon.product}`)
+        return true
+      }
+      
+      // Privater Coupon - nur wenn Kunde in activated_coupons ist
+      const isActivated = activatedCouponIds.includes(coupon.id)
+      if (isActivated) {
+        console.log(`🎯 Privater Coupon sichtbar (Kunde berechtigt): ${coupon.product}`)
+      } else {
+        console.log(`🔒 Privater Coupon NICHT sichtbar (Kunde nicht berechtigt): ${coupon.product}`)
+      }
+      return isActivated
+    })
+    
+    // Prüfe ob sich Coupons geändert haben
+    const couponsChanged = JSON.stringify(previousCoupons) !== JSON.stringify(visibleCoupons)
+    
+    activeCoupons = visibleCoupons
+    previousCoupons = visibleCoupons
+    
+    const hiddenCount = allCoupons.length - visibleCoupons.length
+    console.log(`✅ Coupons gefiltert: ${visibleCoupons.length} sichtbar, ${hiddenCount} private ausgeblendet`)
+    
+    // Rendere nur neu, wenn sich Coupons geändert haben
     if (couponsChanged) {
       console.log('🔄 Coupons haben sich geändert - rendere neu')
       renderProducts()
