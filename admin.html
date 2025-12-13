@@ -2602,6 +2602,7 @@ async function previewTargetGroup() {
     
     // Speichere gefilterte Kunden
     targetedCustomers = filtered
+    window.targetedCustomers = filtered  // Für Konsistenz
     
     // Berechne Stats
     const avgPoints = Math.round(filtered.reduce((sum, c) => sum + c.points, 0) / filtered.length)
@@ -2755,7 +2756,9 @@ async function createActionDirectly() {
     }
     
     // Speichere gefilterte Kunden (WICHTIG für Export-Funktionen!)
+    // ✅ FIX: Beide Varianten setzen für Kompatibilität
     window.targetedCustomers = filtered
+    targetedCustomers = filtered  // Für Export-Funktionen (ohne window.)
     
     // SKIP Preview → gehe direkt zur Aktion!
     showActionCreator()
@@ -2773,6 +2776,12 @@ async function createActionDirectly() {
 // ═══════════════════════════════════════════════════════════════
 
 function copyTargetPhoneNumbers() {
+  // ✅ DEBUG: Log targetedCustomers status
+  console.log('copyTargetPhoneNumbers called')
+  console.log('targetedCustomers:', targetedCustomers)
+  console.log('window.targetedCustomers:', window.targetedCustomers)
+  console.log('targetedCustomers length:', targetedCustomers?.length)
+  
   if (!targetedCustomers || targetedCustomers.length === 0) {
     document.getElementById('export-result').innerHTML = '❌ Keine Kunden zum Exportieren!'
     return
@@ -2804,6 +2813,11 @@ function copyTargetPhoneNumbers() {
 }
 
 function downloadTargetPhoneCSV() {
+  // ✅ DEBUG: Log targetedCustomers status
+  console.log('downloadTargetPhoneCSV called')
+  console.log('targetedCustomers:', targetedCustomers)
+  console.log('targetedCustomers length:', targetedCustomers?.length)
+  
   if (!targetedCustomers || targetedCustomers.length === 0) {
     document.getElementById('export-result').innerHTML = '❌ Keine Kunden zum Exportieren!'
     return
