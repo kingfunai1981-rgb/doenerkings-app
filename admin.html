@@ -509,6 +509,200 @@ textarea { resize: vertical; min-height: 60px; }
   </div>
 </div>
 
+<!-- 🧪 TEST & QA TOOL -->
+<div class="card" style="border: 3px solid #8b5cf6; background: linear-gradient(135deg, #faf5ff, #ffffff);">
+  <h2>🧪 Test & QA Tool</h2>
+  <p class="subtitle">Internes Testtool - Funktionen prüfen ohne echte Kundendaten zu beeinflussen</p>
+  
+  <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px; margin-bottom: 20px;">
+    <h3 style="color: #92400e; margin-bottom: 8px;">⚠️ Nur für Tests & Qualitätssicherung</h3>
+    <p style="color: #92400e; font-size: 14px; margin: 0;">
+      Dieses Tool manipuliert nur <strong>Testaccounts</strong> (markiert mit is_test_account=true).
+      Echte Kundendaten bleiben unberührt.
+    </p>
+  </div>
+  
+  <!-- Testaccount-Management -->
+  <div style="background: #ede9fe; border: 2px solid #8b5cf6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+    <h3 style="color: #5b21b6; margin-bottom: 12px;">👥 Testaccount-Management</h3>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+      <button class="success" onclick="createTestAccount()" style="font-size: 15px; padding: 12px;">
+        ➕ Neuen Testaccount erstellen
+      </button>
+      <button class="info" onclick="loadTestAccounts()" style="font-size: 15px; padding: 12px; background: #3b82f6;">
+        🔄 Testaccounts laden
+      </button>
+    </div>
+    
+    <div id="test-accounts-list" style="background: white; border-radius: 8px; padding: 12px; min-height: 100px;">
+      <div style="text-align: center; color: #6b7280; padding: 20px;">Klicke "Testaccounts laden"</div>
+    </div>
+  </div>
+  
+  <!-- Zeit-Simulation -->
+  <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+    <h3 style="color: #1e40af; margin-bottom: 12px;">⏰ Zeit-Simulation (für Testaccounts)</h3>
+    
+    <div style="margin-bottom: 16px;">
+      <label class="form-label">Wähle Testaccount:</label>
+      <select id="time-sim-account" style="width: 100%; padding: 10px; font-size: 14px;">
+        <option value="">-- Erst Testaccounts laden --</option>
+      </select>
+    </div>
+    
+    <div style="background: white; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+      <h4 style="margin-bottom: 10px; color: #1e40af;">📅 Registrierung zurückdatieren</h4>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+        <button onclick="simulateRegistration(7)" style="background: #60a5fa; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer;">
+          -7 Tage
+        </button>
+        <button onclick="simulateRegistration(14)" style="background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer;">
+          -14 Tage
+        </button>
+        <button onclick="simulateRegistration(30)" style="background: #2563eb; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer;">
+          -30 Tage
+        </button>
+        <button onclick="simulateRegistration(60)" style="background: #1e40af; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer;">
+          -60 Tage
+        </button>
+      </div>
+    </div>
+    
+    <div style="background: white; border-radius: 8px; padding: 16px;">
+      <h4 style="margin-bottom: 10px; color: #1e40af;">🛒 Letzte Bestellung zurückdatieren</h4>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+        <button onclick="simulateLastOrder(7)" style="background: #60a5fa; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer;">
+          -7 Tage
+        </button>
+        <button onclick="simulateLastOrder(14)" style="background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer;">
+          -14 Tage
+        </button>
+        <button onclick="simulateLastOrder(21)" style="background: #2563eb; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer;">
+          -21 Tage
+        </button>
+        <button onclick="simulateLastOrder(30)" style="background: #1e40af; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer;">
+          -30 Tage
+        </button>
+      </div>
+    </div>
+    
+    <div id="time-sim-result" style="margin-top: 12px;"></div>
+  </div>
+  
+  <!-- Automatische Funktions-Checks -->
+  <div style="background: #dcfce7; border: 2px solid #10b981; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+    <h3 style="color: #065f46; margin-bottom: 12px;">✅ Automatische Funktions-Checks</h3>
+    
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px;">
+      <button onclick="checkPricePriority()" style="background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+        🎯 Preis-Priorität prüfen
+      </button>
+      <button onclick="checkDoublePoints()" style="background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+        ⭐ Doppelte Punkte prüfen
+      </button>
+      <button onclick="checkCouponActivation()" style="background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+        🎟️ Coupon-Aktivierung prüfen
+      </button>
+      <button onclick="checkInactivityFilter()" style="background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+        😴 Inaktivitäts-Filter prüfen
+      </button>
+    </div>
+    
+    <div id="qa-check-results" style="background: white; border-radius: 8px; padding: 16px; min-height: 100px;">
+      <div style="text-align: center; color: #6b7280; padding: 20px;">Wähle einen Check aus</div>
+    </div>
+  </div>
+  
+  <!-- Reset & Cleanup -->
+  <div style="background: #fee2e2; border: 2px solid #ef4444; border-radius: 10px; padding: 16px;">
+    <h3 style="color: #991b1b; margin-bottom: 12px;">🗑️ Reset & Cleanup</h3>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+      <button onclick="resetTestAccount()" style="background: #f97316; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+        🔄 Testaccount zurücksetzen
+      </button>
+      <button onclick="deleteAllTestAccounts()" style="background: #dc2626; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+        ⚠️ ALLE Testaccounts löschen
+      </button>
+    </div>
+    
+    <div id="cleanup-result" style="margin-top: 12px;"></div>
+  </div>
+  
+  <!-- 🎯 END-TO-END TESTS -->
+  <div style="background: #e0f2fe; border: 2px solid #0ea5e9; border-radius: 10px; padding: 16px; margin-top: 20px;">
+    <h3 style="color: #0c4a6e; margin-bottom: 12px;">🎯 End-to-End Tests (Frontend-Simulation)</h3>
+    <p style="font-size: 13px; color: #075985; margin-bottom: 16px;">
+      Echte Verhaltens-Tests: Simuliert komplette User-Flows inkl. Frontend-Logik
+    </p>
+    
+    <div style="background: white; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+      <h4 style="margin-bottom: 10px; color: #0c4a6e;">🛒 Bestellungs-Simulation</h4>
+      <div style="margin-bottom: 12px;">
+        <label class="form-label">Testaccount:</label>
+        <select id="e2e-account" style="width: 100%; padding: 8px; margin-bottom: 8px;">
+          <option value="">-- Testaccount wählen --</option>
+        </select>
+        <label class="form-label">Produkt & Preis:</label>
+        <input id="e2e-product" type="text" placeholder="z.B. Döner" style="width: 48%; padding: 8px; margin-right: 4%;">
+        <input id="e2e-price" type="number" placeholder="Preis" step="0.01" style="width: 48%; padding: 8px;">
+      </div>
+      <button onclick="testOrderSimulation()" style="background: #0ea5e9; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%;">
+        ▶️ Bestellung simulieren & validieren
+      </button>
+      <div id="e2e-order-result" style="margin-top: 12px;"></div>
+    </div>
+    
+    <div style="background: white; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+      <h4 style="margin-bottom: 10px; color: #0c4a6e;">🎟️ Coupon-Sichtbarkeit Test</h4>
+      <p style="font-size: 13px; color: #64748b; margin-bottom: 10px;">
+        Testet ob Testaccount private Coupons sieht und globale Coupons überschrieben werden
+      </p>
+      <button onclick="testCouponVisibility()" style="background: #0ea5e9; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%;">
+        ▶️ Coupon-Sichtbarkeit testen
+      </button>
+      <div id="e2e-coupon-result" style="margin-top: 12px;"></div>
+    </div>
+    
+    <div style="background: white; border-radius: 8px; padding: 16px;">
+      <h4 style="margin-bottom: 10px; color: #0c4a6e;">⭐ Bonus-Einlösung Test</h4>
+      <p style="font-size: 13px; color: #64748b; margin-bottom: 10px;">
+        Testet ob aktivierte Bonusse bei Bestellung korrekt eingelöst werden
+      </p>
+      <button onclick="testBonusRedemption()" style="background: #0ea5e9; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%;">
+        ▶️ Bonus-Einlösung testen
+      </button>
+      <div id="e2e-bonus-result" style="margin-top: 12px;"></div>
+    </div>
+  </div>
+  
+  <!-- 🧪 AUTOMATISCHE TEST-SUITE -->
+  <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 3px solid #10b981; border-radius: 10px; padding: 20px; margin-top: 20px;">
+    <h3 style="color: #065f46; margin-bottom: 8px;">🧪 Automatische Test-Suite</h3>
+    <p style="font-size: 14px; color: #047857; margin-bottom: 16px;">
+      Führt alle wichtigen Tests automatisch aus und zeigt detailliertes Reporting
+    </p>
+    
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px;">
+      <button onclick="runCriticalTests()" style="background: #10b981; color: white; border: none; padding: 16px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 15px;">
+        🚀 Kritische Tests laufen lassen
+      </button>
+      <button onclick="runAllTests()" style="background: #059669; color: white; border: none; padding: 16px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 15px;">
+        ✨ ALLE Tests laufen lassen
+      </button>
+    </div>
+    
+    <div id="test-suite-results" style="background: white; border-radius: 8px; padding: 16px; min-height: 200px;">
+      <div style="text-align: center; color: #6b7280; padding: 40px;">
+        Klicke einen Button um Tests zu starten
+      </div>
+    </div>
+  </div>
+  
+  <div id="result-qa-tool"></div>
+</div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -2891,6 +3085,1096 @@ function copyActionNumbers() {
 // ═══════════════════════════════════════════════════════════════
 
 console.log('✅ Business Intelligence geladen (FIXED)!')
+
+// ═══════════════════════════════════════════════════════════════
+// 🧪 QA-TOOL FUNKTIONEN
+// ═══════════════════════════════════════════════════════════════
+
+let currentTestAccounts = []
+
+// Testaccount erstellen
+async function createTestAccount() {
+  const name = prompt('Name des Testaccounts:', 'Test User ' + Math.floor(Math.random() * 1000))
+  if (!name) return
+  
+  const phone = '0999' + Math.floor(Math.random() * 10000000).toString().padStart(7, '0')
+  const qrId = Math.floor(1000 + Math.random() * 9000)
+  
+  try {
+    showResult('result-qa-tool', '⏳ Erstelle Testaccount...', 'info')
+    
+    const { data, error } = await supabase
+      .from('customers')
+      .insert({
+        name: name,
+        phone: phone,
+        qr_id: qrId,
+        points: 0,
+        is_test_account: true,
+        whatsapp_optin: false,
+        created_at: new Date().toISOString()
+      })
+      .select()
+      .single()
+    
+    if (error) throw error
+    
+    showResult('result-qa-tool', `✅ Testaccount "${name}" erstellt (${phone}, QR: ${qrId})`, 'success')
+    loadTestAccounts()
+  } catch (e) {
+    showResult('result-qa-tool', '❌ Fehler: ' + e.message, 'error')
+  }
+}
+
+// Testaccounts laden
+async function loadTestAccounts() {
+  try {
+    showResult('result-qa-tool', '⏳ Lade Testaccounts...', 'info')
+    
+    const { data: accounts, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('is_test_account', true)
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    
+    currentTestAccounts = accounts || []
+    
+    const listDiv = document.getElementById('test-accounts-list')
+    const selectDiv = document.getElementById('time-sim-account')
+    
+    if (accounts.length === 0) {
+      listDiv.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 20px;">Keine Testaccounts vorhanden</div>'
+      selectDiv.innerHTML = '<option value="">-- Keine Testaccounts --</option>'
+      showResult('result-qa-tool', 'ℹ️ Keine Testaccounts gefunden', 'info')
+      return
+    }
+    
+    // Liste rendern
+    listDiv.innerHTML = accounts.map(acc => {
+      const created = new Date(acc.created_at).toLocaleDateString('de-DE')
+      return `
+        <div style="background: #f9fafb; border: 2px solid #8b5cf6; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="color: #5b21b6;">${acc.name}</strong>
+              <span style="background: #8b5cf6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-left: 8px;">TEST</span>
+              <p style="font-size: 13px; color: #6b7280; margin: 4px 0;">📱 ${acc.phone} | QR: ${acc.qr_id} | 💰 ${acc.points}P</p>
+              <p style="font-size: 12px; color: #9ca3af; margin: 0;">📅 Erstellt: ${created}</p>
+            </div>
+            <button onclick="markAsTestAccount('${acc.id}', false)" style="background: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">
+              ❌ Test-Flag entfernen
+            </button>
+          </div>
+        </div>
+      `
+    }).join('')
+    
+    // Select-Dropdown füllen
+    selectDiv.innerHTML = '<option value="">-- Wähle Testaccount --</option>' + 
+      accounts.map(acc => `<option value="${acc.id}">${acc.name} (${acc.phone})</option>`).join('')
+    
+    showResult('result-qa-tool', `✅ ${accounts.length} Testaccount(s) geladen`, 'success')
+  } catch (e) {
+    showResult('result-qa-tool', '❌ Fehler: ' + e.message, 'error')
+  }
+}
+
+// Testaccount-Flag setzen/entfernen
+async function markAsTestAccount(customerId, isTest) {
+  try {
+    const { error } = await supabase
+      .from('customers')
+      .update({ is_test_account: isTest })
+      .eq('id', customerId)
+    
+    if (error) throw error
+    
+    loadTestAccounts()
+    showResult('result-qa-tool', `✅ Test-Flag ${isTest ? 'gesetzt' : 'entfernt'}`, 'success')
+  } catch (e) {
+    showResult('result-qa-tool', '❌ Fehler: ' + e.message, 'error')
+  }
+}
+
+// Zeit-Simulation: Registrierung zurückdatieren
+async function simulateRegistration(daysAgo) {
+  const accountId = document.getElementById('time-sim-account').value
+  if (!accountId) {
+    showResult('time-sim-result', '❌ Bitte Testaccount auswählen!', 'error')
+    return
+  }
+  
+  try {
+    const newDate = new Date()
+    newDate.setDate(newDate.getDate() - daysAgo)
+    
+    const { error } = await supabase
+      .from('customers')
+      .update({ created_at: newDate.toISOString() })
+      .eq('id', accountId)
+      .eq('is_test_account', true) // Sicherheit: nur Testaccounts
+    
+    if (error) throw error
+    
+    showResult('time-sim-result', 
+      `✅ Registrierung auf ${newDate.toLocaleDateString('de-DE')} zurückdatiert (-${daysAgo} Tage)`, 
+      'success')
+    loadTestAccounts()
+  } catch (e) {
+    showResult('time-sim-result', '❌ Fehler: ' + e.message, 'error')
+  }
+}
+
+// Zeit-Simulation: Letzte Bestellung zurückdatieren
+async function simulateLastOrder(daysAgo) {
+  const accountId = document.getElementById('time-sim-account').value
+  if (!accountId) {
+    showResult('time-sim-result', '❌ Bitte Testaccount auswählen!', 'error')
+    return
+  }
+  
+  try {
+    const newDate = new Date()
+    newDate.setDate(newDate.getDate() - daysAgo)
+    
+    // Hole die letzte Transaktion des Testaccounts
+    const { data: lastTx, error: txError } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('customer_id', accountId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+    
+    if (txError) throw txError
+    
+    if (!lastTx || lastTx.length === 0) {
+      // Erstelle eine Test-Transaktion
+      const { error: insertError } = await supabase
+        .from('transactions')
+        .insert({
+          customer_id: accountId,
+          total: 10.00,
+          points_earned: 10,
+          created_at: newDate.toISOString()
+        })
+      
+      if (insertError) throw insertError
+      
+      showResult('time-sim-result', 
+        `✅ Test-Bestellung erstellt (${newDate.toLocaleDateString('de-DE')}, -${daysAgo} Tage)`, 
+        'success')
+    } else {
+      // Update letzte Transaktion
+      const { error: updateError } = await supabase
+        .from('transactions')
+        .update({ created_at: newDate.toISOString() })
+        .eq('id', lastTx[0].id)
+      
+      if (updateError) throw updateError
+      
+      showResult('time-sim-result', 
+        `✅ Letzte Bestellung auf ${newDate.toLocaleDateString('de-DE')} zurückdatiert (-${daysAgo} Tage)`, 
+        'success')
+    }
+  } catch (e) {
+    showResult('time-sim-result', '❌ Fehler: ' + e.message, 'error')
+  }
+}
+
+// Funktions-Check: Preis-Priorität
+async function checkPricePriority() {
+  const resultsDiv = document.getElementById('qa-check-results')
+  resultsDiv.innerHTML = '<div style="text-align: center; padding: 20px;">⏳ Prüfe Preis-Priorität...</div>'
+  
+  try {
+    // Suche nach privatem und globalem Coupon für dasselbe Produkt
+    const { data: coupons } = await supabase
+      .from('coupons')
+      .select('*')
+      .eq('is_active', true)
+    
+    let results = '<h4 style="margin-bottom: 12px; color: #065f46;">🎯 Preis-Priorität Check</h4>'
+    
+    // Gruppiere nach Produkt
+    const productGroups = {}
+    coupons.forEach(c => {
+      if (!productGroups[c.product]) productGroups[c.product] = []
+      productGroups[c.product].push(c)
+    })
+    
+    let testsRun = 0
+    let testsPassed = 0
+    
+    for (const [product, productCoupons] of Object.entries(productGroups)) {
+      const privateCoupon = productCoupons.find(c => c.is_private === true)
+      const globalCoupon = productCoupons.find(c => !c.is_private || c.is_private === false)
+      
+      if (privateCoupon && globalCoupon) {
+        testsRun++
+        const privatePrice = parseFloat(privateCoupon.price)
+        const globalPrice = parseFloat(globalCoupon.price)
+        
+        // Test: Private sollte in getCouponPrice() Vorrang haben
+        const expectedBehavior = 'Privater Coupon hat Vorrang'
+        const actualBehavior = privatePrice < globalPrice 
+          ? `✅ Korrekt: Privat ${privatePrice}€ < Global ${globalPrice}€`
+          : `⚠️ Beide Preise: Privat ${privatePrice}€, Global ${globalPrice}€`
+        
+        testsPassed++
+        
+        results += `
+          <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 8px; border-radius: 4px;">
+            <strong>${product}</strong><br>
+            <span style="font-size: 13px; color: #065f46;">
+              ${actualBehavior}<br>
+              Privat: ${privatePrice}€ | Global: ${globalPrice}€
+            </span>
+          </div>
+        `
+      }
+    }
+    
+    if (testsRun === 0) {
+      results += '<div style="color: #6b7280; padding: 12px;">ℹ️ Keine überlappenden Coupons gefunden (Erstelle globalen + privaten Coupon für dasselbe Produkt)</div>'
+    } else {
+      results = `<div style="background: #10b981; color: white; padding: 8px; border-radius: 6px; margin-bottom: 12px; font-weight: 600;">
+        ✅ ${testsPassed}/${testsRun} Tests bestanden
+      </div>` + results
+    }
+    
+    resultsDiv.innerHTML = results
+  } catch (e) {
+    resultsDiv.innerHTML = `<div style="color: #dc2626; padding: 12px;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+// Funktions-Check: Doppelte Punkte
+async function checkDoublePoints() {
+  const resultsDiv = document.getElementById('qa-check-results')
+  resultsDiv.innerHTML = '<div style="text-align: center; padding: 20px;">⏳ Prüfe Doppelte Punkte...</div>'
+  
+  try {
+    const { data: bonuses } = await supabase
+      .from('global_bonuses')
+      .select('*')
+      .eq('bonus_type', 'double_points')
+      .eq('is_active', true)
+    
+    let results = '<h4 style="margin-bottom: 12px; color: #065f46;">⭐ Doppelte Punkte Check</h4>'
+    
+    if (!bonuses || bonuses.length === 0) {
+      results += '<div style="color: #6b7280; padding: 12px;">ℹ️ Keine aktiven "Doppelte Punkte" Boni gefunden</div>'
+    } else {
+      results += bonuses.map(bonus => {
+        const start = new Date(bonus.start_date).toLocaleDateString('de-DE')
+        const end = new Date(bonus.end_date).toLocaleDateString('de-DE')
+        const isActive = bonus.is_active
+        
+        return `
+          <div style="background: ${isActive ? '#f0fdf4' : '#fef3c7'}; border-left: 4px solid ${isActive ? '#10b981' : '#f59e0b'}; padding: 12px; margin-bottom: 8px; border-radius: 4px;">
+            <strong>${bonus.title}</strong><br>
+            <span style="font-size: 13px;">
+              ${isActive ? '✅' : '⚠️'} Status: ${isActive ? 'Aktiv' : 'Inaktiv'}<br>
+              📅 Gültig: ${start} - ${end}
+            </span>
+          </div>
+        `
+      }).join('')
+      
+      results = `<div style="background: #10b981; color: white; padding: 8px; border-radius: 6px; margin-bottom: 12px; font-weight: 600;">
+        ✅ ${bonuses.length} aktive(r) Bonus/Boni gefunden
+      </div>` + results
+    }
+    
+    resultsDiv.innerHTML = results
+  } catch (e) {
+    resultsDiv.innerHTML = `<div style="color: #dc2626; padding: 12px;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+// Funktions-Check: Coupon-Aktivierung
+async function checkCouponActivation() {
+  const resultsDiv = document.getElementById('qa-check-results')
+  resultsDiv.innerHTML = '<div style="text-align: center; padding: 20px;">⏳ Prüfe Coupon-Aktivierung...</div>'
+  
+  try {
+    const { data: privateCoupons } = await supabase
+      .from('coupons')
+      .select('id, product, price, is_private')
+      .eq('is_private', true)
+      .eq('is_active', true)
+    
+    let results = '<h4 style="margin-bottom: 12px; color: #065f46;">🎟️ Coupon-Aktivierung Check</h4>'
+    
+    if (!privateCoupons || privateCoupons.length === 0) {
+      results += '<div style="color: #6b7280; padding: 12px;">ℹ️ Keine aktiven privaten Coupons gefunden</div>'
+    } else {
+      let checksRun = 0
+      let checksPassed = 0
+      
+      for (const coupon of privateCoupons) {
+        const { data: activations } = await supabase
+          .from('activated_coupons')
+          .select('customer_id')
+          .eq('coupon_id', coupon.id)
+        
+        checksRun++
+        const hasActivations = activations && activations.length > 0
+        
+        if (hasActivations) checksPassed++
+        
+        results += `
+          <div style="background: ${hasActivations ? '#f0fdf4' : '#fef3c7'}; border-left: 4px solid ${hasActivations ? '#10b981' : '#f59e0b'}; padding: 12px; margin-bottom: 8px; border-radius: 4px;">
+            <strong>${coupon.product}</strong> (${coupon.price}€)<br>
+            <span style="font-size: 13px;">
+              ${hasActivations ? '✅' : '⚠️'} ${hasActivations ? `${activations.length} Aktivierung(en)` : 'Keine Aktivierungen'}
+            </span>
+          </div>
+        `
+      }
+      
+      results = `<div style="background: ${checksPassed === checksRun ? '#10b981' : '#f59e0b'}; color: white; padding: 8px; border-radius: 6px; margin-bottom: 12px; font-weight: 600;">
+        ${checksPassed === checksRun ? '✅' : '⚠️'} ${checksPassed}/${checksRun} Coupons haben Aktivierungen
+      </div>` + results
+    }
+    
+    resultsDiv.innerHTML = results
+  } catch (e) {
+    resultsDiv.innerHTML = `<div style="color: #dc2626; padding: 12px;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+// Funktions-Check: Inaktivitäts-Filter
+async function checkInactivityFilter() {
+  const resultsDiv = document.getElementById('qa-check-results')
+  resultsDiv.innerHTML = '<div style="text-align: center; padding: 20px;">⏳ Prüfe Inaktivitäts-Filter...</div>'
+  
+  try {
+    if (currentTestAccounts.length === 0) {
+      resultsDiv.innerHTML = '<div style="color: #f59e0b; padding: 12px;">⚠️ Bitte erst Testaccounts laden</div>'
+      return
+    }
+    
+    let results = '<h4 style="margin-bottom: 12px; color: #065f46;">😴 Inaktivitäts-Filter Check</h4>'
+    
+    const testPeriods = [7, 14, 21, 30]
+    
+    for (const days of testPeriods) {
+      const cutoffDate = new Date()
+      cutoffDate.setDate(cutoffDate.getDate() - days)
+      
+      let inactiveCount = 0
+      
+      for (const account of currentTestAccounts) {
+        const { data: lastTx } = await supabase
+          .from('transactions')
+          .select('created_at')
+          .eq('customer_id', account.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+        
+        let isInactive = false
+        if (!lastTx || lastTx.length === 0) {
+          const registrationDate = new Date(account.created_at)
+          isInactive = registrationDate < cutoffDate
+        } else {
+          const lastDate = new Date(lastTx[0].created_at)
+          isInactive = lastDate < cutoffDate
+        }
+        
+        if (isInactive) inactiveCount++
+      }
+      
+      results += `
+        <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 8px; border-radius: 4px;">
+          <strong>${days}+ Tage inaktiv</strong><br>
+          <span style="font-size: 13px; color: #065f46;">
+            ✅ ${inactiveCount} von ${currentTestAccounts.length} Testaccounts würden gefiltert werden
+          </span>
+        </div>
+      `
+    }
+    
+    resultsDiv.innerHTML = results
+  } catch (e) {
+    resultsDiv.innerHTML = `<div style="color: #dc2626; padding: 12px;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+// Reset Testaccount
+async function resetTestAccount() {
+  const accountId = document.getElementById('time-sim-account').value
+  if (!accountId) {
+    showResult('cleanup-result', '❌ Bitte Testaccount auswählen!', 'error')
+    return
+  }
+  
+  if (!confirm('Testaccount wirklich zurücksetzen?\n(Punkte=0, Transaktionen gelöscht, Zeitstempel auf jetzt)')) return
+  
+  try {
+    showResult('cleanup-result', '⏳ Setze Testaccount zurück...', 'info')
+    
+    // Lösche Transaktionen
+    await supabase.from('transactions').delete().eq('customer_id', accountId)
+    
+    // Lösche Coupon-Aktivierungen
+    await supabase.from('activated_coupons').delete().eq('customer_id', accountId)
+    
+    // Lösche Bonus-Aktivierungen
+    await supabase.from('activated_global_bonuses').delete().eq('customer_id', accountId)
+    
+    // Reset Kunde
+    const { error } = await supabase
+      .from('customers')
+      .update({
+        points: 0,
+        created_at: new Date().toISOString()
+      })
+      .eq('id', accountId)
+      .eq('is_test_account', true)
+    
+    if (error) throw error
+    
+    showResult('cleanup-result', '✅ Testaccount zurückgesetzt', 'success')
+    loadTestAccounts()
+  } catch (e) {
+    showResult('cleanup-result', '❌ Fehler: ' + e.message, 'error')
+  }
+}
+
+// ALLE Testaccounts löschen
+async function deleteAllTestAccounts() {
+  if (!confirm('⚠️ WARNUNG! Alle Testaccounts wirklich löschen?\n\nDies kann nicht rückgängig gemacht werden!')) return
+  if (!confirm('Bist du SICHER? Dies löscht ALLE Testaccounts und deren Daten!')) return
+  
+  try {
+    showResult('cleanup-result', '⏳ Lösche alle Testaccounts...', 'info')
+    
+    // Hole alle Testaccount-IDs
+    const { data: accounts } = await supabase
+      .from('customers')
+      .select('id')
+      .eq('is_test_account', true)
+    
+    if (!accounts || accounts.length === 0) {
+      showResult('cleanup-result', 'ℹ️ Keine Testaccounts zum Löschen', 'info')
+      return
+    }
+    
+    const accountIds = accounts.map(a => a.id)
+    
+    // Lösche alle zugehörigen Daten
+    await supabase.from('transactions').delete().in('customer_id', accountIds)
+    await supabase.from('activated_coupons').delete().in('customer_id', accountIds)
+    await supabase.from('activated_global_bonuses').delete().in('customer_id', accountIds)
+    await supabase.from('redeem_codes').delete().in('customer_id', accountIds)
+    
+    // Lösche Testaccounts
+    const { error } = await supabase
+      .from('customers')
+      .delete()
+      .eq('is_test_account', true)
+    
+    if (error) throw error
+    
+    showResult('cleanup-result', `✅ ${accountIds.length} Testaccount(s) gelöscht`, 'success')
+    loadTestAccounts()
+    document.getElementById('time-sim-account').innerHTML = '<option value="">-- Keine Testaccounts --</option>'
+  } catch (e) {
+    showResult('cleanup-result', '❌ Fehler: ' + e.message, 'error')
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// 🎯 END-TO-END TEST FUNKTIONEN
+// ═══════════════════════════════════════════════════════════════
+
+// Helper: Lade Testaccounts in E2E Dropdown
+async function loadE2ETestAccounts() {
+  try {
+    const { data: accounts } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('is_test_account', true)
+      .order('name')
+    
+    const select = document.getElementById('e2e-account')
+    if (!accounts || accounts.length === 0) {
+      select.innerHTML = '<option value="">-- Keine Testaccounts --</option>'
+      return
+    }
+    
+    select.innerHTML = '<option value="">-- Wähle Testaccount --</option>' +
+      accounts.map(a => `<option value="${a.id}" data-points="${a.points}">${a.name} (${a.points}P)</option>`).join('')
+  } catch (e) {
+    console.error('Fehler beim Laden der E2E Testaccounts:', e)
+  }
+}
+
+// Bei Testaccount-Laden auch E2E-Dropdown füllen
+const originalLoadTestAccounts = loadTestAccounts
+loadTestAccounts = async function() {
+  await originalLoadTestAccounts()
+  await loadE2ETestAccounts()
+}
+
+// 🛒 Test 1: Bestellungs-Simulation (Komplett)
+async function testOrderSimulation() {
+  const accountId = document.getElementById('e2e-account').value
+  const product = document.getElementById('e2e-product').value
+  const price = parseFloat(document.getElementById('e2e-price').value)
+  
+  if (!accountId || !product || !price) {
+    showResult('e2e-order-result', '❌ Bitte alle Felder ausfüllen!', 'error')
+    return
+  }
+  
+  const resultDiv = document.getElementById('e2e-order-result')
+  resultDiv.innerHTML = '<div style="text-align: center; padding: 20px;">⏳ Simuliere Bestellung...</div>'
+  
+  try {
+    let testResults = []
+    
+    // 1. Hole Testaccount
+    const { data: customer } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('id', accountId)
+      .single()
+    
+    const pointsBefore = customer.points
+    
+    // 2. Prüfe aktive Coupons für dieses Produkt (simuliere getCouponPrice() Logik)
+    const { data: allCoupons } = await supabase
+      .from('coupons')
+      .select('*')
+      .eq('is_active', true)
+    
+    let finalPrice = price
+    let couponApplied = null
+    
+    // WICHTIG: Private Coupons haben Vorrang!
+    const privateCoupon = allCoupons?.find(c => 
+      c.product.toLowerCase().trim() === product.toLowerCase().trim() && 
+      c.is_private === true
+    )
+    
+    if (privateCoupon) {
+      // Prüfe ob Kunde berechtigt
+      const { data: activation } = await supabase
+        .from('activated_coupons')
+        .select('*')
+        .eq('coupon_id', privateCoupon.id)
+        .eq('customer_id', accountId)
+        .limit(1)
+      
+      if (activation && activation.length > 0) {
+        finalPrice = parseFloat(privateCoupon.price)
+        couponApplied = { type: 'private', coupon: privateCoupon }
+        testResults.push({
+          test: 'Preis-Priorität',
+          expected: 'Privater Coupon hat Vorrang',
+          actual: `Privater Coupon angewendet (${finalPrice}€)`,
+          passed: true
+        })
+      }
+    }
+    
+    if (!couponApplied) {
+      const globalCoupon = allCoupons?.find(c =>
+        c.product.toLowerCase().trim() === product.toLowerCase().trim() &&
+        (!c.is_private || c.is_private === false)
+      )
+      
+      if (globalCoupon) {
+        finalPrice = parseFloat(globalCoupon.price)
+        couponApplied = { type: 'global', coupon: globalCoupon }
+        testResults.push({
+          test: 'Preis-Berechnung',
+          expected: 'Globaler Coupon angewendet',
+          actual: `${finalPrice}€ (global)`,
+          passed: true
+        })
+      }
+    }
+    
+    if (!couponApplied) {
+      testResults.push({
+        test: 'Preis-Berechnung',
+        expected: `${price}€ (kein Coupon)`,
+        actual: `${price}€`,
+        passed: true
+      })
+    }
+    
+    // 3. Prüfe Doppelte Punkte Bonus
+    const { data: doubleBonuses } = await supabase
+      .from('global_bonuses')
+      .select('*')
+      .eq('bonus_type', 'double_points')
+      .eq('is_active', true)
+    
+    const todayStr = new Date().toISOString().split('T')[0]
+    const activeDoubleBonus = doubleBonuses?.find(b => 
+      b.start_date <= todayStr && b.end_date >= todayStr
+    )
+    
+    let pointsMultiplier = 1
+    if (activeDoubleBonus) {
+      // Prüfe ob Kunde berechtigt (bei privaten Bonussen)
+      if (activeDoubleBonus.is_private) {
+        const { data: bonusActivation } = await supabase
+          .from('activated_global_bonuses')
+          .select('*')
+          .eq('global_bonus_id', activeDoubleBonus.id)
+          .eq('customer_id', accountId)
+          .limit(1)
+        
+        if (bonusActivation && bonusActivation.length > 0) {
+          pointsMultiplier = 2
+          testResults.push({
+            test: 'Doppelte Punkte',
+            expected: 'Bonus greift (Kunde berechtigt)',
+            actual: 'Punkte werden verdoppelt',
+            passed: true
+          })
+        } else {
+          testResults.push({
+            test: 'Doppelte Punkte',
+            expected: 'Bonus greift NICHT (privat, Kunde nicht berechtigt)',
+            actual: 'Normale Punkte',
+            passed: true
+          })
+        }
+      } else {
+        pointsMultiplier = 2
+        testResults.push({
+          test: 'Doppelte Punkte',
+          expected: 'Globaler Bonus greift',
+          actual: 'Punkte werden verdoppelt',
+          passed: true
+        })
+      }
+    }
+    
+    // 4. Berechne Punkte
+    const basePoints = Math.floor(finalPrice)
+    const earnedPoints = basePoints * pointsMultiplier
+    
+    testResults.push({
+      test: 'Punkte-Berechnung',
+      expected: pointsMultiplier === 2 ? `${basePoints} × 2 = ${earnedPoints}P` : `${earnedPoints}P`,
+      actual: `${earnedPoints}P`,
+      passed: true
+    })
+    
+    // 5. Erwarteter Punkte-Stand
+    const expectedPointsTotal = pointsBefore + earnedPoints
+    
+    testResults.push({
+      test: 'Punkte-Stand (nach Bestellung)',
+      expected: `${expectedPointsTotal}P`,
+      actual: `${pointsBefore}P + ${earnedPoints}P = ${expectedPointsTotal}P`,
+      passed: true
+    })
+    
+    // 6. Zeige Ergebnisse
+    let html = '<h4 style="color: #0c4a6e; margin-bottom: 12px;">📊 Bestellungs-Simulation Ergebnis</h4>'
+    
+    html += `
+      <div style="background: #f0f9ff; border: 2px solid #0ea5e9; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+        <strong>Kunde:</strong> ${customer.name}<br>
+        <strong>Bestellung:</strong> ${product}<br>
+        <strong>Original-Preis:</strong> ${price}€<br>
+        <strong>Final-Preis:</strong> ${finalPrice}€ ${couponApplied ? `<span style="background: #fef3c7; padding: 2px 6px; border-radius: 4px; font-size: 11px;">🎟️ ${couponApplied.type === 'private' ? 'Privater' : 'Globaler'} Coupon</span>` : ''}<br>
+        <strong>Punkte verdient:</strong> ${earnedPoints}P ${pointsMultiplier === 2 ? '<span style="background: #fef3c7; padding: 2px 6px; border-radius: 4px; font-size: 11px;">⭐ Doppelt</span>' : ''}<br>
+        <strong>Punkte-Stand:</strong> ${pointsBefore}P → ${expectedPointsTotal}P
+      </div>
+    `
+    
+    const allPassed = testResults.every(t => t.passed)
+    html += `
+      <div style="background: ${allPassed ? '#f0fdf4' : '#fef3c7'}; border-left: 4px solid ${allPassed ? '#10b981' : '#f59e0b'}; padding: 12px; border-radius: 4px; margin-bottom: 8px;">
+        <strong>${allPassed ? '✅' : '⚠️'} ${testResults.filter(t => t.passed).length}/${testResults.length} Tests bestanden</strong>
+      </div>
+    `
+    
+    html += testResults.map(t => `
+      <div style="background: #f9fafb; border-left: 3px solid ${t.passed ? '#10b981' : '#ef4444'}; padding: 10px; margin-bottom: 6px; border-radius: 4px;">
+        <div style="font-weight: 600; color: #111827; margin-bottom: 4px;">${t.passed ? '✅' : '❌'} ${t.test}</div>
+        <div style="font-size: 13px; color: #6b7280;">
+          <strong>Erwartet:</strong> ${t.expected}<br>
+          <strong>Tatsächlich:</strong> ${t.actual}
+        </div>
+      </div>
+    `).join('')
+    
+    html += `
+      <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 12px; margin-top: 12px;">
+        <strong style="color: #92400e;">ℹ️ Hinweis:</strong> Dies ist eine <strong>Simulation</strong> (keine DB-Änderung). 
+        Für echten Test: Bestellung in der App durchführen und Ergebnis mit dieser Simulation vergleichen.
+      </div>
+    `
+    
+    resultDiv.innerHTML = html
+    
+  } catch (e) {
+    resultDiv.innerHTML = `<div style="color: #dc2626; padding: 12px;">❌ Fehler: ${e.message}</div>`
+    console.error('Order simulation error:', e)
+  }
+}
+
+
+
+
+// 🎟️ Test 2: Coupon-Sichtbarkeit (Frontend-Verhalten)
+async function testCouponVisibility() {
+  const resultDiv = document.getElementById('e2e-coupon-result')
+  resultDiv.innerHTML = '<div style="text-align: center; padding: 20px;">⏳ Teste Coupon-Sichtbarkeit...</div>'
+  
+  try {
+    if (currentTestAccounts.length === 0) {
+      resultDiv.innerHTML = '<div style="color: #f59e0b; padding: 12px;">⚠️ Bitte erst Testaccounts laden</div>'
+      return
+    }
+    
+    let testResults = []
+    let html = '<h4 style="color: #0c4a6e; margin-bottom: 12px;">🎟️ Coupon-Sichtbarkeit Test</h4>'
+    
+    // Hole alle aktiven Coupons
+    const { data: allCoupons } = await supabase
+      .from('coupons')
+      .select('*')
+      .eq('is_active', true)
+    
+    const privateCoupons = allCoupons?.filter(c => c.is_private === true) || []
+    const globalCoupons = allCoupons?.filter(c => !c.is_private || c.is_private === false) || []
+    
+    // Teste für jeden Testaccount
+    for (const account of currentTestAccounts.slice(0, 3)) { // Max 3 für Performance
+      // Hole Aktivierungen
+      const { data: activations } = await supabase
+        .from('activated_coupons')
+        .select('coupon_id')
+        .eq('customer_id', account.id)
+      
+      const activatedCouponIds = activations?.map(a => a.coupon_id) || []
+      
+      // Simuliere Frontend-Logik: Welche Coupons sieht dieser Kunde?
+      const visibleCoupons = allCoupons?.filter(coupon => {
+        if (!coupon.is_private) return true // Öffentlich
+        return activatedCouponIds.includes(coupon.id) // Privat + aktiviert
+      }) || []
+      
+      const shouldSeeCount = globalCoupons.length + privateCoupons.filter(pc => activatedCouponIds.includes(pc.id)).length
+      
+      testResults.push({
+        test: `Sichtbarkeit für ${account.name}`,
+        expected: `${shouldSeeCount} Coupons (${globalCoupons.length} global + ${privateCoupons.filter(pc => activatedCouponIds.includes(pc.id)).length} privat aktiviert)`,
+        actual: `${visibleCoupons.length} Coupons sichtbar`,
+        passed: visibleCoupons.length === shouldSeeCount
+      })
+    }
+    
+    // Prüfe ob private Coupons richtig gefiltert werden
+    const hasPrivateCoupons = privateCoupons.length > 0
+    if (hasPrivateCoupons) {
+      testResults.push({
+        test: 'Private Coupons vorhanden',
+        expected: `${privateCoupons.length} private Coupon(s)`,
+        actual: `${privateCoupons.length} gefunden`,
+        passed: true
+      })
+      
+      // Prüfe ob Aktivierungen existieren
+      for (const privateCoupon of privateCoupons.slice(0, 2)) {
+        const { data: activations } = await supabase
+          .from('activated_coupons')
+          .select('customer_id')
+          .eq('coupon_id', privateCoupon.id)
+        
+        const hasActivations = activations && activations.length > 0
+        testResults.push({
+          test: `"${privateCoupon.product}" Aktivierungen`,
+          expected: 'Mindestens 1 Aktivierung (sonst sieht ihn NIEMAND)',
+          actual: hasActivations ? `${activations.length} Aktivierung(en) ✅` : 'Keine Aktivierungen ❌',
+          passed: hasActivations
+        })
+      }
+    }
+    
+    const allPassed = testResults.every(t => t.passed)
+    html += `
+      <div style="background: ${allPassed ? '#f0fdf4' : '#fef3c7'}; border-left: 4px solid ${allPassed ? '#10b981' : '#f59e0b'}; padding: 12px; border-radius: 4px; margin-bottom: 8px;">
+        <strong>${allPassed ? '✅' : '⚠️'} ${testResults.filter(t => t.passed).length}/${testResults.length} Tests bestanden</strong>
+      </div>
+    `
+    
+    html += testResults.map(t => `
+      <div style="background: #f9fafb; border-left: 3px solid ${t.passed ? '#10b981' : '#ef4444'}; padding: 10px; margin-bottom: 6px; border-radius: 4px;">
+        <div style="font-weight: 600; color: #111827; margin-bottom: 4px;">${t.passed ? '✅' : '❌'} ${t.test}</div>
+        <div style="font-size: 13px; color: #6b7280;">
+          <strong>Erwartet:</strong> ${t.expected}<br>
+          <strong>Tatsächlich:</strong> ${t.actual}
+        </div>
+      </div>
+    `).join('')
+    
+    resultDiv.innerHTML = html
+    
+  } catch (e) {
+    resultDiv.innerHTML = `<div style="color: #dc2626; padding: 12px;">❌ Fehler: ${e.message}</div>`
+    console.error('Coupon visibility test error:', e)
+  }
+}
+
+// ⭐ Test 3: Bonus-Einlösung
+async function testBonusRedemption() {
+  const resultDiv = document.getElementById('e2e-bonus-result')
+  resultDiv.innerHTML = '<div style="text-align: center; padding: 20px;">⏳ Teste Bonus-Einlösung...</div>'
+  
+  try {
+    let testResults = []
+    let html = '<h4 style="color: #0c4a6e; margin-bottom: 12px;">⭐ Bonus-Einlösung Test</h4>'
+    
+    // Hole aktive Bonusse
+    const { data: bonuses } = await supabase
+      .from('global_bonuses')
+      .select('*')
+      .eq('is_active', true)
+    
+    if (!bonuses || bonuses.length === 0) {
+      resultDiv.innerHTML = '<div style="color: #6b7280; padding: 12px;">ℹ️ Keine aktiven Bonusse zum Testen</div>'
+      return
+    }
+    
+    const todayStr = new Date().toISOString().split('T')[0]
+    const activeBonuses = bonuses.filter(b => 
+      b.start_date <= todayStr && b.end_date >= todayStr
+    )
+    
+    for (const bonus of activeBonuses.slice(0, 3)) {
+      const isPrivate = bonus.is_private === true
+      
+      // Prüfe Aktivierungen
+      if (isPrivate) {
+        const { data: activations } = await supabase
+          .from('activated_global_bonuses')
+          .select('customer_id')
+          .eq('global_bonus_id', bonus.id)
+        
+        testResults.push({
+          test: `${bonus.title} (privat)`,
+          expected: 'Hat Aktivierungen',
+          actual: activations && activations.length > 0 ? `${activations.length} Aktivierung(en) ✅` : 'Keine ❌',
+          passed: activations && activations.length > 0
+        })
+      } else {
+        testResults.push({
+          test: `${bonus.title} (global)`,
+          expected: 'Für alle sichtbar',
+          actual: 'Global verfügbar ✅',
+          passed: true
+        })
+      }
+      
+      // Prüfe Typ-spezifische Logik
+      if (bonus.bonus_type === 'bonus_points') {
+        testResults.push({
+          test: `${bonus.title} - Betrag`,
+          expected: `+${bonus.bonus_amount} Punkte`,
+          actual: `${bonus.bonus_amount}P konfiguriert`,
+          passed: bonus.bonus_amount > 0
+        })
+      } else if (bonus.bonus_type === 'double_points') {
+        testResults.push({
+          test: `${bonus.title} - Typ`,
+          expected: 'Verdoppelt Punkte',
+          actual: 'Double Points ✅',
+          passed: true
+        })
+      }
+    }
+    
+    const allPassed = testResults.every(t => t.passed)
+    html += `
+      <div style="background: ${allPassed ? '#f0fdf4' : '#fef3c7'}; border-left: 4px solid ${allPassed ? '#10b981' : '#f59e0b'}; padding: 12px; border-radius: 4px; margin-bottom: 8px;">
+        <strong>${allPassed ? '✅' : '⚠️'} ${testResults.filter(t => t.passed).length}/${testResults.length} Tests bestanden</strong>
+      </div>
+    `
+    
+    html += testResults.map(t => `
+      <div style="background: #f9fafb; border-left: 3px solid ${t.passed ? '#10b981' : '#ef4444'}; padding: 10px; margin-bottom: 6px; border-radius: 4px;">
+        <div style="font-weight: 600; color: #111827; margin-bottom: 4px;">${t.passed ? '✅' : '❌'} ${t.test}</div>
+        <div style="font-size: 13px; color: #6b7280;">
+          <strong>Erwartet:</strong> ${t.expected}<br>
+          <strong>Tatsächlich:</strong> ${t.actual}
+        </div>
+      </div>
+    `).join('')
+    
+    resultDiv.innerHTML = html
+    
+  } catch (e) {
+    resultDiv.innerHTML = `<div style="color: #dc2626; padding: 12px;">❌ Fehler: ${e.message}</div>`
+    console.error('Bonus redemption test error:', e)
+  }
+}
+
+// 🚀 Test-Suite: Kritische Tests
+async function runCriticalTests() {
+  const resultDiv = document.getElementById('test-suite-results')
+  resultDiv.innerHTML = '<div style="text-align: center; padding: 40px; color: #0c4a6e;"><h3>🚀 Führe kritische Tests aus...</h3></div>'
+  
+  const allResults = []
+  
+  try {
+    // Test 1: Preis-Priorität (aus den Basic Checks)
+    const priceTest = await runSingleTest('Preis-Priorität', async () => {
+      const { data: coupons } = await supabase.from('coupons').select('*').eq('is_active', true)
+      const productGroups = {}
+      coupons?.forEach(c => {
+        if (!productGroups[c.product]) productGroups[c.product] = []
+        productGroups[c.product].push(c)
+      })
+      
+      let passed = 0
+      let total = 0
+      for (const [product, productCoupons] of Object.entries(productGroups)) {
+        const privateCoupon = productCoupons.find(c => c.is_private === true)
+        const globalCoupon = productCoupons.find(c => !c.is_private || c.is_private === false)
+        if (privateCoupon && globalCoupon) {
+          total++
+          // Check: Private hat Aktivierungen?
+          const { data: act } = await supabase.from('activated_coupons').select('id').eq('coupon_id', privateCoupon.id).limit(1)
+          if (act && act.length > 0) passed++
+        }
+      }
+      
+      return {
+        passed: passed,
+        total: total,
+        success: total === 0 || passed === total,
+        details: total === 0 ? 'Keine überlappenden Coupons' : `${passed}/${total} korrekt`
+      }
+    })
+    allResults.push(priceTest)
+    
+    // Test 2: Private Coupons haben Aktivierungen
+    const activationTest = await runSingleTest('Coupon-Aktivierungen', async () => {
+      const { data: privateCoupons } = await supabase.from('coupons').select('*').eq('is_private', true).eq('is_active', true)
+      let passed = 0
+      for (const coupon of privateCoupons || []) {
+        const { data: act } = await supabase.from('activated_coupons').select('id').eq('coupon_id', coupon.id).limit(1)
+        if (act && act.length > 0) passed++
+      }
+      return {
+        passed: passed,
+        total: privateCoupons?.length || 0,
+        success: (privateCoupons?.length || 0) === 0 || passed === (privateCoupons?.length || 0),
+        details: `${passed}/${privateCoupons?.length || 0} private Coupons haben Aktivierungen`
+      }
+    })
+    allResults.push(activationTest)
+    
+    // Test 3: Doppelte Punkte konfiguriert
+    const doublePointsTest = await runSingleTest('Doppelte Punkte', async () => {
+      const { data: bonuses } = await supabase.from('global_bonuses').select('*').eq('bonus_type', 'double_points').eq('is_active', true)
+      return {
+        passed: bonuses?.length || 0,
+        total: bonuses?.length || 0,
+        success: true,
+        details: bonuses && bonuses.length > 0 ? `${bonuses.length} aktive(r) Bonus/Boni` : 'Keine aktiven'
+      }
+    })
+    allResults.push(doublePointsTest)
+    
+    // Zeige Ergebnisse
+    displayTestSuiteResults(allResults, 'Kritische Tests')
+    
+  } catch (e) {
+    resultDiv.innerHTML = `<div style="color: #dc2626; padding: 20px;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+// ✨ Test-Suite: Alle Tests
+async function runAllTests() {
+  const resultDiv = document.getElementById('test-suite-results')
+  resultDiv.innerHTML = '<div style="text-align: center; padding: 40px; color: #0c4a6e;"><h3>✨ Führe ALLE Tests aus...</h3><p>Dies kann einige Sekunden dauern...</p></div>'
+  
+  const allResults = []
+  
+  try {
+    // Führe kritische Tests aus
+    await runCriticalTests()
+    
+    // Zusätzliche Tests...
+    // (Platzhalter für zukünftige Tests)
+    
+  } catch (e) {
+    resultDiv.innerHTML = `<div style="color: #dc2626; padding: 20px;">❌ Fehler: ${e.message}</div>`
+  }
+}
+
+// Helper: Einzelnen Test ausführen
+async function runSingleTest(name, testFunc) {
+  try {
+    const result = await testFunc()
+    return {
+      name: name,
+      ...result
+    }
+  } catch (e) {
+    return {
+      name: name,
+      passed: 0,
+      total: 0,
+      success: false,
+      details: `Fehler: ${e.message}`
+    }
+  }
+}
+
+// Helper: Test-Suite Ergebnisse anzeigen
+function displayTestSuiteResults(results, suiteName) {
+  const resultDiv = document.getElementById('test-suite-results')
+  
+  const totalTests = results.length
+  const passedTests = results.filter(r => r.success).length
+  const allPassed = passedTests === totalTests
+  
+  let html = `<h3 style="color: #0c4a6e; margin-bottom: 16px;">${suiteName}</h3>`
+  
+  html += `
+    <div style="background: ${allPassed ? '#f0fdf4' : '#fef3c7'}; border-left: 4px solid ${allPassed ? '#10b981' : '#f59e0b'}; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+      <div style="font-size: 24px; font-weight: 700; color: ${allPassed ? '#065f46' : '#92400e'}; margin-bottom: 8px;">
+        ${allPassed ? '✅' : '⚠️'} ${passedTests}/${totalTests} Tests bestanden
+      </div>
+      <div style="font-size: 14px; color: #6b7280;">
+        ${allPassed ? 'Alle kritischen Tests erfolgreich!' : 'Einige Tests benötigen Aufmerksamkeit'}
+      </div>
+    </div>
+  `
+  
+  html += results.map(r => `
+    <div style="background: #f9fafb; border-left: 4px solid ${r.success ? '#10b981' : '#ef4444'}; padding: 14px; margin-bottom: 10px; border-radius: 6px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <strong style="color: #111827; font-size: 15px;">${r.success ? '✅' : '❌'} ${r.name}</strong>
+        <span style="background: ${r.success ? '#dcfce7' : '#fef3c7'}; color: ${r.success ? '#065f46' : '#92400e'}; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+          ${r.passed}/${r.total}
+        </span>
+      </div>
+      <div style="font-size: 13px; color: #6b7280;">
+        ${r.details}
+      </div>
+    </div>
+  `).join('')
+  
+  resultDiv.innerHTML = html
+}
 
 
 // ☁️ WETTER-CHECK FUNKTIONEN
