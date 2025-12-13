@@ -147,15 +147,15 @@ textarea { resize: vertical; min-height: 60px; }
       <h3 style="color: #111827; margin-bottom: 12px;">1️⃣ Zielgruppe auswählen</h3>
       
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px;">
-        <!-- Inaktivitäts-Filter (Bucket-Logik) -->
+        <!-- Inaktivitäts-Filter -->
         <div>
-          <label class="form-label">⏰ Inaktivität (exklusive Segmente)</label>
+          <label class="form-label">⏰ Inaktivität</label>
           <select id="target-inactive-days">
             <option value="0">Alle (keine Filterung)</option>
-            <option value="7">7-13 Tage inaktiv</option>
-            <option value="14">14-20 Tage inaktiv</option>
-            <option value="21">21-29 Tage inaktiv</option>
-            <option value="30">30-59 Tage inaktiv</option>
+            <option value="7">7+ Tage inaktiv</option>
+            <option value="14">14+ Tage inaktiv</option>
+            <option value="21">21+ Tage inaktiv</option>
+            <option value="30">30+ Tage inaktiv</option>
             <option value="60">60+ Tage inaktiv</option>
           </select>
         </div>
@@ -192,19 +192,42 @@ textarea { resize: vertical; min-height: 60px; }
         </label>
       </div>
       
-      <button class="success" onclick="createActionDirectly()" style="margin-top: 8px;">
+      <button class="success" onclick="previewTargetGroup()" style="margin-top: 8px;">
+        🔍 Vorschau zeigen
+      </button>
+    </div>
+
+    <!-- Schritt 2: Preview der Kundengruppe -->
+    <div id="target-preview" style="display: none; background: #f9fafb; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #111827; margin-bottom: 12px;">2️⃣ Deine Zielgruppe</h3>
+      
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
+          <div style="font-size: 32px; font-weight: 700; color: #10b981;" id="target-count">0</div>
+          <div style="font-size: 13px; color: #6b7280;">Berechtigte Kunden</div>
+        </div>
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
+          <div style="font-size: 32px; font-weight: 700; color: #3b82f6;" id="target-avg-points">0</div>
+          <div style="font-size: 13px; color: #6b7280;">Ø Punkte</div>
+        </div>
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 8px;">
+          <div style="font-size: 32px; font-weight: 700; color: #f59e0b;" id="target-avg-orders">0</div>
+          <div style="font-size: 13px; color: #6b7280;">Ø Bestellungen</div>
+        </div>
+      </div>
+      
+      <div id="target-customer-list" style="max-height: 200px; overflow-y: auto; background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+        <!-- Wird dynamisch gefüllt -->
+      </div>
+      
+      <button class="success" onclick="showActionCreator()">
         ➡️ Weiter zur Aktion
       </button>
     </div>
 
-    <!-- Schritt 2: Preview der Kundengruppe (AUSGEBLENDET - auf Nutzer-Anfrage) -->
-    <div id="target-preview" style="display: none !important;">
-      <!-- Section komplett ausgeblendet -->
-    </div>
-
-    <!-- Schritt 2: Aktion erstellen (früher Schritt 3) -->
+    <!-- Schritt 3: Aktion erstellen -->
     <div id="action-creator" style="display: none; background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-      <h3 style="color: #92400e; margin-bottom: 12px;">2️⃣ Aktion erstellen</h3>
+      <h3 style="color: #92400e; margin-bottom: 12px;">3️⃣ Aktion erstellen</h3>
       
       <label class="form-label">🎁 Aktionstyp</label>
       <select id="action-type" onchange="toggleActionFields()">
@@ -247,29 +270,14 @@ textarea { resize: vertical; min-height: 60px; }
         </div>
       </div>
       
-      <!-- WhatsApp Export Buttons -->
-      <div style="background: #dcfce7; border: 2px solid #25D366; border-radius: 8px; padding: 12px; margin-bottom: 12px; margin-top: 12px;">
-        <h4 style="color: #166534; margin-bottom: 8px; font-size: 14px;">📱 WhatsApp Export (Zielgruppe)</h4>
-        <p style="font-size: 13px; color: #166534; margin-bottom: 8px;">Exportiere Telefonnummern deiner Zielgruppe:</p>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <button onclick="copyTargetPhoneNumbers()" style="padding: 10px; background: #25D366; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
-            📋 Nummern kopieren
-          </button>
-          <button onclick="downloadTargetPhoneCSV()" style="padding: 10px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
-            📥 CSV exportieren
-          </button>
-        </div>
-        <div id="export-result" style="margin-top: 8px; font-size: 13px; color: #166534;"></div>
-      </div>
-      
       <button class="success" onclick="createTargetedAction()" style="margin-top: 12px;">
         🚀 Aktion erstellen & WhatsApp vorbereiten
       </button>
     </div>
 
-    <!-- Schritt 3: WhatsApp-Export (früher Schritt 4) -->
+    <!-- Schritt 4: WhatsApp-Export -->
     <div id="action-whatsapp" style="display: none; background: #d1fae5; border: 2px solid #10b981; border-radius: 10px; padding: 16px;">
-      <h3 style="color: #065f46; margin-bottom: 12px;">3️⃣ WhatsApp-Versand</h3>
+      <h3 style="color: #065f46; margin-bottom: 12px;">4️⃣ WhatsApp-Versand</h3>
       
       <div style="margin-bottom: 16px;">
         <label class="form-label" style="color: #065f46;">📋 Nummern kopieren:</label>
@@ -390,7 +398,63 @@ textarea { resize: vertical; min-height: 60px; }
     </div>
   </div>
 
-  <!-- ✅ WhatsApp Marketing Card entfernt (auf Anfrage des Nutzers) -->
+  <div class="card">
+    <h2>📱 WhatsApp Marketing</h2>
+    <p class="subtitle">Verwalte WhatsApp-Benachrichtigungen für deine Kunden</p>
+    
+    <div style="background: #dcfce7; border: 2px solid #25D366; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="color: #166534; margin-bottom: 8px;">✅ WhatsApp Business App Setup</h3>
+      <p style="font-size: 14px; color: #166534; margin-bottom: 12px;">
+        Für den Start nutze einfach die <strong>kostenlose WhatsApp Business App</strong>:
+      </p>
+      <ol style="font-size: 13px; color: #166534; margin-left: 20px;">
+        <li>WhatsApp Business App herunterladen</li>
+        <li>Geschäftsnummer einrichten</li>
+        <li>Broadcast-Liste erstellen (max. 256 Kontakte)</li>
+        <li>Telefonnummern exportieren (Button unten)</li>
+        <li>Nummern in Broadcast-Liste importieren</li>
+      </ol>
+      <p style="font-size: 12px; color: #166534; margin-top: 12px; font-style: italic;">
+        💡 Tipp: Ab ~100 Kunden mit Opt-In lohnt sich WhatsApp Business API mit Automatisierung!
+      </p>
+    </div>
+
+    <div style="background: #f9fafb; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+      <h3 style="margin-bottom: 12px;">📊 Übersicht</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+        <div style="background: white; padding: 12px; border-radius: 8px; border: 2px solid #e5e7eb;">
+          <div style="font-size: 24px; font-weight: 700; color: #25D366;" id="wa-total-optins">0</div>
+          <div style="font-size: 12px; color: #6b7280;">WhatsApp aktiviert</div>
+        </div>
+        <div style="background: white; padding: 12px; border-radius: 8px; border: 2px solid #e5e7eb;">
+          <div style="font-size: 24px; font-weight: 700; color: #F9A825;" id="wa-total-customers">0</div>
+          <div style="font-size: 12px; color: #6b7280;">Gesamt-Kunden</div>
+        </div>
+        <div style="background: white; padding: 12px; border-radius: 8px; border: 2px solid #e5e7eb;">
+          <div style="font-size: 24px; font-weight: 700; color: #E31E24;" id="wa-optin-rate">0%</div>
+          <div style="font-size: 12px; color: #6b7280;">Opt-In Rate</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px; padding: 16px;">
+      <h3 style="color: #92400e; margin-bottom: 12px;">📤 Telefonnummern exportieren</h3>
+      <p style="font-size: 14px; color: #92400e; margin-bottom: 12px;">
+        Exportiere alle Telefonnummern von Kunden mit WhatsApp-Opt-In für deine Broadcast-Liste:
+      </p>
+      <button class="success" onclick="exportWhatsAppNumbers()">📥 WhatsApp-Nummern exportieren</button>
+      <div id="result-wa-export"></div>
+      
+      <div id="wa-numbers-list" style="display: none; margin-top: 16px; background: white; padding: 12px; border-radius: 8px; max-height: 300px; overflow-y: auto;">
+        <h4 style="margin-bottom: 8px; font-size: 14px;">Kopiere diese Nummern:</h4>
+        <textarea id="wa-numbers-textarea" readonly style="width: 100%; min-height: 150px; font-family: monospace; font-size: 13px; padding: 8px;"></textarea>
+        <button onclick="copyWhatsAppNumbers()" style="margin-top: 8px; padding: 8px 16px; background: #25D366; color: white; border: none; border-radius: 6px; cursor: pointer;">
+          📋 In Zwischenablage kopieren
+        </button>
+      </div>
+    </div>
+
+  </div>
 
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -482,21 +546,6 @@ textarea { resize: vertical; min-height: 60px; }
     document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:50px;background:#1a1a1a;min-height:100vh;color:#ff4444;display:flex;flex-direction:column;align-items:center;justify-content:center;"><h1 style="font-size:48px;margin-bottom:20px;">⛔</h1><h2>LIZENZFEHLER</h2><p style="margin-top:15px;">Die Lizenzprüfung ist fehlgeschlagen.</p><p style="font-size:12px;color:#666;margin-top:30px;">© Döner Boxx - Alle Rechte vorbehalten</p></div>';
     throw new Error('Invalid license');
   }
-})();
-
-// ═══════════════════════════════════════════════════════════════
-// 🐛 DEBUG: Alert Hook mit Trace
-// ═══════════════════════════════════════════════════════════════
-(function() {
-  const originalAlert = window.alert;
-  window.alert = function(message) {
-    console.log('🚨 ===== ALERT HOOK =====');
-    console.log('Message:', message);
-    console.log('Stack Trace:');
-    console.trace();
-    console.log('========================');
-    return originalAlert.call(window, message);
-  };
 })();
 // ═══════════════════════════════════════════════════════════════
 
@@ -729,10 +778,13 @@ async function loadAllCustomers() {
     document.getElementById('totalTransactions').textContent = txCount || 0
     document.getElementById('totalCodes').textContent = codeCount || 0
     
-    // WhatsApp Stats (nur für Dashboard-Stat, nicht für entfernte Card)
+    // WhatsApp Stats
     const whatsappOptins = customers.filter(c => c.whatsapp_optin === true).length
     document.getElementById('whatsappOptins').textContent = whatsappOptins
-    // wa-total-optins, wa-total-customers, wa-optin-rate entfernt (WhatsApp Card wurde entfernt)
+    document.getElementById('wa-total-optins').textContent = whatsappOptins
+    document.getElementById('wa-total-customers').textContent = customers?.length || 0
+    const optinRate = customers.length > 0 ? Math.round((whatsappOptins / customers.length) * 100) : 0
+    document.getElementById('wa-optin-rate').textContent = optinRate + '%'
     if (!customers || customers.length === 0) { container.innerHTML = '<div class="empty-state">📭 Noch keine Kunden vorhanden</div>'; document.getElementById('warningBox').style.display = 'none'; document.getElementById('searchResultCount').textContent = ''; return }
     window.allCustomers = customers
     const customerTxCounts = {}
@@ -1447,17 +1499,9 @@ async function loadWeatherSettings() {
 // WhatsApp-Export-Funktionen
 // ═══════════════════════════════════════════════════════════════
 async function exportWhatsAppNumbers() {
-  // ⚠️ Diese Funktion ist veraltet (WhatsApp Card wurde entfernt)
-  // Sie bleibt nur zur Kompatibilität erhalten
   const resultDiv = document.getElementById('result-wa-export')
   const listDiv = document.getElementById('wa-numbers-list')
   const textarea = document.getElementById('wa-numbers-textarea')
-  
-  // Null-Checks für entfernte Elemente
-  if (!resultDiv || !listDiv || !textarea) {
-    console.warn('WhatsApp export: Elemente nicht gefunden (WhatsApp Card wurde entfernt)')
-    return
-  }
   
   try {
     resultDiv.innerHTML = '<div class="result info">⏳ Lade WhatsApp-Nummern...</div>'
@@ -1484,33 +1528,21 @@ async function exportWhatsAppNumbers() {
     listDiv.style.display = 'block'
     
   } catch (e) {
-    if (resultDiv) {
-      resultDiv.innerHTML = `<div class="result error">❌ Fehler: ${e.message}</div>`
-    }
+    resultDiv.innerHTML = `<div class="result error">❌ Fehler: ${e.message}</div>`
     console.error('WhatsApp export error:', e)
   }
 }
 
 function copyWhatsAppNumbers() {
-  // ⚠️ Diese Funktion ist veraltet (WhatsApp Card wurde entfernt)
   const textarea = document.getElementById('wa-numbers-textarea')
-  const resultDiv = document.getElementById('result-wa-export')
-  
-  // Null-Checks
-  if (!textarea || !resultDiv) {
-    console.warn('WhatsApp copy: Elemente nicht gefunden (WhatsApp Card wurde entfernt)')
-    return
-  }
-  
   textarea.select()
   document.execCommand('copy')
   
+  const resultDiv = document.getElementById('result-wa-export')
   resultDiv.innerHTML = '<div class="result success">✅ Nummern in Zwischenablage kopiert!</div>'
   
   setTimeout(() => {
-    if (resultDiv) {
-      resultDiv.innerHTML = ''
-    }
+    resultDiv.innerHTML = ''
   }, 3000)
 }
 // ═══════════════════════════════════════════════════════════════
@@ -2495,8 +2527,6 @@ let targetedCustomers = []
 let currentAction = null
 
 async function previewTargetGroup() {
-  const runId = `RUN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  console.log(`🔍 ===== previewTargetGroup() START [${runId}] =====`);
   try {
     showResult('result-targeted-action', '⏳ Analysiere Kunden...', 'info')
     
@@ -2519,34 +2549,12 @@ async function previewTargetGroup() {
       return
     }
     
-    // Filter 1: Inaktivität (BUCKET-LOGIK - exklusive Segmente!)
+    // Filter 1: Inaktivität
     let filtered = []
     
     if (inactiveDays > 0) {
-      // Bucket-Definitionen (exklusiv):
-      // 7: 7-13 Tage
-      // 14: 14-20 Tage
-      // 21: 21-29 Tage
-      // 30: 30-59 Tage
-      // 60: 60+ Tage
-      
-      const bucketRanges = {
-        7: [7, 13],
-        14: [14, 20],
-        21: [21, 29],
-        30: [30, 59],
-        60: [60, 999999]
-      }
-      
-      const [minDays, maxDays] = bucketRanges[inactiveDays] || [inactiveDays, 999999]
-      
-      const minCutoffDate = new Date()
-      minCutoffDate.setDate(minCutoffDate.getDate() - maxDays)
-      minCutoffDate.setHours(0, 0, 0, 0)  // ✅ Start of day
-      
-      const maxCutoffDate = new Date()
-      maxCutoffDate.setDate(maxCutoffDate.getDate() - minDays)
-      maxCutoffDate.setHours(23, 59, 59, 999)  // ✅ FIX: End of day (inkl. Uhrzeit!)
+      const cutoffDate = new Date()
+      cutoffDate.setDate(cutoffDate.getDate() - inactiveDays)
       
       for (const customer of allCustomers) {
         const { data: lastTx } = await supabase
@@ -2556,24 +2564,20 @@ async function previewTargetGroup() {
           .order('created_at', { ascending: false })
           .limit(1)
         
-        let lastActivityDate
+        let isInactive = false
         if (!lastTx || lastTx.length === 0) {
-          // Keine Bestellung? Nutze Registrierungsdatum
-          lastActivityDate = new Date(customer.created_at)
+          // Keine Bestellung? Prüfe Registrierungsdatum!
+          const registrationDate = new Date(customer.created_at)
+          isInactive = registrationDate < cutoffDate
         } else {
-          lastActivityDate = new Date(lastTx[0].created_at)
+          const lastDate = new Date(lastTx[0].created_at)
+          if (lastDate < cutoffDate) {
+            isInactive = true
+          }
         }
         
-        // Bucket-Check: lastActivityDate muss im Bucket-Bereich liegen
-        // Beispiel 21-29: lastActivityDate zwischen (heute - 29 Tage) und (heute - 21 Tage)
-        if (lastActivityDate >= minCutoffDate && lastActivityDate <= maxCutoffDate) {
-          
-          // ✅ COOLDOWN-CHECK: Prüfe ob Kunde bereits in diesem Bucket kontaktiert wurde
-          const cooldownOk = await checkMarketingCooldown(customer.id, inactiveDays)
-          
-          if (cooldownOk) {
-            filtered.push(customer)
-          }
+        if (isInactive) {
+          filtered.push(customer)
         }
       }
     } else {
@@ -2621,7 +2625,6 @@ async function previewTargetGroup() {
     
     // Speichere gefilterte Kunden
     targetedCustomers = filtered
-    window.targetedCustomers = filtered  // Für Konsistenz
     
     // Berechne Stats
     const avgPoints = Math.round(filtered.reduce((sum, c) => sum + c.points, 0) / filtered.length)
@@ -2659,405 +2662,6 @@ async function previewTargetGroup() {
     console.error('Preview error:', e)
   }
 }
-
-// ═══════════════════════════════════════════════════════════════
-// 🚀 DIRECT ACTION CREATOR (Skip Preview) - DEBOUNCED
-// ═══════════════════════════════════════════════════════════════
-
-let createActionDirectlyRunning = false;
-let createActionDirectlyLastCall = 0;
-
-async function createActionDirectly_Internal() {
-    // RUN ID Logging bereits eingebaut (siehe Konsole)
-    createActionDirectlyRunning = true
-    // =======================================================================
-// KORRIGIERTE FUNKTION: createActionDirectly_Internal()
-// =======================================================================
-async function createActionDirectly_Internal() {
-    // RUN ID Logging bereits eingebaut (siehe Konsole)
-    createActionDirectlyRunning = true
-    showResult('result-targeted-action', '⏳ Suche Kunden...', 'info')
-
-    // 1. Eingaben lesen
-    const inactiveDays = parseInt(document.getElementById('target-inactive-days').value)
-    const pointsRange = document.getElementById('target-points').value
-    const ordersRange = document.getElementById('target-orders').value
-    const whatsappOnly = document.getElementById('target-whatsapp-only').checked
-
-    // 2. Alle Kunden laden (für die Filterung)
-    const { data: allCustomers, error: allCustomersError } = await supabase
-        .from('customers')
-        .select('*')
-
-    if (allCustomersError) {
-        showResult('result-targeted-action', '❌ Fehler beim Laden der Kundendaten: ' + allCustomersError.message, 'error')
-        createActionDirectlyRunning = false
-        return
-    }
-
-    if (allCustomers.length === 0) {
-        showResult('result-targeted-action', '❌ Keine Kunden gefunden!', 'error')
-        createActionDirectlyRunning = false
-        return
-    }
-
-    // Filter 1: Inaktivität (BUCKET-LOGIK - exklusive Segmente!)
-    let filtered = []
-    if (inactiveDays > 0) {
-        // Bucket-Definitionen (exklusiv):
-        const bucketRanges = {
-            7: [7, 13],
-            14: [14, 20],
-            21: [21, 29],
-            30: [30, 59],
-            60: [60, 999999]
-        }
-        const [minDays, maxDays] = bucketRanges[inactiveDays] || [inactiveDays, 999999]
-        
-        // Berechnung der Cutoff-Daten für den Inaktivitätsbereich
-        const minCutoffDate = new Date()
-        minCutoffDate.setDate(minCutoffDate.getDate() - maxDays)
-        minCutoffDate.setHours(0, 0, 0, 0) // Start of day
-        
-        const maxCutoffDate = new Date()
-        maxCutoffDate.setDate(maxCutoffDate.getDate() - minDays)
-        maxCutoffDate.setHours(23, 59, 59, 999) // End of day (inkl. Uhrzeit!)
-
-        console.log(`[DEBUG] Suche Inaktivität: ${minDays}-${maxDays} Tage. Cutoff-Bereich: ${minCutoffDate.toISOString().split('T')[0]} bis ${maxCutoffDate.toISOString().split('T')[0]}`)
-
-
-        for (const customer of allCustomers) {
-            // FIX: Nur Transaktionen mit Betrag > 0 (echte Käufe) berücksichtigen
-            // Dies korrigiert den Fehler, dass z.B. 0€-Punkte-Spins als "Aktivität" zählen.
-            const { data: lastTx } = await supabase
-                .from('transactions')
-                .select('created_at')
-                .eq('customer_id', customer.id)
-                .gt('amount', 0) // <--- FIX: Filter für Kaufaktivität (Amount > 0)
-                .order('created_at', { ascending: false })
-                .limit(1)
-
-            let lastActivityDate
-            if (!lastTx || lastTx.length === 0) {
-                // Kunde hatte nie eine echte Bestellung. Die Aktivität ist das Registrierdatum.
-                lastActivityDate = new Date(customer.created_at)
-            } else {
-                lastActivityDate = new Date(lastTx[0].created_at)
-            }
-            
-            // Debugging-Log für den Hauptfehler-Case:
-            if (inactiveDays === 60) {
-                const daysInactive = Math.floor((new Date() - lastActivityDate) / (1000 * 60 * 60 * 24))
-                const activityStatus = (lastActivityDate >= minCutoffDate && lastActivityDate <= maxCutoffDate) ? 'ENHÄLT (Inaktiv)' : 'FÄLLT HERAUS (Zu aktiv oder zu inaktiv)';
-                console.log(`[DEBUG: ${customer.id}] Letzte Kauf-Aktivität: ${lastActivityDate.toISOString().split('T')[0]} (${daysInactive} Tage inaktiv). Status: ${activityStatus}`);
-            }
-
-            // Prüfung, ob die letzte Kauf-Aktivität im gewünschten Inaktivitäts-Zeitraum liegt
-            if (lastActivityDate >= minCutoffDate && lastActivityDate <= maxCutoffDate) {
-                const cooldownOk = await checkMarketingCooldown(customer.id, inactiveDays)
-                if (cooldownOk) {
-                    filtered.push(customer)
-                } else {
-                    console.log(`[DEBUG: ${customer.id}] FÄLLT HERAUS wegen Cooldown-Logik.`);
-                }
-            }
-        }
-    } else {
-        filtered = [...allCustomers]
-    }
-
-    // Filter 2: Punkte
-    if (pointsRange !== 'all') {
-        const [min, max] = pointsRange.includes('+') ? [parseInt(pointsRange), 999999] : pointsRange.split('-').map(n => parseInt(n))
-        const beforeFilterCount = filtered.length
-        filtered = filtered.filter(c => c.points >= min && c.points <= max)
-        console.log(`[DEBUG] Punkte-Filter (${pointsRange}) hat ${beforeFilterCount - filtered.length} Kunden entfernt.`)
-    }
-
-    // Filter 3: Bestellungen
-    if (ordersRange !== 'all') {
-        // Hole alle Bestellzähler in einem Schritt (besser für Performance, falls nicht schon vorhanden)
-        const customerOrderCounts = new Map()
-        for (const customer of filtered) {
-            // Hinweis: Hier wird auch AMOUNT > 0 verwendet, um konsistent zu sein
-            const { count } = await supabase
-                .from('transactions')
-                .select('*', { count: 'exact', head: true })
-                .eq('customer_id', customer.id)
-                .gt('amount', 0)
-            customerOrderCounts.set(customer.id, count || 0)
-        }
-
-        const [min, max] = ordersRange.includes('+') ? [parseInt(ordersRange), 999999] : ordersRange.split('-').map(n => parseInt(n))
-        const beforeFilterCount = filtered.length
-        filtered = filtered.filter(c => {
-            const orderCount = customerOrderCounts.get(c.id) || 0
-            return orderCount >= min && orderCount <= max
-        })
-        console.log(`[DEBUG] Bestell-Filter (${ordersRange}) hat ${beforeFilterCount - filtered.length} Kunden entfernt.`)
-    }
-
-    // Filter 4: WhatsApp Opt-In
-    const beforeFilterCount = filtered.length
-    if (whatsappOnly) {
-        filtered = filtered.filter(c => c.whatsapp_optin)
-        console.log(`[DEBUG] WhatsApp-Filter hat ${beforeFilterCount - filtered.length} Kunden entfernt.`)
-    }
-
-    // 3. Ergebnis prüfen
-    if (filtered.length === 0) {
-        alert('Keine Kunden entsprechen diesen Kriterien')
-        showResult('result-targeted-action', '❌ Keine Kunden entsprechen diesen Kriterien!', 'error')
-        createActionDirectlyRunning = false
-        return
-    }
-
-    // 4. Zielgruppe zwischenspeichern und UI anzeigen
-    window.targetedCustomers = filtered // Für den Export und die Aktion
-    document.getElementById('action-creator').style.display = 'block'
-    showResult('result-targeted-action', `✅ Zielgruppe gefunden: ${filtered.length} Kunden.`, 'success')
-
-    // Performance-Logging, falls gewünscht
-    const duration = new Date() - createActionDirectlyLastCall
-    console.log(`[DEBUG] Gesamtlaufzeit: ${duration}ms`)
-
-    createActionDirectlyRunning = false
-}
-// =======================================================================
-    }
-    
-    // Speichere gefilterte Kunden (WICHTIG für Export-Funktionen!)
-    // ✅ FIX: Beide Varianten setzen für Kompatibilität
-    window.targetedCustomers = filtered
-    targetedCustomers = filtered  // Für Export-Funktionen (ohne window.)
-    
-    // SKIP Preview → gehe direkt zur Aktion!
-    showActionCreator()
-    
-    console.log(`✅ ${filtered.length} Kunden gefiltert → Direkt zur Aktion`)
-    
-  } catch (e) {
-    console.log(`[${runId}] ❌ ERROR in createActionDirectly`);
-    alert('❌ Fehler beim Filtern: ' + e.message)
-    console.error('Filter error:', e)
-  } finally {
-    createActionDirectlyRunning = false;
-    console.log(`[${runId}] ===== createActionDirectly() END =====`);
-  }
-}
-
-// Debounced wrapper to prevent double-calls
-async function createActionDirectly() {
-  const now = Date.now();
-  const timeSinceLastCall = now - createActionDirectlyLastCall;
-  
-  console.log('🔘 createActionDirectly() WRAPPER called');
-  console.log('  - Running:', createActionDirectlyRunning);
-  console.log('  - Time since last call:', timeSinceLastCall, 'ms');
-  
-  // Prevent double-click (< 500ms)
-  if (timeSinceLastCall < 500) {
-    console.log('⚠️ BLOCKED: Too fast! (< 500ms since last call)');
-    return;
-  }
-  
-  // Prevent concurrent execution
-  if (createActionDirectlyRunning) {
-    console.log('⚠️ BLOCKED: Function already running!');
-    return;
-  }
-  
-  createActionDirectlyRunning = true;
-  createActionDirectlyLastCall = now;
-  console.log('✅ ALLOWED: Calling _Internal()');
-  
-  try {
-    await createActionDirectly_Internal();
-  } catch (e) {
-    console.error('Error in wrapper:', e);
-    createActionDirectlyRunning = false;
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 📱 WHATSAPP EXPORT FUNCTIONS (für Zielgruppen)
-// ═══════════════════════════════════════════════════════════════
-
-function copyTargetPhoneNumbers() {
-  // ✅ DEBUG: Log targetedCustomers status
-  console.log('copyTargetPhoneNumbers called')
-  console.log('targetedCustomers:', targetedCustomers)
-  console.log('window.targetedCustomers:', window.targetedCustomers)
-  console.log('targetedCustomers length:', targetedCustomers?.length)
-  
-  if (!targetedCustomers || targetedCustomers.length === 0) {
-    document.getElementById('export-result').innerHTML = '❌ Keine Kunden zum Exportieren!'
-    return
-  }
-  
-  // Filter nur WhatsApp Opt-In
-  const whatsappCustomers = targetedCustomers.filter(c => c.whatsapp_optin)
-  
-  if (whatsappCustomers.length === 0) {
-    document.getElementById('export-result').innerHTML = '❌ Keine WhatsApp-aktivierten Kunden in der Zielgruppe!'
-    return
-  }
-  
-  // Extrahiere Telefonnummern (Duplikate entfernen)
-  const phoneNumbers = [...new Set(whatsappCustomers.map(c => c.phone).filter(p => p))]
-  
-  // Format: Eine Nummer pro Zeile
-  const numbersText = phoneNumbers.join('\n')
-  
-  // In Zwischenablage kopieren
-  navigator.clipboard.writeText(numbersText).then(() => {
-    document.getElementById('export-result').innerHTML = `✅ ${phoneNumbers.length} Nummern kopiert!`
-    setTimeout(() => {
-      document.getElementById('export-result').innerHTML = ''
-    }, 3000)
-  }).catch(err => {
-    document.getElementById('export-result').innerHTML = '❌ Fehler beim Kopieren: ' + err.message
-  })
-}
-
-function downloadTargetPhoneCSV() {
-  // ✅ DEBUG: Log targetedCustomers status
-  console.log('downloadTargetPhoneCSV called')
-  console.log('targetedCustomers:', targetedCustomers)
-  console.log('targetedCustomers length:', targetedCustomers?.length)
-  
-  if (!targetedCustomers || targetedCustomers.length === 0) {
-    document.getElementById('export-result').innerHTML = '❌ Keine Kunden zum Exportieren!'
-    return
-  }
-  
-  // Filter nur WhatsApp Opt-In
-  const whatsappCustomers = targetedCustomers.filter(c => c.whatsapp_optin)
-  
-  if (whatsappCustomers.length === 0) {
-    document.getElementById('export-result').innerHTML = '❌ Keine WhatsApp-aktivierten Kunden in der Zielgruppe!'
-    return
-  }
-  
-  // CSV erstellen: Name, Telefon
-  let csv = 'Name,Telefon\n'
-  whatsappCustomers.forEach(c => {
-    csv += `"${c.name || 'Unbekannt'}","${c.phone || ''}"\n`
-  })
-  
-  // Download triggern
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-  const link = document.createElement('a')
-  const url = URL.createObjectURL(blob)
-  
-  const now = new Date()
-  const timestamp = now.toISOString().split('T')[0]
-  link.setAttribute('href', url)
-  link.setAttribute('download', `whatsapp_nummern_${timestamp}.csv`)
-  link.style.display = 'none'
-  
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  
-  document.getElementById('export-result').innerHTML = `✅ CSV mit ${whatsappCustomers.length} Nummern heruntergeladen!`
-  setTimeout(() => {
-    document.getElementById('export-result').innerHTML = ''
-  }, 3000)
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 🔒 MARKETING COOLDOWN FUNCTIONS
-// ═══════════════════════════════════════════════════════════════
-
-async function checkMarketingCooldown(customerId, currentBucket, cooldownDays = 7) {
-  try {
-    // Hole Kunden-Daten
-    const { data: customer, error } = await supabase
-      .from('customers')
-      .select('last_marketing_bucket, last_marketing_contact_at')
-      .eq('id', customerId)
-      .single()
-    
-    if (error) {
-      console.error('Cooldown check error:', error)
-      return true // Bei Fehler: Berechtigt (fail-safe)
-    }
-    
-    // Noch nie kontaktiert? → Berechtigt
-    if (!customer.last_marketing_contact_at) {
-      return true
-    }
-    
-    const lastContact = new Date(customer.last_marketing_contact_at)
-    const now = new Date()
-    const daysSinceContact = Math.floor((now - lastContact) / (1000 * 60 * 60 * 24))
-    
-    // Gleicher Bucket UND innerhalb Cooldown? → NICHT berechtigt
-    if (customer.last_marketing_bucket === currentBucket && daysSinceContact < cooldownDays) {
-      return false
-    }
-    
-    // Höherer Bucket erreicht? → Berechtigt
-    if (currentBucket > customer.last_marketing_bucket) {
-      return true
-    }
-    
-    // Cooldown abgelaufen? → Berechtigt
-    if (daysSinceContact >= cooldownDays) {
-      return true
-    }
-    
-    // Default: Nicht berechtigt
-    return false
-    
-  } catch (e) {
-    console.error('Cooldown check exception:', e)
-    return true // Fail-safe
-  }
-}
-
-async function setMarketingCooldown(customerId, bucket) {
-  try {
-    const { error } = await supabase
-      .from('customers')
-      .update({
-        last_marketing_contact_at: new Date().toISOString(),
-        last_marketing_bucket: bucket
-      })
-      .eq('id', customerId)
-    
-    if (error) {
-      console.error('Set cooldown error:', error)
-    }
-  } catch (e) {
-    console.error('Set cooldown exception:', e)
-  }
-}
-
-async function resetAllCooldowns() {
-  if (!confirm('⚠️ WARNUNG!\n\nWirklich ALLE Marketing-Cooldowns zurücksetzen?\n\nDies ermöglicht es Kunden wieder angezeigt zu werden.')) {
-    return
-  }
-  
-  try {
-    const { error } = await supabase
-      .from('customers')
-      .update({
-        last_marketing_contact_at: null,
-        last_marketing_bucket: null
-      })
-      .not('last_marketing_contact_at', 'is', null)
-    
-    if (error) throw error
-    
-    alert('✅ Alle Cooldowns zurückgesetzt!')
-  } catch (e) {
-    alert('❌ Fehler: ' + e.message)
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
 
 function showActionCreator() {
   document.getElementById('action-creator').style.display = 'block'
@@ -3178,15 +2782,6 @@ async function createTargetedAction() {
       document.getElementById('action-whatsapp').style.display = 'block'
       showResult('result-targeted-action', `✅ Privater Coupon erstellt! ${targetedCustomers.length} Kunden können ihn jetzt in der App sehen.`, 'success')
       
-      // ✅ COOLDOWN: Markiere Kunden als kontaktiert
-      const currentBucket = parseInt(document.getElementById('target-inactive-days').value)
-      if (currentBucket > 0) {
-        for (const customer of targetedCustomers) {
-          await setMarketingCooldown(customer.id, currentBucket)
-        }
-        console.log(`✅ Cooldown gesetzt für ${targetedCustomers.length} Kunden (Bucket ${currentBucket})`)
-      }
-      
     } else if (actionType === 'bonus_points') {
       // Bonus-Punkte erstellen
       const bonusAmount = parseInt(document.getElementById('action-bonus-amount').value)
@@ -3237,15 +2832,6 @@ async function createTargetedAction() {
       document.getElementById('action-whatsapp').style.display = 'block'
       showResult('result-targeted-action', `✅ Bonus-Aktion erstellt! Nur ${targetedCustomers.length} Kunden sehen sie.`, 'success')
       
-      // ✅ COOLDOWN: Markiere Kunden als kontaktiert
-      const currentBucket = parseInt(document.getElementById('target-inactive-days').value)
-      if (currentBucket > 0) {
-        for (const customer of targetedCustomers) {
-          await setMarketingCooldown(customer.id, currentBucket)
-        }
-        console.log(`✅ Cooldown gesetzt für ${targetedCustomers.length} Kunden (Bucket ${currentBucket})`)
-      }
-      
     } else if (actionType === 'double_points') {
       // Doppelte Punkte als PRIVAT erstellen
       const { data: bonus, error: bonusError } = await supabase
@@ -3287,15 +2873,6 @@ async function createTargetedAction() {
       
       document.getElementById('action-whatsapp').style.display = 'block'
       showResult('result-targeted-action', `✅ Doppelte-Punkte-Aktion erstellt! Nur ${targetedCustomers.length} Kunden sehen sie.`, 'success')
-      
-      // ✅ COOLDOWN: Markiere Kunden als kontaktiert
-      const currentBucket = parseInt(document.getElementById('target-inactive-days').value)
-      if (currentBucket > 0) {
-        for (const customer of targetedCustomers) {
-          await setMarketingCooldown(customer.id, currentBucket)
-        }
-        console.log(`✅ Cooldown gesetzt für ${targetedCustomers.length} Kunden (Bucket ${currentBucket})`)
-      }
     }
     
   } catch (e) {
