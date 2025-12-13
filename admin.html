@@ -2525,9 +2525,11 @@ async function previewTargetGroup() {
       
       const minCutoffDate = new Date()
       minCutoffDate.setDate(minCutoffDate.getDate() - maxDays)
+      minCutoffDate.setHours(0, 0, 0, 0)  // ✅ Start of day
       
       const maxCutoffDate = new Date()
       maxCutoffDate.setDate(maxCutoffDate.getDate() - minDays)
+      maxCutoffDate.setHours(23, 59, 59, 999)  // ✅ FIX: End of day (inkl. Uhrzeit!)
       
       for (const customer of allCustomers) {
         const { data: lastTx } = await supabase
@@ -2686,9 +2688,11 @@ async function createActionDirectly() {
       
       const minCutoffDate = new Date()
       minCutoffDate.setDate(minCutoffDate.getDate() - maxDays)
+      minCutoffDate.setHours(0, 0, 0, 0)  // ✅ Start of day
       
       const maxCutoffDate = new Date()
       maxCutoffDate.setDate(maxCutoffDate.getDate() - minDays)
+      maxCutoffDate.setHours(23, 59, 59, 999)  // ✅ FIX: End of day (inkl. Uhrzeit!)
       
       for (const customer of allCustomers) {
         const { data: lastTx } = await supabase
