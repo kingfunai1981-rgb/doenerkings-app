@@ -3520,37 +3520,86 @@ async function loadActiveCoupons() {
 // 🌟 GLOBALE BONUSSE LADEN
 // ═══════════════════════════════════════════════════════════════
 async function loadGlobalBonuses() {
+  if (!currentCustomer) {
+    console.warn('⚠️ Kein Kunde geladen, kann Bonusse nicht filtern')
+    document.getElementById('globalBonusSection').style.display = 'none'
+    return
+  }
+  
   try {
     const now = new Date()
     const todayStr = now.toISOString().split('T')[0]
     
-    // Lade aktive globale Bonusse
-    const { data: bonuses, error } = await supabase
+    // Lade ALLE aktiven globalen Bonusse
+    const { data: allBonuses, error: bonusError } = await supabase
       .from('global_bonuses')
       .select('*')
       .eq('is_active', true)
       .lte('start_date', todayStr)
       .gte('end_date', todayStr)
     
-    if (error) throw error
+    if (bonusError) throw bonusError
     
-    if (!bonuses || bonuses.length === 0) {
+    if (!allBonuses || allBonuses.length === 0) {
       document.getElementById('globalBonusSection').style.display = 'none'
       console.log('ℹ️ Keine aktiven Global Bonusse')
       return
     }
     
-    console.log('✅ Aktive Global Bonusse geladen:', bonuses.length)
+    console.log('✅ Aktive Global Bonusse geladen:', allBonuses.length)
     
-    // Prüfe welche der Kunde bereits aktiviert hat
+    // 🔒 KRITISCH: Hole Bonus-Aktivierungen für DIESEN Kunden
     const { data: activated, error: activatedError } = await supabase
       .from('activated_global_bonuses')
       .select('*')
       .eq('customer_id', currentCustomer.id)
     
-    if (activatedError) throw activatedError
+    if (activatedError) {
+      console.warn('⚠️ Fehler beim Laden der Aktivierungen:', activatedError)
+      // Bei Fehler: Zeige nur öffentliche Bonusse
+      const publicBonuses = allBonuses.filter(b => !b.is_private)
+      if (publicBonuses.length === 0) {
+        document.getElementById('globalBonusSection').style.display = 'none'
+        return
+      }
+      // Setze bonuses für weiteren Code
+      var bonuses = publicBonuses
+      var activatedIds = []
+    } else {
+      const activatedBonusIds = activated ? activated.map(a => a.global_bonus_id) : []
+      
+      // 🎯 FILTER: Nur öffentliche ODER für diesen Kunden aktivierte private Bonusse
+      const visibleBonuses = allBonuses.filter(bonus => {
+        // Öffentlicher Bonus (is_private = false, null oder undefined)
+        if (!bonus.is_private) {
+          console.log(`✅ Öffentlicher Bonus sichtbar: ${bonus.title}`)
+          return true
+        }
+        
+        // Privater Bonus - nur wenn Kunde in activated_global_bonuses ist
+        const isActivated = activatedBonusIds.includes(bonus.id)
+        if (isActivated) {
+          console.log(`🎯 Privater Bonus sichtbar (Kunde berechtigt): ${bonus.title}`)
+        } else {
+          console.log(`🔒 Privater Bonus NICHT sichtbar (Kunde nicht berechtigt): ${bonus.title}`)
+        }
+        return isActivated
+      })
+      
+      if (visibleBonuses.length === 0) {
+        document.getElementById('globalBonusSection').style.display = 'none'
+        console.log('ℹ️ Keine sichtbaren Bonusse für diesen Kunden')
+        return
+      }
+      
+      const hiddenCount = allBonuses.length - visibleBonuses.length
+      console.log(`✅ Bonusse gefiltert: ${visibleBonuses.length} sichtbar, ${hiddenCount} private ausgeblendet`)
+      
+      // Setze für weiteren Code
+      var bonuses = visibleBonuses
+      var activatedIds = activatedBonusIds
+    }
     
-    const activatedIds = activated ? activated.map(a => a.global_bonus_id) : []
     console.log('📋 Aktivierte Boni (noch nicht eingelöst):', activatedIds)
     
     // ✅ NEU: Lade Historie der bereits eingelösten Boni für diesen Kunden
